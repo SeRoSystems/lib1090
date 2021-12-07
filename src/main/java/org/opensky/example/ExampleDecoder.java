@@ -17,10 +17,13 @@ package org.opensky.example;
  *  along with org.opensky.libadsb.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.opensky.libadsb.*;
+import org.opensky.libadsb.ModeSDecoder;
+import org.opensky.libadsb.Position;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
 import org.opensky.libadsb.msgs.*;
+import org.opensky.libadsb.msgs.adsb.*;
+import org.opensky.libadsb.tools;
 
 import java.util.Scanner;
 
