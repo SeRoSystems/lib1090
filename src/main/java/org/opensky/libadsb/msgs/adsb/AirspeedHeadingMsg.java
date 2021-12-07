@@ -1,6 +1,8 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
+import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import java.io.Serializable;
 
@@ -69,7 +71,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 */
 	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSB_AIRSPEED);
+		setType(ModeSReply.subtype.ADSB_AIRSPEED);
 
 		if (this.getFormatTypeCode() != 19) {
 			throw new BadFormatException("Airspeed and heading messages must have typecode 19.");

@@ -1,6 +1,8 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
+import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import java.io.Serializable;
 
@@ -57,7 +59,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 	 */
 	public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSB_EMERGENCY);
+		setType(ModeSReply.subtype.ADSB_EMERGENCY);
 
 		if (this.getFormatTypeCode() != 28) {
 			throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");

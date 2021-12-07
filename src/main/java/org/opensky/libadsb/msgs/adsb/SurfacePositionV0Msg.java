@@ -1,8 +1,9 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.Position;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.PositionStraddleError;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
 import org.opensky.libadsb.tools;
 
 import java.io.Serializable;
@@ -25,63 +26,60 @@ import java.io.Serializable;
  */
 
 /**
- * Decoder for ADS-B airborne position messages version 0 and 1.
+ * Decoder for ADS-B surface position messages
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable {
+public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -1901589500173456758L;
+	private static final long serialVersionUID = 8854492255470317616L;
 	private boolean horizontal_position_available;
-	private boolean altitude_available;
-	private byte surveillance_status;
-	private boolean nic_suppl_b;
-	private short altitude_encoded;
+	private byte movement;
+	private boolean heading_status; // is heading valid?
+	private byte ground_track;
 	private boolean time_flag;
 	private boolean cpr_format;
 	private int cpr_encoded_lat;
 	private int cpr_encoded_lon;
+	private static final int[] lon_offs = new int[] {90, 180, 270};
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirbornePositionV0Msg() { }
+	protected SurfacePositionV0Msg() { }
 
 	/**
-	 * @param raw_message raw ADS-B airborne position message as hex string
+	 * @param raw_message raw ADS-B surface position message as hex string
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(String raw_message) throws BadFormatException {
+	public SurfacePositionV0Msg(String raw_message) throws BadFormatException {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
-	 * @param raw_message raw ADS-B airborne position message as byte array
+	 * @param raw_message raw ADS-B surface position message as byte array
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(byte[] raw_message) throws BadFormatException {
+	public SurfacePositionV0Msg(byte[] raw_message) throws BadFormatException {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
-	 * @param squitter extended squitter containing the airborne position msg
+	 * @param squitter extended squitter which contains this surface position msg
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+	public SurfacePositionV0Msg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSB_AIRBORN_POSITION_V0);
+		setType(subtype.ADSB_SURFACE_POSITION_V0);
 
 		if (!(getFormatTypeCode() == 0 ||
-				(getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
-				(getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
+				(getFormatTypeCode() >= 5 && getFormatTypeCode() <= 8)))
 			throw new BadFormatException("This is not a position message! Wrong format type code ("+getFormatTypeCode()+").");
 
 		byte[] msg = getMessage();
 
 		horizontal_position_available = getFormatTypeCode() != 0;
 
-		surveillance_status = (byte) ((msg[0]>>>1)&0x3);
-		nic_suppl_b = (msg[0]&0x1) == 1;
-
-		altitude_encoded = (short) (((msg[1]<<4)|((msg[2]>>>4)&0xF))&0xFFF);
-		altitude_available = altitude_encoded != 0;
+		movement = (byte) ((((msg[0]&0x7)<<4) | ((msg[1]&0xF0)>>>4))&0x7F);
+		heading_status = (msg[1]&0x8) != 0;
+		ground_track = (byte) ((((msg[1]&0x7)<<4) | ((msg[2]&0xF0)>>>4))&0x7F);
 
 		time_flag = ((msg[2]>>>3)&0x1) == 1;
 		cpr_format = ((msg[2]>>>2)&0x1) == 1;
@@ -98,17 +96,11 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
 		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11: return 185.2;
-			case 12: return 370.4;
-			case 13: return 926;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16: return 18520;
-			case 17: return 37040;
-			default: return -1;
+		case 0: case 8: return -1;
+		case 5: return 7.5;
+		case 6: return 25;
+		case 7: return 185.2;
+		default: return -1;
 		}
 	}
 
@@ -122,18 +114,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 8;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: case 17: return 1;
-			default: return 0;
-		}
+		return this.getNIC();
 	}
 
 	/**
@@ -141,43 +122,31 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *
 	 * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
 	 * is reflected by this method.
-	 * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-	 * {@link AirborneOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-B
+	 * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
+	 * {@link SurfaceOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-B
 	 * version 1 and 2.
 	 *
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
 		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: return 3;
-			case 10: return 10;
-			case 11: return 92.6;
-			case 12: return 185.2;
-			case 13: return 463;
-			case 14: return 926;
-			case 15: return 1852;
-			case 16: return 9260;
-			case 17: return 18520;
+			case 0: case 8: return -1;
+			case 5: return 3;
+			case 6: return 10;
+			case 7: return 92.6;
 			default: return -1;
 		}
 	}
 
 	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unkown".
+	 * @return Navigation integrity category. A NIC of 0 means "unkown". Values according to DO-260B Table N-4.
 	 */
 	public byte getNIC() {
 		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 9;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: return 3;
-			case 17: return 1;
+			case 0: case 8: return 0;
+			case 5: return 11;
+			case 6: return 10;
+			case 7: return 8;
 			default: return 0;
 		}
 	}
@@ -187,18 +156,15 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *
 	 * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
 	 * is reflected by this method.
-	 * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-	 * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
+	 * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
+	 * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
 	 * version 1 and 2.
 	 *
 	 * @return the source integrity level (SIL) which indicates the propability of exceeding
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			default: return 2;
-		}
+		return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
 	}
 
 	/**
@@ -209,42 +175,83 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return whether altitude information is available
+	 * @return whether ground speed information is available
 	 */
-	public boolean hasAltitude() {
-		return altitude_available;
+	public boolean hasGroundSpeed() {
+		return movement >= 1 && movement <= 124;
 	}
 
 	/**
-	 * @see #getSurveillanceStatusDescription()
-	 * @return the surveillance status
+	 * @return speed in knots or null if ground speed is not available. The latter can also be checked with
+	 * {@link #hasGroundSpeed()}.
 	 */
-	public byte getSurveillanceStatus() {
-		return surveillance_status;
+	public Double getGroundSpeed() {
+		double speed;
+
+		if (movement == 1)
+			speed = 0;
+		else if (movement >= 2 && movement <= 8)
+			speed = 0.125+(movement-2)*0.125;
+		else if (movement >= 9 && movement <= 12)
+			speed = 1+(movement-9)*0.25;
+		else if (movement >= 13 && movement <= 38)
+			speed = 2+(movement-13)*0.5;
+		else if (movement >= 39 && movement <= 93)
+			speed = 15+(movement-39);
+		else if (movement >= 94 && movement <= 108)
+			speed = 70+(movement-94)*2;
+		else if (movement >= 109 && movement <= 123)
+			speed = 100+(movement-109)*5;
+		else if (movement == 124)
+			speed = 175;
+		else
+			return null;
+
+		return speed;
 	}
 
 	/**
-	 * This is a function of the surveillance status field in the position
-	 * message.
-	 *
-	 * @return surveillance status description as defines in DO-260B
+	 * @return speed resolution (accuracy) in knots or null if ground speed is not available. The latter can also be
+	 * checked with {@link #hasGroundSpeed()}.
 	 */
-	public String getSurveillanceStatusDescription() {
-		String[] desc = {
-				"No condition information",
-				"Permanent alert (emergency condition)",
-				"Temporary alert (change in Mode A identity code oter than emergency condition)",
-				"SPI condition"
-		};
+	public Double getGroundSpeedResolution() {
+		double resolution;
 
-		return desc[surveillance_status];
+		if (movement >= 1 && movement <= 8)
+			resolution = 0.125;
+		else if (movement >= 9 && movement <= 12)
+			resolution = 0.25;
+		else if (movement >= 13 && movement <= 38)
+			resolution = 0.5;
+		else if (movement >= 39 && movement <= 93)
+			resolution = 1;
+		else if (movement >= 94 && movement <= 108)
+			resolution = 2;
+		else if (movement >= 109 && movement <= 123)
+			resolution = 5;
+		else if (movement == 124)
+			resolution = 175;
+		else
+			return null;
+
+		return resolution;
 	}
 
 	/**
-	 * @return for ADS-B version 0 and 1 messages true, iff transmitting system uses only one antenna.
+	 * @return whether valid heading information is available
 	 */
-	public boolean hasSingleAntenna() {
-		return nic_suppl_b;
+	public boolean hasValidHeading() {
+		return heading_status;
+	}
+
+	/**
+	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north. Returns null if heading is not available.
+	 * This can also be checked using {@link #hasValidHeading()}
+	 */
+	public Double getHeading() {
+		if (!heading_status) return null;
+
+		return ground_track*360D/128D;
 	}
 
 	/**
@@ -279,13 +286,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return true, if barometric altitude. False if GNSS is used to determine altitude
-	 */
-	public boolean isBarometricAltitude() {
-		return this.getFormatTypeCode() < 20;
-	}
-
-	/**
 	 * @param Rlat Even or odd Rlat value (CPR internal)
 	 * @return the number of even longitude zones at a latitude
 	 */
@@ -308,17 +308,20 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	/**
 	 * This method can only be used if another position report with a different format (even/odd) is available
 	 * and set with msg.setOtherFormatMsg(other).
-	 * @param other airborne position message of the other format (even/odd). Note that the time between
-	 *        both messages should be not longer than 10 seconds! 
-	 * @return globally unambiguously decoded position. The positional
-	 *         accuracy maintained by the Airborne CPR encoding will be approximately 5.1 meters.
-	 *         A message of the other format is needed for global decoding.
-	 *         Result will be null if this or the other message does not contain horizontal position information.
+	 * @param other position message of the other format (even/odd). Note that the time between
+	 *        both messages should be not longer than 50 seconds! 
+	 * @param ref reference position used to resolve the ambiguity of the CPR result by choosing the closest
+	 *        position to the reference position
+	 * @return globally unambiguously decoded position tuple (latitude, longitude). The positional
+	 *         accuracy maintained by the CPR encoding will be approximately 1.25 meters.
+	 *         A message of the other format is needed for global decoding. Result will be null if this or the
+	 *         other message does not contain horizontal position information.
 	 * @throws IllegalArgumentException if input message was emitted from a different transmitter
 	 * @throws PositionStraddleError if position messages straddle latitude transition
 	 * @throws BadFormatException other has the same format (even/odd)
 	 */
-	public Position getGlobalPosition(AirbornePositionV0Msg other) throws BadFormatException, PositionStraddleError {
+	public Position getGlobalPosition(SurfacePositionV0Msg other, Position ref)
+			throws PositionStraddleError, BadFormatException {
 		if (!tools.areEqual(other.getIcao24(), getIcao24()))
 			throw new IllegalArgumentException(
 					String.format("Transmitter of other message (%s) not equal to this (%s).",
@@ -331,12 +334,12 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		if (!horizontal_position_available || !other.hasPosition())
 			return null;
 
-		AirbornePositionV0Msg even = isOddFormat() ? other : this;
-		AirbornePositionV0Msg odd = isOddFormat() ? this : other;
+		SurfacePositionV0Msg even = isOddFormat() ? other : this;
+		SurfacePositionV0Msg odd = isOddFormat() ? this : other;
 
-		// Helper for latitude (Number of zones NZ is set to 15)
-		double Dlat0 = 360.0 / 60.0;
-		double Dlat1 = 360.0 / 59.0;
+		// Helper for latitude single(Number of zones NZ is set to 15)
+		double Dlat0 = 90.0 / 60.0;
+		double Dlat1 = 90.0 / 59.0;
 
 		// latitude index
 		double j = Math
@@ -348,16 +351,8 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		double Rlat1 = Dlat1 * (mod(j, 59.0) + ((double) odd.getCPREncodedLatitude()) / ((double) (1 << 17)));
 
 		// Southern hemisphere?
-		if (Rlat0 >= 270.0 && Rlat0 <= 360.0)
-			Rlat0 -= 360.0;
-		if (Rlat1 >= 270.0 && Rlat1 <= 360.0)
-			Rlat1 -= 360.0;
-
-		// Northern hemisphere?
-		//if (Rlat0 <= -270.0 && Rlat0 >= -360.0)
-		//	Rlat0 += 360.0;
-		//if (Rlat1 <= -270.0 && Rlat1 >= -360.0)
-		//	Rlat1 += 360.0;
+		Rlat0 = (ref.getLatitude() < Rlat0 - 45.0) ? Rlat0 - 90.0 : Rlat0;
+		Rlat1 = (ref.getLatitude() < Rlat1 - 45.0) ? Rlat1 - 90.0 : Rlat1;
 
 		// ensure that the number of even longitude zones are equal
 		if (NL(Rlat0) != NL(Rlat1))
@@ -368,44 +363,50 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		// Helper for longitude
 		double NL_helper = NL(Rlat0);// NL(Rlat0) and NL(Rlat1) are equal
 		double n_helper = Math.max(1.0, NL_helper - (isOddFormat() ? 1.0 : 0.0));
-		double Dlon = 360.0 / n_helper;
+		double Dlon = 90.0 / n_helper;
 
 		// longitude index
-		double m = Math.floor(((double) even.getCPREncodedLongitude() * (NL_helper - 1.0)
-				- (double) odd.getCPREncodedLongitude() * NL_helper) / ((double) (1 << 17)) + 0.5);
+		double m = Math.floor((((double) even.getCPREncodedLongitude()) * (NL_helper - 1.0)
+				- ((double) odd.getCPREncodedLongitude()) * NL_helper) / ((double) (1 << 17)) + 0.5);
 
 		// global longitude
 		double Rlon = Dlon * (mod(m, n_helper)
 				+ ((double) (isOddFormat() ? odd.getCPREncodedLongitude() : even.getCPREncodedLongitude()))
 						/ ((double) (1 << 17)));
 
-		// correct longitude
-		if (Rlon < -180.0 && Rlon > -360.0)
-			Rlon += 360.0;
-		if (Rlon > 180.0 && Rlon < 360.0)
-			Rlon -= 360.0;
+		Double lon = Rlon;
+		Double lat = isOddFormat() ? Rlat1 : Rlat0;
 
-		Integer alt = this.getAltitude();
-		return new Position(Rlon, isOddFormat() ? Rlat1 : Rlat0, alt != null ? alt.doubleValue() : null);
+		// check the four possible positions
+		Position tmp, result = new Position(lon, lat, 0.);
+		for (int o : lon_offs) {
+			tmp = new Position(lon + o, lat, 0.0);
+			if (tmp.haversine(ref) < result.haversine(ref))
+				result = tmp;
+		}
+
+		if (result.getLongitude() > 180.0)
+			result.setLongitude(result.getLongitude() - 360.0);
+
+		return result;
 	}
 
 	/**
-	 * This method uses a locally unambiguous decoding for airborne position messages. It
-	 * uses a reference position known to be within 180NM (= 333.36km) of the true target
-	 * airborne position. the reference point may be a previously tracked position that has
+	 * This method uses a locally unambiguous decoding for position messages. It
+	 * uses a reference position known to be within 45NM (= 83.34km) of the true target
+	 * position. the reference point may be a previously tracked position that has
 	 * been confirmed by global decoding (see getGlobalPosition()).
-	 * @param ref reference position
-	 * @return decoded position. The positional
-	 *         accuracy maintained by the Airborne CPR encoding will be approximately 5.1 meters.
-	 *         Result will be null if message does not contain horizontal position information.
-	 *         This can also be checked with {@link #hasPosition()}.
+	 * @param ref reference position for local CPR
+	 * @return decoded position. The positional accuracy maintained by the CPR encoding will
+	 * be approximately 5.1 meters. Result will be null if message does not contain horizontal
+	 * position information. This can also be checked with {@link #hasPosition()}.
 	 */
 	public Position getLocalPosition(Position ref) {
 		if (!horizontal_position_available)
 			return null;
 
 		// latitude zone size
-		double Dlat = isOddFormat() ? 360.0 / 59.0 : 360.0 / 60.0;
+		double Dlat = isOddFormat() ? 90.0 / 59.0 : 90.0 / 60.0;
 
 		// latitude zone index
 		double j = Math.floor(ref.getLatitude() / Dlat) + Math.floor(
@@ -415,7 +416,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		double Rlat = Dlat * (j + ((double) getCPREncodedLatitude()) / ((double) (1 << 17)));
 
 		// longitude zone size
-		double Dlon = 360.0 / Math.max(1.0, NL(Rlat) - (isOddFormat() ? 1.0 : 0.0));
+		double Dlon = 90.0 / Math.max(1.0, NL(Rlat) - (isOddFormat() ? 1.0 : 0.0));
 
 		// longitude zone coordinate
 		double m = Math.floor(ref.getLongitude() / Dlon) + Math.floor(0.5 + mod(ref.getLongitude(), Dlon) / Dlon
@@ -424,69 +425,25 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		// and finally the longitude
 		double Rlon = Dlon * (m + ((double) getCPREncodedLongitude()) / ((double) (1 << 17)));
 
-		Integer alt = this.getAltitude();
-		return new Position(Rlon, Rlat, alt != null ? alt.doubleValue() : null);
-	}
+		// System.out.println("Loc: EncLon: "+getCPREncodedLongitude()+
+		// " m: "+m+" Dlon: "+Dlon+ " Rlon2: "+Rlon2);
 
-	/**
-	 * This method converts a gray code encoded int to a standard decimal int
-	 * @param gray gray code encoded int of length bitlength
-	 *        bitlength bitlength of gray code
-	 * @return radix 2 encoded integer
-	 */
-	private static int grayToBin(int gray, int bitlength) {
-		int result = 0;
-		for (int i = bitlength-1; i >= 0; --i)
-			result = result|((((0x1<<(i+1))&result)>>>1)^((1<<i)&gray));
-		return result;
-	}
-
-	/**
-	 * @return the decoded altitude in feet or null if altitude is not available. The latter can be checked with
-	 * {@link #hasAltitude()}.
-	 */
-	public Integer getAltitude() {
-		if (!altitude_available) return null;
-
-		boolean Qbit = (altitude_encoded&0x10)!=0;
-		int N;
-		if (Qbit) { // altitude reported in 25ft increments
-			N = (altitude_encoded&0xF) | ((altitude_encoded&0xFE0)>>>1);
-			return 25*N-1000;
-		}
-		else { // altitude is above 50175ft, so we use 100ft increments
-
-			// it's decoded using the Gillham code
-			int C1 = (0x800&altitude_encoded)>>>11;
-			int A1 = (0x400&altitude_encoded)>>>10;
-			int C2 = (0x200&altitude_encoded)>>>9;
-			int A2 = (0x100&altitude_encoded)>>>8;
-			int C4 = (0x080&altitude_encoded)>>>7;
-			int A4 = (0x040&altitude_encoded)>>>6;
-			int B1 = (0x020&altitude_encoded)>>>5;
-			int B2 = (0x008&altitude_encoded)>>>3;
-			int D2 = (0x004&altitude_encoded)>>>2;
-			int B4 = (0x002&altitude_encoded)>>>1;
-			int D4 = (0x001&altitude_encoded);
-
-			// this is standard gray code
-			int N500 = grayToBin(D2<<7|D4<<6|A1<<5|A2<<4|A4<<3|B1<<2|B2<<1|B4, 8);
-
-			// 100-ft steps must be converted
-			int N100 = grayToBin(C1<<2|C2<<1|C4, 3)-1;
-			if (N100 == 6) N100=4;
-			if (N500%2 != 0) N100=4-N100; // invert it
-
-			return -1200+N500*500+N100*100;
-		}
+		return new Position(Rlon, Rlat, 0.0);
 	}
 
 	public String toString() {
-		return super.toString()+"\n"+
-				"Position:\n"+
-				"\tFormat:\t\t"+(isOddFormat()?"odd":"even")+
-				"\n\tHas position:\t"+(hasPosition()?"yes":"no")+
-				"\n\tAltitude:\t"+(hasAltitude()?getAltitude():"unkown");
+		try {
+			return super.toString()+"\n"+
+					"Surface Position:\n"+
+					"\tSpeed:\t\t"+(hasGroundSpeed() ? getGroundSpeed() : "unkown")+
+					"\n\tSpeed Resolution:\t\t"+(hasGroundSpeed() ? getGroundSpeedResolution() : "unkown")+
+					"\n\tHeading:\t\t"+(hasValidHeading() ? getHeading() : "unkown")+
+					"\n\tFormat:\t\t"+(isOddFormat()?"odd":"even")+
+					"\n\tHas position:\t"+(hasPosition()?"yes":"no");
+		} catch (Exception e) {
+			// should never happen
+			return "An exception was thrown.";
+		}
 	}
 
 }

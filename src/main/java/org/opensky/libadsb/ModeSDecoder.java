@@ -2,7 +2,8 @@ package org.opensky.libadsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
-import org.opensky.libadsb.msgs.*;
+import org.opensky.libadsb.msgs.adsb.*;
+import org.opensky.libadsb.msgs.modes.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 public class ModeSDecoder {
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
-	private Map<Integer, DecoderData> decoderData = new HashMap<Integer, DecoderData>();
+	private final Map<Integer, DecoderData> decoderData = new HashMap<Integer, DecoderData>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
 

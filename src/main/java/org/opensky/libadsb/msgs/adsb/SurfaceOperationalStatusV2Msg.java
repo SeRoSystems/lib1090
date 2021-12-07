@@ -1,7 +1,8 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -25,19 +26,19 @@ import java.io.Serializable;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1Msg implements Serializable {
+public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg implements Serializable {
 
 	private boolean sil_supplement;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirborneOperationalStatusV2Msg() { }
+	protected SurfaceOperationalStatusV2Msg() { }
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
 	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public AirborneOperationalStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public SurfaceOperationalStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -46,7 +47,7 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public AirborneOperationalStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public SurfaceOperationalStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -55,9 +56,9 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	 * @throws BadFormatException  if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+	public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSB_AIRBORN_STATUS_V2);
+		setType(subtype.ADSB_SURFACE_STATUS_V2);
 
 		byte[] msg = this.getMessage();
 

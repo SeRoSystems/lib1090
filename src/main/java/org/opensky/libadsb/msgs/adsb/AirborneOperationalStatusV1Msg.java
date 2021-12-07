@@ -1,7 +1,9 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
+import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import java.io.Serializable;
 
@@ -69,7 +71,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	 */
 	public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSB_AIRBORN_STATUS_V1);
+		setType(ModeSReply.subtype.ADSB_AIRBORN_STATUS_V1);
 
 		if (getFormatTypeCode() != 31) {
 			throw new BadFormatException("Operational status messages must have typecode 31.");

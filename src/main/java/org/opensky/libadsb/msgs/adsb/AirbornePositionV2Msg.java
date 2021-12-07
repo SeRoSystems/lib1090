@@ -1,6 +1,8 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.adsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
+import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
+import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import java.io.Serializable;
 
@@ -22,21 +24,19 @@ import java.io.Serializable;
  */
 
 /**
- * Decoder for ADS-B airborne position messages version 1 (DO-260A)
+ * Decoder for ADS-B airborne position version 2 (DO-260B).
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Serializable {
-
-	private boolean nic_suppl_a;
+public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Serializable {
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirbornePositionV1Msg() { }
+	protected AirbornePositionV2Msg() { }
 
 	/**
 	 * @param raw_message raw ADS-B airborne position message as hex string
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV1Msg(String raw_message) throws BadFormatException {
+	public AirbornePositionV2Msg(String raw_message) throws BadFormatException {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -44,7 +44,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 	 * @param raw_message raw ADS-B airborne position message as byte array
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV1Msg(byte[] raw_message) throws BadFormatException {
+	public AirbornePositionV2Msg(byte[] raw_message) throws BadFormatException {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -52,54 +52,51 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 	 * @param squitter extended squitter containing the airborne position msg
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV1Msg(ExtendedSquitter squitter) throws BadFormatException {
+	public AirbornePositionV2Msg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSB_AIRBORN_POSITION_V1);
+		setType(ModeSReply.subtype.ADSB_AIRBORN_POSITION_V2);
 	}
 
 	/**
-	 * @param nic_suppl Navigation Integrity Category (NIC) supplement from operational status message.
-	 *        Otherwise worst case is assumed for containment radius limit and NIC. ADS-B version 1+ only!
+	 * NIC supplement B as introduced in ADS-B version 2. The flag indicated single antenna in previous versions.
+	 * @return NIC supplement B to refine horizontal containment radius limit and navigation integrity category
 	 */
-	public void setNICSupplementA(boolean nic_suppl) {
-		this.nic_suppl_a = nic_suppl;
-	}
-
-	/**
-	 * @return NIC supplement that was set before
-	 */
-	public boolean hasNICSupplementA() {
-		return nic_suppl_a;
+	public boolean hasNICSupplementB() {
+		return super.hasSingleAntenna();
 	}
 
 	/**
 	 * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-	 * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to DO-260B Table N-11.
+	 * (NACp) see {@link AirborneOperationalStatusV2Msg}. According to DO-260B Table 2-14.
 	 *
 	 * The horizontal containment radius is also known as "horizontal protection level".
 	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-	 *         If aircraft uses ADS-B version 1+, set NIC supplement A from Operational Status Message
-	 *         for better precision.
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
+	 *         If aircraft uses ADS-B version 2, set NIC supplement A from Operational Status Message
+	 *         for better precision. Otherwise, we'll be pessimistic.
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
 		switch (getFormatTypeCode()) {
 			case 0: case 18: case 22: return -1;
 			case 9: case 20: return 7.5;
 			case 10: case 21: return 25;
-			case 11: return nic_suppl_a ? 75.0 : 185.2;
+			case 11:
+				return hasNICSupplementB() && hasNICSupplementA() ? 75 : 185.2;
 			case 12: return 370.4;
-			case 13: return nic_suppl_a ? 1111.2 : 926;
+			case 13:
+				if (!hasNICSupplementB()) return 926;
+				else return hasNICSupplementA() ? 1111.2 : 555.6;
 			case 14: return 1852;
 			case 15: return 3704;
-			case 16: return nic_suppl_a ? 7408 : 14816;
+			case 16:
+				return hasNICSupplementB() && hasNICSupplementA() ? 7408 : 14816;
 			case 17: return 37040;
 			default: return -1;
 		}
 	}
 
 	/**
-	 * Values according to DO-260B Table N-11
+	 * According to DO-260B Table 2-14.
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
@@ -107,15 +104,16 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 10: case 21: return 10;
-			case 11: return (byte) (nic_suppl_a ? 9 : 8);
+			case 11:
+				return (byte) (hasNICSupplementB() && hasNICSupplementA() ? 9 : 8);
 			case 12: return 7;
 			case 13: return 6;
 			case 14: return 5;
 			case 15: return 4;
-			case 16: return (byte) (nic_suppl_a ? 3 : 2);
+			case 16:
+				return (byte) (hasNICSupplementB() && hasNICSupplementA() ? 3 : 2);
 			case 17: return 1;
 			default: return 0;
 		}
 	}
-
 }

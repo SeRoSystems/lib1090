@@ -1,6 +1,7 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
+import org.opensky.libadsb.tools;
 
 import java.io.Serializable;
 
@@ -22,57 +23,63 @@ import java.io.Serializable;
  */
 
 /**
- * Decoder for Mode S surveillance identify replies (DF 5)
+ * Decoder for Mode S surveillance altitude replies with Comm-B message (DF 20)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class IdentifyReply extends ModeSReply implements Serializable {
+public class CommBAltitudeReply extends ModeSReply implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
-
+	
 	private byte flight_status;
 	private byte downlink_request;
 	private byte utility_msg;
-	private short identity;
+	private short altitude_code;
+	private byte[] message;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected IdentifyReply() { }
+	protected CommBAltitudeReply() { }
 
 	/**
-	 * @param raw_message raw identify reply as hex string
-	 * @throws BadFormatException if message is not identify reply or 
+	 * @param raw_message raw comm-b altitude reply as hex string
+	 * @throws BadFormatException if message is not comm-b altitude reply or 
 	 * contains wrong values.
 	 */
-	public IdentifyReply(String raw_message) throws BadFormatException {
+	public CommBAltitudeReply(String raw_message) throws BadFormatException {
 		this(new ModeSReply(raw_message));
 	}
 
 	/**
-	 * @param raw_message raw identify reply as byte array
-	 * @throws BadFormatException if message is not identify reply or
+	 * @param raw_message raw comm-b altitude reply as byte array
+	 * @throws BadFormatException if message is not comm-b altitude reply or
 	 * contains wrong values.
 	 */
-	public IdentifyReply(byte[] raw_message) throws BadFormatException {
+	public CommBAltitudeReply(byte[] raw_message) throws BadFormatException {
 		this(new ModeSReply(raw_message));
 	}
 
 	/**
-	 * @param reply Mode S reply which contains this identify reply
-	 * @throws BadFormatException if message is not identify reply or 
+	 * @param reply Mode S reply which contains this comm-b altitude reply
+	 * @throws BadFormatException if message is not comm-b altitude reply or 
 	 * contains wrong values.
 	 */
-	public IdentifyReply(ModeSReply reply) throws BadFormatException {
+	public CommBAltitudeReply(ModeSReply reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.IDENTIFY_REPLY);
+		setType(subtype.COMM_B_ALTITUDE_REPLY);
 
-		if (getDownlinkFormat() != 5) {
-			throw new BadFormatException("Message is not an identify reply!");
+		if (getDownlinkFormat() != 20) {
+			throw new BadFormatException("Message is not an altitude reply!");
 		}
 
 		byte[] payload = getPayload();
 		flight_status = getFirstField();
 		downlink_request = (byte) ((payload[0]>>>3) & 0x1F);
 		utility_msg = (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-		identity = (short) ((payload[1]<<8 | (payload[2]&0xFF))&0x1FFF);
+		altitude_code = (short) ((payload[1]<<8 | payload[2]&0xFF)&0x1FFF);
+
+		// extract Comm-B message
+		message = new byte[7];
+		for (int i=0; i<7; i++)
+			message[i] = payload[i+3];
 	}
 
 	/**
@@ -156,7 +163,7 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 	}
 
 	/**
-	 * Note: this is not the same identifier as the one contained in all-call replies.
+	 * Note that this is not the same identifier as the one contained in all-call replies.
 	 * 
 	 * @return the 4-bit interrogator identifier subfield of the
 	 * utility message which reports the identifier of the
@@ -167,72 +174,49 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 	}
 
 	/**
+	 * Assigned coding is:<br>
+	 * 0 signifies no information<br>
+	 * 1 signifies IIS contains Comm-B II code<br>
+	 * 2 signifies IIS contains Comm-C II code<br>
+	 * 3 signifies IIS contains Comm-D II code<br>
 	 * @return the 2-bit identifier designator subfield of the
 	 * utility message which reports the type of reservation made
 	 * by the interrogator identified in
 	 * {@link #getInterrogatorIdentifier() getInterrogatorIdentifier}.
-	 * Assigned coding is:<br>
-	 * <ul>
-	 * <li>0 signifies no information</li>
-	 * <li>1 signifies IIS contains Comm-B II code</li>
-	 * <li>2 signifies IIS contains Comm-C II code</li>
-	 * <li>3 signifies IIS contains Comm-D II code</li>
-	 * </ul>
 	 */
 	public byte getIdentifierDesignator() {
 		return (byte) (utility_msg&0x3);
 	}
 
 	/**
-	 * @return The 13 bits identity code (Mode A code; see ICAO Annex 10 V4)
+	 * @return The 13 bits altitude code (see ICAO Annex 10 V4)
 	 */
-	public short getIdentityCode() {
-		return identity;
+	public short getAltitudeCode() {
+		return altitude_code;
 	}
 
 	/**
-	 * @return The identity/Mode A code (see ICAO Annex 10 V4).
-	 * Special codes are<br>
-	 * <ul>
-	 * <li> 7700 indicates emergency<br>
-	 * <li> 7600 indicates radiocommunication failure</li>
-	 * <li> 7500 indicates unlawful interference</li>
-	 * <li> 2000 indicates that transponder is not yet operated</li>
-	 * </ul>
+	 * @return the decoded altitude in feet
 	 */
-	public String getIdentity() {
-		return decodeIdentity(identity);
+	public Integer getAltitude() {
+		return AltitudeReply.decodeAltitude(altitude_code);
 	}
 
-	static String decodeIdentity(short identity) {
-		int C1 = (0x1000&identity)>>>12;
-		int A1 = (0x800&identity)>>>11;
-		int C2 = (0x400&identity)>>>10;
-		int A2 = (0x200&identity)>>>9;
-		int C4 = (0x100&identity)>>>8;
-		int A4 = (0x080&identity)>>>7;
-		int B1 = (0x020&identity)>>>5;
-		int D1 = (0x010&identity)>>>4;
-		int B2 = (0x008&identity)>>>3;
-		int D2 = (0x004&identity)>>>2;
-		int B4 = (0x002&identity)>>>1;
-		int D4 = (0x001&identity);
-
-		String A = Integer.toString((A4<<2)+(A2<<1)+A1);
-		String B = Integer.toString((B4<<2)+(B2<<1)+B1);
-		String C = Integer.toString((C4<<2)+(C2<<1)+C1);
-		String D = Integer.toString((D4<<2)+(D2<<1)+D1);
-
-		return A+B+C+D;
+	/**
+	 * @return the 7-byte Comm-B message (BDS register)
+	 */
+	public byte[] getMessage() {
+		return message;
 	}
 
 	public String toString() {
 		return super.toString()+"\n"+
-				"Identify Reply:\n"+
+				"Comm-B Altitude Reply:\n"+
 				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
 				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
 				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tIdentity:\t\t"+getIdentity();
+				"\tAltitude:\t\t"+getAltitude()+"\n"+
+				"\tComm-B Message:\t\t"+tools.toHexString(getMessage());
 	}
 
 }

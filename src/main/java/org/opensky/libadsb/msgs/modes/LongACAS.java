@@ -1,4 +1,4 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
 

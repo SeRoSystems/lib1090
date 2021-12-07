@@ -3,6 +3,8 @@ package org.opensky.libadsb.msgs;
 import org.junit.Test;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
+import org.opensky.libadsb.msgs.adsb.AirborneOperationalStatusV1Msg;
+import org.opensky.libadsb.msgs.adsb.AirborneOperationalStatusV2Msg;
 import org.opensky.libadsb.tools;
 
 import static org.junit.Assert.*;

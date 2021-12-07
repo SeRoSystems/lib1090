@@ -2,10 +2,8 @@ package org.opensky.libadsb;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.PositionStraddleError;
-import org.opensky.libadsb.msgs.AirbornePositionV0Msg;
-import org.opensky.libadsb.msgs.SurfacePositionV0Msg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opensky.libadsb.msgs.adsb.AirbornePositionV0Msg;
+import org.opensky.libadsb.msgs.adsb.SurfacePositionV0Msg;
 
 import static java.lang.Math.abs;
 
@@ -51,14 +49,9 @@ public class PositionDecoder {
 	private Position last_pos; // lat lon
 	private double last_time;
 	private int num_reasonable; // number of successive reasonable msgs
-	private Logger logger;
 
 	// distance to receiver threshold
 	private static final int MAX_DIST_TO_SENDER = 700000; // 700km
-
-	public PositionDecoder() {
-		logger = LoggerFactory.getLogger(this.getClass());
-	}
 
 	/**
 	 * This function is used to induce some tolerance if messages
@@ -112,10 +105,6 @@ public class PositionDecoder {
 		if (!msg.hasPosition())
 			return null;
 
-		if (time < last_time) {
-			logger.debug("Position messages should be ordered!");
-		}
-
 		// decide whether to use global or local position decoding
 		if (last_pos != null && abs(time-last_time) < 640.0) { // 640 seconds corresponds to 180NM with 1000 knots
 			local = true;
@@ -133,13 +122,7 @@ public class PositionDecoder {
 		if (global) { // do global CPR
 			try {
 				global_pos = msg.getGlobalPosition(last_other);
-			} catch (BadFormatException e) {
-				logger.debug("Cannot do global CPR due to bad format (icao24: {}).",
-						tools.toHexString(msg.getIcao24()));
-				global = false;
-			} catch (PositionStraddleError e) {
-				logger.debug("Position staddle (icao24: {}).",
-						tools.toHexString(msg.getIcao24()));
+			} catch (BadFormatException | PositionStraddleError e) {
 				global = false;
 			}
 			if (global_pos == null) global = false;
@@ -158,16 +141,12 @@ public class PositionDecoder {
 
 		// check distance between global and local position if possible
 		if (local && global && global_pos.haversine(local_pos) > distance_threshold) {  // should be almost equal
-			logger.debug("Local and global differ by {} (icao24: {})",
-					global_pos.haversine(local_pos), tools.toHexString(msg.getIcao24()));
 			reasonable = false;
 		}
 
 		// check if it's realistic that the airplane covered this distance
 		if (global && last_pos != null &&
 				!withinThreshold(time-last_time, global_pos.haversine(last_pos))) { // faster than 1000 knots???
-			logger.debug("'{}' would have been too fast ({} m/s) from other position.",
-					tools.toHexString(msg.getIcao24()), global_pos.haversine(last_pos)/abs(time-last_time));
 			reasonable = false;
 		}
 
@@ -178,8 +157,6 @@ public class PositionDecoder {
 				double dist = global_pos.haversine(msg.getLocalPosition(global_pos));
 				if (dist > distance_threshold) {
 					reasonable = false;
-					logger.debug("Local/Global differ for new message by {} m (icao24: {})",
-							dist, tools.toHexString(msg.getIcao24()));
 				}
 
 				// check local/global dist of old message
@@ -187,18 +164,12 @@ public class PositionDecoder {
 				dist = other_pos.haversine(last_other.getLocalPosition(other_pos));
 				if (dist > distance_threshold) {
 					reasonable = false;
-					logger.debug("Local/Global differ for old message by {} m (icao24: {})",
-							dist, tools.toHexString(msg.getIcao24()));
 				}
 
 				if (!withinThreshold(time-last_other_time, global_pos.haversine(other_pos))) { // faster than 1000 knots
 					reasonable = false;
-					logger.debug("'{}' would have been too fast ({} m/s) for global.",
-							tools.toHexString(msg.getIcao24()), global_pos.haversine(other_pos)/abs(last_other_time-time));
 				}
-			} catch (BadFormatException e) {
-				reasonable = false;
-			} catch (PositionStraddleError e) {
+			} catch (BadFormatException | PositionStraddleError e) {
 				reasonable = false;
 			}
 		}
@@ -206,10 +177,6 @@ public class PositionDecoder {
 		// check if it's realistic that the airplane covered this distance
 		if (local_pos != null && last_pos != null &&
 				!withinThreshold(last_time-time, local_pos.haversine(last_pos))) { // faster than 1000 knots???
-			logger.debug("'{}' would be too fast ({}/{} = {} m/s).",
-					tools.toHexString(msg.getIcao24()),
-					local_pos.haversine(last_pos), abs(time-last_time),
-					local_pos.haversine(last_pos)/abs(time-last_time));
 			reasonable = false;
 		}
 
@@ -299,10 +266,6 @@ public class PositionDecoder {
 		
 		Position real_ref = last_pos != null ? last_pos : ref;
 		
-		if (time <= last_time) {
-			logger.debug("Position messages should be ordered!");
-		}
-
 		// decide whether to use global or local position decoding
 		if (last_pos != null && abs(time-last_time) < 1620.0) { // 45NM with 100 knots; see 1090 MOPS
 			local = true;
@@ -326,13 +289,7 @@ public class PositionDecoder {
 		if (global) { // do global CPR
 			try {
 				global_pos = msg.getGlobalPosition(last_other, real_ref);
-			} catch (BadFormatException e) {
-				logger.debug("Cannot do global CPR due to bad format (icao24: {}).",
-						tools.toHexString(msg.getIcao24()));
-				global = false;
-			} catch (PositionStraddleError e) {
-				logger.debug("Position staddle (icao24: {}).",
-						tools.toHexString(msg.getIcao24()));
+			} catch (BadFormatException | PositionStraddleError e) {
 				global = false;
 			}
 			if (global_pos == null) global = false;
@@ -351,16 +308,12 @@ public class PositionDecoder {
 
 		// check distance between global and local position if possible
 		if (local && global && global_pos.haversine(local_pos) > distance_threshold) {  // should be almost equal
-			logger.debug("Local and global differ by {} (icao24: {})\n",
-					global_pos.haversine(local_pos), tools.toHexString(msg.getIcao24()));
 			reasonable = false;
 		}
 
 		// check if it's realistic that the airplane covered this distance
 		if (global && last_pos != null &&
 				!withinThreshold(time-last_time, global_pos.haversine(last_pos), true)) { // faster than 1000 knots???
-			logger.debug("'{}' would have been too fast ({} m/s) from other position.\n",
-					tools.toHexString(msg.getIcao24()), global_pos.haversine(last_pos)/abs(time-last_time));
 			reasonable = false;
 		}
 
@@ -371,8 +324,6 @@ public class PositionDecoder {
 				double dist = global_pos.haversine(msg.getLocalPosition(global_pos));
 				if (dist > distance_threshold) {
 					reasonable = false;
-					logger.debug("Local/Global differ for new message by {} m (icao24: {})",
-							dist, tools.toHexString(msg.getIcao24()));
 				}
 
 				// check local/global dist of old message
@@ -380,18 +331,12 @@ public class PositionDecoder {
 				dist = other_pos.haversine(last_other.getLocalPosition(other_pos));
 				if (dist > distance_threshold) {
 					reasonable = false;
-					logger.debug("Local/Global differ for old message by {} m (icao24: {})",
-							dist, tools.toHexString(msg.getIcao24()));
 				}
 
 				if (!withinThreshold(time-last_other_time, global_pos.haversine(other_pos), true)) { // faster than 1000 knots
 					reasonable = false;
-					logger.debug("'{}' would have been too fast ({} m/s) for global.",
-							tools.toHexString(msg.getIcao24()), global_pos.haversine(other_pos)/abs(last_other_time-time));
 				}
-			} catch (BadFormatException e) {
-				reasonable = false;
-			} catch (PositionStraddleError e) {
+			} catch (BadFormatException | PositionStraddleError e) {
 				reasonable = false;
 			}
 		}
@@ -399,10 +344,6 @@ public class PositionDecoder {
 		// check if it's realistic that the airplane covered this distance
 		if (local_pos != null && last_pos != null &&
 				!withinThreshold(last_time-time, local_pos.haversine(last_pos), true)) { // faster than 1000 knots???
-			logger.debug("'{}' would be too fast ({}/{} = {} m/s).",
-					tools.toHexString(msg.getIcao24()),
-					local_pos.haversine(last_pos), abs(time-last_time),
-					local_pos.haversine(last_pos)/abs(time-last_time));
 			reasonable = false;
 		}
 

@@ -21,8 +21,8 @@ import org.opensky.libadsb.ModeSDecoder;
 import org.opensky.libadsb.Position;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
-import org.opensky.libadsb.msgs.*;
 import org.opensky.libadsb.msgs.adsb.*;
+import org.opensky.libadsb.msgs.modes.*;
 import org.opensky.libadsb.tools;
 
 import java.util.Scanner;
@@ -51,7 +51,7 @@ import java.util.Scanner;
  */
 public class ExampleDecoder {
 	// The ModeSDecoder does all the magic for us
-	private ModeSDecoder decoder = new ModeSDecoder();
+	private final ModeSDecoder decoder = new ModeSDecoder();
 
 	/**
 	 *

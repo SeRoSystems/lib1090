@@ -1,7 +1,6 @@
-package org.opensky.libadsb.msgs;
+package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
 
 import java.io.Serializable;
 
@@ -23,63 +22,57 @@ import java.io.Serializable;
  */
 
 /**
- * Decoder for Mode S identify replies with Comm-B message (DF 21)
+ * Decoder for Mode S surveillance altitude replies (DF 4)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class CommBIdentifyReply extends ModeSReply implements Serializable {
+public class AltitudeReply extends ModeSReply implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
 
 	private byte flight_status;
 	private byte downlink_request;
 	private byte utility_msg;
-	private short identity;
-	private byte[] message;
+	private short altitude_code;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected CommBIdentifyReply() { }
+	protected AltitudeReply() { }
 
 	/**
-	 * @param raw_message raw comm-b identify reply as hex string
-	 * @throws BadFormatException if message is not comm-b identify reply or 
+	 * @param raw_message raw altitude reply as hex string
+	 * @throws BadFormatException if message is not altitude reply or 
 	 * contains wrong values.
 	 */
-	public CommBIdentifyReply(String raw_message) throws BadFormatException {
+	public AltitudeReply(String raw_message) throws BadFormatException {
 		this(new ModeSReply(raw_message));
 	}
 
 	/**
-	 * @param raw_message raw comm-b identify reply as byte array
-	 * @throws BadFormatException if message is not comm-b identify reply or
+	 * @param raw_message raw altitude reply as byte array
+	 * @throws BadFormatException if message is not altitude reply or
 	 * contains wrong values.
 	 */
-	public CommBIdentifyReply(byte[] raw_message) throws BadFormatException {
+	public AltitudeReply(byte[] raw_message) throws BadFormatException {
 		this(new ModeSReply(raw_message));
 	}
 
 	/**
-	 * @param reply Mode S reply which contains this comm-b identify reply
-	 * @throws BadFormatException if message is not comm-b identify reply or 
+	 * @param reply Mode S reply containing this altitude reply
+	 * @throws BadFormatException if message is not altitude reply or 
 	 * contains wrong values.
 	 */
-	public CommBIdentifyReply(ModeSReply reply) throws BadFormatException {
+	public AltitudeReply(ModeSReply reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.COMM_B_IDENTIFY_REPLY);
+		setType(subtype.ALTITUDE_REPLY);
 
-		if (getDownlinkFormat() != 21) {
-			throw new BadFormatException("Message is not a comm-b identify reply!");
+		if (getDownlinkFormat() != 4) {
+			throw new BadFormatException("Message is not an altitude reply!");
 		}
 
 		byte[] payload = getPayload();
 		flight_status = getFirstField();
 		downlink_request = (byte) ((payload[0]>>>3) & 0x1F);
 		utility_msg = (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-		identity = (short) ((payload[1]<<8 | (payload[2]&0xFF))&0x1FFF);
-
-		// extract Comm-B message
-		message = new byte[7];
-		for (int i=0; i<7; i++)
-			message[i] = payload[i+3];
+		altitude_code = (short) ((payload[1]<<8 | payload[2]&0xFF)&0x1FFF);
 	}
 
 	/**
@@ -163,7 +156,7 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 	}
 
 	/**
-	 * Note: this is not the same identifier as the one contained in all-call replies.
+	 * Note that this is not the same identifier as the one contained in all-call replies.
 	 * 
 	 * @return the 4-bit interrogator identifier subfield of the
 	 * utility message which reports the identifier of the
@@ -174,58 +167,98 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 	}
 
 	/**
+	 * Assigned coding is:<br>
+	 * 0 signifies no information<br>
+	 * 1 signifies IIS contains Comm-B II code<br>
+	 * 2 signifies IIS contains Comm-C II code<br>
+	 * 3 signifies IIS contains Comm-D II code<br>
 	 * @return the 2-bit identifier designator subfield of the
 	 * utility message which reports the type of reservation made
 	 * by the interrogator identified in
 	 * {@link #getInterrogatorIdentifier() getInterrogatorIdentifier}.
-	 * Assigned coding is:<br>
-	 * <ul>
-	 * <li>0 signifies no information</li>
-	 * <li>1 signifies IIS contains Comm-B II code</li>
-	 * <li>2 signifies IIS contains Comm-C II code</li>
-	 * <li>3 signifies IIS contains Comm-D II code</li>
-	 * </ul>
 	 */
 	public byte getIdentifierDesignator() {
 		return (byte) (utility_msg&0x3);
 	}
 
 	/**
-	 * @return The 13 bits identity code (Mode A code; see ICAO Annex 10 V4)
+	 * @return The 13 bits altitude code (see ICAO Annex 10 V4)
 	 */
-	public short getIdentityCode() {
-		return identity;
+	public short getAltitudeCode() {
+		return altitude_code;
 	}
 
 	/**
-	 * @return the 7-byte Comm-B message (BDS register)
+	 * This method converts a gray code encoded int to a standard decimal int
+	 * @param gray gray code encoded int of length bitlength
+	 *        bitlength bitlength of gray code
+	 * @return radix 2 encoded integer
 	 */
-	public byte[] getMessage() {
-		return message;
+	private static int grayToBin(int gray, int bitlength) {
+		int result = 0;
+		for (int i = bitlength-1; i >= 0; --i)
+			result = result|((((0x1<<(i+1))&result)>>>1)^((1<<i)&gray));
+		return result;
 	}
 
 	/**
-	 * @return The identity/Mode A code (see ICAO Annex 10 V4).
-	 * Special codes are<br>
-	 * <ul>
-	 * <li> 7700 indicates emergency<br>
-	 * <li> 7600 indicates radiocommunication failure</li>
-	 * <li> 7500 indicates unlawful interference</li>
-	 * <li> 2000 indicates that transponder is not yet operated</li>
-	 * </ul>
+	 * @return the decoded altitude in feet
 	 */
-	public String getIdentity() {
-		return IdentifyReply.decodeIdentity(identity);
+	public Integer getAltitude() {
+		return decodeAltitude(altitude_code);
 	}
 
+	/**
+	 * @param altitude_code as provided in most Mode S replies
+	 * @return altitude in feet
+	 */
+	public static Integer decodeAltitude(short altitude_code) {
+		// altitude unavailable
+		if (altitude_code == 0) return null;
+
+		boolean Mbit = (altitude_code&0x40)!=0;
+		if (!Mbit) {
+			boolean Qbit = (altitude_code&0x10)!=0;
+			if (Qbit) { // altitude reported in 25ft increments
+				int N = (altitude_code&0x0F) | ((altitude_code&0x20)>>>1) | ((altitude_code&0x1F80)>>>2);
+				return 25*N-1000;
+			}
+			else { // altitude is above 50175ft, so we use 100ft increments
+
+				// it's decoded using the Gillham code
+				int C1 = (0x1000&altitude_code)>>>12;
+				int A1 = (0x0800&altitude_code)>>>11;
+				int C2 = (0x0400&altitude_code)>>>10;
+				int A2 = (0x0200&altitude_code)>>>9;
+				int C4 = (0x0100&altitude_code)>>>8;
+				int A4 = (0x0080&altitude_code)>>>7;
+				int B1 = (0x0020&altitude_code)>>>5;
+				int B2 = (0x0008&altitude_code)>>>3;
+				int D2 = (0x0004&altitude_code)>>>2;
+				int B4 = (0x0002&altitude_code)>>>1;
+				int D4 = (0x0001&altitude_code);
+
+				// this is standard gray code
+				int N500 = grayToBin(D2<<7|D4<<6|A1<<5|A2<<4|A4<<3|B1<<2|B2<<1|B4, 8);
+
+				// 100-ft steps must be converted
+				int N100 = grayToBin(C1<<2|C2<<1|C4, 3)-1;
+				if (N100 == 6) N100=4;
+				if (N500%2 != 0) N100=4-N100; // invert it
+
+				return -1200+N500*500+N100*100;
+			}
+		}
+		else return null; // unspecified metric encoding
+	}
+	
 	public String toString() {
 		return super.toString()+"\n"+
-				"Comm-B Identify Reply:\n"+
+				"Altitude Reply:\n"+
 				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
 				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
 				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tIdentity:\t\t"+getIdentity()+"\n"+
-				"\tComm-B Message:\t\t"+tools.toHexString(getMessage());
+				"\tAltitude:\t\t"+getAltitude();
 	}
 
 }

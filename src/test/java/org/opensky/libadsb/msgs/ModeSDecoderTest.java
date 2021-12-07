@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.opensky.libadsb.ModeSDecoder;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
+import org.opensky.libadsb.msgs.adsb.TargetStateAndStatusMsg;
+import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import static org.junit.Assert.*;
 
