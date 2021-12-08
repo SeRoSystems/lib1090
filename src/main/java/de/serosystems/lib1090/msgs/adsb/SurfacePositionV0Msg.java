@@ -1,7 +1,9 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.CompactPositionReporting;
+import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -27,7 +29,7 @@ import java.io.Serializable;
  * Decoder for ADS-B surface position messages
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable {
+public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 
 	private static final long serialVersionUID = 8854492255470317616L;
 	private boolean horizontal_position_available;
@@ -170,13 +172,6 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	}
 
 	/**
-	 * @return whether horizontal position information is available
-	 */
-	public boolean hasPosition() {
-		return horizontal_position_available;
-	}
-
-	/**
 	 * @return whether ground speed information is available
 	 */
 	public boolean hasGroundSpeed() {
@@ -265,11 +260,29 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 		return time_flag;
 	}
 
-	/**
-	 * @return the CPR encoded position
-	 */
+	@Override
 	public CompactPositionReporting.CPREncodedPosition getCPREncodedPosition() {
 		return position;
+	}
+
+	@Override
+	public boolean hasValidPosition() {
+		return horizontal_position_available;
+	}
+
+	@Override
+	public boolean hasValidAltitude() {
+		return true;
+	}
+
+	@Override
+	public Integer getAltitude() {
+		return 0;
+	}
+
+	@Override
+	public Position.AltitudeType getAltitudeType() {
+		return Position.AltitudeType.ABOVE_GROUND_LEVEL;
 	}
 
 	@Override

@@ -87,7 +87,7 @@ public class ExampleDecoder {
 
 				// use CPR to decode position
 				// CPR needs at least 2 positions or a reference, otherwise we get null here
-				Position c0 = decoder.extractPosition(ap0, receiver);
+				Position c0 = decoder.extractPosition(ap0.getAddress(), ap0, receiver);
 				if (c0 == null)
 					System.out.println("Cannot decode position yet.");
 				else
@@ -95,13 +95,13 @@ public class ExampleDecoder {
 				System.out.println("          Horizontal containment radius limit/protection level: " +
 						ap0.getHorizontalContainmentRadiusLimit() + " m");
 
-				if (ap0.isBarometricAltitude())
-					System.out.println("          Altitude (barom.): "+ (ap0.hasAltitude() ? ap0.getAltitude() : "unknown") +" ft");
-				else
-					System.out.println("          Height (geom.): "+ (ap0.hasAltitude() ? ap0.getAltitude() : "unknown") +" ft");
+				if (ap0.hasValidAltitude()) {
+					System.out.println("          Altitude: " + ap0.getAltitude() + " ft");
+					System.out.println("          Altitude Reference System: " + ap0.getAltitudeType());
+				}
 
 				Integer geoMinusBaro = decoder.getGeoMinusBaro(msg);
-				if (ap0.hasAltitude() && ap0.isBarometricAltitude() && geoMinusBaro != null) {
+				if (ap0.hasValidAltitude() && ap0.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
 					System.out.println("          Height (geom.): " + ap0.getAltitude() + geoMinusBaro + " ft");
 				}
 
@@ -134,7 +134,7 @@ public class ExampleDecoder {
 				SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
 				System.out.print("["+icao24+"]: ");
 
-				Position sPos0 = decoder.extractPosition(sp0, receiver);
+				Position sPos0 = decoder.extractPosition(sp0.getAddress(), sp0, receiver);
 				// decode the position if possible; prior position needed
 				if (sPos0 == null)
 					System.out.println("Cannot decode position yet or no reference available (yet).");

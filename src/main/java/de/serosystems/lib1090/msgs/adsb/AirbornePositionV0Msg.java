@@ -1,7 +1,9 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.CompactPositionReporting;
+import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
@@ -28,7 +30,7 @@ import java.io.Serializable;
  * Decoder for ADS-B airborne position messages version 0 and 1.
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable {
+public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 
 	private static final long serialVersionUID = -1901589500173456758L;
 	private boolean horizontal_position_available;
@@ -208,20 +210,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return whether horizontal position information is available
-	 */
-	public boolean hasPosition() {
-		return horizontal_position_available;
-	}
-
-	/**
-	 * @return whether altitude information is available
-	 */
-	public boolean hasAltitude() {
-		return altitude_available;
-	}
-
-	/**
 	 * @see #getSurveillanceStatusDescription()
 	 * @return the surveillance status
 	 */
@@ -262,18 +250,19 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		return time_flag;
 	}
 
-	/**
-	 * @return the CPR encoded position
-	 */
+	@Override
 	public CompactPositionReporting.CPREncodedPosition getCPREncodedPosition() {
 		return position;
 	}
 
-	/**
-	 * @return true, if barometric altitude. False if GNSS is used to determine altitude
-	 */
-	public boolean isBarometricAltitude() {
-		return this.getFormatTypeCode() < 20;
+	@Override
+	public boolean hasValidPosition() {
+		return horizontal_position_available;
+	}
+
+	@Override
+	public boolean hasValidAltitude() {
+		return altitude_available;
 	}
 
 	/**
@@ -289,10 +278,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		return result;
 	}
 
-	/**
-	 * @return the decoded altitude in feet or null if altitude is not available. The latter can be checked with
-	 * {@link #hasAltitude()}.
-	 */
+	@Override
 	public Integer getAltitude() {
 		if (!altitude_available) return null;
 
@@ -327,6 +313,12 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 			return -1200+N500*500+N100*100;
 		}
+	}
+
+	@Override
+	public Position.AltitudeType getAltitudeType () {
+		return this.getFormatTypeCode() < 20 ?
+				Position.AltitudeType.BAROMETRIC_ALTITUDE : Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
 	}
 
 	@Override

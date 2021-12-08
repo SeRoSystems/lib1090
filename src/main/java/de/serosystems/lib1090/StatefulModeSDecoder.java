@@ -2,6 +2,7 @@ package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
 
@@ -273,31 +274,14 @@ public class StatefulModeSDecoder {
 	 * @param receiver position for reasonableness test (can be null)
 	 * @return decoded WGS84 position
 	 */
-	public Position extractPosition(AirbornePositionV0Msg msg, Position receiver) {
-		DecoderData dd = getDecoderData(msg.getAddress());
+	public Position extractPosition(ModeSReply.QualifiedAddress address, PositionMsg msg, Position receiver) {
+		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
-		if (msg.hasAltitude()) {
+		if (msg.hasValidAltitude()) {
 			pos.setAltitude(Double.valueOf(msg.getAltitude()));
-			pos.setAltitudeType(msg.isBarometricAltitude() ?
-					Position.AltitudeType.BAROMETRIC_ALTITUDE : Position.AltitudeType.ABOVE_WGS84_ELLIPSOID);
+			pos.setAltitudeType(msg.getAltitudeType());
 		}
-
-		return pos;
-	}
-
-
-	/**
-	 * Decode CPR encoded position from surface position message.
-	 * @param msg which contains the encoded position
-	 * @param receiver position for reasonableness test (can be null)
-	 * @return decoded WGS84 position
-	 */
-	public Position extractPosition(SurfacePositionV0Msg msg, Position receiver) {
-		DecoderData dd = getDecoderData(msg.getAddress());
-		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
-		pos.setAltitude(0.);
-		pos.setAltitudeType(Position.AltitudeType.ABOVE_GROUND_LEVEL);
 
 		return pos;
 	}
