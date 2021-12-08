@@ -77,4 +77,10 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 		return sil_supplement;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tSurfaceOperationalStatusV2Msg{" +
+				"sil_supplement=" + sil_supplement +
+				'}';
+	}
 }

@@ -1,9 +1,10 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -71,7 +72,7 @@ public class AllCallReply extends ModeSReply implements Serializable {
 		capabilities = getFirstField();
 
 		// extract interrogator ID
-		this.parity_interrogator = tools.xor(calcParity(), getParity());
+		this.parity_interrogator = Tools.xor(calcParity(), getParity());
 
 		code_label = (byte) ((parity_interrogator[2]>>4)&0x7);
 	}
@@ -174,13 +175,13 @@ public class AllCallReply extends ModeSReply implements Serializable {
 		return true;
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"All-call Reply:\n"+
-				"\tCapabilities:\t\t"+getCapabilities()+"\n"+
-				"\tValid Interrogator ID:\t\t"+hasValidInterrogatorCode()+"\n"+
-				(isSurveillanceID() ? "\tSI-Code:\t\t" : "\tII-Code:\t\t")+
-				getInterrogatorCode();
+		return "AllCallReply{" +
+				"capabilities=" + capabilities +
+				", interrogator_id=" + getInterrogatorCode() + (isSurveillanceID() ? "/SI" : "/II") +
+				", code_label=" + code_label +
+				'}';
 	}
 
 }

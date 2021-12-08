@@ -264,53 +264,19 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 		return hrd;
 	}
 
-	 /* (non-Javadoc)
-	 * @see org.opensky.libadsb.ExtendedSquitter#toString()
-	 */
+	@Override
 	public String toString() {
-		String retstr;
-		retstr = "Airborne operational status:\n";
-		retstr += "\tHas TCAS: ";
-		retstr += (hasOperationalTCAS() ? "yes" : "no")+"\n";
-
-		retstr += "\tAir-referenced velocity: ";
-		retstr += (hasAirReferencedVelocity() ? "yes" : "no")+"\n";
-
-		retstr += "\tTarget State Reports: ";
-		retstr += (hasTargetStateReport() ? "yes" : "no")+"\n";
-		retstr += "\tTarget Change Reports: ";
-		retstr += (supportsTargetChangeReport() ? "yes" : "no")+"\n";
-
-		retstr += "\tHas 1090ES IN: ";
-		retstr += (has1090ESIn() ? "yes" : "no")+"\n";
-
-		retstr += "\tHas UAT IN: ";
-		retstr += (hasUATIn() ? "yes" : "no")+"\n";
-
-		retstr += "\tUses TCAS: ";
-		retstr += (hasTCASResolutionAdvisory() ? "yes" : "no")+"\n";
-
-		retstr += "\tIDENT Switch on: ";
-		retstr += (hasActiveIDENTSwitch() ? "yes" : "no")+"\n";
-
-		retstr += "\tUses single antenna: ";
-		retstr += (hasSingleAntenna() ? "yes" : "no")+"\n";
-
-		retstr += "\tSystem design assurance: ";
-		retstr += getSystemDesignAssurance()+"\n";
-
-		retstr += "\tADS-B version: "+getVersion()+"\n";
-
-		retstr += "\tNIC supplement A: ";
-		retstr += (hasNICSupplementA() ? "true" : "false")+"\n";
-
-		retstr += "\tPosition NAC: "+ getNACp()+"\n";
-		retstr += "\tVertical Accuracy: "+getGeometricVerticalAccuracy()+"\n";
-
-		retstr += "\tSource Integrity Level: "+ getSIL()+"\n";
-		retstr += "\tHorizontal reference: "+getHorizontalReferenceDirection();
-
-		return super.toString()+"\n"+retstr;
+		return super.toString() + "\n\tAirborneOperationalStatusV1Msg{" +
+				"subtype_code=" + subtype_code +
+				", capability_class_code=" + capability_class_code +
+				", operational_mode_code=" + operational_mode_code +
+				", version=" + version +
+				", nic_suppl=" + nic_suppl +
+				", nac_pos=" + nac_pos +
+				", geometric_vertical_accuracy=" + geometric_vertical_accuracy +
+				", sil=" + sil +
+				", nic_trk_hdg=" + nic_trk_hdg +
+				", hrd=" + hrd +
+				'}';
 	}
-
 }

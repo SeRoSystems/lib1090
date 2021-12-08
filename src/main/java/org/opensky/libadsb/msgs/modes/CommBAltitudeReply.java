@@ -1,9 +1,10 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -209,14 +210,14 @@ public class CommBAltitudeReply extends ModeSReply implements Serializable {
 		return message;
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Comm-B Altitude Reply:\n"+
-				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
-				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
-				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tAltitude:\t\t"+getAltitude()+"\n"+
-				"\tComm-B Message:\t\t"+tools.toHexString(getMessage());
+		return super.toString() + "\n\tCommBAltitudeReply{" +
+				"flight_status=" + flight_status +
+				", downlink_request=" + downlink_request +
+				", utility_msg=" + utility_msg +
+				", altitude_code=" + altitude_code +
+				", message=" + Arrays.toString(message) +
+				'}';
 	}
-
 }

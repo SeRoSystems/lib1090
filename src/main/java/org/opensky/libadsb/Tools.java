@@ -23,7 +23,7 @@ package org.opensky.libadsb;
  * not really readable for humans or basic operations are missing.
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class tools {
+public class Tools {
 	private static final char[] hexDigits =
 			{'0', '1', '2', '3', '4', '5', '6', '7',
 					'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};

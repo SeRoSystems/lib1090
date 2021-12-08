@@ -41,14 +41,40 @@ public class Position implements Serializable {
 	private Double altitude;
 	private boolean reasonable;
 
+	public enum AltitudeType {
+		BAROMETRIC_ALTITUDE, // as reported by the transponder
+		ABOVE_WGS84_ELLIPSOID, // above WGS 84 ellipsoid
+		ABOVE_GROUND_LEVEL,
+		UNKNOWN
+	}
+	private AltitudeType altitude_type;
+
 	public Position() {
 		longitude = null;
 		latitude = null;
 		altitude = null;
+		altitude_type = AltitudeType.UNKNOWN;
+
 		setReasonable(true); // be optimistic :-)
 	}
 
 	/**
+	 * @param lon longitude in decimal degrees
+	 * @param lat latitude in decimal degrees
+	 * @param alt altitude in feet
+	 * @param altType reference system of altitude
+	 */
+	public Position(Double lon, Double lat, Double alt, AltitudeType altType) {
+		longitude = lon;
+		latitude = lat;
+		altitude = alt;
+		this.altitude_type = altType;
+		setReasonable(true);
+	}
+
+	/**
+	 * Uses UNKNOWN reference system for altitude.
+	 *
 	 * @param lon longitude in decimal degrees
 	 * @param lat latitude in decimal degrees
 	 * @param alt altitude in feet
@@ -57,6 +83,7 @@ public class Position implements Serializable {
 		longitude = lon;
 		latitude = lat;
 		altitude = alt;
+		this.altitude_type = AltitudeType.UNKNOWN;
 		setReasonable(true);
 	}
 
@@ -103,6 +130,20 @@ public class Position implements Serializable {
 	}
 
 	/**
+	 * @return altitude reference system
+	 */
+	public AltitudeType getAltitudeType() {
+		return altitude_type;
+	}
+
+	/**
+	 * @param altitudeType reference system of altitude of this position
+	 */
+	public void setAltitudeType(AltitudeType altitudeType) {
+		this.altitude_type = altitudeType;
+	}
+
+	/**
 	 * Calculates the two-dimensional great circle distance (haversine)
 	 * @param other position to which we calculate the distance
 	 * @return distance between the this and other position in meters
@@ -120,12 +161,15 @@ public class Position implements Serializable {
 
 	/**
 	 * Converts the WGS84 position to cartesian coordinates
-	 * @return earth-centered earth-fixed coordinates as [x, y, z]
+	 * @return earth-centered earth-fixed coordinates as [x, y, z] or null if wrong altitude type
 	 */
 	public double[] toECEF () {
+		if (altitude_type != AltitudeType.ABOVE_WGS84_ELLIPSOID)
+			return null;
+
 		double lon0r = toRadians(this.longitude);
 		double lat0r = toRadians(this.latitude);
-		double height = tools.feet2Meters(altitude);
+		double height = Tools.feet2Meters(altitude);
 
 		double v = a / Math.sqrt(1 - e2*Math.sin(lat0r)*Math.sin(lat0r));
 
@@ -144,7 +188,6 @@ public class Position implements Serializable {
 	 * @return a position object representing the WGS84 position
 	 */
 	public static Position fromECEF (double x, double y, double z) {
-
 		double p = sqrt(x*x + y*y);
 		double th = atan2(a * z, b * p);
 		double lon = atan2(y, x);
@@ -160,7 +203,7 @@ public class Position implements Serializable {
 		if (abs(x) < 1 & abs(y) < 1)
 			alt = abs(z) - b;
 
-		return new Position(toDegrees(lon), toDegrees(lat), tools.meters2Feet(alt));
+		return new Position(toDegrees(lon), toDegrees(lat), Tools.meters2Feet(alt), AltitudeType.ABOVE_WGS84_ELLIPSOID);
 	}
 
 	/**
@@ -175,6 +218,9 @@ public class Position implements Serializable {
 
 		double[] xyz1 = this.toECEF();
 		double[] xyz2 = other.toECEF();
+
+		if (xyz1 == null || xyz2 == null)
+			return null;
 
 		return Math.sqrt(
 				Math.pow(xyz2[0] - xyz1[0], 2) +
@@ -209,20 +255,22 @@ public class Position implements Serializable {
 				", latitude=" + latitude +
 				", altitude=" + altitude +
 				", reasonable=" + reasonable +
+				", altitude_type=" + altitude_type +
 				'}';
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Position)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
 		Position position = (Position) o;
 
 		if (reasonable != position.reasonable) return false;
 		if (longitude != null ? !longitude.equals(position.longitude) : position.longitude != null) return false;
 		if (latitude != null ? !latitude.equals(position.latitude) : position.latitude != null) return false;
-		return altitude != null ? altitude.equals(position.altitude) : position.altitude == null;
+		if (altitude != null ? !altitude.equals(position.altitude) : position.altitude != null) return false;
+		return altitude_type == position.altitude_type;
 	}
 
 	@Override
@@ -231,6 +279,7 @@ public class Position implements Serializable {
 		result = 31 * result + (latitude != null ? latitude.hashCode() : 0);
 		result = 31 * result + (altitude != null ? altitude.hashCode() : 0);
 		result = 31 * result + (reasonable ? 1 : 0);
+		result = 31 * result + (altitude_type != null ? altitude_type.hashCode() : 0);
 		return result;
 	}
 }

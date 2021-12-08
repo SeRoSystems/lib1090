@@ -254,20 +254,24 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return Math.hypot(north_south_velocity, east_west_velocity);
 	}
 
+	@Override
 	public String toString() {
-		String ret = super.toString()+"\n"+
-				"Velocity over ground:\n";
-		try { ret += "\tNorth to south velocity:\t"+getNorthToSouthVelocity()+"\n"; }
-		catch (Exception e) { ret += "\tNorth to south velocity:\t\tnot available\n"; }
-		try { ret += "\tEast to west velocity:\t\t"+getEastToWestVelocity()+"\n"; }
-		catch (Exception e) { ret += "\tEast to west velocity:\t\tnot available\n"; }
-		try { ret += "\tVelocity:\t\t\t"+getVelocity()+"\n"; }
-		catch (Exception e) { ret += "\tVelocity:\t\t\tnot available\n"; }
-		try { ret += "\tHeading\t\t\t\t"+getHeading()+"\n"; }
-		catch (Exception e) { ret += "\tHeading\t\t\t\tnot available\n"; }
-		try { ret += "\tVertical rate:\t\t\t"+getVerticalRate(); }
-		catch (Exception e) { ret += "\tVertical rate:\t\t\tnot available"; }
-
-		return ret;
+		return super.toString() + "\n\tVelocityOverGroundMsg{" +
+				"msg_subtype=" + msg_subtype +
+				", intent_change=" + intent_change +
+				", ifr_capability=" + ifr_capability +
+				", navigation_accuracy_category=" + navigation_accuracy_category +
+				", direction_west=" + direction_west +
+				", east_west_velocity=" + east_west_velocity +
+				", velocity_info_available=" + velocity_info_available +
+				", direction_south=" + direction_south +
+				", north_south_velocity=" + north_south_velocity +
+				", vertical_source=" + vertical_source +
+				", vertical_rate_down=" + vertical_rate_down +
+				", vertical_rate=" + vertical_rate +
+				", vertical_rate_info_available=" + vertical_rate_info_available +
+				", geo_minus_baro=" + geo_minus_baro +
+				", geo_minus_baro_available=" + geo_minus_baro_available +
+				'}';
 	}
 }

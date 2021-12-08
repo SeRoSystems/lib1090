@@ -331,4 +331,27 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 		if (!mcp_fcu_status) return null;
 		return lnav_mode_engaged;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tTargetStateAndStatusMsg{" +
+				"sil_suppl=" + sil_suppl +
+				", selected_altitude_type=" + selected_altitude_type +
+				", selected_altitude=" + selected_altitude +
+				", barometric_pressure_setting=" + barometric_pressure_setting +
+				", selectected_heading_status=" + selectected_heading_status +
+				", selectected_heading_sign=" + selectected_heading_sign +
+				", selected_heading=" + selected_heading +
+				", nac_p=" + nac_p +
+				", nic_baro=" + nic_baro +
+				", sil=" + sil +
+				", mcp_fcu_status=" + mcp_fcu_status +
+				", autopilot_engaged=" + autopilot_engaged +
+				", vnav_mode_engaged=" + vnav_mode_engaged +
+				", altitude_hold_mode=" + altitude_hold_mode +
+				", approach_mode=" + approach_mode +
+				", has_operational_tcas=" + has_operational_tcas +
+				", lnav_mode_engaged=" + lnav_mode_engaged +
+				'}';
+	}
 }

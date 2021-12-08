@@ -1,9 +1,10 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -95,12 +96,12 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 		return seqno;
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Comm-D Extended Length Message:\n"+
-				"\tMessage is "+(isAck()?"an":"no")+" ACK\n"+
-				"\tSequence number: "+getSequenceNumber()+"\n"+
-				"\tComm-B Message:\t\t"+tools.toHexString(getMessage());
+		return super.toString() + "\n\tCommDExtendedLengthMsg{" +
+				"message=" + Tools.toHexString(message) +
+				", ack=" + ack +
+				", seqno=" + seqno +
+				'}';
 	}
-
 }

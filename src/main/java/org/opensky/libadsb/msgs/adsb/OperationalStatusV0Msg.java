@@ -107,4 +107,11 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 	public byte getVersion() {
 		return 0;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tOperationalStatusV0Msg{" +
+				"enroute_capabilities=" + enroute_capabilities +
+				'}';
+	}
 }

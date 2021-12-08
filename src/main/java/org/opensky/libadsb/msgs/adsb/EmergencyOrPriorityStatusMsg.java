@@ -130,13 +130,12 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 				(byte) (D1+(D2<<1)+(D4<<2))};
 	}
 
+	@Override
 	public String toString() {
-		byte[] modeA = getModeACode();
-		String ret = super.toString()+"\n"+
-				"Emergency & Priority Status:\n";
-		ret += "\tEmergency:\t"+getEmergencyStateText()+"\n";
-		ret += "\tMode A code:\t"+modeA[0]+"|"+modeA[1]+"|"+modeA[2]+"|"+modeA[3];
-
-		return ret;
+		return super.toString() + "\n\tEmergencyOrPriorityStatusMsg{" +
+				"msgsubtype=" + msgsubtype +
+				", emergency_state=" + emergency_state +
+				", mode_a_code=" + mode_a_code +
+				'}';
 	}
 }

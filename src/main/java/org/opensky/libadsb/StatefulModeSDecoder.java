@@ -5,9 +5,7 @@ import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
 import org.opensky.libadsb.msgs.adsb.*;
 import org.opensky.libadsb.msgs.modes.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /*
@@ -28,27 +26,36 @@ import java.util.Map;
  */
 
 /**
- * Generic decoder for Mode S Messages.
+ * Generic stateful decoder for Mode S Messages.
  *
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class ModeSDecoder {
+public class StatefulModeSDecoder {
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
-	private final Map<Integer, DecoderData> decoderData = new HashMap<Integer, DecoderData>();
+	private final Map<ModeSReply.QualifiedAddress, DecoderData> decoderData = new HashMap<>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
+
+	private DecoderData getDecoderData (ModeSReply.QualifiedAddress address) {
+		DecoderData dd = decoderData.computeIfAbsent(address, a -> new DecoderData());
+		dd.lastUsed = latestTimestamp;
+		return dd;
+	}
 
 	/**
 	 * This function decodes a half-decoded Mode S reply to its
 	 * deepest possible specialization. Use getType() to check its
 	 * actual type afterwards.
 	 * @param modes the incompletely decoded Mode S message
+	 * @param timestamp time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(ModeSReply modes) throws BadFormatException, UnspecifiedFormatError {
-		if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) gc();
+	public ModeSReply decode(ModeSReply modes, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
+
+		latestTimestamp = timestamp;
 
 		switch (modes.getDownlinkFormat()) {
 			case 0: return new ShortACAS(modes);
@@ -67,13 +74,7 @@ public class ModeSDecoder {
 
 					// we need stateful decoding, because ADS-B version > 0 can only be assumed
 					// if matching version info in operational status has been found.
-					DecoderData dd = this.decoderData.get(modes.getTransponderAddress());
-					if (dd == null) {
-						// create new DecoderData
-						// assume ADS-B version 0 (as demanded by DO-260B N.1.2)
-						dd = new DecoderData();
-						this.decoderData.put(modes.getTransponderAddress(), dd);
-					}
+					DecoderData dd = getDecoderData(modes.getAddress());
 
 					// what kind of extended squitter?
 					byte ftc = es1090.getFormatTypeCode();
@@ -85,19 +86,19 @@ public class ModeSDecoder {
 						// surface position message
 						switch(dd.adsbVersion) {
 							case 0:
-								return new SurfacePositionV0Msg(es1090);
+								return new SurfacePositionV0Msg(es1090, timestamp);
 							case 1:
-								SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090);
+								SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090, timestamp);
 								s1.setNICSupplementA(dd.nicSupplA);
 								return s1;
 							case 2:
-								SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090);
+								SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090, timestamp);
 								s2.setNICSupplementA(dd.nicSupplA);
 								s2.setNICSupplementC(dd.nicSupplC);
 								return s2;
 							default:
 								// implicit by version 0
-								return new SurfacePositionV0Msg(es1090);
+								return new SurfacePositionV0Msg(es1090, timestamp);
 						}
 					}
 
@@ -105,18 +106,18 @@ public class ModeSDecoder {
 						// airborne position message
 						switch(dd.adsbVersion) {
 							case 0:
-								return new AirbornePositionV0Msg(es1090);
+								return new AirbornePositionV0Msg(es1090, timestamp);
 							case 1:
-								AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090);
+								AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090, timestamp);
 								a1.setNICSupplementA(dd.nicSupplA);
 								return a1;
 							case 2:
-								AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090);
+								AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090, timestamp);
 								a2.setNICSupplementA(dd.nicSupplA);
 								return a2;
 							default:
 								// implicit by version 0
-								return new AirbornePositionV0Msg(es1090);
+								return new AirbornePositionV0Msg(es1090, timestamp);
 						}
 					}
 
@@ -221,40 +222,84 @@ public class ModeSDecoder {
 	}
 
 	/**
-	 * @param time time of applicability/reception of position report in milliseconds
-	 * @param surfPos surface position message
-	 * @param receiverPos position of the receiver to check if received position was more than 600km away (optional)
-	 * @param <T> {@link SurfacePositionV0Msg} or one of its sub classes where position is encoded using CPR
-	 * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. Altitude is null
-	 *         On error, the returned position is null. Check the .isReasonable() flag before using the position.
+	 * @param raw_message the Mode S message as byte array
+	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @return an instance of the most specialized ModeSReply possible
+	 * @throws UnspecifiedFormatError if format is not specified
+	 * @throws BadFormatException if format contains error
 	 */
-	public <T extends SurfacePositionV0Msg> Position decodePosition(long time, T surfPos, Position receiverPos) {
-		latestTimestamp = Math.max(latestTimestamp, time);
-		DecoderData dd = this.decoderData.get(surfPos.getTransponderAddress());
-		if (dd == null) {
-			dd = new DecoderData();
-			decoderData.put(surfPos.getTransponderAddress(), dd);
-		}
-		return dd.posDec.decodePosition(time/1000, surfPos, receiverPos);
+	public ModeSReply decode(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSReply(raw_message), timestamp);
 	}
 
 	/**
-	 * @param time time of applicability/reception of position report in milliseconds
-	 * @param airPos airborne position message
-	 * @param receiverPos position of the receiver to check if received position was more than 600km away (optional)
-	 * @param <T> {@link AirbornePositionV0Msg} or one of its sub classes where position is encoded using CPR
-	 * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
-	 *         if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
-	 *         the position.
+	 * @param raw_message the Mode S message as byte array
+	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
+	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @return an instance of the most specialized ModeSReply possible
+	 * @throws UnspecifiedFormatError if format is not specified
+	 * @throws BadFormatException if format contains error
 	 */
-	public <T extends AirbornePositionV0Msg> Position decodePosition(long time, T airPos, Position receiverPos) {
-		latestTimestamp = Math.max(latestTimestamp, time);
-		DecoderData dd = this.decoderData.get(airPos.getTransponderAddress());
-		if (dd == null) {
-			dd = new DecoderData();
-			decoderData.put(airPos.getTransponderAddress(), dd);
+	public ModeSReply decode(byte[] raw_message, boolean noCRC, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSReply(raw_message, noCRC), timestamp);
+	}
+
+	/**
+	 * @param raw_message the Mode S message in hex representation
+	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @return an instance of the most specialized ModeSReply possible
+	 * @throws UnspecifiedFormatError if format is not specified
+	 * @throws BadFormatException if format contains error
+	 */
+	public ModeSReply decode(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSReply(raw_message), timestamp);
+	}
+
+	/**
+	 * @param raw_message the Mode S message in hex representation
+	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
+	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @return an instance of the most specialized ModeSReply possible
+	 * @throws UnspecifiedFormatError if format is not specified
+	 * @throws BadFormatException if format contains error
+	 */
+	public ModeSReply decode(String raw_message, boolean noCRC, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSReply(raw_message, noCRC), timestamp);
+	}
+
+	/**
+	 * Decode CPR encoded position from airborne position message.
+	 * @param msg which contains the encoded position
+	 * @param receiver position for reasonableness test (can be null)
+	 * @return decoded WGS84 position
+	 */
+	public Position extractPosition(AirbornePositionV0Msg msg, Position receiver) {
+		DecoderData dd = getDecoderData(msg.getAddress());
+		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
+
+		if (msg.hasAltitude()) {
+			pos.setAltitude(Double.valueOf(msg.getAltitude()));
+			pos.setAltitudeType(msg.isBarometricAltitude() ?
+					Position.AltitudeType.BAROMETRIC_ALTITUDE : Position.AltitudeType.ABOVE_WGS84_ELLIPSOID);
 		}
-		return dd.posDec.decodePosition(time/1000, receiverPos, airPos);
+
+		return pos;
+	}
+
+
+	/**
+	 * Decode CPR encoded position from surface position message.
+	 * @param msg which contains the encoded position
+	 * @param receiver position for reasonableness test (can be null)
+	 * @return decoded WGS84 position
+	 */
+	public Position extractPosition(SurfacePositionV0Msg msg, Position receiver) {
+		DecoderData dd = getDecoderData(msg.getAddress());
+		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
+		pos.setAltitude(0.);
+		pos.setAltitudeType(Position.AltitudeType.ABOVE_GROUND_LEVEL);
+
+		return pos;
 	}
 
 	/**
@@ -265,8 +310,8 @@ public class ModeSDecoder {
 	 */
 	public <T extends ModeSReply> byte getAdsbVersion(T reply) {
 		if (reply == null) return 0;
-		DecoderData dd = this.decoderData.get(reply.getTransponderAddress());
-		return dd == null ? 0 : dd.adsbVersion;
+		DecoderData dd = getDecoderData(reply.getAddress());
+		return dd.adsbVersion;
 	}
 
 	/**
@@ -279,50 +324,8 @@ public class ModeSDecoder {
 	 */
 	public <T extends ModeSReply> Integer getGeoMinusBaro(T reply) {
 		if (reply == null) return null;
-		DecoderData dd = this.decoderData.get(reply.getTransponderAddress());
-		return dd == null ? null : dd.geoMinusBaro;
-	}
-
-	/**
-	 * @param raw_message the Mode S message as byte array
-	 * @return an instance of the most specialized ModeSReply possible
-	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
-	 */
-	public ModeSReply decode(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message));
-	}
-
-	/**
-	 * @param raw_message the Mode S message as byte array
-	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
-	 * @return an instance of the most specialized ModeSReply possible
-	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
-	 */
-	public ModeSReply decode(byte[] raw_message, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message, noCRC));
-	}
-
-	/**
-	 * @param raw_message the Mode S message in hex representation
-	 * @return an instance of the most specialized ModeSReply possible
-	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
-	 */
-	public ModeSReply decode(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message));
-	}
-
-	/**
-	 * @param raw_message the Mode S message in hex representation
-	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
-	 * @return an instance of the most specialized ModeSReply possible
-	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
-	 */
-	public ModeSReply decode(String raw_message, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message, noCRC));
+		DecoderData dd = getDecoderData(reply.getAddress());
+		return dd.geoMinusBaro;
 	}
 
 	/**
@@ -368,14 +371,8 @@ public class ModeSDecoder {
 	 * Clean state by removing decoders not used for more than an hour. This happens automatically
 	 * every 1 Mio messages if more than 30000 aircraft are tracked.
 	 */
-	public void gc() {
-		List<Integer> toRemove = new ArrayList<Integer>();
-		for (Integer transponder : decoderData.keySet())
-			if (decoderData.get(transponder).posDec.getLastUsedTime()<latestTimestamp-3600000)
-				toRemove.add(transponder);
-
-		for (Integer transponder : toRemove)
-			decoderData.remove(transponder);
+	public void clearDecoders() {
+		decoderData.values().removeIf(dd -> latestTimestamp - dd.lastUsed > 3600_000L);
 	}
 
 	/**
@@ -386,6 +383,7 @@ public class ModeSDecoder {
 		boolean nicSupplA;
 		boolean nicSupplC;
 		Integer geoMinusBaro;
-		PositionDecoder posDec = new PositionDecoder();
+		long lastUsed = System.currentTimeMillis();
+		CompactPositionReporting.StatefulPositionDecoder posDec = new CompactPositionReporting.StatefulPositionDecoder();
 	}
 }

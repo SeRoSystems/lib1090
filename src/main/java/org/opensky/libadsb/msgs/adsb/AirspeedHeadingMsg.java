@@ -249,18 +249,25 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	public boolean isTrueAirspeed() {
 		return true_airspeed;
 	}
-	
+
+	@Override
 	public String toString() {
-		String ret = super.toString()+"\n"+
-				"Airspeed and heading:\n";
-		try { ret += "\tAirspeed:\t"+getAirspeed()+" m/s\n"; }
-		catch (Exception e) { ret += "\tAirspeed:\t\tnot available\n"; }
-		ret += "\tAirspeed Type:\t\t"+(isTrueAirspeed() ? "true" : "indicated")+"\n";
-		try { ret += "\tHeading\t\t\t\t"+getHeading()+"\n"; }
-		catch (Exception e) { ret += "\tHeading\t\t\t\tnot available\n"; }
-		try { ret += "\tVertical rate:\t\t\t"+getVerticalRate(); }
-		catch (Exception e) { ret += "\tVertical rate:\t\t\tnot available"; }
-		
-		return ret;
+		return super.toString() + "\n\tAirspeedHeadingMsg{" +
+				"msg_subtype=" + msg_subtype +
+				", intent_change=" + intent_change +
+				", ifr_capability=" + ifr_capability +
+				", navigation_accuracy_category=" + navigation_accuracy_category +
+				", heading_status_bit=" + heading_status_bit +
+				", heading=" + heading +
+				", true_airspeed=" + true_airspeed +
+				", airspeed=" + airspeed +
+				", airspeed_available=" + airspeed_available +
+				", vertical_source=" + vertical_source +
+				", vertical_rate_down=" + vertical_rate_down +
+				", vertical_rate=" + vertical_rate +
+				", vertical_rate_info_available=" + vertical_rate_info_available +
+				", geo_minus_baro=" + geo_minus_baro +
+				", geo_minus_baro_available=" + geo_minus_baro_available +
+				'}';
 	}
 }

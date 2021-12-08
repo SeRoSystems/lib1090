@@ -5,6 +5,7 @@ import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
 import org.opensky.libadsb.msgs.modes.ModeSReply;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -172,14 +173,11 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 		return categories[4-getFormatTypeCode()][emitter_category];
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opensky.libadsb.ExtendedSquitter#toString()
-	 */
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Identification:\n"+
-				"\tEmitter category:\t"+getCategoryDescription()+" ("+getEmitterCategory()+")\n"+
-				"\tCallsign:\t\t"+new String(getIdentity());
+		return super.toString() + "\n\tIdentificationMsg{" +
+				"emitter_category=" + emitter_category +
+				", identity=" + Arrays.toString(identity) +
+				'}';
 	}
-
 }

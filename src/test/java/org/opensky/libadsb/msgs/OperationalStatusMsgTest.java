@@ -5,7 +5,7 @@ import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
 import org.opensky.libadsb.msgs.adsb.AirborneOperationalStatusV1Msg;
 import org.opensky.libadsb.msgs.adsb.AirborneOperationalStatusV2Msg;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import static org.junit.Assert.*;
 
@@ -44,7 +44,7 @@ public class OperationalStatusMsgTest {
 	public void testDecodeAirborneOpstat() throws UnspecifiedFormatError, BadFormatException {
 		final AirborneOperationalStatusV1Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
 
-		assertEquals("4d0131", tools.toHexString(opstat.getIcao24()));
+		assertEquals("4d0131", Tools.toHexString(opstat.getRawAddress()));
 		assertEquals(31, opstat.getFormatTypeCode());
 
 		assertEquals(2, opstat.getVersion());

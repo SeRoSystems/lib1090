@@ -141,16 +141,16 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
 		return threat_identity;
 	}
 
+	@Override
 	public String toString() {
-		String ret = super.toString()+"\n"+
-				"TCAS Resolution Advisory:\n";
-		ret += "\tActive RAs:\t\t"+getActiveRA()+"\n";
-		ret += "\tCurrent active RACs:\t"+getRACRecord()+"\n";
-		ret += "\tRA terminated:\t"+hasRATerminated()+"\n";
-		ret += "\tMultiple Threats:\t"+hasMultiThreatEncounter()+"\n";
-		ret += "\tThreat type:\t"+getThreatType()+"\n";
-		ret += "\tThreat identity:\t"+getThreatIdentity();
-
-		return ret;
+		return super.toString() + "\n\tTCASResolutionAdvisoryMsg{" +
+				"msg_subtype=" + msg_subtype +
+				", active_ra=" + active_ra +
+				", racs_record=" + racs_record +
+				", ra_terminated=" + ra_terminated +
+				", multi_threat_encounter=" + multi_threat_encounter +
+				", threat_type=" + threat_type +
+				", threat_identity=" + threat_identity +
+				'}';
 	}
 }

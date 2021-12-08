@@ -201,17 +201,14 @@ public class ShortACAS extends ModeSReply implements Serializable {
 		return AltitudeReply.decodeAltitude(altitude_code);
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Short air-air ACAS reply:\n"+
-				"\tAircraft is airborne:\t\t\t\t"+isAirborne()+"\n"+
-				"\tHas cross-link capability:\t\t\t"+hasCrossLinkCapability()+"\n"+
-				"\tSensitivity level:\t\t\t\t\t"+getSensitivityLevel()+"\n"+
-				"\tHas operating ACAS:\t\t\t\t\t"+hasOperatingACAS()+"\n"+
-				"\tMaximum airspeed:\t\t\t\t\t"+getMaximumAirspeed()+"\n"+
-				"\tVertical resolution capability:\t\t"+hasVerticalResolutionCapability()+"\n"+
-				"\tHorizontal resolution capability:\t"+hasHorizontalResolutionCapability()+"\n"+
-				"\tAltitude:\t\t\t\t\t\t\t"+getAltitude();
+		return super.toString() + "\n\tShortACAS{" +
+				"airborne=" + airborne +
+				", cross_link_capability=" + cross_link_capability +
+				", sensitivity_level=" + sensitivity_level +
+				", reply_information=" + reply_information +
+				", altitude_code=" + altitude_code +
+				'}';
 	}
-
 }

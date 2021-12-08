@@ -251,14 +251,14 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 		}
 		else return null; // unspecified metric encoding
 	}
-	
-	public String toString() {
-		return super.toString()+"\n"+
-				"Altitude Reply:\n"+
-				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
-				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
-				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tAltitude:\t\t"+getAltitude();
-	}
 
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tAltitudeReply{" +
+				"flight_status=" + flight_status +
+				", downlink_request=" + downlink_request +
+				", utility_msg=" + utility_msg +
+				", altitude_code=" + altitude_code +
+				'}';
+	}
 }

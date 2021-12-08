@@ -17,13 +17,13 @@ package org.opensky.example;
  *  along with org.opensky.libadsb.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.opensky.libadsb.ModeSDecoder;
+import org.opensky.libadsb.StatefulModeSDecoder;
 import org.opensky.libadsb.Position;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
 import org.opensky.libadsb.msgs.adsb.*;
 import org.opensky.libadsb.msgs.modes.*;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.util.Scanner;
 
@@ -51,7 +51,7 @@ import java.util.Scanner;
  */
 public class ExampleDecoder {
 	// The ModeSDecoder does all the magic for us
-	private final ModeSDecoder decoder = new ModeSDecoder();
+	private final StatefulModeSDecoder decoder = new StatefulModeSDecoder();
 
 	/**
 	 *
@@ -62,7 +62,7 @@ public class ExampleDecoder {
 	public void decodeMsg(long timestamp, String raw, Position receiver) {
 		ModeSReply msg;
 		try {
-			msg = decoder.decode(raw);
+			msg = decoder.decode(raw, timestamp);
 		} catch (BadFormatException e) {
 			System.out.println("Malformed message! Skipping it. Message: "+e.getMessage());
 			return;
@@ -71,11 +71,11 @@ public class ExampleDecoder {
 			return;
 		}
 
-		String icao24 = tools.toHexString(msg.getIcao24());
+		String icao24 = Tools.toHexString(msg.getRawAddress());
 
 		// check for erroneous messages; some receivers set
 		// parity field to the result of the CRC polynomial division
-		if (tools.isZero(msg.getParity()) || msg.checkParity()) { // CRC is ok
+		if (Tools.isZero(msg.getParity()) || msg.checkParity()) { // CRC is ok
 
 			// now check the message type
 			switch (msg.getType()) {
@@ -87,7 +87,7 @@ public class ExampleDecoder {
 
 				// use CPR to decode position
 				// CPR needs at least 2 positions or a reference, otherwise we get null here
-				Position c0 = decoder.decodePosition(timestamp, ap0, receiver);
+				Position c0 = decoder.extractPosition(ap0, receiver);
 				if (c0 == null)
 					System.out.println("Cannot decode position yet.");
 				else
@@ -134,7 +134,7 @@ public class ExampleDecoder {
 				SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
 				System.out.print("["+icao24+"]: ");
 
-				Position sPos0 = decoder.decodePosition(timestamp, sp0, receiver);
+				Position sPos0 = decoder.extractPosition(sp0, receiver);
 				// decode the position if possible; prior position needed
 				if (sPos0 == null)
 					System.out.println("Cannot decode position yet or no reference available (yet).");
@@ -358,7 +358,7 @@ public class ExampleDecoder {
 				break;
 			case ALL_CALL_REPLY:
 				AllCallReply allcall = (AllCallReply)msg;
-				System.out.println("["+icao24+"]: All-call reply for "+tools.toHexString(allcall.getInterrogatorCode())+
+				System.out.println("["+icao24+"]: All-call reply for "+ Tools.toHexString(allcall.getInterrogatorCode())+
 						" ("+(allcall.hasValidInterrogatorCode()?"valid":"invalid")+")");
 				break;
 			case LONG_ACAS:
@@ -374,7 +374,7 @@ public class ExampleDecoder {
 			case MILITARY_EXTENDED_SQUITTER:
 				MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter)msg;
 				System.out.println("["+icao24+"]: Military ES of application "+mil.getApplicationCode());
-				System.out.println("          Message is 0x"+tools.toHexString(mil.getMessage()));
+				System.out.println("          Message is 0x"+ Tools.toHexString(mil.getMessage()));
 				break;
 			case COMM_B_ALTITUDE_REPLY:
 				CommBAltitudeReply commBaltitude = (CommBAltitudeReply)msg;
@@ -388,7 +388,7 @@ public class ExampleDecoder {
 				CommDExtendedLengthMsg commDELM = (CommDExtendedLengthMsg)msg;
 				System.out.println("["+icao24+"]: ELM message w/ sequence no "+commDELM.getSequenceNumber()+
 						" (ACK: "+commDELM.isAck()+")");
-				System.out.println("          Message is 0x"+tools.toHexString(commDELM.getMessage()));
+				System.out.println("          Message is 0x"+ Tools.toHexString(commDELM.getMessage()));
 				break;
 			default:
 			}

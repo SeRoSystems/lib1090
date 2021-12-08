@@ -1,11 +1,9 @@
 package org.opensky.libadsb.msgs.adsb;
 
-import org.opensky.libadsb.Position;
+import org.opensky.libadsb.CompactPositionReporting;
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.exceptions.PositionStraddleError;
 import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
 import org.opensky.libadsb.msgs.modes.ModeSReply;
-import org.opensky.libadsb.tools;
 
 import java.io.Serializable;
 
@@ -39,35 +37,37 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	private boolean nic_suppl_b;
 	private short altitude_encoded;
 	private boolean time_flag;
-	private boolean cpr_format;
-	private int cpr_encoded_lat;
-	private int cpr_encoded_lon;
+	private CompactPositionReporting.CPREncodedPosition position;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected AirbornePositionV0Msg() { }
 
 	/**
 	 * @param raw_message raw ADS-B airborne position message as hex string
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(String raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public AirbornePositionV0Msg(String raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param raw_message raw ADS-B airborne position message as byte array
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(byte[] raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public AirbornePositionV0Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param squitter extended squitter containing the airborne position msg
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+	public AirbornePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
+
 		setType(ModeSReply.subtype.ADSB_AIRBORN_POSITION_V0);
 
 		if (!(getFormatTypeCode() == 0 ||
@@ -86,9 +86,13 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		altitude_available = altitude_encoded != 0;
 
 		time_flag = ((msg[2]>>>3)&0x1) == 1;
-		cpr_format = ((msg[2]>>>2)&0x1) == 1;
-		cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
-		cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
+
+		boolean cpr_format = ((msg[2]>>>2)&0x1) == 1;
+		int cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
+		int cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
+		position = new CompactPositionReporting.CPREncodedPosition(
+				cpr_format, cpr_encoded_lat, cpr_encoded_lon, 17, false,
+				timestamp == null ? System.currentTimeMillis() : timestamp);
 	}
 
 	/**
@@ -259,25 +263,10 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return the CPR encoded binary latitude
+	 * @return the CPR encoded position
 	 */
-	public int getCPREncodedLatitude() {
-		return cpr_encoded_lat;
-	}
-
-	/**
-	 * @return the CPR encoded binary longitude
-	 */
-	public int getCPREncodedLongitude() {
-		return cpr_encoded_lon;
-	}
-
-	/**
-	 * @return whether message is odd format. Returns false if message is even format. This is
-	 *         needed for position decoding as the CPR algorithm uses both formats.
-	 */
-	public boolean isOddFormat() {
-		return cpr_format;
+	public CompactPositionReporting.CPREncodedPosition getCPREncodedPosition() {
+		return position;
 	}
 
 	/**
@@ -285,149 +274,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public boolean isBarometricAltitude() {
 		return this.getFormatTypeCode() < 20;
-	}
-
-	/**
-	 * @param Rlat Even or odd Rlat value (CPR internal)
-	 * @return the number of even longitude zones at a latitude
-	 */
-	private double NL(double Rlat) {
-		if (Rlat == 0) return 59;
-		else if (Math.abs(Rlat) == 87) return 2;
-		else if (Math.abs(Rlat) > 87) return 1;
-
-		double tmp = 1-(1-Math.cos(Math.PI/(2.0*15.0)))/Math.pow(Math.cos(Math.PI/180.0*Math.abs(Rlat)), 2);
-		return Math.floor(2*Math.PI/Math.acos(tmp));
-	}
-
-	/**
-	 * Modulo operator in java has stupid behavior
-	 */
-	private static double mod(double a, double b) {
-		return ((a%b)+b)%b;
-	}
-
-	/**
-	 * This method can only be used if another position report with a different format (even/odd) is available
-	 * and set with msg.setOtherFormatMsg(other).
-	 * @param other airborne position message of the other format (even/odd). Note that the time between
-	 *        both messages should be not longer than 10 seconds! 
-	 * @return globally unambiguously decoded position. The positional
-	 *         accuracy maintained by the Airborne CPR encoding will be approximately 5.1 meters.
-	 *         A message of the other format is needed for global decoding.
-	 *         Result will be null if this or the other message does not contain horizontal position information.
-	 * @throws IllegalArgumentException if input message was emitted from a different transmitter
-	 * @throws PositionStraddleError if position messages straddle latitude transition
-	 * @throws BadFormatException other has the same format (even/odd)
-	 */
-	public Position getGlobalPosition(AirbornePositionV0Msg other) throws BadFormatException, PositionStraddleError {
-		if (!tools.areEqual(other.getIcao24(), getIcao24()))
-			throw new IllegalArgumentException(
-					String.format("Transmitter of other message (%s) not equal to this (%s).",
-							tools.toHexString(other.getIcao24()), tools.toHexString(this.getIcao24())));
-
-		if (other.isOddFormat() == this.isOddFormat())
-			throw new BadFormatException("Expected " + (isOddFormat() ? "even" : "odd") + " message format.",
-					other.toString());
-
-		if (!horizontal_position_available || !other.hasPosition())
-			return null;
-
-		AirbornePositionV0Msg even = isOddFormat() ? other : this;
-		AirbornePositionV0Msg odd = isOddFormat() ? this : other;
-
-		// Helper for latitude (Number of zones NZ is set to 15)
-		double Dlat0 = 360.0 / 60.0;
-		double Dlat1 = 360.0 / 59.0;
-
-		// latitude index
-		double j = Math
-				.floor((59.0 * ((double) even.getCPREncodedLatitude()) - 60.0 * ((double) odd.getCPREncodedLatitude()))
-						/ ((double) (1 << 17)) + 0.5);
-
-		// global latitudes
-		double Rlat0 = Dlat0 * (mod(j, 60.0) + ((double) even.getCPREncodedLatitude()) / ((double) (1 << 17)));
-		double Rlat1 = Dlat1 * (mod(j, 59.0) + ((double) odd.getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// Southern hemisphere?
-		if (Rlat0 >= 270.0 && Rlat0 <= 360.0)
-			Rlat0 -= 360.0;
-		if (Rlat1 >= 270.0 && Rlat1 <= 360.0)
-			Rlat1 -= 360.0;
-
-		// Northern hemisphere?
-		//if (Rlat0 <= -270.0 && Rlat0 >= -360.0)
-		//	Rlat0 += 360.0;
-		//if (Rlat1 <= -270.0 && Rlat1 >= -360.0)
-		//	Rlat1 += 360.0;
-
-		// ensure that the number of even longitude zones are equal
-		if (NL(Rlat0) != NL(Rlat1))
-			throw new org.opensky.libadsb.exceptions.PositionStraddleError(
-					"The two given position straddle a transition latitude "
-							+ "and cannot be decoded. Wait for positions where they are equal.");
-
-		// Helper for longitude
-		double NL_helper = NL(Rlat0);// NL(Rlat0) and NL(Rlat1) are equal
-		double n_helper = Math.max(1.0, NL_helper - (isOddFormat() ? 1.0 : 0.0));
-		double Dlon = 360.0 / n_helper;
-
-		// longitude index
-		double m = Math.floor(((double) even.getCPREncodedLongitude() * (NL_helper - 1.0)
-				- (double) odd.getCPREncodedLongitude() * NL_helper) / ((double) (1 << 17)) + 0.5);
-
-		// global longitude
-		double Rlon = Dlon * (mod(m, n_helper)
-				+ ((double) (isOddFormat() ? odd.getCPREncodedLongitude() : even.getCPREncodedLongitude()))
-						/ ((double) (1 << 17)));
-
-		// correct longitude
-		if (Rlon < -180.0 && Rlon > -360.0)
-			Rlon += 360.0;
-		if (Rlon > 180.0 && Rlon < 360.0)
-			Rlon -= 360.0;
-
-		Integer alt = this.getAltitude();
-		return new Position(Rlon, isOddFormat() ? Rlat1 : Rlat0, alt != null ? alt.doubleValue() : null);
-	}
-
-	/**
-	 * This method uses a locally unambiguous decoding for airborne position messages. It
-	 * uses a reference position known to be within 180NM (= 333.36km) of the true target
-	 * airborne position. the reference point may be a previously tracked position that has
-	 * been confirmed by global decoding (see getGlobalPosition()).
-	 * @param ref reference position
-	 * @return decoded position. The positional
-	 *         accuracy maintained by the Airborne CPR encoding will be approximately 5.1 meters.
-	 *         Result will be null if message does not contain horizontal position information.
-	 *         This can also be checked with {@link #hasPosition()}.
-	 */
-	public Position getLocalPosition(Position ref) {
-		if (!horizontal_position_available)
-			return null;
-
-		// latitude zone size
-		double Dlat = isOddFormat() ? 360.0 / 59.0 : 360.0 / 60.0;
-
-		// latitude zone index
-		double j = Math.floor(ref.getLatitude() / Dlat) + Math.floor(
-				0.5 + mod(ref.getLatitude(), Dlat) / Dlat - ((double) getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// decoded position latitude
-		double Rlat = Dlat * (j + ((double) getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// longitude zone size
-		double Dlon = 360.0 / Math.max(1.0, NL(Rlat) - (isOddFormat() ? 1.0 : 0.0));
-
-		// longitude zone coordinate
-		double m = Math.floor(ref.getLongitude() / Dlon) + Math.floor(0.5 + mod(ref.getLongitude(), Dlon) / Dlon
-				- ((double) getCPREncodedLongitude()) / ((double) (1 << 17)));
-
-		// and finally the longitude
-		double Rlon = Dlon * (m + ((double) getCPREncodedLongitude()) / ((double) (1 << 17)));
-
-		Integer alt = this.getAltitude();
-		return new Position(Rlon, Rlat, alt != null ? alt.doubleValue() : null);
 	}
 
 	/**
@@ -483,12 +329,16 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		}
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Position:\n"+
-				"\tFormat:\t\t"+(isOddFormat()?"odd":"even")+
-				"\n\tHas position:\t"+(hasPosition()?"yes":"no")+
-				"\n\tAltitude:\t"+(hasAltitude()?getAltitude():"unkown");
+		return super.toString() + "\n\tAirbornePositionV0Msg{" +
+				"horizontal_position_available=" + horizontal_position_available +
+				", altitude_available=" + altitude_available +
+				", surveillance_status=" + surveillance_status +
+				", nic_suppl_b=" + nic_suppl_b +
+				", altitude_encoded=" + altitude_encoded +
+				", time_flag=" + time_flag +
+				", position=" + position +
+				'}';
 	}
-
 }

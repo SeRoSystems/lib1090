@@ -1,10 +1,8 @@
 package org.opensky.libadsb.msgs.adsb;
 
-import org.opensky.libadsb.Position;
+import org.opensky.libadsb.CompactPositionReporting;
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.exceptions.PositionStraddleError;
 import org.opensky.libadsb.msgs.modes.ExtendedSquitter;
-import org.opensky.libadsb.tools;
 
 import java.io.Serializable;
 
@@ -37,35 +35,35 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	private boolean heading_status; // is heading valid?
 	private byte ground_track;
 	private boolean time_flag;
-	private boolean cpr_format;
-	private int cpr_encoded_lat;
-	private int cpr_encoded_lon;
-	private static final int[] lon_offs = new int[] {90, 180, 270};
+	private CompactPositionReporting.CPREncodedPosition position;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected SurfacePositionV0Msg() { }
 
 	/**
 	 * @param raw_message raw ADS-B surface position message as hex string
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV0Msg(String raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public SurfacePositionV0Msg(String raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param raw_message raw ADS-B surface position message as byte array
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV0Msg(byte[] raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public SurfacePositionV0Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param squitter extended squitter which contains this surface position msg
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+	public SurfacePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
 		setType(subtype.ADSB_SURFACE_POSITION_V0);
 
@@ -82,9 +80,13 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 		ground_track = (byte) ((((msg[1]&0x7)<<4) | ((msg[2]&0xF0)>>>4))&0x7F);
 
 		time_flag = ((msg[2]>>>3)&0x1) == 1;
-		cpr_format = ((msg[2]>>>2)&0x1) == 1;
-		cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
-		cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
+		boolean cpr_format = ((msg[2]>>>2)&0x1) == 1;
+		int cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
+		int cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
+
+		position = new CompactPositionReporting.CPREncodedPosition(
+				cpr_format, cpr_encoded_lat, cpr_encoded_lon, 17, true,
+				timestamp == null ? System.currentTimeMillis() : timestamp);
 	}
 
 	/**
@@ -264,186 +266,21 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	}
 
 	/**
-	 * @return the CPR encoded binary latitude
+	 * @return the CPR encoded position
 	 */
-	public int getCPREncodedLatitude() {
-		return cpr_encoded_lat;
+	public CompactPositionReporting.CPREncodedPosition getCPREncodedPosition() {
+		return position;
 	}
 
-	/**
-	 * @return the CPR encoded binary longitude
-	 */
-	public int getCPREncodedLongitude() {
-		return cpr_encoded_lon;
-	}
-
-	/**
-	 * @return whether message is odd format. Returns false if message is even format. This is
-	 *         needed for position decoding as the CPR algorithm uses both formats.
-	 */
-	public boolean isOddFormat() {
-		return cpr_format;
-	}
-
-	/**
-	 * @param Rlat Even or odd Rlat value (CPR internal)
-	 * @return the number of even longitude zones at a latitude
-	 */
-	private double NL(double Rlat) {
-		if (Rlat == 0) return 59;
-		else if (Math.abs(Rlat) == 87) return 2;
-		else if (Math.abs(Rlat) > 87) return 1;
-
-		double tmp = 1-(1-Math.cos(Math.PI/(2.0*15.0)))/Math.pow(Math.cos(Math.PI/180.0*Math.abs(Rlat)), 2);
-		return Math.floor(2*Math.PI/Math.acos(tmp));
-	}
-
-	/**
-	 * Modulo operator in java has stupid behavior
-	 */
-	private static double mod(double a, double b) {
-		return ((a%b)+b)%b;
-	}
-
-	/**
-	 * This method can only be used if another position report with a different format (even/odd) is available
-	 * and set with msg.setOtherFormatMsg(other).
-	 * @param other position message of the other format (even/odd). Note that the time between
-	 *        both messages should be not longer than 50 seconds! 
-	 * @param ref reference position used to resolve the ambiguity of the CPR result by choosing the closest
-	 *        position to the reference position
-	 * @return globally unambiguously decoded position tuple (latitude, longitude). The positional
-	 *         accuracy maintained by the CPR encoding will be approximately 1.25 meters.
-	 *         A message of the other format is needed for global decoding. Result will be null if this or the
-	 *         other message does not contain horizontal position information.
-	 * @throws IllegalArgumentException if input message was emitted from a different transmitter
-	 * @throws PositionStraddleError if position messages straddle latitude transition
-	 * @throws BadFormatException other has the same format (even/odd)
-	 */
-	public Position getGlobalPosition(SurfacePositionV0Msg other, Position ref)
-			throws PositionStraddleError, BadFormatException {
-		if (!tools.areEqual(other.getIcao24(), getIcao24()))
-			throw new IllegalArgumentException(
-					String.format("Transmitter of other message (%s) not equal to this (%s).",
-							tools.toHexString(other.getIcao24()), tools.toHexString(this.getIcao24())));
-
-		if (other.isOddFormat() == this.isOddFormat())
-			throw new BadFormatException("Expected " + (isOddFormat() ? "even" : "odd") + " message format.",
-					other.toString());
-
-		if (!horizontal_position_available || !other.hasPosition())
-			return null;
-
-		SurfacePositionV0Msg even = isOddFormat() ? other : this;
-		SurfacePositionV0Msg odd = isOddFormat() ? this : other;
-
-		// Helper for latitude single(Number of zones NZ is set to 15)
-		double Dlat0 = 90.0 / 60.0;
-		double Dlat1 = 90.0 / 59.0;
-
-		// latitude index
-		double j = Math
-				.floor((59.0 * ((double) even.getCPREncodedLatitude()) - 60.0 * ((double) odd.getCPREncodedLatitude()))
-						/ ((double) (1 << 17)) + 0.5);
-
-		// global latitudes
-		double Rlat0 = Dlat0 * (mod(j, 60.0) + ((double) even.getCPREncodedLatitude()) / ((double) (1 << 17)));
-		double Rlat1 = Dlat1 * (mod(j, 59.0) + ((double) odd.getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// Southern hemisphere?
-		Rlat0 = (ref.getLatitude() < Rlat0 - 45.0) ? Rlat0 - 90.0 : Rlat0;
-		Rlat1 = (ref.getLatitude() < Rlat1 - 45.0) ? Rlat1 - 90.0 : Rlat1;
-
-		// ensure that the number of even longitude zones are equal
-		if (NL(Rlat0) != NL(Rlat1))
-			throw new org.opensky.libadsb.exceptions.PositionStraddleError(
-					"The two given position straddle a transition latitude "
-							+ "and cannot be decoded. Wait for positions where they are equal.");
-
-		// Helper for longitude
-		double NL_helper = NL(Rlat0);// NL(Rlat0) and NL(Rlat1) are equal
-		double n_helper = Math.max(1.0, NL_helper - (isOddFormat() ? 1.0 : 0.0));
-		double Dlon = 90.0 / n_helper;
-
-		// longitude index
-		double m = Math.floor((((double) even.getCPREncodedLongitude()) * (NL_helper - 1.0)
-				- ((double) odd.getCPREncodedLongitude()) * NL_helper) / ((double) (1 << 17)) + 0.5);
-
-		// global longitude
-		double Rlon = Dlon * (mod(m, n_helper)
-				+ ((double) (isOddFormat() ? odd.getCPREncodedLongitude() : even.getCPREncodedLongitude()))
-						/ ((double) (1 << 17)));
-
-		Double lon = Rlon;
-		Double lat = isOddFormat() ? Rlat1 : Rlat0;
-
-		// check the four possible positions
-		Position tmp, result = new Position(lon, lat, 0.);
-		for (int o : lon_offs) {
-			tmp = new Position(lon + o, lat, 0.0);
-			if (tmp.haversine(ref) < result.haversine(ref))
-				result = tmp;
-		}
-
-		if (result.getLongitude() > 180.0)
-			result.setLongitude(result.getLongitude() - 360.0);
-
-		return result;
-	}
-
-	/**
-	 * This method uses a locally unambiguous decoding for position messages. It
-	 * uses a reference position known to be within 45NM (= 83.34km) of the true target
-	 * position. the reference point may be a previously tracked position that has
-	 * been confirmed by global decoding (see getGlobalPosition()).
-	 * @param ref reference position for local CPR
-	 * @return decoded position. The positional accuracy maintained by the CPR encoding will
-	 * be approximately 5.1 meters. Result will be null if message does not contain horizontal
-	 * position information. This can also be checked with {@link #hasPosition()}.
-	 */
-	public Position getLocalPosition(Position ref) {
-		if (!horizontal_position_available)
-			return null;
-
-		// latitude zone size
-		double Dlat = isOddFormat() ? 90.0 / 59.0 : 90.0 / 60.0;
-
-		// latitude zone index
-		double j = Math.floor(ref.getLatitude() / Dlat) + Math.floor(
-				0.5 + mod(ref.getLatitude(), Dlat) / Dlat - ((double) getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// decoded position latitude
-		double Rlat = Dlat * (j + ((double) getCPREncodedLatitude()) / ((double) (1 << 17)));
-
-		// longitude zone size
-		double Dlon = 90.0 / Math.max(1.0, NL(Rlat) - (isOddFormat() ? 1.0 : 0.0));
-
-		// longitude zone coordinate
-		double m = Math.floor(ref.getLongitude() / Dlon) + Math.floor(0.5 + mod(ref.getLongitude(), Dlon) / Dlon
-				- ((double) getCPREncodedLongitude()) / ((double) (1 << 17)));
-
-		// and finally the longitude
-		double Rlon = Dlon * (m + ((double) getCPREncodedLongitude()) / ((double) (1 << 17)));
-
-		// System.out.println("Loc: EncLon: "+getCPREncodedLongitude()+
-		// " m: "+m+" Dlon: "+Dlon+ " Rlon2: "+Rlon2);
-
-		return new Position(Rlon, Rlat, 0.0);
-	}
-
+	@Override
 	public String toString() {
-		try {
-			return super.toString()+"\n"+
-					"Surface Position:\n"+
-					"\tSpeed:\t\t"+(hasGroundSpeed() ? getGroundSpeed() : "unkown")+
-					"\n\tSpeed Resolution:\t\t"+(hasGroundSpeed() ? getGroundSpeedResolution() : "unkown")+
-					"\n\tHeading:\t\t"+(hasValidHeading() ? getHeading() : "unkown")+
-					"\n\tFormat:\t\t"+(isOddFormat()?"odd":"even")+
-					"\n\tHas position:\t"+(hasPosition()?"yes":"no");
-		} catch (Exception e) {
-			// should never happen
-			return "An exception was thrown.";
-		}
+		return super.toString() + "\n\tSurfacePositionV0Msg{" +
+				"horizontal_position_available=" + horizontal_position_available +
+				", movement=" + movement +
+				", heading_status=" + heading_status +
+				", ground_track=" + ground_track +
+				", time_flag=" + time_flag +
+				", position=" + position +
+				'}';
 	}
-
 }

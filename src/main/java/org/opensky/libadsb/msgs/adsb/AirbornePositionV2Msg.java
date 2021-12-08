@@ -34,26 +34,29 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 
 	/**
 	 * @param raw_message raw ADS-B airborne position message as hex string
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV2Msg(String raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public AirbornePositionV2Msg(String raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param raw_message raw ADS-B airborne position message as byte array
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV2Msg(byte[] raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public AirbornePositionV2Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param squitter extended squitter containing the airborne position msg
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public AirbornePositionV2Msg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+	public AirbornePositionV2Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+		super(squitter, timestamp);
 		setType(ModeSReply.subtype.ADSB_AIRBORN_POSITION_V2);
 	}
 
@@ -115,5 +118,10 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 			case 17: return 1;
 			default: return 0;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tAirbornePositionV2Msg{}";
 	}
 }

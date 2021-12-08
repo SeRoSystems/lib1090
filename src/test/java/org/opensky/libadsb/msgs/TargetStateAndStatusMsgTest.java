@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.opensky.libadsb.exceptions.BadFormatException;
 import org.opensky.libadsb.exceptions.UnspecifiedFormatError;
 import org.opensky.libadsb.msgs.adsb.TargetStateAndStatusMsg;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import static org.junit.Assert.*;
 
@@ -121,9 +121,9 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithoutHeading() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
+		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
 
-		assertEquals("89653e", tools.toHexString(tss.getIcao24()));
+		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());
@@ -149,9 +149,9 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithHeadingLt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
+		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
 
-		assertEquals("89653e", tools.toHexString(tss.getIcao24()));
+		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());
@@ -177,9 +177,9 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithHeadingGt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
+		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
 
-		assertEquals("89653e", tools.toHexString(tss.getIcao24()));
+		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());
@@ -206,7 +206,7 @@ public class TargetStateAndStatusMsgTest {
 	@Test
 	public void testInvalidReservedBits_shouldThrowBadFormatException() {
 		try {
-			final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(tools.hexStringToByteArray(INVALID_TSS));
+			final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(INVALID_TSS));
 			fail();
 		} catch (BadFormatException e) {
 			// NOP

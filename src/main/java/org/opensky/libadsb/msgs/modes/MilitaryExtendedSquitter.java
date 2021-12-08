@@ -2,9 +2,10 @@ package org.opensky.libadsb.msgs.modes;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -101,10 +102,9 @@ public class MilitaryExtendedSquitter extends ModeSReply implements Serializable
 
 	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Extended Squitter:\n"+
-				"\tApplication Code: "+getApplicationCode()+"\n"+
-				"\tMessage field:\t\t"+tools.toHexString(getMessage());
+		return super.toString() + "\n\tMilitaryExtendedSquitter{" +
+				"message=" + Tools.toHexString(message) +
+				", application_code=" + application_code +
+				'}';
 	}
-
 }

@@ -1,7 +1,7 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -35,7 +35,6 @@ public class ModeSReply implements Serializable {
 	 */
 	private byte downlink_format; // 0-31
 	private byte first_field; // the 3 bits after downlink format
-	private byte[] icao24; // 3 bytes
 	private byte[] payload; // 3 or 10 bytes
 	private byte[] parity; // 3 bytes
 	private boolean noCRC;
@@ -45,6 +44,7 @@ public class ModeSReply implements Serializable {
 	 * users which message format is encapsulated in this Mode S message.
 	 */
 	public enum subtype {
+		// Mode S downlink formats
 		MODES_REPLY, // unknown mode s reply
 		SHORT_ACAS,
 		ALTITUDE_REPLY,
@@ -56,6 +56,7 @@ public class ModeSReply implements Serializable {
 		COMM_B_ALTITUDE_REPLY,
 		COMM_B_IDENTIFY_REPLY,
 		COMM_D_ELM,
+
 		// ADS-B subtypes
 		ADSB_AIRBORN_POSITION_V0,
 		ADSB_AIRBORN_POSITION_V1,
@@ -73,9 +74,81 @@ public class ModeSReply implements Serializable {
 		ADSB_SURFACE_STATUS_V1,
 		ADSB_AIRBORN_STATUS_V2,
 		ADSB_SURFACE_STATUS_V2,
-		ADSB_TARGET_STATE_AND_STATUS
+		ADSB_TARGET_STATE_AND_STATUS,
+
+		// TIS-B subtypes
+		TISB_FINE_AIRBORNE_POSITION,
+		TISB_FINE_SURFACE_POSITION,
+		TISB_IDENTIFICATION,
+		TISB_VELOCITY,
+		TISB_COARSE_POSITION
 	}
 	private subtype type;
+
+	public static class QualifiedAddress {
+		/**
+		 * Different types of addresses in the AA field (see Table 2-11 in DO-260B)
+		 */
+		public enum Types {
+			// ICAO 24-bit address
+			ICAO24,
+			// Anonymous address or ground vehicle address or fixed obstacle address of transmitting ADS-B Participant
+			ANONYMOUS, // DF=18 with CF=1 or CF=6 and IMF=1
+			// 12-bit Mode A code and track file number
+			MODEA_TRACK, // DF=18 with CF=2/3 and IMF=1
+			// TIS-B/ADS-R management information
+			TISB_MANAGEMENT_INFO, // DF=18 with CF=4
+			// Reserved (e.g. for military use)
+			RESERVED, // DF=19 with AF>0 or DF=18 with CF=5 and IMF=1 or DF=18 and CF=7
+			// Not (yet) determined
+			UNKNOWN
+		}
+
+		private byte[] address; // 3 bytes
+		private Types type;
+
+		/**
+		 * @return type of address (e.g. ICAO 24-bit)
+		 */
+		public Types getType() {
+			return type;
+		}
+
+		/**
+		 * @return the address in integer representation
+		 */
+		public int getAddress() {
+			return (address[0]&0xff) << 16 | (address[1]&0xff) << 8 | (address[2]&0xff);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			QualifiedAddress that = (QualifiedAddress) o;
+
+			if (!Arrays.equals(address, that.address)) return false;
+			return type == that.type;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = Arrays.hashCode(address);
+			result = 31 * result + (type != null ? type.hashCode() : 0);
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "QualifiedAddress{" +
+					"icao24=" + Tools.toHexString(address) +
+					", address_type=" + type +
+					'}';
+		}
+	}
+
+	private QualifiedAddress address;
 
 	/*
 	 * Static fields and functions
@@ -169,7 +242,7 @@ public class ModeSReply implements Serializable {
 		parity = Arrays.copyOfRange(reply,reply.length-3, reply.length);
 
 		// extract ICAO24 address
-		icao24 = new byte[3];
+		address = new QualifiedAddress();
 		switch (downlink_format) {
 			case 0: // Short air-air (ACAS)
 			case 4: // Short altitude reply
@@ -178,12 +251,13 @@ public class ModeSReply implements Serializable {
 			case 20: // Long Comm-B, altitude reply
 			case 21: // Long Comm-B, identity reply
 			case 24: // Long Comm-D (ELM)
-				icao24 = noCRC ? parity : tools.xor(calcParity(), parity);
+				address.address = noCRC ? parity : Tools.xor(calcParity(), parity);
 				break;
 
 			case 11: // all call replies
 			case 17: case 18: // Extended squitter
-				System.arraycopy(payload, 0, icao24, 0, 3);
+				address.address = new byte[3];
+				System.arraycopy(payload, 0, address.address, 0, 3);
 				break;
 			default: // unkown downlink format
 				// throw exception
@@ -191,20 +265,51 @@ public class ModeSReply implements Serializable {
 						String.format("Invalid downlink format %d detected.", downlink_format));
 		}
 
+		// determine address type according to table 2-11 of DO-260B
+		if (downlink_format == 18) {
+			// check CF
+			switch (first_field) {
+				case 0:
+					address.type = QualifiedAddress.Types.ICAO24;
+					break;
+				case 1:
+					address.type = QualifiedAddress.Types.ANONYMOUS;
+					break;
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+					// TODO: check IMF subfield
+					address.type = QualifiedAddress.Types.UNKNOWN;
+					break;
+				case 7:
+					address.type = QualifiedAddress.Types.RESERVED;
+					break;
+				default:
+					address.type = QualifiedAddress.Types.UNKNOWN;
+			}
+		} else if (downlink_format == 19) {
+			// check AF field
+			address.type = first_field == 0 ? QualifiedAddress.Types.ICAO24 : QualifiedAddress.Types.RESERVED;
+		} else {
+			address.type = QualifiedAddress.Types.ICAO24;
+		}
+
 		setType(subtype.MODES_REPLY);
 	}
 
-    /**
-     * We assume the following message format:<br>
-     * | DF (5) | FF (3) | Payload (24/80) | PI/AP (24) |
-     *
-     * @param raw_message Mode S message as byte array
-     * @throws BadFormatException if message has invalid length or payload does
-     * not match specification or parity has invalid length
-     */
-    public ModeSReply (byte[] raw_message) throws BadFormatException {
-        this(raw_message, false);
-    }
+	/**
+	 * We assume the following message format:<br>
+	 * | DF (5) | FF (3) | Payload (24/80) | PI/AP (24) |
+	 *
+	 * @param raw_message Mode S message as byte array
+	 * @throws BadFormatException if message has invalid length or payload does
+	 * not match specification or parity has invalid length
+	 */
+	public ModeSReply (byte[] raw_message) throws BadFormatException {
+		this(raw_message, false);
+	}
 
 	/**
 	 * We assume the following message format:<br>
@@ -215,7 +320,7 @@ public class ModeSReply implements Serializable {
 	 * not match specification or parity has invalid length
 	 */
 	public ModeSReply (String raw_message) throws BadFormatException {
-		this(tools.hexStringToByteArray(raw_message), false);
+		this(Tools.hexStringToByteArray(raw_message), false);
 	}
 
 	/**
@@ -228,7 +333,7 @@ public class ModeSReply implements Serializable {
 	 * not match specification or parity has invalid length
 	 */
 	public ModeSReply (String raw_message, boolean noCRC) throws BadFormatException {
-		this(tools.hexStringToByteArray(raw_message), noCRC);
+		this(Tools.hexStringToByteArray(raw_message), noCRC);
 	}
 
 	/**
@@ -239,11 +344,13 @@ public class ModeSReply implements Serializable {
 	public ModeSReply (ModeSReply reply) {
 		downlink_format = reply.downlink_format;
 		first_field = reply.first_field;
-		icao24 = reply.icao24;
-		payload = reply.payload;
-		parity = reply.parity;
+		payload = Arrays.copyOf(reply.payload, reply.payload.length);
+		parity = Arrays.copyOf(reply.parity, reply.parity.length);
 		type = reply.type;
 		noCRC = reply.noCRC;
+		address = new QualifiedAddress();
+		address.address = Arrays.copyOf(reply.address.address, reply.address.address.length);
+		address.type = reply.address.type;
 	}
 
 	/**
@@ -268,7 +375,10 @@ public class ModeSReply implements Serializable {
 	}
 
 	/**
-	 * Note: the definition of this field depends on the downlink format
+	 * Note: the definition of this field depends on the return value of {@link #getDownlinkFormat()}:<br>
+	 * - if 17: CA (capability) field<br>
+	 * - if 18: CF (TIS-B coarse format) field<br>
+	 * - if 19: AF (application) field<br>
 	 * @return the first field (three bits after downlink format)
 	 */
 	public byte getFirstField() {
@@ -276,17 +386,17 @@ public class ModeSReply implements Serializable {
 	}
 
 	/**
-	 * @return the icao24 as an 3-byte array
+	 * @return the 24-bit representation of the address (3-byte array)
 	 */
-	public byte[] getIcao24() {
-		return icao24;
+	public byte[] getRawAddress() {
+		return address.address;
 	}
 
 	/**
-	 * @return the icao24 in integer representation
+	 * @return fully qualified address (with type)
 	 */
-	public int getTransponderAddress() {
-		return (icao24[0]&0xff) << 16 | (icao24[1]&0xff) << 8 | (icao24[2]&0xff);
+	public QualifiedAddress getAddress () {
+		return address;
 	}
 
 	/**
@@ -324,9 +434,9 @@ public class ModeSReply implements Serializable {
 		byte[] msg = new byte[4+payload.length];
 		msg[0] = (byte) (downlink_format<<3 | first_field);
 		System.arraycopy(payload, 0, msg, 1, payload.length);
-		byte[] crc = noCRC ? tools.xor(getParity(), calcParity()) : getParity();
+		byte[] crc = noCRC ? Tools.xor(getParity(), calcParity()) : getParity();
 		for (int i = 0; i < 3; ++i) msg[1+payload.length+i] = crc[i];
-		return tools.toHexString(msg);
+		return Tools.toHexString(msg);
 	}
 
 	/**
@@ -337,19 +447,7 @@ public class ModeSReply implements Serializable {
 	 * @return true if parity in message matched calculated parity
 	 */
 	public boolean checkParity() {
-		return tools.areEqual(calcParity(), getParity());
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		return "Mode S Reply:\n"+
-				"\tDownlink format:\t"+getDownlinkFormat()+"\n"+
-				"\tICAO 24-bit address:\t"+tools.toHexString(getIcao24())+"\n"+
-				"\tPayload:\t\t"+tools.toHexString(getPayload())+"\n"+
-				"\tParity:\t\t\t"+tools.toHexString(getParity())+"\n"+
-				"\tCalculated Parity:\t"+tools.toHexString(calcParity());
+		return Tools.areEqual(calcParity(), getParity());
 	}
 
 	@Override
@@ -366,24 +464,24 @@ public class ModeSReply implements Serializable {
 
 		// most common
 		if (this.getDownlinkFormat() == 11 &&
-				!tools.areEqual(this.getIcao24(), other.getIcao24()))
+				!Tools.areEqual(this.getRawAddress(), other.getRawAddress()))
 			return false;
 
 		// ads-b
 		if (this.getDownlinkFormat() == 17 &&
-				!tools.areEqual(this.getIcao24(), other.getIcao24()))
+				!Tools.areEqual(this.getRawAddress(), other.getRawAddress()))
 			return false;
 		if (this.getDownlinkFormat() == 18 &&
-				!tools.areEqual(this.getIcao24(), other.getIcao24()))
+				!Tools.areEqual(this.getRawAddress(), other.getRawAddress()))
 			return false;
 
 		// check the full payload
-		if (!tools.areEqual(this.getPayload(), other.getPayload()) ||
+		if (!Tools.areEqual(this.getPayload(), other.getPayload()) ||
 				this.getFirstField() != other.getFirstField())
 			return false;
 
 		// and finally the parity
-		if (tools.areEqual(this.getParity(), other.getParity()))
+		if (Tools.areEqual(this.getParity(), other.getParity()))
 			return true;
 
 		// Note: the following checks are necessary since some receivers set
@@ -391,25 +489,37 @@ public class ModeSReply implements Serializable {
 		// while others do not touch it. This combination should be extremely
 		// rare so the performance can be more or less neglected.
 
-		if (tools.areEqual(this.getParity(), other.calcParity()))
+		if (Tools.areEqual(this.getParity(), other.calcParity()))
 			return true;
 
-		if (tools.areEqual(this.calcParity(), other.getParity()))
+		if (Tools.areEqual(this.calcParity(), other.getParity()))
 			return true;
 
 		if (this.getDownlinkFormat() == 11) {
 			// check interrogator code
-			if (tools.areEqual(tools.xor(calcParity(), getParity()),
+			if (Tools.areEqual(Tools.xor(calcParity(), getParity()),
 					other.getParity()))
 				return true;
 
-			if (tools.areEqual(tools.xor(other.calcParity(),
+			if (Tools.areEqual(Tools.xor(other.calcParity(),
 					other.getParity()), this.getParity()))
 				return true;
 		}
 
-		return tools.areEqual(this.getIcao24(), other.getParity()) ||
-				tools.areEqual(this.getParity(), other.getIcao24());
+		return Tools.areEqual(this.getRawAddress(), other.getParity()) ||
+				Tools.areEqual(this.getParity(), other.getRawAddress());
+	}
+
+	@Override
+	public String toString() {
+		return "ModeSReply{" +
+				"downlink_format=" + downlink_format +
+				", first_field=" + first_field +
+				", payload=" + Tools.toHexString(payload) +
+				", noCRC=" + noCRC +
+				", type=" + type +
+				", address=" + address.toString() +
+				'}';
 	}
 
 	@Override
@@ -420,7 +530,7 @@ public class ModeSReply implements Serializable {
 			sum += payload[i]*31^(payload.length-i);
 
 		byte[] effective_partiy = parity;
-		if (noCRC) effective_partiy = tools.xor(parity, calcParity());
+		if (noCRC) effective_partiy = Tools.xor(parity, calcParity());
 
 		for (int i = 0; i<effective_partiy.length; ++i)
 			sum += effective_partiy[i]*31^(payload.length+effective_partiy.length-i);

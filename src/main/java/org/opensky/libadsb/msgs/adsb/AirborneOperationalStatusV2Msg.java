@@ -78,4 +78,10 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 		return sil_supplement;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tAirborneOperationalStatusV2Msg{" +
+				"sil_supplement=" + sil_supplement +
+				'}';
+	}
 }

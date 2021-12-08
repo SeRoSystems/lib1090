@@ -226,13 +226,14 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 		return A+B+C+D;
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Identify Reply:\n"+
-				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
-				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
-				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tIdentity:\t\t"+getIdentity();
+		return super.toString() + "\n\tIdentifyReply{" +
+				"flight_status=" + flight_status +
+				", downlink_request=" + downlink_request +
+				", utility_msg=" + utility_msg +
+				", identity=" + identity +
+				'}';
 	}
 
 }

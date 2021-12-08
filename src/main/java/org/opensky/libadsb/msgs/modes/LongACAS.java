@@ -216,18 +216,19 @@ public class LongACAS extends ModeSReply implements Serializable {
 		return AltitudeReply.decodeAltitude(altitude_code);
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Long air-air ACAS reply:\n"+
-				"\tAircraft is airborne:\t\t"+isAirborne()+"\n"+
-				"\tSensitivity level:\t\t"+getSensitivityLevel()+"\n"+
-				"\tHas operating ACAS:\t\t"+hasOperatingACAS()+"\n"+
-				"\tMaximum airspeed:\t\t"+getMaximumAirspeed()+"\n"+
-				"\tAltitude:\t\t"+getAltitude()+"\n"+
-				"\tHas valid RAC:\t"+hasValidRAC()+"\n"+
-				"\tActive resolution advisories:\t"+getActiveResolutionAdvisories()+"\n"+
-				"\tHas multiple threats:\t"+hasMultipleThreats()+"\n"+
-				"\tResolution advisory complement:\t"+getResolutionAdvisoryComplement();
+		return super.toString() + "\n\tLongACAS{" +
+				"airborne=" + airborne +
+				", sensitivity_level=" + sensitivity_level +
+				", reply_information=" + reply_information +
+				", altitude_code=" + altitude_code +
+				", valid_rac=" + valid_rac +
+				", active_resolution_advisories=" + active_resolution_advisories +
+				", racs_record=" + racs_record +
+				", ra_terminated=" + ra_terminated +
+				", multiple_threat_encounter=" + multiple_threat_encounter +
+				'}';
 	}
 
 }

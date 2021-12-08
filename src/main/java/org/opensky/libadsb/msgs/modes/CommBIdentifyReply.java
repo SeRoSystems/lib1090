@@ -1,9 +1,10 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -218,14 +219,14 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 		return IdentifyReply.decodeIdentity(identity);
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Comm-B Identify Reply:\n"+
-				"\tFlight status:\t\t"+getFlightStatus()+"\n"+
-				"\tDownlink request:\t\t"+getDownlinkRequest()+"\n"+
-				"\tUtility Message:\t\t"+getUtilityMsg()+"\n"+
-				"\tIdentity:\t\t"+getIdentity()+"\n"+
-				"\tComm-B Message:\t\t"+tools.toHexString(getMessage());
+		return super.toString() + "\n\tCommBIdentifyReply{" +
+				"flight_status=" + flight_status +
+				", downlink_request=" + downlink_request +
+				", utility_msg=" + utility_msg +
+				", identity=" + identity +
+				", message=" + Tools.toHexString(message) +
+				'}';
 	}
-
 }

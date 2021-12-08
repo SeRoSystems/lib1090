@@ -17,26 +17,29 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 
 	/**
 	 * @param raw_message raw ADS-B surface position message as hex string
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV1Msg(String raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public SurfacePositionV1Msg(String raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param raw_message raw ADS-B surface position message as byte array
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV1Msg(byte[] raw_message) throws BadFormatException {
-		this(new ExtendedSquitter(raw_message));
+	public SurfacePositionV1Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
 	/**
 	 * @param squitter extended squitter which contains this surface position msg
+	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
 	 */
-	public SurfacePositionV1Msg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+	public SurfacePositionV1Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+		super(squitter, timestamp);
 		setType(subtype.ADSB_SURFACE_POSITION_V1);
 	}
 
@@ -96,4 +99,10 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 		}
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tSurfacePositionV1Msg{" +
+				"nic_suppl_a=" + nic_suppl_a +
+				'}';
+	}
 }

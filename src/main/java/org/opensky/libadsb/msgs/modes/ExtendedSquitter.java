@@ -1,9 +1,10 @@
 package org.opensky.libadsb.msgs.modes;
 
 import org.opensky.libadsb.exceptions.BadFormatException;
-import org.opensky.libadsb.tools;
+import org.opensky.libadsb.Tools;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /*
  *  This file is part of org.opensky.libadsb.
@@ -30,7 +31,6 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 
 	private static final long serialVersionUID = -7877955448285410779L;
 
-	private byte capabilities;
 	private byte[] message;
 	private byte format_type_code;
 
@@ -64,12 +64,11 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 		super(reply);
 		setType(subtype.EXTENDED_SQUITTER);
 
-		if (getDownlinkFormat() != 17 && getDownlinkFormat() != 18) {
+		if (getDownlinkFormat() != 17 && getDownlinkFormat() != 18 && getDownlinkFormat() != 19) {
 			throw new BadFormatException("Message is not an extended squitter!");
 		}
 
 		byte[] payload = getPayload();
-		capabilities = getFirstField();
 
 		// extract ADS-B message
 		message = new byte[7];
@@ -87,16 +86,8 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	public ExtendedSquitter(ExtendedSquitter squitter) {
 		super(squitter);
 
-		capabilities = squitter.getCapabilities();
 		message = squitter.getMessage();
 		format_type_code = squitter.getFormatTypeCode();
-	}
-
-	/**
-	 * @return The emitter's capabilities (see ICAO Annex 10 V4; 3.1.2.5.2.2.1)
-	 */
-	public byte getCapabilities() {
-		return capabilities;
 	}
 
 	/**
@@ -113,12 +104,11 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 		return message;
 	}
 
+	@Override
 	public String toString() {
-		return super.toString()+"\n"+
-				"Extended Squitter:\n"+
-				"\tFormat type code:\t"+getFormatTypeCode()+"\n"+
-				"\tCapabilities:\t\t"+getCapabilities()+"\n"+
-				"\tMessage field:\t\t"+tools.toHexString(getMessage());
+		return super.toString() + "\n\tExtendedSquitter{" +
+				"message=" + Tools.toHexString(message) +
+				", format_type_code=" + format_type_code +
+				'}';
 	}
-
 }
