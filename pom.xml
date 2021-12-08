@@ -77,7 +77,7 @@
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
-										<Main-Class>org.opensky.example.ExampleDecoder</Main-Class>
+										<Main-Class>de.serosystems.example.ExampleDecoder</Main-Class>
 									</manifestEntries>
 								</transformer>
 							</transformers>
