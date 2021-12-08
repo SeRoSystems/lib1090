@@ -1,7 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 
 import java.io.Serializable;
 

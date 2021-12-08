@@ -1,11 +1,9 @@
 package de.serosystems.lib1090;
 
-import de.serosystems.lib1090.msgs.adsb.*;
-import de.serosystems.lib1090.msgs.modes.*;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import org.opensky.libadsb.msgs.adsb.*;
-import org.opensky.libadsb.msgs.modes.*;
+import de.serosystems.lib1090.msgs.adsb.*;
+import de.serosystems.lib1090.msgs.modes.*;
 
 import java.util.HashMap;
 import java.util.Map;

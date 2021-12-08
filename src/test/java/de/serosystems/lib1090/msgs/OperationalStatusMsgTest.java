@@ -1,11 +1,11 @@
 package de.serosystems.lib1090.msgs;
 
-import org.junit.Test;
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
-import de.serosystems.lib1090.Tools;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 

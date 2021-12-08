@@ -19,13 +19,11 @@ package de.serosystems.example;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import org.opensky.libadsb.msgs.adsb.*;
-import org.opensky.libadsb.msgs.modes.*;
-import de.serosystems.lib1090.Tools;
 
 import java.util.Scanner;
 

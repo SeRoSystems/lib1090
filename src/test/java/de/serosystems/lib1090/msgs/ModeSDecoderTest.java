@@ -2,11 +2,11 @@ package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsg;
+import de.serosystems.lib1090.msgs.modes.ModeSReply;
 import org.junit.Before;
 import org.junit.Test;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
 import static org.junit.Assert.*;
 
