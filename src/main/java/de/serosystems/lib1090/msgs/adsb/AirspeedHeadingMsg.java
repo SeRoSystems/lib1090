@@ -3,7 +3,6 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -74,7 +73,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 */
 	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(ModeSDownlinkMsg.subtype.ADSB_AIRSPEED);
+		setType(subtype.ADSB_AIRSPEED);
 
 		if (this.getFormatTypeCode() != 19) {
 			throw new BadFormatException("Airspeed and heading messages must have typecode 19.");

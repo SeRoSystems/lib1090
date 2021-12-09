@@ -3,7 +3,6 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -59,7 +58,7 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	 */
 	public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(ModeSDownlinkMsg.subtype.ADSB_AIRBORN_STATUS_V2);
+		setType(subtype.ADSB_AIRBORN_STATUS_V2);
 
 		byte[] msg = this.getMessage();
 

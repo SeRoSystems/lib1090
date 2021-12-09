@@ -198,9 +198,6 @@ public class StatefulModeSDecoder {
 					}
 
 					return es1090; // unknown extended squitter
-				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
-					// TODO: ADS-R message (minor differences to ADS-B, see 2.2.18 in DO-260B
-					return modes;
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() < 4 ||
 						modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
 					// TODO: TIS-B "ME" field
@@ -208,6 +205,9 @@ public class StatefulModeSDecoder {
 					return modes;
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
 					// TODO: TIS-B or ADS-R Management Message
+					return modes;
+				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
+					// TODO: ADS-R message (minor differences to ADS-B, see 2.2.18 in DO-260B
 					return modes;
 				} else if (modes.getDownlinkFormat() == 19) {
 					return new MilitaryExtendedSquitter(modes);

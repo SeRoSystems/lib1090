@@ -3,7 +3,6 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -62,7 +61,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 	 */
 	public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(ModeSDownlinkMsg.subtype.ADSB_EMERGENCY);
+		setType(subtype.ADSB_EMERGENCY);
 
 		if (this.getFormatTypeCode() != 28) {
 			throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
