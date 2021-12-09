@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
@@ -40,16 +41,18 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 	/**
 	 * @param raw_message raw ADS-B aircraft status message as hex string
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public EmergencyOrPriorityStatusMsg(String raw_message) throws BadFormatException {
+	public EmergencyOrPriorityStatusMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
 	 * @param raw_message raw ADS-B aircraft status message as byte array
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public EmergencyOrPriorityStatusMsg(byte[] raw_message) throws BadFormatException {
+	public EmergencyOrPriorityStatusMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 

@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
@@ -36,8 +37,9 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 * @param raw_message raw ADS-B airborne position message as hex string
 	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AirbornePositionV2Msg(String raw_message, Long timestamp) throws BadFormatException {
+	public AirbornePositionV2Msg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
@@ -45,8 +47,9 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 * @param raw_message raw ADS-B airborne position message as byte array
 	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AirbornePositionV2Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+	public AirbornePositionV2Msg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 

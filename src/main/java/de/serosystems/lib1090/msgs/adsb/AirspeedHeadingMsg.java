@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
@@ -52,16 +53,18 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	/**
 	 * @param raw_message raw ADS-B airspeed and heading message as hex string
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AirspeedHeadingMsg(String raw_message) throws BadFormatException {
+	public AirspeedHeadingMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
 	 * @param raw_message raw ADS-B airspeed and heading message as byte array
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AirspeedHeadingMsg(byte[] raw_message) throws BadFormatException {
+	public AirspeedHeadingMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -94,7 +97,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
 		// heading available in ADS-B version 1+, indicates true/magnetic north for version 0
 		heading_status_bit = (msg[1]&0x4)>0;
-		heading = ((msg[1]&0x3)<<8 | msg[2]&0xFF) * 360/1024;
+		heading = ((msg[1]&0x3)<<8 | msg[2]&0xFF) * 360./1024.;
 
 		true_airspeed = (msg[3]&0x80)>0;
 		airspeed = (short) (((msg[3]&0x7F)<<3 | msg[4]>>>5&0x07)-1);
@@ -106,10 +109,8 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		vertical_source = (msg[4]&0x10)>0;
 		vertical_rate_down = (msg[4]&0x08)>0;
 		vertical_rate = (short) ((((msg[4]&0x07)<<6 | msg[5]>>>2&0x3F)-1)<<6);
-		if (vertical_rate == -1) vertical_rate_info_available = false;
 
 		geo_minus_baro = (short) (((msg[6]&0x7F)-1)*25);
-		if (geo_minus_baro == -1) geo_minus_baro_available = false;
 		if ((msg[6]&0x80)>0) geo_minus_baro *= -1;
 	}
 

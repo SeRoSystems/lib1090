@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -41,8 +42,9 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 	 * @param raw_message raw altitude reply as hex string
 	 * @throws BadFormatException if message is not altitude reply or 
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AltitudeReply(String raw_message) throws BadFormatException {
+	public AltitudeReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -50,8 +52,9 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 	 * @param raw_message raw altitude reply as byte array
 	 * @throws BadFormatException if message is not altitude reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public AltitudeReply(byte[] raw_message) throws BadFormatException {
+	public AltitudeReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 

@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -51,16 +52,18 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	/**
 	 * @param raw_message raw ADS-B velocity-over-ground message as hex string
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public VelocityOverGroundMsg(String raw_message) throws BadFormatException {
+	public VelocityOverGroundMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
 	 * @param raw_message raw ADS-B velocity-over-ground message as byte array
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public VelocityOverGroundMsg(byte[] raw_message) throws BadFormatException {
+	public VelocityOverGroundMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -105,7 +108,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		vertical_source = (msg[4]&0x10)>0;
 		vertical_rate_down = (msg[4]&0x08)>0;
 		vertical_rate = (short) ((((msg[4]&0x07)<<6 | msg[5]>>>2&0x3F)-1)<<6);
-		if (vertical_rate == -1) vertical_rate_info_available = false;
 
 		geo_minus_baro = msg[6]&0x7F;
 		if (geo_minus_baro == 0) geo_minus_baro_available = false;

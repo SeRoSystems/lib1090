@@ -3,6 +3,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.CompactPositionReporting;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
@@ -46,8 +47,9 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	 * @param raw_message raw ADS-B surface position message as hex string
 	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public SurfacePositionV0Msg(String raw_message, Long timestamp) throws BadFormatException {
+	public SurfacePositionV0Msg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 
@@ -55,8 +57,9 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	 * @param raw_message raw ADS-B surface position message as byte array
 	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public SurfacePositionV0Msg(byte[] raw_message, Long timestamp) throws BadFormatException {
+	public SurfacePositionV0Msg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message), timestamp);
 	}
 

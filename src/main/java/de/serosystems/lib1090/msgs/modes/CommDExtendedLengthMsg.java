@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -41,8 +42,9 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 	 * @param raw_message raw comm-d extended len msg as hex string
 	 * @throws BadFormatException if message is not extended len msg or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public CommDExtendedLengthMsg(String raw_message) throws BadFormatException {
+	public CommDExtendedLengthMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -50,8 +52,9 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 	 * @param raw_message raw comm-d extended len msg as byte array
 	 * @throws BadFormatException if message is not extended len msg or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public CommDExtendedLengthMsg(byte[] raw_message) throws BadFormatException {
+	public CommDExtendedLengthMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 

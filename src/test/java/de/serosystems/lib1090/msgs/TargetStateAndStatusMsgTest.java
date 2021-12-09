@@ -123,7 +123,7 @@ public class TargetStateAndStatusMsgTest {
 	public void testTssWithoutHeading() throws UnspecifiedFormatError, BadFormatException {
 		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
 
-		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
+		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());
@@ -151,7 +151,7 @@ public class TargetStateAndStatusMsgTest {
 	public void testTssWithHeadingLt180Degrees() throws UnspecifiedFormatError, BadFormatException {
 		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
 
-		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
+		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());
@@ -179,7 +179,7 @@ public class TargetStateAndStatusMsgTest {
 	public void testTssWithHeadingGt180Degrees() throws UnspecifiedFormatError, BadFormatException {
 		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
 
-		assertEquals("89653e", Tools.toHexString(tss.getRawAddress()));
+		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
 
 		assertEquals(29, tss.getFormatTypeCode());

@@ -71,11 +71,11 @@ public class ExampleDecoder {
 			return;
 		}
 
-		String icao24 = Tools.toHexString(msg.getRawAddress());
+		String icao24 = msg.getAddress().getHexAddress();
 
 		// check for erroneous messages; some receivers set
 		// parity field to the result of the CRC polynomial division
-		if (Tools.isZero(msg.getParity()) || msg.checkParity()) { // CRC is ok
+		if (msg.getParity() == 0 || msg.checkParity()) { // CRC is ok
 
 			// now check the message type
 			switch (msg.getType()) {
@@ -373,7 +373,7 @@ public class ExampleDecoder {
 				break;
 			case MILITARY_EXTENDED_SQUITTER:
 				MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter)msg;
-				System.out.println("["+icao24+"]: Military ES of application "+mil.getApplicationCode());
+				System.out.println("["+icao24+"]: Military ES of application "+mil.getFirstField());
 				System.out.println("          Message is 0x"+ Tools.toHexString(mil.getMessage()));
 				break;
 			case COMM_B_ALTITUDE_REPLY:

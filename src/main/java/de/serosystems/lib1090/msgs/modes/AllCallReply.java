@@ -1,7 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
-import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -31,7 +31,7 @@ public class AllCallReply extends ModeSReply implements Serializable {
 	private static final long serialVersionUID = -1156158096293306435L;
 
 	private byte capabilities;
-	private byte[] parity_interrogator; // 3 bytes
+	private int parity_interrogator;
 	private byte code_label;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
@@ -41,8 +41,9 @@ public class AllCallReply extends ModeSReply implements Serializable {
      * @param raw_message raw all-call reply as hex string
      * @throws BadFormatException if message is not all-call reply or
      * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AllCallReply(String raw_message) throws BadFormatException {
+    public AllCallReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSReply(raw_message));
     }
 
@@ -50,8 +51,9 @@ public class AllCallReply extends ModeSReply implements Serializable {
      * @param raw_message raw all-call reply as byte array
      * @throws BadFormatException if message is not all-call reply or
      * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AllCallReply(byte[] raw_message) throws BadFormatException {
+    public AllCallReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSReply(raw_message));
     }
 
@@ -71,9 +73,9 @@ public class AllCallReply extends ModeSReply implements Serializable {
 		capabilities = getFirstField();
 
 		// extract interrogator ID
-		this.parity_interrogator = Tools.xor(calcParity(), getParity());
+		this.parity_interrogator = calcParity()^getParity();
 
-		code_label = (byte) ((parity_interrogator[2]>>4)&0x7);
+		code_label = (byte) ((parity_interrogator>>4)&0x7);
 	}
 
 	/**
@@ -114,13 +116,13 @@ public class AllCallReply extends ModeSReply implements Serializable {
 		switch (code_label) {
 			case 0:
 			case 1:
-				return (byte) (parity_interrogator[2]&0xF);
+				return (byte) (parity_interrogator&0xF);
 			case 2:
-				return (byte) ((parity_interrogator[2]&0xF) + 16);
+				return (byte) ((parity_interrogator&0xF) + 16);
 			case 3:
-				return (byte) ((parity_interrogator[2]&0xF) + 32);
+				return (byte) ((parity_interrogator&0xF) + 32);
 			default: // 4 and >= 4 (illegal)
-				return (byte) ((parity_interrogator[2]&0xF) + 48);
+				return (byte) ((parity_interrogator&0xF) + 48);
 		}
 
 	}
@@ -154,16 +156,9 @@ public class AllCallReply extends ModeSReply implements Serializable {
 	 * @return true if the interrogator ID is conformant with Annex 10 V4
 	 */
 	public boolean hasValidInterrogatorCode() {
-		assert(parity_interrogator.length == 3);
-
 		// 3.1.2.3.3.2
 		// the first 17 bits have to be zero
-		if (parity_interrogator[0] != 0 || parity_interrogator[1] != 0 || (parity_interrogator[2]&0x80) != 0)
-			return false;
-
-		// 3.1.2.5.2.1.3
-		// code label is only defined for 0-4
-		if (code_label > 4) return false;
+		if (parity_interrogator > 127) return false;
 
 		// Note: seems to be used by ACAS
 //		int ii = interrogator[2]&0xF;
@@ -171,7 +166,9 @@ public class AllCallReply extends ModeSReply implements Serializable {
 //		// surveillance identifier of 0 shall never be used
 //		if (cl>0 && ii==0) return false;
 
-		return true;
+		// 3.1.2.5.2.1.3
+		// code label is only defined for 0-4
+		return code_label <= 4;
 	}
 
 	@Override

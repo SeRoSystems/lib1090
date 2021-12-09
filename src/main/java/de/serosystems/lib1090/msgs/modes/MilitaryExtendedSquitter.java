@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.Serializable;
@@ -28,12 +29,9 @@ import java.io.Serializable;
  * Note: this format is practically unspecified
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class MilitaryExtendedSquitter extends ModeSReply implements Serializable {
+public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serializable {
 
 	private static final long serialVersionUID = -7877955448285410779L;
-
-	private byte[] message;
-	private byte application_code;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected MilitaryExtendedSquitter() { }
@@ -42,8 +40,9 @@ public class MilitaryExtendedSquitter extends ModeSReply implements Serializable
 	 * @param raw_message raw military extended squitter as hex string
 	 * @throws BadFormatException if message is not military extended squitter or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public MilitaryExtendedSquitter(String raw_message) throws BadFormatException {
+	public MilitaryExtendedSquitter(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -51,8 +50,9 @@ public class MilitaryExtendedSquitter extends ModeSReply implements Serializable
 	 * @param raw_message raw military extended squitter as byte array
 	 * @throws BadFormatException if message is not military extended squitter or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public MilitaryExtendedSquitter(byte[] raw_message) throws BadFormatException {
+	public MilitaryExtendedSquitter(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -60,17 +60,17 @@ public class MilitaryExtendedSquitter extends ModeSReply implements Serializable
 	 * @param reply Mode S reply containing this military extended squitter
 	 * @throws BadFormatException if message is not a military extended squitter or 
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public MilitaryExtendedSquitter(ModeSReply reply) throws BadFormatException {
+	public MilitaryExtendedSquitter(ModeSReply reply) throws BadFormatException, UnspecifiedFormatError {
 		super(reply);
 		setType(subtype.MILITARY_EXTENDED_SQUITTER);
 
-		if (getDownlinkFormat() != 19) {
+		if (getDownlinkFormat() != 19)
 			throw new BadFormatException("Message is not a military extended squitter!");
-		}
 
-		message = ArrayUtils.addAll(getPayload(), getParity());
-		application_code = getFirstField();
+		if (getFirstField() != 0)
+			throw new UnspecifiedFormatError("Military extended squitters are only specified for AF=0.");
 	}
 
 	/**
@@ -80,30 +80,5 @@ public class MilitaryExtendedSquitter extends ModeSReply implements Serializable
 	 */
 	public MilitaryExtendedSquitter(MilitaryExtendedSquitter squitter) {
 		super(squitter);
-
-		message = squitter.getMessage();
-		application_code = squitter.getApplicationCode();
-	}
-
-	/**
-	 * @return The message as 13-byte array
-	 */
-	public byte[] getMessage() {
-		return message;
-	}
-
-	/**
-	 * @return the application code from the AF field
-	 */
-	public byte getApplicationCode() {
-		return application_code;
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tMilitaryExtendedSquitter{" +
-				"message=" + Tools.toHexString(message) +
-				", application_code=" + application_code +
-				'}';
 	}
 }

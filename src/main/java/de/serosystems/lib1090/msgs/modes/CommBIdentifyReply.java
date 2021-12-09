@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -43,8 +44,9 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 	 * @param raw_message raw comm-b identify reply as hex string
 	 * @throws BadFormatException if message is not comm-b identify reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public CommBIdentifyReply(String raw_message) throws BadFormatException {
+	public CommBIdentifyReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -52,8 +54,9 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 	 * @param raw_message raw comm-b identify reply as byte array
 	 * @throws BadFormatException if message is not comm-b identify reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public CommBIdentifyReply(byte[] raw_message) throws BadFormatException {
+	public CommBIdentifyReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -78,8 +81,7 @@ public class CommBIdentifyReply extends ModeSReply implements Serializable {
 
 		// extract Comm-B message
 		message = new byte[7];
-		for (int i=0; i<7; i++)
-			message[i] = payload[i+3];
+		System.arraycopy(payload, 3, message, 0, 7);
 	}
 
 	/**

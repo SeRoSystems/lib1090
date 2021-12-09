@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -46,8 +47,9 @@ public class LongACAS extends ModeSReply implements Serializable {
 	 * @param raw_message raw long air-to-air ACAS reply as hex string
 	 * @throws BadFormatException if message is not long air-to-air ACAS reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public LongACAS(String raw_message) throws BadFormatException {
+	public LongACAS(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -55,8 +57,9 @@ public class LongACAS extends ModeSReply implements Serializable {
 	 * @param raw_message raw long air-to-air ACAS reply as byte array
 	 * @throws BadFormatException if message is not long air-to-air ACAS reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public LongACAS(byte[] raw_message) throws BadFormatException {
+	public LongACAS(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 

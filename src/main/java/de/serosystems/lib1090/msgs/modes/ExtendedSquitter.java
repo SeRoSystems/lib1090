@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -40,8 +41,9 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	 * @param raw_message raw extended squitter as hex string
 	 * @throws BadFormatException if message is not extended squitter or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ExtendedSquitter(String raw_message) throws BadFormatException {
+	public ExtendedSquitter(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -49,8 +51,9 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	 * @param raw_message raw extended squitter as byte array
 	 * @throws BadFormatException if message is not extended squitter or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ExtendedSquitter(byte[] raw_message) throws BadFormatException {
+	public ExtendedSquitter(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -71,8 +74,7 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 
 		// extract ADS-B message
 		message = new byte[7];
-		for (int i=0; i<7; i++)
-			message[i] = payload[i+3];
+		System.arraycopy(payload, 3, message, 0, 7);
 
 		format_type_code = (byte) ((message[0] >>> 3) & 0x1F);
 	}

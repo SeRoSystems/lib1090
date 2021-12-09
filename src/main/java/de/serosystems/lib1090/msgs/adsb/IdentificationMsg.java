@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.ModeSReply;
 
@@ -65,16 +66,18 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 	/**
 	 * @param raw_message the identification message in hex representation
 	 * @throws BadFormatException if message has the wrong typecode
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public IdentificationMsg(String raw_message) throws BadFormatException {
+	public IdentificationMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
 	 * @param raw_message the identification message as byte array
 	 * @throws BadFormatException if message has the wrong typecode
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public IdentificationMsg(byte[] raw_message) throws BadFormatException {
+	public IdentificationMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 

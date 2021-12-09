@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -44,16 +45,18 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
 	/**
 	 * @param raw_message raw ADS-B aircraft status message as hex string
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public TCASResolutionAdvisoryMsg(String raw_message) throws BadFormatException {
+	public TCASResolutionAdvisoryMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
 	/**
 	 * @param raw_message raw ADS-B aircraft status message as byte array
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public TCASResolutionAdvisoryMsg(byte[] raw_message) throws BadFormatException {
+	public TCASResolutionAdvisoryMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 

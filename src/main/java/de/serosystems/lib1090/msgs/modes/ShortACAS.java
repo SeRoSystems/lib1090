@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
 import java.io.Serializable;
 
@@ -42,8 +43,9 @@ public class ShortACAS extends ModeSReply implements Serializable {
 	 * @param raw_message raw short air-air acas reply as hex string
 	 * @throws BadFormatException if message is not altitude reply or 
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ShortACAS(String raw_message) throws BadFormatException {
+	public ShortACAS(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
@@ -51,8 +53,9 @@ public class ShortACAS extends ModeSReply implements Serializable {
 	 * @param raw_message raw short air-air acas reply as byte array
 	 * @throws BadFormatException if message is not altitude reply or
 	 * contains wrong values.
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ShortACAS(byte[] raw_message) throws BadFormatException {
+	public ShortACAS(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ModeSReply(raw_message));
 	}
 
