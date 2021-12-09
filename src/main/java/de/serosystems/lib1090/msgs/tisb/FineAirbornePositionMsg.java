@@ -85,8 +85,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
 		}
 
-		if (!(getFormatTypeCode() == 0 ||
-				(getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
+		if (!((getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
 				(getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
 			throw new BadFormatException("This is not a TIS-B position message! Wrong format type code.");
 
