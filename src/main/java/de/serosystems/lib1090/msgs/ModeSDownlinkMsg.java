@@ -93,6 +93,8 @@ public class ModeSDownlinkMsg implements Serializable {
 		public enum Type {
 			// ICAO 24-bit address
 			ICAO24,
+			// NON-ICAO 24-bit address
+			NON_ICAO,
 			// Anonymous address or ground vehicle address or fixed obstacle address of transmitting ADS-B Participant
 			ANONYMOUS, // DF=18 with CF=1 or CF=6 and IMF=1
 			// 12-bit Mode A code and track file number
@@ -221,6 +223,32 @@ public class ModeSDownlinkMsg implements Serializable {
 	protected ModeSDownlinkMsg() { }
 
 	/**
+	 * NOTE: use this method only for CF 2 and 5
+	 * @return the IMF field from TIS-B messages or null if unknown
+	 */
+	private static Boolean extractIMF(byte[] payload) {
+		// format type code
+		int ftc = (payload[3] >>> 3) & 0x1F;
+
+		boolean imf;
+		if (ftc >= 9 && ftc <= 18 || ftc >= 20 && ftc <= 22)
+			// airborne position
+			imf = (payload[3]&0x1) == 1;
+		else if (ftc >= 5 && ftc <= 8)
+			// surface position
+			imf = ((payload[5]>>>3)&0x1) == 1;
+		else if (ftc >= 2 && ftc <= 4)
+			// ID and category -> no IMF, always ICAO 24
+			imf = false; // -> will result in ICAO 24
+		else if (ftc == 19)
+			// velocity / airspeed
+			imf = (payload[4]&0x80) > 0;
+		else return null;
+
+		return imf;
+	}
+
+	/**
 	 *
 	 * @param reply the bytes of the reply
 	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
@@ -296,12 +324,29 @@ public class ModeSDownlinkMsg implements Serializable {
 					address.type = QualifiedAddress.Type.ANONYMOUS;
 					break;
 				case 2:
-				case 3:
-				case 4:
 				case 5:
+					Boolean imf = extractIMF(payload);
+					if (imf == null)
+						address.type = QualifiedAddress.Type.UNKNOWN;
+					else if (first_field == 2)
+						address.type = imf ? QualifiedAddress.Type.MODEA_TRACK : QualifiedAddress.Type.ICAO24;
+					else // first_field == 5
+						address.type = imf ? QualifiedAddress.Type.RESERVED : QualifiedAddress.Type.NON_ICAO;
+
+					break;
+				case 3:
+					// coarse position
+					if ((payload[3]&0x80) > 0) // IMF field
+						address.type = QualifiedAddress.Type.ICAO24;
+					else
+						address.type = QualifiedAddress.Type.MODEA_TRACK;
+
+					break;
+				case 4:
+					address.type = QualifiedAddress.Type.TISB_MANAGEMENT_INFO;
+					break;
 				case 6:
-					// TODO: check IMF subfield
-					address.type = QualifiedAddress.Type.UNKNOWN;
+					// TODO: ADS-R
 					break;
 				case 7:
 					address.type = QualifiedAddress.Type.RESERVED;
