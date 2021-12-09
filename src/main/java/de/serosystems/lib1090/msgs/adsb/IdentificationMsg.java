@@ -51,7 +51,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 	 * @param digits array of encoded digits
 	 * @return array of decoded characters
 	 */
-	private static char[] mapChar (byte[] digits) {
+	public static char[] mapChar (byte[] digits) {
 		char[] result = new char[digits.length];
 
 		for (int i=0; i<digits.length; i++)
@@ -129,51 +129,60 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 	}
 
 	/**
-	 * @return the decription of the emitter's category according to
-	 *         the ADS-B message format specification
+	 * @param type_code format type code of identity message
+	 * @param emitter_category reported emitter category
+	 * @return a textual description of the emitter's category according to DO-260B
 	 */
-	public String getCategoryDescription () {
+	public static String categoryDescription(byte type_code, byte emitter_category) {
 		// category descriptions according
 		// to the ADS-B specification
 		String[][] categories = {{
-			"No ADS-B Emitter Category Information",
-			"Light (< 15500 lbs)",
-			"Small (15500 to 75000 lbs)",
-			"Large (75000 to 300000 lbs)",
-			"High Vortex Large (aircraft such as B-757)",
-			"Heavy (> 300000 lbs)",
-			"High Performance (> 5g acceleration and 400 kts)",
-			"Rotorcraft"
+				"No ADS-B Emitter Category Information",
+				"Light (< 15500 lbs)",
+				"Small (15500 to 75000 lbs)",
+				"Large (75000 to 300000 lbs)",
+				"High Vortex Large (aircraft such as B-757)",
+				"Heavy (> 300000 lbs)",
+				"High Performance (> 5g acceleration and 400 kts)",
+				"Rotorcraft"
 		},{
-			"No ADS-B Emitter Category Information",
-			"Glider / sailplane",
-			"Lighter-than-air",
-			"Parachutist / Skydiver",
-			"Ultralight / hang-glider / paraglider",
-			"Reserved",
-			"Unmanned Aerial Vehicle",
-			"Space / Trans-atmospheric vehicle",
+				"No ADS-B Emitter Category Information",
+				"Glider / sailplane",
+				"Lighter-than-air",
+				"Parachutist / Skydiver",
+				"Ultralight / hang-glider / paraglider",
+				"Reserved",
+				"Unmanned Aerial Vehicle",
+				"Space / Trans-atmospheric vehicle",
 		},{
-			"No ADS-B Emitter Category Information",
-			"Surface Vehicle – Emergency Vehicle",
-			"Surface Vehicle – Service Vehicle",
-			"Point Obstacle (includes tethered balloons)",
-			"Cluster Obstacle",
-			"Line Obstacle",
-			"Reserved",
-			"Reserved"
+				"No ADS-B Emitter Category Information",
+				"Surface Vehicle – Emergency Vehicle",
+				"Surface Vehicle – Service Vehicle",
+				"Point Obstacle (includes tethered balloons)",
+				"Cluster Obstacle",
+				"Line Obstacle",
+				"Reserved",
+				"Reserved"
 		},{
-			"Reserved",
-			"Reserved",
-			"Reserved",
-			"Reserved",
-			"Reserved",
-			"Reserved",
-			"Reserved",
-			"Reserved"
+				"Reserved",
+				"Reserved",
+				"Reserved",
+				"Reserved",
+				"Reserved",
+				"Reserved",
+				"Reserved",
+				"Reserved"
 		}};
 
-		return categories[4-getFormatTypeCode()][emitter_category];
+		return categories[4-type_code][emitter_category];
+	}
+
+	/**
+	 * @return the decription of the emitter's category according to
+	 *         the ADS-B message format specification
+	 */
+	public String getCategoryDescription() {
+		return categoryDescription(getFormatTypeCode(), emitter_category);
 	}
 
 	@Override

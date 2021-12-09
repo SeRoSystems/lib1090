@@ -281,10 +281,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		return result;
 	}
 
-	@Override
-	public Integer getAltitude() {
-		if (!altitude_available) return null;
-
+	public static Integer decodeAltitude(short altitude_encoded) {
 		boolean Qbit = (altitude_encoded&0x10)!=0;
 		int N;
 		if (Qbit) { // altitude reported in 25ft increments
@@ -319,9 +316,18 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	@Override
+	public Integer getAltitude() {
+		if (!altitude_available) return null;
+		return decodeAltitude(altitude_encoded);
+	}
+
+	@Override
 	public Position.AltitudeType getAltitudeType () {
-		return this.getFormatTypeCode() < 20 ?
-				Position.AltitudeType.BAROMETRIC_ALTITUDE : Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
+		if (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18)
+			return Position.AltitudeType.BAROMETRIC_ALTITUDE;
+		else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
+			return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
+		else return Position.AltitudeType.UNKNOWN;
 	}
 
 	@Override
@@ -330,7 +336,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 				"horizontal_position_available=" + horizontal_position_available +
 				", altitude_available=" + altitude_available +
 				", surveillance_status=" + surveillance_status +
-				", nic_suppl_b=" + nic_suppl_b +
+				", single_antenna_flag=" + nic_suppl_b +
 				", altitude_encoded=" + altitude_encoded +
 				", time_flag=" + time_flag +
 				", position=" + position +

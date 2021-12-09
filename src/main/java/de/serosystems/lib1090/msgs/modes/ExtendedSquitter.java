@@ -66,9 +66,10 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 		super(reply);
 		setType(subtype.EXTENDED_SQUITTER);
 
-		if (getDownlinkFormat() != 17 && getDownlinkFormat() != 18 && getDownlinkFormat() != 19) {
+		if (getDownlinkFormat() < 17 && getDownlinkFormat() > 19 ||
+				getDownlinkFormat() == 18 && (getFirstField() == 4 || getFirstField() == 7) ||
+				getDownlinkFormat() == 19 && getFirstField() > 0)
 			throw new BadFormatException("Message is not an extended squitter!");
-		}
 
 		byte[] payload = getPayload();
 
