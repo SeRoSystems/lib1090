@@ -32,7 +32,7 @@ public class CompactPositionReporting {
         private final int encoded_lon;
         private final int nbits;
         private final boolean surface;
-        private final long timestamp;
+        private final Long timestamp;
 
         /**
          * @param is_odd true if it is a odd format, false if it is even (format field in most position messags)
@@ -41,9 +41,9 @@ public class CompactPositionReporting {
          * @param nbits number of bits used to encode latitude and longitude; 17 for airborne position, 14 for intent,
          *              and 12 for TIS-B
          * @param surface true if encoded position is surface position
-         * @param timestamp timestamp when this position was received in milliseconds
+         * @param timestamp timestamp when this position was received in milliseconds (null disables all tests based on time)
          */
-        public CPREncodedPosition(boolean is_odd, int encoded_lat, int encoded_lon, int nbits, boolean surface, long timestamp) {
+        public CPREncodedPosition(boolean is_odd, int encoded_lat, int encoded_lon, int nbits, boolean surface, Long timestamp) {
             this.is_odd = is_odd;
             this.encoded_lat = encoded_lat;
             this.encoded_lon = encoded_lon;
@@ -55,7 +55,7 @@ public class CompactPositionReporting {
         /**
          * @return timestamp of this position message in milliseconds
          */
-        public long getTimestamp() {
+        public Long getTimestamp() {
             return timestamp;
         }
 
@@ -81,7 +81,10 @@ public class CompactPositionReporting {
             boolean global = other != null && // need other pos for global decoding
                     this.is_odd != other.is_odd && // other pos must be complementary format
                     this.surface == other.surface && // cannot combine surface and airborne
-                    (!this.surface || reference != null) && // we need reference position for surface positions
+                    (!this.surface || reference != null); // we need reference position for surface positions
+
+            // time-based tests
+            global = global && this.timestamp != null && other.timestamp != null &&
                     (this.surface ||  Math.abs(this.timestamp - other.timestamp) < 10_000L) && // airborne should not be more than 10 seconds apart
                     (!this.surface ||  Math.abs(this.timestamp - other.timestamp) < 25_000L); // surface should not be more than 25 seconds apart
 
@@ -192,9 +195,11 @@ public class CompactPositionReporting {
         CPREncodedPosition even = pos.is_odd ? old : pos;
         CPREncodedPosition odd = pos.is_odd ? pos : old;
 
+        double angle = even.surface ? 90 : 360.0;
+
         // Helper for latitude (Number of zones NZ is set to 15)
-        double Dlat0 = (even.surface ? 90 : 360.0) / 60.0;
-        double Dlat1 = (odd.surface ? 90 : 360.0) / 59.0;
+        double Dlat0 = angle / 60.0;
+        double Dlat1 = angle / 59.0;
 
         // latitude index
         double j = Math.floor((
@@ -224,7 +229,7 @@ public class CompactPositionReporting {
 
         // global longitude
         double n_helper = Math.max(1.0, NL_helper - (pos.is_odd ? 1.0 : 0.0));
-        double Rlon = (360.0 / n_helper) * (mod(m, n_helper) + ((double) pos.encoded_lon) / ((double) (1 << pos.nbits)));
+        double Rlon = (angle / n_helper) * (mod(m, n_helper) + ((double) pos.encoded_lon) / ((double) (1 << pos.nbits)));
 
         // correct longitude
         if (Rlon < -180.0 && Rlon > -360.0) Rlon += 360.0;
@@ -287,7 +292,7 @@ public class CompactPositionReporting {
         private CompactPositionReporting.CPREncodedPosition last_even_airborne;
         private CompactPositionReporting.CPREncodedPosition last_odd_airborne;
         private Position last_pos; // lat lon
-        private long last_time; // in ms
+        private Long last_time; // in ms
         private int num_reasonable; // number of successive reasonable msgs
 
         // distance to receiver threshold
@@ -295,11 +300,12 @@ public class CompactPositionReporting {
 
         /**
          * @param cpr CPR encoded position
+         * @param receiver position of the receiver for surface decoding and to check if received position was more than 700km away
          * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
          *         if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
          *         the position.
          */
-        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr) {
+        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr, Position receiver) {
             if (cpr == null) return null;
 
             // get last position in complementary format for global decoding
@@ -310,14 +316,14 @@ public class CompactPositionReporting {
             if (cpr.isOddFormat()) last_odd_airborne = cpr;
             else last_even_airborne = cpr;
 
-            Position new_pos = cpr.decodePosition(last_other, last_pos);
+            Position new_pos = cpr.decodePosition(last_other, last_pos != null ? last_pos : receiver);
 
             if (new_pos == null) return null;
 
             //////// apply some additional (stateful) reasonableness tests //////////
 
             // check if it's realistic that the target covered this distance (faster than 1000 knots?)
-            if (last_pos != null) {
+            if (last_pos != null && last_time != null && cpr.getTimestamp() != null) {
                 double td = abs((cpr.getTimestamp() - last_time) / 1_000.);
                 double groundSpeed = new_pos.haversine(last_pos) / td; // in meters per second
 
@@ -331,25 +337,13 @@ public class CompactPositionReporting {
                 // at least n good msgs before we declare reasonable
             else if (num_reasonable++<2) new_pos.setReasonable(false);
 
-            return new_pos;
-        }
-
-        /**
-         * @param cpr CPR encoded position
-         * @param receiver position of the receiver to check if received position was more than 700km away
-         * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in meters. altitude might be null if unavailable
-         *         On error, the returned position is null. Check the .isReasonable() flag before using the position.
-         */
-        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr, Position receiver) {
-            Position ret = decodePosition(cpr);
-
             // apply additional reasonableness test
-            if (ret != null && receiver != null && receiver.haversine(ret) > MAX_DIST_TO_SENDER) {
-                ret.setReasonable(false);
+            if (receiver != null && receiver.haversine(new_pos) > MAX_DIST_TO_SENDER) {
+                new_pos.setReasonable(false);
                 num_reasonable = 0;
             }
 
-            return ret;
+            return new_pos;
         }
 
     }
