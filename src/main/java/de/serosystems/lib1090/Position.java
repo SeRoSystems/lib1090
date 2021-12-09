@@ -251,8 +251,8 @@ public class Position implements Serializable {
 	@Override
 	public String toString() {
 		return "Position{" +
-				"longitude=" + longitude +
-				", latitude=" + latitude +
+				"latitude=" + latitude +
+				", longitude=" + longitude +
 				", altitude=" + altitude +
 				", reasonable=" + reasonable +
 				", altitude_type=" + altitude_type +
