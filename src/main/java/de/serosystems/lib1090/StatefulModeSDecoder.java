@@ -53,7 +53,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(ModeSReply modes, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSReply decode(ModeSReply modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
 
 		latestTimestamp = timestamp;
@@ -229,7 +229,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSReply decode(byte[] raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSReply(raw_message), timestamp);
 	}
 
@@ -241,7 +241,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(byte[] raw_message, boolean noCRC, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSReply decode(byte[] raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSReply(raw_message, noCRC), timestamp);
 	}
 
@@ -252,7 +252,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSReply decode(String raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSReply(raw_message), timestamp);
 	}
 
@@ -264,7 +264,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(String raw_message, boolean noCRC, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSReply decode(String raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSReply(raw_message, noCRC), timestamp);
 	}
 
@@ -278,7 +278,7 @@ public class StatefulModeSDecoder {
 		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
-		if (msg.hasValidAltitude()) {
+		if (pos != null && msg.hasValidAltitude()) {
 			pos.setAltitude(Double.valueOf(msg.getAltitude()));
 			pos.setAltitudeType(msg.getAltitudeType());
 		}
