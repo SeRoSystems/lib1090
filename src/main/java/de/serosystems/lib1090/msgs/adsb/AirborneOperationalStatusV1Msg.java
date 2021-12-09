@@ -3,7 +3,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -71,7 +71,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	 */
 	public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(ModeSReply.subtype.ADSB_AIRBORN_STATUS_V1);
+		setType(ModeSDownlinkMsg.subtype.ADSB_AIRBORN_STATUS_V1);
 
 		if (getFormatTypeCode() != 31) {
 			throw new BadFormatException("Operational status messages must have typecode 31.");

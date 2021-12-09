@@ -3,6 +3,7 @@ package de.serosystems.lib1090.msgs.modes;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -27,7 +28,7 @@ import java.io.Serializable;
  * Decoder for Mode S surveillance Extended Length Messages (Comm-D ELM) (DF 24)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
+public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = 1509054097399122428L;
 
@@ -45,7 +46,7 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public CommDExtendedLengthMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public CommDExtendedLengthMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class CommDExtendedLengthMsg extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not extended len msg or 
 	 * contains wrong values.
 	 */
-	public CommDExtendedLengthMsg(ModeSReply reply) throws BadFormatException {
+	public CommDExtendedLengthMsg(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.COMM_D_ELM);
 

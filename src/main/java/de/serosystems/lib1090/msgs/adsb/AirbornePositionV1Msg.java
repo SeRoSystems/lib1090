@@ -3,7 +3,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -62,7 +62,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 	 */
 	public AirbornePositionV1Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter, timestamp);
-		setType(ModeSReply.subtype.ADSB_AIRBORN_POSITION_V1);
+		setType(ModeSDownlinkMsg.subtype.ADSB_AIRBORN_POSITION_V1);
 	}
 
 	/**

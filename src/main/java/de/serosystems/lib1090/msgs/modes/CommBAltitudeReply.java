@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ import java.util.Arrays;
  * Decoder for Mode S surveillance altitude replies with Comm-B message (DF 20)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class CommBAltitudeReply extends ModeSReply implements Serializable {
+public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
 	
@@ -47,7 +48,7 @@ public class CommBAltitudeReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public CommBAltitudeReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -57,7 +58,7 @@ public class CommBAltitudeReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public CommBAltitudeReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -65,7 +66,7 @@ public class CommBAltitudeReply extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not comm-b altitude reply or 
 	 * contains wrong values.
 	 */
-	public CommBAltitudeReply(ModeSReply reply) throws BadFormatException {
+	public CommBAltitudeReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.COMM_B_ALTITUDE_REPLY);
 

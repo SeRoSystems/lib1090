@@ -22,6 +22,7 @@ import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
 
@@ -60,7 +61,7 @@ public class ExampleDecoder {
 	 * @param receiver the location of the receiver for sanity checks on decoded positions (optional)
 	 */
 	public void decodeMsg(long timestamp, String raw, Position receiver) {
-		ModeSReply msg;
+		ModeSDownlinkMsg msg;
 		try {
 			msg = decoder.decode(raw, timestamp);
 		} catch (BadFormatException e) {

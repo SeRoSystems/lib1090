@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
@@ -28,7 +28,7 @@ import java.util.Arrays;
  * Decoder for Mode S replies
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class ModeSReply implements Serializable {
+public class ModeSDownlinkMsg implements Serializable {
 	private static final long serialVersionUID = 5369519167589262290L;
 
 	/*
@@ -218,7 +218,7 @@ public class ModeSReply implements Serializable {
 	 */
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected ModeSReply() { }
+	protected ModeSDownlinkMsg() { }
 
 	/**
 	 *
@@ -227,7 +227,7 @@ public class ModeSReply implements Serializable {
 	 * @throws BadFormatException if message has invalid length or downlink format
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ModeSReply (byte[] reply, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSDownlinkMsg(byte[] reply, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
 		// check format invariants
 		this.noCRC = noCRC;
 
@@ -328,7 +328,7 @@ public class ModeSReply implements Serializable {
 	 * not match specification or parity has invalid length
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ModeSReply (byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSDownlinkMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(raw_message, false);
 	}
 
@@ -341,7 +341,7 @@ public class ModeSReply implements Serializable {
 	 * not match specification or parity has invalid length
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ModeSReply (String raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSDownlinkMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(Tools.hexStringToByteArray(raw_message), false);
 	}
 
@@ -355,7 +355,7 @@ public class ModeSReply implements Serializable {
 	 * not match specification or parity has invalid length
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public ModeSReply (String raw_message, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSDownlinkMsg(String raw_message, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
 		this(Tools.hexStringToByteArray(raw_message), noCRC);
 	}
 
@@ -364,7 +364,7 @@ public class ModeSReply implements Serializable {
 	 *
 	 * @param reply instance of ModeSReply to copy from
 	 */
-	public ModeSReply (ModeSReply reply) {
+	public ModeSDownlinkMsg(ModeSDownlinkMsg reply) {
 		downlink_format = reply.downlink_format;
 		first_field = reply.first_field;
 		payload = Arrays.copyOf(reply.payload, reply.payload.length);
@@ -485,7 +485,7 @@ public class ModeSReply implements Serializable {
 		if (o == this) return true;
 		if (o.getClass() != getClass()) return false;
 
-		ModeSReply other = (ModeSReply)o;
+		ModeSDownlinkMsg other = (ModeSDownlinkMsg)o;
 
 		// same type?
 		if (this.getDownlinkFormat() != other.getDownlinkFormat())

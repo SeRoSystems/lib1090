@@ -3,7 +3,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 	 */
 	public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(ModeSReply.subtype.ADSB_IDENTIFICATION);
+		setType(ModeSDownlinkMsg.subtype.ADSB_IDENTIFICATION);
 
 		if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4) {
 			throw new BadFormatException("Identification messages must have typecode of 1-4.");

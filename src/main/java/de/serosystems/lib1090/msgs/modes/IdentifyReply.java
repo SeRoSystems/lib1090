@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -26,7 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S surveillance identify replies (DF 5)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class IdentifyReply extends ModeSReply implements Serializable {
+public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
 
@@ -45,7 +46,7 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public IdentifyReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public IdentifyReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class IdentifyReply extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not identify reply or 
 	 * contains wrong values.
 	 */
-	public IdentifyReply(ModeSReply reply) throws BadFormatException {
+	public IdentifyReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.IDENTIFY_REPLY);
 

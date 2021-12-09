@@ -4,7 +4,6 @@ import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsg;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,10 +25,10 @@ public class ModeSDecoderTest {
 	@Test
 	public void tssV0Me11Set_shouldNotDecode() throws UnspecifiedFormatError, BadFormatException {
 		// decoder assumes ADS-B v0 and should not decode TSS
-		final ModeSReply reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITH_ME11_BIT_SET, 0L);
+		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITH_ME11_BIT_SET, 0L);
 
-		assertEquals(ModeSReply.subtype.EXTENDED_SQUITTER, reply.getType());
-		assertNotEquals(ModeSReply.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertEquals(ModeSDownlinkMsg.subtype.EXTENDED_SQUITTER, reply.getType());
+		assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
 	}
 
 	@Test
@@ -38,9 +37,9 @@ public class ModeSDecoderTest {
 		decoder.decode(OperationalStatusMsgTest.A_OPSTAT_V2, 0L);
 
 		// decode message with ME bit 11 set
-		final ModeSReply reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITH_ME11_BIT_SET, 0L);
+		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITH_ME11_BIT_SET, 0L);
 
-		assertEquals(ModeSReply.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
 
 		TargetStateAndStatusMsg tss = (TargetStateAndStatusMsg) reply;
 
@@ -51,9 +50,9 @@ public class ModeSDecoderTest {
 
 	@Test
 	public void tssV0Me11NotSet_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
-		final ModeSReply reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITHOUT_HEADING, 0L);
+		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusMsgTest.TSS_WITHOUT_HEADING, 0L);
 
-		assertEquals(ModeSReply.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
 
 		TargetStateAndStatusMsg tss = (TargetStateAndStatusMsg) reply;
 

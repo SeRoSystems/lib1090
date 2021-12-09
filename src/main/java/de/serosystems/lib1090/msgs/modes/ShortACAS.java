@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -26,7 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S short air-air ACAS replies (DF 0)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class ShortACAS extends ModeSReply implements Serializable {
+public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = 7201021668905726988L;
 
@@ -46,7 +47,7 @@ public class ShortACAS extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public ShortACAS(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -56,7 +57,7 @@ public class ShortACAS extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public ShortACAS(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -64,7 +65,7 @@ public class ShortACAS extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not short air-air acas reply or 
 	 * contains wrong values.
 	 */
-	public ShortACAS(ModeSReply reply) throws BadFormatException {
+	public ShortACAS(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.SHORT_ACAS);
 

@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -26,7 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S surveillance altitude replies (DF 4)
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class AltitudeReply extends ModeSReply implements Serializable {
+public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
 
@@ -45,7 +46,7 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public AltitudeReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public AltitudeReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class AltitudeReply extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not altitude reply or 
 	 * contains wrong values.
 	 */
-	public AltitudeReply(ModeSReply reply) throws BadFormatException {
+	public AltitudeReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.ALTITUDE_REPLY);
 

@@ -3,6 +3,7 @@ package de.serosystems.lib1090.msgs.modes;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -27,7 +28,7 @@ import java.io.Serializable;
  * Decoder for Mode S extended squitters
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class ExtendedSquitter extends ModeSReply implements Serializable {
+public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -7877955448285410779L;
 
@@ -44,7 +45,7 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public ExtendedSquitter(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public ExtendedSquitter(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class ExtendedSquitter extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not extended squitter or 
 	 * contains wrong values.
 	 */
-	public ExtendedSquitter(ModeSReply reply) throws BadFormatException {
+	public ExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.EXTENDED_SQUITTER);
 

@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -26,7 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S all-call replies
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
-public class AllCallReply extends ModeSReply implements Serializable {
+public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -1156158096293306435L;
 
@@ -44,7 +45,7 @@ public class AllCallReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
     public AllCallReply(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-        this(new ModeSReply(raw_message));
+        this(new ModeSDownlinkMsg(raw_message));
     }
 
     /**
@@ -54,7 +55,7 @@ public class AllCallReply extends ModeSReply implements Serializable {
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
     public AllCallReply(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-        this(new ModeSReply(raw_message));
+        this(new ModeSDownlinkMsg(raw_message));
     }
 
 	/**
@@ -62,7 +63,7 @@ public class AllCallReply extends ModeSReply implements Serializable {
 	 * @throws BadFormatException if message is not all-call reply or 
 	 * contains wrong values.
 	 */
-	public AllCallReply(ModeSReply reply) throws BadFormatException {
+	public AllCallReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 		setType(subtype.ALL_CALL_REPLY);
 

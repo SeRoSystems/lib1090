@@ -1,9 +1,8 @@
 package de.serosystems.lib1090.msgs.modes;
 
-import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import org.apache.commons.lang3.ArrayUtils;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -43,7 +42,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public MilitaryExtendedSquitter(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -53,7 +52,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public MilitaryExtendedSquitter(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSReply(raw_message));
+		this(new ModeSDownlinkMsg(raw_message));
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 	 * contains wrong values.
 	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
-	public MilitaryExtendedSquitter(ModeSReply reply) throws BadFormatException, UnspecifiedFormatError {
+	public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException, UnspecifiedFormatError {
 		super(reply);
 		setType(subtype.MILITARY_EXTENDED_SQUITTER);
 

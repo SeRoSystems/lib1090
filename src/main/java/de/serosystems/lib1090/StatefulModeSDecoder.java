@@ -2,6 +2,7 @@ package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
@@ -33,11 +34,11 @@ import java.util.Map;
  */
 public class StatefulModeSDecoder {
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
-	private final Map<ModeSReply.QualifiedAddress, DecoderData> decoderData = new HashMap<>();
+	private final Map<ModeSDownlinkMsg.QualifiedAddress, DecoderData> decoderData = new HashMap<>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
 
-	private DecoderData getDecoderData (ModeSReply.QualifiedAddress address) {
+	private DecoderData getDecoderData (ModeSDownlinkMsg.QualifiedAddress address) {
 		DecoderData dd = decoderData.computeIfAbsent(address, a -> new DecoderData());
 		dd.lastUsed = latestTimestamp;
 		return dd;
@@ -53,7 +54,7 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(ModeSReply modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+	public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
 
 		latestTimestamp = timestamp;
@@ -229,8 +230,8 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(byte[] raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message), timestamp);
+	public ModeSDownlinkMsg decode(byte[] raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSDownlinkMsg(raw_message), timestamp);
 	}
 
 	/**
@@ -241,8 +242,8 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(byte[] raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message, noCRC), timestamp);
+	public ModeSDownlinkMsg decode(byte[] raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSDownlinkMsg(raw_message, noCRC), timestamp);
 	}
 
 	/**
@@ -252,8 +253,8 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(String raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message), timestamp);
+	public ModeSDownlinkMsg decode(String raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSDownlinkMsg(raw_message), timestamp);
 	}
 
 	/**
@@ -264,8 +265,8 @@ public class StatefulModeSDecoder {
 	 * @throws UnspecifiedFormatError if format is not specified
 	 * @throws BadFormatException if format contains error
 	 */
-	public ModeSReply decode(String raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		return decode(new ModeSReply(raw_message, noCRC), timestamp);
+	public ModeSDownlinkMsg decode(String raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		return decode(new ModeSDownlinkMsg(raw_message, noCRC), timestamp);
 	}
 
 	/**
@@ -274,7 +275,7 @@ public class StatefulModeSDecoder {
 	 * @param receiver position for reasonableness test (can be null)
 	 * @return decoded WGS84 position
 	 */
-	public Position extractPosition(ModeSReply.QualifiedAddress address, PositionMsg msg, Position receiver) {
+	public Position extractPosition(ModeSDownlinkMsg.QualifiedAddress address, PositionMsg msg, Position receiver) {
 		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
@@ -289,10 +290,10 @@ public class StatefulModeSDecoder {
 	/**
 	 * @param reply a Mode S message
 	 * @return the ADS-B version as tracked by the decoder. Version 0 is assumed until an Operational Status message
-	 * @param <T> {@link ModeSReply} or one of its sub classes
+	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
 	 * for a higher version is received for the given aircraft.
 	 */
-	public <T extends ModeSReply> byte getAdsbVersion(T reply) {
+	public <T extends ModeSDownlinkMsg> byte getAdsbVersion(T reply) {
 		if (reply == null) return 0;
 		DecoderData dd = getDecoderData(reply.getAddress());
 		return dd.adsbVersion;
@@ -303,10 +304,10 @@ public class StatefulModeSDecoder {
 	 * from ADS-B {@link AirspeedHeadingMsg} and {@link VelocityOverGroundMsg}. The method returns the most recent
 	 * value.
 	 * @param reply a Mode S message
-	 * @param <T> {@link ModeSReply} or one of its sub classes
+	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return the difference between geometric and barometric altitude in feet or null if not present
 	 */
-	public <T extends ModeSReply> Integer getGeoMinusBaro(T reply) {
+	public <T extends ModeSDownlinkMsg> Integer getGeoMinusBaro(T reply) {
 		if (reply == null) return null;
 		DecoderData dd = getDecoderData(reply.getAddress());
 		return dd.geoMinusBaro;
@@ -316,38 +317,38 @@ public class StatefulModeSDecoder {
 	 * Check whether a ModeSReply is an airborne position (of any version), i.e., it
 	 * is of type {@link AirbornePositionV0Msg}, {@link AirbornePositionV1Msg} or {@link AirbornePositionV2Msg}
 	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSReply} or one of its sub classes
+	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
 	 */
-	public static <T extends ModeSReply> boolean isAirbornePosition(T reply) {
+	public static <T extends ModeSDownlinkMsg> boolean isAirbornePosition(T reply) {
 		if (reply == null) return false;
-		ModeSReply.subtype t = reply.getType();
-		return (t == ModeSReply.subtype.ADSB_AIRBORN_POSITION_V0 ||
-				t == ModeSReply.subtype.ADSB_AIRBORN_POSITION_V1 ||
-				t == ModeSReply.subtype.ADSB_AIRBORN_POSITION_V2);
+		ModeSDownlinkMsg.subtype t = reply.getType();
+		return (t == ModeSDownlinkMsg.subtype.ADSB_AIRBORN_POSITION_V0 ||
+				t == ModeSDownlinkMsg.subtype.ADSB_AIRBORN_POSITION_V1 ||
+				t == ModeSDownlinkMsg.subtype.ADSB_AIRBORN_POSITION_V2);
 	}
 
 	/**
 	 * Check whether a ModeSReply is a surface position (of any version), i.e., it
 	 * is of type {@link SurfacePositionV0Msg}, {@link SurfacePositionV1Msg} or {@link SurfacePositionV2Msg}
 	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSReply} or one of its sub classes
+	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
 	 */
-	public static <T extends ModeSReply> boolean isSurfacePosition(T reply) {
+	public static <T extends ModeSDownlinkMsg> boolean isSurfacePosition(T reply) {
 		if (reply == null) return false;
-		ModeSReply.subtype t = reply.getType();
-		return (t == ModeSReply.subtype.ADSB_SURFACE_POSITION_V0 ||
-				t == ModeSReply.subtype.ADSB_SURFACE_POSITION_V1 ||
-				t == ModeSReply.subtype.ADSB_SURFACE_POSITION_V2);
+		ModeSDownlinkMsg.subtype t = reply.getType();
+		return (t == ModeSDownlinkMsg.subtype.ADSB_SURFACE_POSITION_V0 ||
+				t == ModeSDownlinkMsg.subtype.ADSB_SURFACE_POSITION_V1 ||
+				t == ModeSDownlinkMsg.subtype.ADSB_SURFACE_POSITION_V2);
 	}
 
 	/**
 	 * Check whether a ModeSReply is either an airborne or a surface position
-	 * @see #isAirbornePosition(ModeSReply)
-	 * @see #isSurfacePosition(ModeSReply)
+	 * @see #isAirbornePosition(ModeSDownlinkMsg)
+	 * @see #isSurfacePosition(ModeSDownlinkMsg)
 	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSReply} or one of its sub classes
+	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
 	 */
-	public static <T extends ModeSReply> boolean isPosition(T reply) {
+	public static <T extends ModeSDownlinkMsg> boolean isPosition(T reply) {
 		return isAirbornePosition(reply) || isSurfacePosition(reply);
 	}
 

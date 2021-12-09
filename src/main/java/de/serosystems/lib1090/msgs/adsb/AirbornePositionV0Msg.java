@@ -6,7 +6,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.modes.ModeSReply;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
@@ -73,7 +73,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	public AirbornePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
 
-		setType(ModeSReply.subtype.ADSB_AIRBORN_POSITION_V0);
+		setType(ModeSDownlinkMsg.subtype.ADSB_AIRBORN_POSITION_V0);
 
 		if (!(getFormatTypeCode() == 0 ||
 				(getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
