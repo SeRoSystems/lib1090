@@ -295,7 +295,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 
 	@Override
 	public String toString() {
-		return "FineSurfacePositionMsg{" +
+		return super.toString() + "\n\tFineSurfacePositionMsg{" +
 				"movement=" + movement +
 				", heading_status=" + heading_status +
 				", ground_track=" + ground_track +

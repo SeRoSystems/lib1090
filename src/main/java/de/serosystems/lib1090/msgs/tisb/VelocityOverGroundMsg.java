@@ -284,4 +284,24 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	public Byte getSIL() {
 		return sil;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tVelocityOverGroundMsg{" +
+				"msg_subtype=" + msg_subtype +
+				", imf=" + imf +
+				", nacp=" + nacp +
+				", direction_west=" + direction_west +
+				", east_west_velocity=" + east_west_velocity +
+				", velocity_info_available=" + velocity_info_available +
+				", direction_south=" + direction_south +
+				", north_south_velocity=" + north_south_velocity +
+				", vertical_rate_down=" + vertical_rate_down +
+				", vertical_rate=" + vertical_rate +
+				", vertical_rate_info_available=" + vertical_rate_info_available +
+				", geo_minus_baro=" + geo_minus_baro +
+				", nacv=" + nacv +
+				", sil=" + sil +
+				'}';
+	}
 }

@@ -191,7 +191,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
 	@Override
 	public String toString() {
-		return "CoarsePositionMsg{" +
+		return super.toString() + "\n\tCoarsePositionMsg{" +
 				"imf=" + imf +
 				", surveillance_status=" + surveillance_status +
 				", svid=" + svid +

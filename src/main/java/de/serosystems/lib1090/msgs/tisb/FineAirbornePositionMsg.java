@@ -285,7 +285,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 
 	@Override
 	public String toString() {
-		return "FineAirbornePositionMsg{" +
+		return super.toString() + "\n\tFineAirbornePositionMsg{" +
 				"surveillance_status=" + surveillance_status +
 				", imf=" + imf +
 				", encoded_altitude=" + encoded_altitude +

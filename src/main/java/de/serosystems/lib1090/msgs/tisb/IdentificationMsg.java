@@ -122,7 +122,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 
 	@Override
 	public String toString() {
-		return "IdentificationMsg{" +
+		return super.toString() + "\n\tIdentificationMsg{" +
 				"emitter_category=" + emitter_category +
 				", identity=" + Arrays.toString(identity) +
 				'}';

@@ -266,4 +266,25 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	public Boolean isMagneticHeading () {
 		return magnetic_heading;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "\n\tAirspeedHeadingMsg{" +
+				"msg_subtype=" + msg_subtype +
+				", imf=" + imf +
+				", nacp=" + nacp +
+				", vertical_rate_down=" + vertical_rate_down +
+				", vertical_rate=" + vertical_rate +
+				", vertical_rate_info_available=" + vertical_rate_info_available +
+				", heading_status_bit=" + heading_status_bit +
+				", heading=" + heading +
+				", true_airspeed=" + true_airspeed +
+				", airspeed=" + airspeed +
+				", airspeed_available=" + airspeed_available +
+				", geo_minus_baro=" + geo_minus_baro +
+				", nacv=" + nacv +
+				", sil=" + sil +
+				", magnetic_heading=" + magnetic_heading +
+				'}';
+	}
 }
