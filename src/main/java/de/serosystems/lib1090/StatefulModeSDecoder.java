@@ -6,6 +6,10 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
+import de.serosystems.lib1090.msgs.tisb.CoarsePositionMsg;
+import de.serosystems.lib1090.msgs.tisb.FineAirbornePositionMsg;
+import de.serosystems.lib1090.msgs.tisb.FineSurfacePositionMsg;
+import de.serosystems.lib1090.msgs.tisb.ManagementMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,7 +86,7 @@ public class StatefulModeSDecoder {
 					byte ftc = es1090.getFormatTypeCode();
 
 					if (ftc >= 1 && ftc <= 4) // identification message
-						return new IdentificationMsg(es1090);
+						return new de.serosystems.lib1090.msgs.adsb.IdentificationMsg(es1090);
 
 					if (ftc >= 5 && ftc <= 8) {
 						// surface position message
@@ -127,14 +131,22 @@ public class StatefulModeSDecoder {
 						int subtype = es1090.getMessage()[0] & 0x7;
 
 						if (subtype == 1 || subtype == 2) { // velocity over ground
-							VelocityOverGroundMsg velocity = new VelocityOverGroundMsg(es1090);
+							de.serosystems.lib1090.msgs.adsb.VelocityOverGroundMsg velocity =
+									new de.serosystems.lib1090.msgs.adsb.VelocityOverGroundMsg(es1090);
 							if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
 							return velocity;
 						} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
-							AirspeedHeadingMsg airspeed = new AirspeedHeadingMsg(es1090);
+							de.serosystems.lib1090.msgs.adsb.AirspeedHeadingMsg airspeed =
+									new de.serosystems.lib1090.msgs.adsb.AirspeedHeadingMsg(es1090);
 							if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
 							return airspeed;
 						}
+					}
+
+					if (ftc == 24) {
+						int subtype = es1090.getMessage()[0] & 0x7;
+						if (subtype == 1)
+							return new MLATSystemStatusMsg(es1090);
 					}
 
 					if (ftc == 28) { // aircraft status message, check subtype
@@ -198,14 +210,49 @@ public class StatefulModeSDecoder {
 					}
 
 					return es1090; // unknown extended squitter
-				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() < 4 ||
+				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 2 ||
 						modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
-					// TODO: TIS-B "ME" field
-					// check IMF field for AA interpretation
-					return modes;
+
+					// interpret ME field as standard ADS-B
+					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+
+					// we need stateful decoding, because ADS-B version > 0 can only be assumed
+					// if matching version info in operational status has been found.
+					DecoderData dd = getDecoderData(modes.getAddress());
+
+					// what kind of extended squitter?
+					byte ftc = es1090.getFormatTypeCode();
+
+					if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
+						return new FineAirbornePositionMsg(es1090, timestamp);
+					} else if (ftc >= 5 && ftc <= 8) {
+						return new FineSurfacePositionMsg(es1090, timestamp);
+					} else if (ftc == 19) {
+						int subtype = es1090.getMessage()[0] & 0x7;
+						if (subtype == 1 || subtype == 2) {
+							de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
+									new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
+							if (vog.hasGeoMinusBaroInfo())
+								dd.geoMinusBaro = vog.getGeoMinusBaro();
+							return vog;
+						} else if (subtype == 3 || subtype == 4) {
+							de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
+									new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
+							if (ash.hasGeoMinusBaroInfo())
+								dd.geoMinusBaro = ash.getGeoMinusBaro();
+							return ash;
+						}
+					} else if (ftc >= 1 && ftc <= 4) {
+						return new de.serosystems.lib1090.msgs.tisb.IdentificationMsg(es1090);
+					}
+
+					return es1090; // unknown TIS-B message
+				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 3) {
+					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+					return new CoarsePositionMsg(es1090, timestamp);
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
-					// TODO: TIS-B or ADS-R Management Message
-					return modes;
+					// TIS-B or ADS-R Management Message
+					return new ManagementMessage(new ExtendedSquitter(modes));
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
 					// TODO: ADS-R message (minor differences to ADS-B, see 2.2.18 in DO-260B
 					return modes;
