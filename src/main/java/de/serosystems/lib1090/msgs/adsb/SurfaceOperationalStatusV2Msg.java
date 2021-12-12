@@ -28,6 +28,8 @@ import java.io.Serializable;
  */
 public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg implements Serializable {
 
+	private static final long serialVersionUID = 5774750859726557576L;
+
 	private boolean sil_supplement;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/

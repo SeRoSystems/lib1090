@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = -1156158096293306435L;
+	private static final long serialVersionUID = 190338580932294046L;
 
 	private byte flight_status;
 	private byte downlink_request;

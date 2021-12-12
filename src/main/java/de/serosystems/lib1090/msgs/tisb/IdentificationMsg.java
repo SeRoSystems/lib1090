@@ -33,6 +33,8 @@ import static de.serosystems.lib1090.msgs.adsb.IdentificationMsg.mapChar;
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable {
 
+	private static final long serialVersionUID = -1692656992966148114L;
+
 	private byte emitter_category;
 	private byte[] identity;
 

@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -7877955448285410779L;
+	private static final long serialVersionUID = 2459913562133769670L;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected MilitaryExtendedSquitter() { }

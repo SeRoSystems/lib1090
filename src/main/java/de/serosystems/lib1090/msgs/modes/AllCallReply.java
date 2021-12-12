@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = -1156158096293306435L;
+	private static final long serialVersionUID = 2459589933570219472L;
 
 	private byte capabilities;
 	private int parity_interrogator;

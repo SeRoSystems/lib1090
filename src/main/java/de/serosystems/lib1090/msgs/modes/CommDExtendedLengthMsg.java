@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = 1509054097399122428L;
+	private static final long serialVersionUID = 8539282448043078992L;
 
 	private byte[] message;
 	private boolean ack;

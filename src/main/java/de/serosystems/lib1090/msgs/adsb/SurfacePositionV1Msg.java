@@ -11,6 +11,8 @@ import java.io.Serializable;
  */
 public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serializable {
 
+	private static final long serialVersionUID = -5119960912384954056L;
+
 	private boolean nic_suppl_a;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/

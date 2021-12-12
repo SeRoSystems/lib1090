@@ -28,8 +28,9 @@ import java.io.Serializable;
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
 public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable {
-	
-	private static final long serialVersionUID = -7072061713588878404L;
+
+	private static final long serialVersionUID = 6901092011249128775L;
+
 	private byte msg_subtype;
 	private boolean intent_change;
 	private boolean ifr_capability;

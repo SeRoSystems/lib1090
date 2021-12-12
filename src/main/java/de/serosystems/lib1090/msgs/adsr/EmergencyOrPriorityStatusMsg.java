@@ -28,6 +28,8 @@ import java.io.Serializable;
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable {
+
+	private static final long serialVersionUID = 2611795026824285668L;
 	
 	private byte msgsubtype;
 	private byte emergency_state;

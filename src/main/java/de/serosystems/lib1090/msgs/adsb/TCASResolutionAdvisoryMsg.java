@@ -30,7 +30,8 @@ import java.io.Serializable;
  */
 public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -5356935198993751991L;
+	private static final long serialVersionUID = 789568444700434753L;
+
 	private byte msg_subtype;
 	private short active_ra;
 	private byte racs_record;

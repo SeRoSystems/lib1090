@@ -36,6 +36,8 @@ import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.decodeAltit
  */
 public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
 
+	private static final long serialVersionUID = 8691583253646403341L;
+
 	// bits 6-7
 	private byte surveillance_status;
 	// bit 8

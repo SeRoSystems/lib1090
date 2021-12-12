@@ -30,7 +30,8 @@ import java.util.Arrays;
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -4395826778354619987L;
+	private static final long serialVersionUID = 3475444849066416732L;
+
 	private byte emitter_category;
 	private byte[] identity;
 

@@ -31,6 +31,8 @@ import java.io.Serializable;
  */
 public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable {
 
+	private static final long serialVersionUID = 944130622021621845L;
+
 	private byte msg_subtype;
 	private boolean imf;
 	private byte nacp;

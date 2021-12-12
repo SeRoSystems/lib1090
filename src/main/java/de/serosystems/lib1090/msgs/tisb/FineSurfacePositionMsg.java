@@ -36,6 +36,8 @@ import java.io.Serializable;
  */
 public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
 
+	private static final long serialVersionUID = 8325609209771059717L;
+
 	private byte movement;
 	private boolean heading_status; // is heading valid?
 	private byte ground_track;

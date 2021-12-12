@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = -945389130204217847L;
+	private static final long serialVersionUID = 1052613416840618986L;
 
 	private boolean airborne;
 	private byte sensitivity_level;

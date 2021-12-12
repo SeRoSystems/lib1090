@@ -29,7 +29,8 @@ import java.util.Arrays;
  * @author Matthias Schäfer (schaefer@opensky-network.org)
  */
 public class ModeSDownlinkMsg implements Serializable {
-	private static final long serialVersionUID = 5369519167589262290L;
+
+	private static final long serialVersionUID = 4429516110651295544L;
 
 	/*
 	 * Attributes

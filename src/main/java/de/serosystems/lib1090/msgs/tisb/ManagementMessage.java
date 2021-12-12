@@ -33,6 +33,8 @@ import static de.serosystems.lib1090.msgs.adsb.IdentificationMsg.mapChar;
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable {
 
+	private static final long serialVersionUID = 1526130029633174669L;
+
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected ManagementMessage() { }
 

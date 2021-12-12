@@ -37,6 +37,8 @@ import java.io.Serializable;
  */
 public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 
+	private static final long serialVersionUID = -257270493057596465L;
+
 	private boolean horizontal_position_available;
 	private byte movement;
 	private boolean heading_status; // is heading valid?

@@ -31,6 +31,8 @@ import java.io.Serializable;
  */
 public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable {
 
+	private static final long serialVersionUID = 4633940058263818959L;
+
 	private byte msg_subtype;
 	private boolean imf;
 	private byte nacp;

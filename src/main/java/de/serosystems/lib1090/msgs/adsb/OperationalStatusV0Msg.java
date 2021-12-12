@@ -29,6 +29,8 @@ import java.io.Serializable;
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable {
 
+	private static final long serialVersionUID = -8925123066831152922L;
+
 	private byte enroute_capabilities;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/

@@ -34,6 +34,8 @@ import java.io.Serializable;
  */
 public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 
+	private static final long serialVersionUID = 1178987247553752100L;
+
 	private boolean horizontal_position_available;
 	private boolean altitude_available;
 	private byte surveillance_status;

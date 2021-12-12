@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = -1156158096293306435L;
+	private static final long serialVersionUID = -1623942073259152603L;
 
 	private byte flight_status;
 	private byte downlink_request;

@@ -29,6 +29,8 @@ import java.io.Serializable;
  */
 public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Serializable {
 
+	private static final long serialVersionUID = 1143167908544789169L;
+
 	private boolean nic_suppl_a;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
