@@ -326,13 +326,12 @@ public class ModeSDownlinkMsg implements Serializable {
 				System.arraycopy(payload, 0, raw_address, 0, 3);
 				address.address = rawAPToInt(raw_address);
 
-				if (downlink_format == 18 && first_field==4 || // TIS-B/ADS-R Management Message
-						downlink_format == 18 && first_field==7 || // Reserved
-						downlink_format == 19 && first_field != 0) { // Reserved for Military Applications
-					// TIS-B management frame or military reserved
-					// no address given here
-					throw new UnspecifiedFormatError("Format unknown or not specified.");
-				}
+				if (downlink_format == 18 && first_field==4)
+					throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented.");
+				else if (downlink_format == 18 && first_field == 7)
+					throw new UnspecifiedFormatError("Got invalid (reserved) format.");
+				else if (downlink_format == 19 && first_field != 0)
+					throw new UnspecifiedFormatError("Military frame not implemented.");
 
 				break;
 
