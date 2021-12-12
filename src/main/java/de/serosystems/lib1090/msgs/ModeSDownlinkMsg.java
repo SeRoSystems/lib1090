@@ -242,8 +242,8 @@ public class ModeSDownlinkMsg implements Serializable {
 	protected ModeSDownlinkMsg() { }
 
 	/**
-	 * NOTE: use this method only for CF 2 and 5
-	 * @return the IMF field from TIS-B messages or null if unknown
+	 * NOTE: use this method only for CF 2, 5, and 6
+	 * @return the IMF field from TIS-B and ADS-R messages or null if unknown
 	 */
 	private static Boolean extractIMF(byte[] payload) {
 		// format type code
@@ -262,6 +262,16 @@ public class ModeSDownlinkMsg implements Serializable {
 		else if (ftc == 19)
 			// velocity / airspeed
 			imf = (payload[4]&0x80) > 0;
+		else if (ftc == 28)
+			// emergency and prio status
+			imf = (payload[9] & 0x1) != 0;
+		else if (ftc == 29)
+			// target state and status
+			imf = ((payload[9] & 0x20) != 0);
+		else if (ftc == 31)
+			// operational status
+			imf = (payload[9] & 0x1) != 0;
+
 		else return null;
 
 		return imf;
@@ -344,14 +354,16 @@ public class ModeSDownlinkMsg implements Serializable {
 					break;
 				case 2:
 				case 5:
+				case 6:
 					Boolean imf = extractIMF(payload);
 					if (imf == null)
 						address.type = QualifiedAddress.Type.UNKNOWN;
-					else if (first_field == 2)
+					else if (first_field == 2) // TIS-B
 						address.type = imf ? QualifiedAddress.Type.MODEA_TRACK : QualifiedAddress.Type.ICAO24;
-					else // first_field == 5
+					else if (first_field == 5) // TIS-B
 						address.type = imf ? QualifiedAddress.Type.RESERVED : QualifiedAddress.Type.NON_ICAO;
-
+					else // first_field == 6 // ADS-R
+						address.type = imf ? QualifiedAddress.Type.ANONYMOUS : QualifiedAddress.Type.ICAO24;
 					break;
 				case 3:
 					// coarse position
@@ -363,9 +375,6 @@ public class ModeSDownlinkMsg implements Serializable {
 					break;
 				case 4:
 					address.type = QualifiedAddress.Type.TISB_MANAGEMENT_INFO;
-					break;
-				case 6:
-					// TODO: ADS-R
 					break;
 				case 7:
 					address.type = QualifiedAddress.Type.RESERVED;
