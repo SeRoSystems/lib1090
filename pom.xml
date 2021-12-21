@@ -9,18 +9,18 @@
 
 	<name>lib1090</name>
 	<description>Java decoding library for Mode S, ADS-B, TIS-B and ADS-R</description>
-	<url>http://sero-systems.de</url>
+	<url>https://sero-systems.de</url>
 
 	<developers>
 		<developer>
 			<name>Matthias Schaefer</name>
-			<organization>OpenSky Network</organization>
-			<email>schaefer@sero-systems.de</email>
+			<organization>SeRo Systems</organization>
+			<email>contact@sero-systems.de</email>
 		</developer>
 		<developer>
 			<name>Markus Fuchs</name>
-			<organization>OpenSky Network</organization>
-			<email>fuchs@opensky-network.org</email>
+			<organization>SeRo Systems</organization>
+			<email>contact@sero-systems.de</email>
 		</developer>
 	</developers>
 
