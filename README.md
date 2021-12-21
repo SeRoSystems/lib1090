@@ -53,4 +53,4 @@ We have also published this project on Maven Central. Just include the following
 </dependency>
 ```
 
-Get the latest version number [here](https://mvnrepository.com/artifact/de.sero-systems/lib1090).
+Get the latest version number [here](https://search.maven.org/artifact/de.sero-systems/lib1090).

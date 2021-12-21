@@ -1,4 +1,4 @@
-# Publishing to Central
+# Publishing to Maven Central
 
 ## Prerequisites
 
