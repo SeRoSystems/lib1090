@@ -71,7 +71,7 @@ public class CompactPositionReporting {
          * reasonableness tests.
          *
          * @param other the other CPR encoded position in complementary format (even/odd). Also surface positions can
-         *              only be combined with other surface positions. Use null for local decoding only.Long
+         *              only be combined with other surface positions. Use null for local decoding only.
          * @param reference reference point for plausibility, surface and local decoding. Must be within 175 NM of the
          *                  true airborne position or within 42 NM for surface. Use null for global decoding only.
          * @return the decoded position or null if could not be decoded
@@ -121,7 +121,7 @@ public class CompactPositionReporting {
                 Position globalOther = decodeGlobalPosition(other, this, reference);
                 Position localOther = decodeLocalPosition(other, globalPos);
 
-                // should be within 3 NM (see comment in method's java doc)
+                // should be within 3 NM (= 555.6 m/s * 10 seconds)
                 if (globalOther != null && !surface && globalOther.haversine(globalPos) > 5556)
                     reasonable = false;
 
@@ -300,12 +300,15 @@ public class CompactPositionReporting {
 
         /**
          * @param cpr CPR encoded position
-         * @param receiver position of the receiver for surface decoding and to check if received position was more than 700km away
+         * @param receiver position of the receiver for surface decoding and to check if received position was more than 700km away;
+         *                 null disables checks and surface decoding
+         * @param disableSpeedTest do not perform speed estimation for reasonableness testing (use this, e.g., when you are merging
+         *                         data from different streams with different delays)
          * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
          *         if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
          *         the position.
          */
-        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr, Position receiver) {
+        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr, Position receiver, boolean disableSpeedTest) {
             if (cpr == null) return null;
 
             // get last position in complementary format for global decoding
@@ -323,7 +326,7 @@ public class CompactPositionReporting {
             //////// apply some additional (stateful) reasonableness tests //////////
 
             // check if it's realistic that the target covered this distance (faster than 1000 knots?)
-            if (last_pos != null && last_time != null && cpr.getTimestamp() != null) {
+            if (!disableSpeedTest && last_pos != null && last_time != null && cpr.getTimestamp() != null) {
                 double td = abs((cpr.getTimestamp() - last_time) / 1_000.);
                 double groundSpeed = new_pos.haversine(last_pos) / td; // in meters per second
 
@@ -344,6 +347,20 @@ public class CompactPositionReporting {
             }
 
             return new_pos;
+        }
+
+        /**
+         * Decodes position with speed estimation-based reasonableness test.
+         *
+         * @param cpr CPR encoded position
+         * @param receiver position of the receiver for surface decoding and to check if received position was more than 700km away;
+         *                 null disables checks and surface decoding
+         * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
+         *         if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
+         *         the position.
+         */
+        public Position decodePosition(CompactPositionReporting.CPREncodedPosition cpr, Position receiver) {
+            return decodePosition(cpr, receiver, false);
         }
 
     }
