@@ -5,10 +5,6 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
-import java.util.Arrays;
-
-import static de.serosystems.lib1090.msgs.adsb.IdentificationMsg.categoryDescription;
-import static de.serosystems.lib1090.msgs.adsb.IdentificationMsg.mapChar;
 
 /*
  *  This file is part of de.serosystems.lib1090.
