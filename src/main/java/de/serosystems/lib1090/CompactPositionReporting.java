@@ -25,6 +25,7 @@ import static java.lang.Math.abs;
  */
 public class CompactPositionReporting {
 
+    @SuppressWarnings("unused")
     public static class CPREncodedPosition {
 
         private final boolean is_odd;
@@ -64,6 +65,18 @@ public class CompactPositionReporting {
          */
         public boolean isOddFormat() {
             return is_odd;
+        }
+
+        public int getEncodedLat() {
+            return encoded_lat;
+        }
+
+        public int getEncodedLon() {
+            return encoded_lon;
+        }
+
+        public boolean isSurface() {
+            return surface;
         }
 
         /**
