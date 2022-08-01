@@ -1,28 +1,17 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
 /**
  * BDS 1,0
  */
-public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serializable {
+public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
 
     // Fields
     // ------
 
-    private byte flightStatus;
-    // Downlink Request
-    private byte downlinkRequest;
-    // Utility Message
-    private byte utilityMsg;
-    // Altitude Code (if DF20 otherwise null)
-    private Short altitudeCode;
-    // Identity (if DF21 otherwise null)
-    private Short identity;
     // BDS Code
     private short bdsCode;
     // Register 1116 Continuation Flag
@@ -79,36 +68,10 @@ public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serial
     protected DataLinkCapabilityReport() {
     }
 
-    public DataLinkCapabilityReport(String raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
+    public DataLinkCapabilityReport(byte[] message) throws BadFormatException {
 
-    public DataLinkCapabilityReport(byte[] raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
-
-    public DataLinkCapabilityReport(ModeSDownlinkMsg reply) throws BadFormatException {
-
-        super(reply);
-        //setType(subtype.DATALINK_CAPABILITY_REPORT);
-
-        byte[] payload = getPayload();
-        byte[] message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        if (getDownlinkFormat() == 20) {
-            this.altitudeCode = extractAltitudeCode(payload);
-            this.identity = null;
-        } else if (getDownlinkFormat() == 21) {
-            this.altitudeCode = null;
-            this.identity = extractIdentity(payload);
-        } else {
-            throw new BadFormatException("Message is not an altitude reply or an identity reply !");
-        }
-
-        this.flightStatus = getFirstField();
-        this.downlinkRequest = extractDownlinkRequest(payload);
-        this.utilityMsg = extractUtilityMessage(payload);
+        super(message);
+        setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
 
         this.bdsCode = extractBdsCode(message);
         this.continuationFlag = extractContinuationFlag(message);
@@ -139,26 +102,6 @@ public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serial
 
     // Getters
     // -------
-
-    public byte getFlightStatus() {
-        return flightStatus;
-    }
-
-    public byte getDownlinkRequest() {
-        return downlinkRequest;
-    }
-
-    public byte getUtilityMsg() {
-        return utilityMsg;
-    }
-
-    public Short getAltitudeCode() {
-        return altitudeCode;
-    }
-
-    public Short getIdentity() {
-        return identity;
-    }
 
     public short getBdsCode() {
         return bdsCode;
@@ -259,9 +202,6 @@ public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serial
     // Public static methods
     // ---------------------
 
-    public static short extractBdsCode(byte[] message) {
-        return (short) (((message[0] >>> 4) & 0x0F) * 10 + (message[0] & 0x0F));
-    }
 
     public static boolean extractContinuationFlag(byte[] message) {
         return ((message[1] >>> 7) & 0x1) == 1;
@@ -355,37 +295,13 @@ public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serial
         return ((message[5] >>> 5) & 0x01) == 1;
     }
 
-    // Private static methods
-    // ----------------------
-
-    private short extractIdentity(byte[] payload) {
-        return (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
-    }
-
-    private static short extractAltitudeCode(byte[] payload) {
-        return (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
-    }
-
-    private static byte extractUtilityMessage(byte[] payload) {
-        return (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-    }
-
-    private static byte extractDownlinkRequest(byte[] payload) {
-        return (byte) ((payload[0]>>>3) & 0x1F);
-    }
-
     // Override
     // --------
 
     @Override
     public String toString() {
         return "DataLinkCapabilityReport{" +
-                "flightStatus=" + flightStatus +
-                ", downlinkRequest=" + downlinkRequest +
-                ", utilityMsg=" + utilityMsg +
-                ", altitudeCode=" + altitudeCode +
-                ", identity=" + identity +
-                ", bdsCode=" + bdsCode +
+                "bdsCode=" + bdsCode +
                 ", continuationFlag=" + continuationFlag +
                 ", tcasOperationalCoordinationMessage=" + tcasOperationalCoordinationMessage +
                 ", tcasExtendedVersionNumber=" + tcasExtendedVersionNumber +
@@ -411,5 +327,4 @@ public class DataLinkCapabilityReport extends ModeSDownlinkMsg implements Serial
                 ", changeFlag=" + changeFlag +
                 '}';
     }
-
 }

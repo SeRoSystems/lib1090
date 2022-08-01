@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import java.io.Serializable;
 

@@ -1,8 +1,6 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -11,21 +9,11 @@ import java.util.Map;
 /**
  * BDS 1,7
  */
-public class CommonUsageGICBCapabilityReport extends ModeSDownlinkMsg implements Serializable {
+public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
 
     // Fields
     // ------
 
-    // Flight Status
-    private byte flightStatus;
-    // Downlink Request
-    private byte downlinkRequest;
-    // Utility Message
-    private byte utilityMsg;
-    // Altitude Code (if DF20 otherwise null)
-    private Short altitudeCode;
-    // Identity (if DF21 otherwise null)
-    private Short identity;
     // Common Usage GICB Capability Report
     private Map<String, Boolean> commonUsageGICBCapabilityReport;
 
@@ -36,36 +24,10 @@ public class CommonUsageGICBCapabilityReport extends ModeSDownlinkMsg implements
     protected CommonUsageGICBCapabilityReport() {
     }
 
-    public CommonUsageGICBCapabilityReport(String raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
+    public CommonUsageGICBCapabilityReport(byte[] message) throws BadFormatException {
 
-    public CommonUsageGICBCapabilityReport(byte[] raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
-
-    public CommonUsageGICBCapabilityReport(ModeSDownlinkMsg reply) throws BadFormatException {
-
-        super(reply);
-        //setType(subtype.COMMON_USAGE_GICB_CAPABILITY_REPORT);
-
-        byte[] payload = getPayload();
-        byte[] message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        if (reply.getDownlinkFormat() == 20) {
-            this.altitudeCode = extractAltitudeCode(payload);
-            this.identity = null;
-        } else if (reply.getDownlinkFormat() == 21) {
-            this.altitudeCode = null;
-            this.identity = (short) extractIdentity(payload);
-        } else {
-            throw new BadFormatException("Message is not an altitude reply or an identity reply !");
-        }
-
-        this.flightStatus = getFirstField();
-        this.downlinkRequest = extractDownlinkRequest(payload);
-        this.utilityMsg = extractUtilityMessage(payload);
+        super(message);
+        setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
 
         this.commonUsageGICBCapabilityReport = extractCommonGICBCapabilityReport(message);
 
@@ -73,26 +35,6 @@ public class CommonUsageGICBCapabilityReport extends ModeSDownlinkMsg implements
 
     // Getters
     // -------
-
-    public byte getFlightStatus() {
-        return flightStatus;
-    }
-
-    public byte getDownlinkRequest() {
-        return downlinkRequest;
-    }
-
-    public byte getUtilityMsg() {
-        return utilityMsg;
-    }
-
-    public Short getAltitudeCode() {
-        return altitudeCode;
-    }
-
-    public Short getIdentity() {
-        return identity;
-    }
 
     public Map<String, Boolean> getCommonUsageGICBCapabilityReport() {
         return commonUsageGICBCapabilityReport;
@@ -164,37 +106,13 @@ public class CommonUsageGICBCapabilityReport extends ModeSDownlinkMsg implements
 
     }
 
-    // Private static methods
-    // ----------------------
-
-    private short extractIdentity(byte[] payload) {
-        return (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
-    }
-
-    private static short extractAltitudeCode(byte[] payload) {
-        return (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
-    }
-
-    private static byte extractUtilityMessage(byte[] payload) {
-        return (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-    }
-
-    private static byte extractDownlinkRequest(byte[] payload) {
-        return (byte) ((payload[0]>>>3) & 0x1F);
-    }
-
     // Override
     // --------
 
     @Override
     public String toString() {
         return "CommonUsageGICBCapabilityReport{" +
-                "flightStatus=" + flightStatus +
-                ", downlinkRequest=" + downlinkRequest +
-                ", utilityMsg=" + utilityMsg +
-                ", altitudeCode=" + altitudeCode +
-                ", identity=" + identity +
-                ", commonUsageGICBCapabilityReport=" + commonUsageGICBCapabilityReport +
+                "commonUsageGICBCapabilityReport=" + commonUsageGICBCapabilityReport +
                 '}';
     }
 

@@ -1,8 +1,6 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -10,21 +8,11 @@ import java.util.Arrays;
 /**
  * BDS 3,0
  */
-public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implements Serializable {
+public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements Serializable {
 
     // Fields
     // ------
 
-    // Flight Status
-    private byte flightStatus;
-    // Downlink Request
-    private byte downlinkRequest;
-    // Utility Message
-    private byte utilityMsg;
-    // Altitude Code (if DF20 otherwise null)
-    private Short altitudeCode;
-    // Identity (if DF21 otherwise null)
-    private Short identity;
     // BDS Number
     private short bdsCode;
     // Active Resolution Advisories
@@ -44,38 +32,12 @@ public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implemen
     // ------------
 
     /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected ACASActiveResolutionAdvisorReport() {}
+    protected ACASActiveResolutionAdvisoryReport() {}
 
-    public ACASActiveResolutionAdvisorReport(String raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
+    public ACASActiveResolutionAdvisoryReport(byte[] message) throws BadFormatException {
 
-    public ACASActiveResolutionAdvisorReport(byte[] raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
-
-    public ACASActiveResolutionAdvisorReport(ModeSDownlinkMsg reply) throws BadFormatException {
-
-        super(reply);
-        //setType(subtype.ACAS_ACTIVE_RESOLUTION_ADVISOR_REPORT);
-
-        byte[] payload = getPayload();
-        byte[] message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        if (reply.getDownlinkFormat() == 20) {
-            this.altitudeCode = extractAltitudeCode(payload);
-            this.identity = null;
-        } else if (reply.getDownlinkFormat() == 21) {
-            this.altitudeCode = null;
-            this.identity = extractIdentity(payload);
-        } else {
-            throw new BadFormatException("Message is not an altitude reply or an identity reply !");
-        }
-
-        this.flightStatus = getFirstField();
-        this.downlinkRequest = extractDownlinkRequest(payload);
-        this.utilityMsg = extractUtilityMessage(payload);
+        super(message);
+        setBds(BDSRegister.bdsCode.ACAS_ACTIVE_RESOLUTION_ADVISORY);
 
         this.bdsCode = extractBdsCode(message);
         this.activeResolutionAdvisories = extractActiveResolutionAdvisories(message);
@@ -89,26 +51,6 @@ public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implemen
 
     // Getters
     // -------
-
-    public byte getFlightStatus() {
-        return flightStatus;
-    }
-
-    public byte getDownlinkRequest() {
-        return downlinkRequest;
-    }
-
-    public byte getUtilityMsg() {
-        return utilityMsg;
-    }
-
-    public Short getAltitudeCode() {
-        return altitudeCode;
-    }
-
-    public Short getIdentity() {
-        return identity;
-    }
 
     public short getBdsCode() {
         return bdsCode;
@@ -140,12 +82,6 @@ public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implemen
 
     // Private static methods
     // ----------------------
-
-    public static short extractBdsCode(byte[] message) {
-        int part1 = (message[0] >>> 4) & 0x0F;
-        int part2 = message[0] & 0x0F;
-        return (short) (part1 * 10 + part2);
-    }
 
     public static boolean[] extractActiveResolutionAdvisories(byte[] message) {
 
@@ -218,37 +154,13 @@ public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implemen
         return (ara[0] || mte) ? Arrays.copyOfRange(ara, 1, 7) : null;
     }
 
-    // Private static methods
-    // ----------------------
-
-    private static short extractIdentity(byte[] payload) {
-        return (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
-    }
-
-    private static short extractAltitudeCode(byte[] payload) {
-        return (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
-    }
-
-    private static byte extractUtilityMessage(byte[] payload) {
-        return (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-    }
-
-    private static byte extractDownlinkRequest(byte[] payload) {
-        return (byte) ((payload[0]>>>3) & 0x1F);
-    }
-
     // Override
     // --------
 
     @Override
     public String toString() {
-        return "ACASActiveResolutionAdvisorReport{" +
-                "flightStatus=" + flightStatus +
-                ", downlinkRequest=" + downlinkRequest +
-                ", utilityMsg=" + utilityMsg +
-                ", altitudeCode=" + altitudeCode +
-                ", identity=" + identity +
-                ", bdsCode=" + bdsCode +
+        return "ACASActiveResolutionAdvisoryReport{" +
+                "bdsCode=" + bdsCode +
                 ", activeResolutionAdvisories=" + Arrays.toString(activeResolutionAdvisories) +
                 ", resolutionAdvisoriesComponentsRecord=" + Arrays.toString(resolutionAdvisoriesComponentsRecord) +
                 ", resolutionAdvisoriesTerminatedIndicator=" + resolutionAdvisoriesTerminatedIndicator +
@@ -257,5 +169,4 @@ public class ACASActiveResolutionAdvisorReport extends ModeSDownlinkMsg implemen
                 ", threatIdentityData=" + threatIdentityData +
                 '}';
     }
-
 }

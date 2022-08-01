@@ -1,6 +1,5 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,9 +15,6 @@ public class HeadingAndSpeedTest {
                 (byte) 0b11111111, (byte) 0b10111010, (byte) 0b10100001, (byte) 0b00011110, (byte) 0b00100000,
                 (byte) 0b00000100, (byte) 0b01110010
         };
-
-        for (byte b : msg)
-            System.out.print(StringUtils.leftPad(Integer.toBinaryString(b & 0xFF), 8, '0') + " ");
 
     }
 

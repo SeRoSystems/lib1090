@@ -1,29 +1,17 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
 /**
  * BDS 6,0
  */
-public class HeadingAndSpeed extends ModeSDownlinkMsg implements Serializable {
+public class HeadingAndSpeed extends BDSRegister implements Serializable {
 
     // Fields
     // ------
 
-    // Flight Status
-    private byte flightStatus;
-    // Downlink Request
-    private byte downlinkRequest;
-    // Utility Message
-    private byte utilityMsg;
-    // Altitude Code (if DF20 otherwise null)
-    private Short altitudeCode;
-    // Identity (if DF21 otherwise null)
-    private Short identity;
     // Magnetic Heading
     private boolean magneticHeadingStatus;
     private boolean magneticHeadingSign;
@@ -50,36 +38,11 @@ public class HeadingAndSpeed extends ModeSDownlinkMsg implements Serializable {
     protected HeadingAndSpeed() {
     }
 
-    public HeadingAndSpeed(String raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
 
-    public HeadingAndSpeed(byte[] raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
+    public HeadingAndSpeed(byte[] message) throws BadFormatException {
 
-    public HeadingAndSpeed(ModeSDownlinkMsg reply) throws BadFormatException {
-
-        super(reply);
-        //setType(subtype.HEADING_AND_SPEED);
-
-        byte[] payload = getPayload();
-        byte[] message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        if (getDownlinkFormat() == 20) {
-            this.altitudeCode = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
-            this.identity = null;
-        } else if (getDownlinkFormat() == 21) {
-            this.altitudeCode = null;
-            this.identity = (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
-        } else {
-            throw new BadFormatException("Message is not an altitude reply or an identity reply !");
-        }
-
-        this.flightStatus = getFirstField();
-        this.downlinkRequest = (byte) ((payload[0] >>> 3) & 0x1F);
-        this.utilityMsg = (byte) ((payload[0] & 0x7) << 3 | (payload[1] >>> 5) & 0x7);
+        super(message);
+        setBds(BDSRegister.bdsCode.HEADING_AND_SPEED_REPORT);
 
         this.magneticHeadingStatus = extractMagneticHeadingStatus(message);
         this.magneticHeadingSign = extractMagneticHeadingSign(message);
@@ -99,26 +62,6 @@ public class HeadingAndSpeed extends ModeSDownlinkMsg implements Serializable {
 
     // Getters
     // -------
-
-    public byte getFlightStatus() {
-        return flightStatus;
-    }
-
-    public byte getDownlinkRequest() {
-        return downlinkRequest;
-    }
-
-    public byte getUtilityMsg() {
-        return utilityMsg;
-    }
-
-    public short getAltitudeCode() {
-        return altitudeCode;
-    }
-
-    public short getIdentity() {
-        return identity;
-    }
 
     public Float getMagneticHeading() {
         return computeMagneticHeading(magneticHeadingStatus, magneticHeadingSign, magneticHeadingValue);
@@ -221,12 +164,7 @@ public class HeadingAndSpeed extends ModeSDownlinkMsg implements Serializable {
     @Override
     public String toString() {
         return "HeadingAndSpeed{" +
-                "flightStatus=" + flightStatus +
-                ", downlinkRequest=" + downlinkRequest +
-                ", utilityMsg=" + utilityMsg +
-                ", altitudeCode=" + altitudeCode +
-                ", identity=" + identity +
-                ", magneticHeadingStatus=" + magneticHeadingStatus +
+                "magneticHeadingStatus=" + magneticHeadingStatus +
                 ", magneticHeadingSign=" + magneticHeadingSign +
                 ", magneticHeadingValue=" + magneticHeadingValue +
                 ", indicatedAirspeedStatus=" + indicatedAirspeedStatus +

@@ -1,6 +1,5 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,9 +15,6 @@ public class SelectedVerticalIntentionTest {
                 (byte) 0b10000101, (byte) 0b11100100, (byte) 0b00101111, (byte) 0b00110001, (byte) 0b00110000,
                 (byte) 0b00000000, (byte) 0b00000000
         };
-
-        for (byte b : msg)
-            System.out.print(StringUtils.leftPad(Integer.toBinaryString(b & 0xFF), 8, '0') + " ");
 
     }
 

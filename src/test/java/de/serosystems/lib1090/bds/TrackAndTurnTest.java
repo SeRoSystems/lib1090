@@ -1,6 +1,5 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,9 +15,6 @@ public class TrackAndTurnTest {
                 (byte) 0b10000001, (byte) 0b10010101, (byte) 0b00010101, (byte) 0b00110110, (byte) 0b11100000,
                 (byte) 0b00100100, (byte) 0b11010100
         };
-
-        for (byte b : msg)
-            System.out.print(StringUtils.leftPad(Integer.toBinaryString(b & 0xFF), 8, '0') + " ");
 
     }
 

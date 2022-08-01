@@ -1,29 +1,17 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
 /**
  * BDS 4,0
  */
-public class SelectedVerticalIntention extends ModeSDownlinkMsg implements Serializable {
+public class SelectedVerticalIntention extends BDSRegister implements Serializable {
 
     // Fields
     // ------
 
-    // Flight Status
-    private byte flightStatus;
-    // Downlink Request
-    private byte downlinkRequest;
-    // Utility Message
-    private byte utilityMsg;
-    // Altitude Code (if DF20 otherwise null)
-    private Short altitudeCode;
-    // Identity (if DF21 otherwise null)
-    private Short identity;
     // MCP/FCU Selected Altitude Status
     private boolean mcpFcuSelectedAltitudeStatus;
     // MCP/FCU Selected Altitude
@@ -56,37 +44,10 @@ public class SelectedVerticalIntention extends ModeSDownlinkMsg implements Seria
     protected SelectedVerticalIntention() {
     }
 
-    public SelectedVerticalIntention(String raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
+    public SelectedVerticalIntention(byte[] message) throws BadFormatException {
 
-    public SelectedVerticalIntention(byte[] raw_message) throws UnspecifiedFormatError, BadFormatException {
-        this(new ModeSDownlinkMsg(raw_message));
-    }
-
-    public SelectedVerticalIntention(ModeSDownlinkMsg reply) throws BadFormatException {
-
-        super(reply);
-        //setType(subtype.SELECTED_VERTICAL_INTENTION);
-
-
-        byte[] payload = getPayload();
-        byte[] message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        if (reply.getDownlinkFormat() == 20) {
-            this.altitudeCode = extractAltitudeCode(payload);
-            this.identity = null;
-        } else if (reply.getDownlinkFormat() == 21) {
-            this.altitudeCode = null;
-            this.identity = extractIdentity(payload);
-        } else {
-            throw new BadFormatException("Message is not an altitude reply or an identity reply !");
-        }
-
-        this.flightStatus = getFirstField();
-        this.downlinkRequest = extractDownlinkRequest(payload);
-        this.utilityMsg = extractUtilityMessage(payload);
+        super(message);
+        setBds(BDSRegister.bdsCode.SELECTED_VERTICAL_INTENTION);
 
         this.mcpFcuSelectedAltitudeStatus = extractMcpFcuSelectedAltitudeStatus(message);
         this.mcpFcuSelectedAltitudeValue = extractMcpFcuSelectedAltitudeValue(message);
@@ -105,26 +66,6 @@ public class SelectedVerticalIntention extends ModeSDownlinkMsg implements Seria
 
     // Getters
     // -------
-
-    public byte getFlightStatus() {
-        return flightStatus;
-    }
-
-    public byte getDownlinkRequest() {
-        return downlinkRequest;
-    }
-
-    public byte getUtilityMsg() {
-        return utilityMsg;
-    }
-
-    public short getAltitudeCode() {
-        return altitudeCode;
-    }
-
-    public short getIdentity() {
-        return identity;
-    }
 
     public Integer getMcpFcuSelectedAltitudeValue() {
         return computeSelectedAltitude(mcpFcuSelectedAltitudeStatus, mcpFcuSelectedAltitudeValue);
@@ -221,37 +162,13 @@ public class SelectedVerticalIntention extends ModeSDownlinkMsg implements Seria
         return status ? value : null;
     }
 
-    // Private static methods
-    // ----------------------
-
-    private static short extractIdentity(byte[] payload) {
-        return (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
-    }
-
-    private static short extractAltitudeCode(byte[] payload) {
-        return (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
-    }
-
-    private static byte extractUtilityMessage(byte[] payload) {
-        return (byte) ((payload[0]&0x7)<<3 | (payload[1]>>>5)&0x7);
-    }
-
-    private static byte extractDownlinkRequest(byte[] payload) {
-        return (byte) ((payload[0]>>>3) & 0x1F);
-    }
-
     // Override
     // --------
 
     @Override
     public String toString() {
         return "SelectedVerticalIntention{" +
-                "flightStatus=" + flightStatus +
-                ", downlinkRequest=" + downlinkRequest +
-                ", utilityMsg=" + utilityMsg +
-                ", altitudeCode=" + altitudeCode +
-                ", identity=" + identity +
-                ", mcpFcuSelectedAltitudeStatus=" + mcpFcuSelectedAltitudeStatus +
+                "mcpFcuSelectedAltitudeStatus=" + mcpFcuSelectedAltitudeStatus +
                 ", mcpFcuSelectedAltitudeValue=" + mcpFcuSelectedAltitudeValue +
                 ", fmsSelectedAltitudeStatus=" + fmsSelectedAltitudeStatus +
                 ", fmsSelectedAltitudeValue=" + fmsSelectedAltitudeValue +

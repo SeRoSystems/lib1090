@@ -1,6 +1,5 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,8 +17,6 @@ public class CommonUsgeGICBCapabilityReportTest {
                 (byte) 0b11111010, (byte) 0b10000001, (byte) 0b11000001, (byte) 0b00000000, (byte) 0b00000000,
                 (byte) 0b00000000, (byte) 0b00000000
         };
-        for (byte b : msg)
-            System.out.print(StringUtils.leftPad(Integer.toBinaryString(b & 0xFF), 8, '0') + " ");
 
     }
 

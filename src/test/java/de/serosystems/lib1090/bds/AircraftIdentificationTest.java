@@ -1,6 +1,5 @@
-package de.serosystems.lib1090.msgs.modes;
+package de.serosystems.lib1090.bds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,15 +16,12 @@ public class AircraftIdentificationTest {
                 (byte) 0b00011101, (byte) 0b11100000
         };
 
-        for (byte b : msg)
-            System.out.print(StringUtils.leftPad(Integer.toBinaryString(b & 0xFF), 8, '0') + " ");
-
     }
 
     @Test
     public void bdsCode() {
 
-        int bds = AircraftIdentification.extractBdsCode(msg);
+        short bds = AircraftIdentification.extractBdsCode(msg);
         Assert.assertEquals(20, bds);
 
     }
@@ -40,6 +36,5 @@ public class AircraftIdentificationTest {
         Assert.assertEquals("KLM1017 ", String.valueOf(identityCharArray));
 
     }
-
-
+    
 }
