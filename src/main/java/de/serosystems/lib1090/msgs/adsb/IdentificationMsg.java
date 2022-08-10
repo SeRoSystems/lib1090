@@ -97,7 +97,12 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 		emitter_category = (byte) (msg[0] & 0x7);
 
 		// extract identity
-		identity = new byte[8];
+		identity = decodeAircraftIdentification(msg);
+	}
+
+	public static byte[] decodeAircraftIdentification(byte[] msg) {
+		byte[] identity = new byte[8];
+
 		int byte_off, bit_off;
 		for (int i=8; i>=1; i--) {
 			// calculate offsets
@@ -112,6 +117,8 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 				if (bit_off < 6) identity[i-1] |= msg[byte_off-1]<<bit_off&0x3F;
 			}
 		}
+
+		return identity;
 	}
 
 	/**

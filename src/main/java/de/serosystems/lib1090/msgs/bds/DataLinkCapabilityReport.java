@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
 import java.io.Serializable;
 
@@ -22,6 +22,7 @@ import java.io.Serializable;
 /**
  * Decoder for Datalink Capability Report (BDS 1,0)
  */
+@SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
 
     // Fields
@@ -82,8 +83,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected DataLinkCapabilityReport() {
-    }
+    protected DataLinkCapabilityReport() { }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
@@ -355,99 +355,99 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
         return changeFlag;
     }
 
-    // Public static methods
+    // static methods
     // ---------------------
 
 
-    public static boolean extractContinuationFlag(byte[] message) {
+    static boolean extractContinuationFlag(byte[] message) {
         return ((message[1] >>> 7) & 0x1) == 1;
     }
 
-    public static boolean extractTcasOperationalCoordinationMessage(byte[] message) {
+    static boolean extractTcasOperationalCoordinationMessage(byte[] message) {
         return ((message[1] >>> 6) & 0x1) == 1;
     }
 
-    public static short extractTcasExtendedVersionNumber(byte[] message) {
+    static short extractTcasExtendedVersionNumber(byte[] message) {
         return (short) ((message[1] >>> 2) & 0xF);
     }
 
-    public static boolean extractOverlayCommandCapability(byte[] message) {
+    static boolean extractOverlayCommandCapability(byte[] message) {
         return ((message[1] >>> 1) & 0x1) == 1;
     }
 
-    public static boolean extractTcasInterfaceOperational(byte[] message) {
+    static boolean extractTcasInterfaceOperational(byte[] message) {
         return (message[1] & 0x1) == 1;
     }
 
-    public static short extractModeSSubNetworkVersionNumber(byte[] message) {
+    static short extractModeSSubNetworkVersionNumber(byte[] message) {
         return (short) ((message[2] >>> 1) & 0x7F);
     }
 
-    public static boolean extractTransponderEnhancedProtocolIndicator(byte[] message) {
+    static boolean extractTransponderEnhancedProtocolIndicator(byte[] message) {
         return (message[2] & 0x01) == 1;
     }
 
-    public static boolean extractModeSSpecificServicesCapability(byte[] message) {
+    static boolean extractModeSSpecificServicesCapability(byte[] message) {
         return ((message[3] >>> 7) & 0x1) == 1;
     }
 
-    public static short extractUelmAverageThroughputCapability(byte[] message) {
+    static short extractUelmAverageThroughputCapability(byte[] message) {
         return (short) ((message[3] >>> 4) & 0x07);
     }
 
-    public static short extractDelmThroughputCapability(byte[] message) {
+    static short extractDelmThroughputCapability(byte[] message) {
         return (short) (message[3] & 0x0F);
     }
 
-    public static boolean extractAircraftIdentificationCapability(byte[] message) {
+    static boolean extractAircraftIdentificationCapability(byte[] message) {
         return ((message[4] >>> 7) & 0x01) == 1;
     }
 
-    public static boolean extractSquitterCapabilitySubfield(byte[] message) {
+    static boolean extractSquitterCapabilitySubfield(byte[] message) {
         return ((message[4] >>> 6) & 0x01) == 1;
     }
 
-    public static boolean extractSurveillanceIdentifierCode(byte[] message) {
+    static boolean extractSurveillanceIdentifierCode(byte[] message) {
         return ((message[4] >>> 5) & 0x01) == 1;
     }
 
-    public static boolean extractCommonUsageGICB(byte[] message) {
+    static boolean extractCommonUsageGICB(byte[] message) {
         return ((message[4] >>> 4) & 0x01) == 1;
     }
 
-    public static boolean extractTcasHybridSurveillanceCapability(byte[] message) {
+    static boolean extractTcasHybridSurveillanceCapability(byte[] message) {
         return ((message[4] >>> 3) & 0x01) == 1;
     }
 
-    public static boolean extractTcasRataCapability(byte[] message) {
+    static boolean extractTcasRataCapability(byte[] message) {
         return ((message[4] >>> 2) & 0x01) == 1;
     }
 
-    public static short extractTcasVersionNumber(byte[] message) {
+    static short extractTcasVersionNumber(byte[] message) {
         return (short) (message[4] & 0x03);
     }
 
-    public static boolean extractBasicDataFlashCapability(byte[] message) {
+    static boolean extractBasicDataFlashCapability(byte[] message) {
         return ((message[5] >>> 6) & 0x01) == 1;
     }
 
-    public static boolean extractPhaseOverlayExtendedSquitterCapability(byte[] message) {
+    static boolean extractPhaseOverlayExtendedSquitterCapability(byte[] message) {
         return ((message[5] >>> 5) & 0x01) == 1;
     }
 
-    public static boolean extractPhaseOverlayModeSCapability(byte[] message) {
+    static boolean extractPhaseOverlayModeSCapability(byte[] message) {
         return ((message[5] >>> 4) & 0x01) == 1;
     }
 
-    public static boolean extractEnhancedSurveillanceCapability(byte[] message) {
+    static boolean extractEnhancedSurveillanceCapability(byte[] message) {
         return ((message[5] >>> 1) & 0x01) == 1;
     }
 
-    public static short extractActiveTransponderSideIndicator(byte[] message) {
+    static short extractActiveTransponderSideIndicator(byte[] message) {
         return (short) ((message[6] >>> 6) & 0x03);
     }
 
-    public static boolean extractChangeFlag(byte[] message) {
+    static boolean extractChangeFlag(byte[] message) {
         return ((message[5] >>> 5) & 0x01) == 1;
     }
 

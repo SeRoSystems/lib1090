@@ -1,4 +1,6 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
+
+import de.serosystems.lib1090.exceptions.BadFormatException;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -22,7 +24,9 @@ import java.util.Arrays;
 
 /**
  * Decoder for ACAS active resolution advisory report (BDS 3,0)
+ * See Annex 10 V4 4.3.8.4.2.2
  */
+@SuppressWarnings("unused")
 public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements Serializable {
 
     // Fields
@@ -52,7 +56,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
-    public ACASActiveResolutionAdvisoryReport(byte[] message) {
+    public ACASActiveResolutionAdvisoryReport(byte[] message) throws BadFormatException {
 
         super(message);
         setBds(BDSRegister.bdsCode.ACAS_ACTIVE_RESOLUTION_ADVISORY);
@@ -122,10 +126,10 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
         return threatIdentityData;
     }
 
-    // Private static methods
+    // static methods
     // ----------------------
 
-    public static boolean[] extractActiveResolutionAdvisories(byte[] message) {
+    static boolean[] extractActiveResolutionAdvisories(byte[] message) {
 
         return new boolean[]{
                 ((message[1] >>> 7) & 0x01) == 1,
@@ -145,7 +149,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
         };
     }
 
-    public static boolean[] extractResolutionAdvisoriesComponentsRecord(byte[] message) {
+    static boolean[] extractResolutionAdvisoriesComponentsRecord(byte[] message) {
 
         boolean doNotPassBelow = ((message[2] >>> 1) & 0x01) == 1;
         boolean doNotPassAbove = (message[2] & 0x01) == 1;
@@ -156,19 +160,19 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
 
     }
 
-    public static boolean extractResolutionAdvisoryTerminated(byte[] message) {
+    static boolean extractResolutionAdvisoryTerminated(byte[] message) {
         return ((message[3] >>> 5) & 0x01) == 1;
     }
 
-    public static boolean extractMultipleThreatEncounter(byte[] message) {
+    static boolean extractMultipleThreatEncounter(byte[] message) {
         return ((message[3] >>> 4) & 0x01) == 1;
     }
 
-    public static short extractThreatTypeIndicator(byte[] message) {
+    static short extractThreatTypeIndicator(byte[] message) {
         return (short) ((message[3] >>> 2) & 0x03);
     }
 
-    public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, byte[] message) {
+    static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, byte[] message) throws BadFormatException {
 
         ThreatIdentityData threatIdentityData = null;
 
@@ -176,14 +180,14 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
 
             case 1 :
                 long icao = (((message[3] & 0x03) << 22) | ((message[4] & 0xFF) << 14) | ((message[5] & 0xFF) << 6) | ((message[6] >>> 2) & 0x3F)) & 0xFFFFFF;
-                threatIdentityData = new ThreatIdentityData(icao, null, null, null);
+                threatIdentityData = new ThreatIdentityData(icao);
                 break;
 
             case 2 :
                 short altitudeCode = (short) ((((message[3] & 0x03) << 11) | ((message[4] & 0xFF) << 3) | ((message[5] >>> 5) & 0x03)) & 0x1FFF);
                 short threatIdentityDataRange = (short) ((((message[5] & 0x1F) << 2) | ((message[6] >>> 6) & 0x03)) & 0x7F);
                 short threatIdentityDataBearing = (short) (message[6] & 0x3F);
-                threatIdentityData = new ThreatIdentityData(null, altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
+                threatIdentityData = new ThreatIdentityData(altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
                 break;
 
         }
@@ -192,7 +196,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
 
     }
 
-    public static boolean[] computeActiveResolutionAdvisories(boolean[] ara, boolean mte) {
+    static boolean[] computeActiveResolutionAdvisories(boolean[] ara, boolean mte) {
         return (ara[0] || mte) ? Arrays.copyOfRange(ara, 1, 7) : null;
     }
 
