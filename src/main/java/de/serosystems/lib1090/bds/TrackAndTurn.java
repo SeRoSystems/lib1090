@@ -1,11 +1,26 @@
 package de.serosystems.lib1090.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-
 import java.io.Serializable;
 
+/*
+ *  This file is part of de.serosystems.lib1090.
+ *
+ *  de.serosystems.lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  de.serosystems.lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
- * BDS 5,0
+ * Decoder for track and turn (BDS 5,0)
  */
 public class TrackAndTurn extends BDSRegister implements Serializable {
 
@@ -38,7 +53,10 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     protected TrackAndTurn() {
     }
 
-    public TrackAndTurn(byte[] message) throws BadFormatException {
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     */
+    public TrackAndTurn(byte[] message) {
 
         super(message);
         setBds(BDSRegister.bdsCode.TRACK_AND_TURN_REPORT);
@@ -62,22 +80,42 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     // Getters
     // -------
 
+    /**
+     * @return the roll angle.
+     * The value range is [-90, +90] degrees.
+     */
     public Float getRollAngle() {
         return computeRollAngle(rollAngleStatus, rollAngleSign, rollAngleValue);
     }
 
+    /**
+     * @return the true track angle.
+     * The value range is [-180, +180] degrees
+     */
     public Float getTrueTrackAngle() {
         return computeTrueTrackAngle(trueTrackAngleStatus, trueTrackAngleSign, trueTrackAngleValue);
     }
 
+    /**
+     * @return the ground speed.
+     * The value range is [0, 2046] knots
+     */
     public Integer getGroundSpeed() {
         return computeGroundSpeed(groundSpeedStatus, groundSpeedValue);
     }
 
+    /**
+     * @return the track angle rate
+     * The value range is [-16, +16] degrees/seconds
+     */
     public Float getTrackAngleRate() {
         return computeTrackAngleRate(trackAngleRateStatus, trackAngleRateSign, trackAngleRateValue);
     }
 
+    /**
+     * @return the true airspeed
+     * The value range is [0, 2046] knots
+     */
     public Integer getTrueAirspeed() {
         return computeTrueAirSpeed(trueAirSpeedStatus, trueAirSpeedValue);
     }

@@ -1,12 +1,27 @@
 package de.serosystems.lib1090.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
+/*
+ *  This file is part of de.serosystems.lib1090.
+ *
+ *  de.serosystems.lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  de.serosystems.lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
- * BDS 2,0
+ * Decoder for aircraft identification (BDS 2,0)
  */
 public class AircraftIdentification extends BDSRegister implements Serializable {
 
@@ -26,7 +41,10 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
     protected AircraftIdentification() {
     }
 
-    public AircraftIdentification(byte[] message) throws BadFormatException {
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     */
+    public AircraftIdentification(byte[] message) {
 
         super(message);
         setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
@@ -39,10 +57,9 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
     // Getters
     // -------
 
-    public short getBdsCode() {
-        return bdsCode;
-    }
-
+    /**
+     * @return The call sign as 8 characters array
+     */
     public char[] getAircraftIdentification() {
         return mapChar(aircraftIdentification);
     }

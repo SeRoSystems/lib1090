@@ -1,13 +1,28 @@
 package de.serosystems.lib1090.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ *  This file is part of de.serosystems.lib1090.
+ *
+ *  de.serosystems.lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  de.serosystems.lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
- * BDS 1,7
+ * Decoder for COmmon usage GICB capability report (BDS 1,7)
  */
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
 
@@ -24,7 +39,10 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
     protected CommonUsageGICBCapabilityReport() {
     }
 
-    public CommonUsageGICBCapabilityReport(byte[] message) throws BadFormatException {
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     */
+    public CommonUsageGICBCapabilityReport(byte[] message) {
 
         super(message);
         setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
@@ -36,6 +54,9 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
     // Getters
     // -------
 
+    /**
+     * @return common usage GICB services currently supported
+     */
     public Map<String, Boolean> getCommonUsageGICBCapabilityReport() {
         return commonUsageGICBCapabilityReport;
     }
@@ -59,47 +80,47 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
         map.put("BDS09", ((message[0] >>> 3) & 0x1) == 1);
         // BDS 0,A Extended Squitter Event-Driven Information
         map.put("BDS0A", ((message[0] >>> 2) & 0x1) == 1);
-        // 2,0 Aircraft identification
+        // BDS 2,0 Aircraft identification
         map.put("BDS20", ((message[0] >>> 1) & 0x1) == 1);
-        // 2,1 Aircraft registration number
+        // BDS 2,1 Aircraft registration number
         map.put("BDS21", (message[0] & 0x1) == 1);
-        // 4,0 Selected vertical intention
+        // BDS 4,0 Selected vertical intention
         map.put("BDS40", ((message[1] >>> 7) & 0x1) == 1);
-        // 4,1 Next waypoint identifier
+        // BDS 4,1 Next waypoint identifier
         map.put("BDS41", ((message[1] >>> 6) & 0x1) == 1);
-        // 4,2 Next waypoint position
+        // BDS 4,2 Next waypoint position
         map.put("BDS42", ((message[1] >>> 5) & 0x1) == 1);
-        // 4,3 Next waypoint information
+        // BDS 4,3 Next waypoint information
         map.put("BDS43", ((message[1] >>> 4) & 0x1) == 1);
-        // 4,4 Meteorological routine report
+        // BDS 4,4 Meteorological routine report
         map.put("BDS44", ((message[1] >>> 3) & 0x1) == 1);
-        // 4,5 Meteorological hazard report
+        // BDS 4,5 Meteorological hazard report
         map.put("BDS45", ((message[1] >>> 2) & 0x1) == 1);
-        // 4,8 VHF channel report
+        // BDS 4,8 VHF channel report
         map.put("BDS48", ((message[1] >>> 1) & 0x1) == 1);
-        // 5,0 Track and turn report
+        // BDS 5,0 Track and turn report
         map.put("BDS50", (message[1] & 0x1) == 1);
-        // 5,1 Position coarse
+        // BDS 5,1 Position coarse
         map.put("BDS51", ((message[2] >>> 7) & 0x1) == 1);
-        // 5,2 Position fine
+        // BDS 5,2 Position fine
         map.put("BDS52", ((message[2] >>> 6) & 0x1) == 1);
-        // 5,3 Air-referenced state vector
+        // BDS 5,3 Air-referenced state vector
         map.put("BDS53", ((message[2] >>> 5) & 0x1) == 1);
-        // 5,4 Waypoint 1
+        // BDS 5,4 Waypoint 1
         map.put("BDS54", ((message[2] >>> 4) & 0x1) == 1);
-        // 5,5 Waypoint 2
+        // BDS 5,5 Waypoint 2
         map.put("BDS55", ((message[2] >>> 3) & 0x1) == 1);
-        // 5,6 Waypoint 3
+        // BDS 5,6 Waypoint 3
         map.put("BDS56", ((message[2] >>> 2) & 0x1) == 1);
-        // 5,F Quasi-static parameter monitoring
+        // BDS 5,F Quasi-static parameter monitoring
         map.put("BDS5F", ((message[2] >>> 1) & 0x1) == 1);
-        // 6,0 Heading and speed report
+        // BDS 6,0 Heading and speed report
         map.put("BDS60", (message[2] & 0x1) == 1);
-        // E,1 Reserved for Mode S BITE (Built In Test Equipment)
+        // BDS E,1 Reserved for Mode S BITE (Built In Test Equipment)
         map.put("BDSE1", ((message[3] >>> 5) & 0x1) == 1);
-        // E,2 Reserved for Mode S BITE (Built In Test Equipment)
+        // BDS E,2 Reserved for Mode S BITE (Built In Test Equipment)
         map.put("BDSE2", ((message[3] >>> 4) & 0x1) == 1);
-        // F,1 Military applications
+        // BDS F,1 Military applications
         map.put("BDSF1", ((message[3] >>> 3) & 0x1) == 1);
 
         return map;

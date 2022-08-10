@@ -1,11 +1,26 @@
 package de.serosystems.lib1090.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-
 import java.io.Serializable;
 
+/*
+ *  This file is part of de.serosystems.lib1090.
+ *
+ *  de.serosystems.lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  de.serosystems.lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
- * BDS 4,0
+ * Decoder for selected vertical intention (BDS 4,0)
  */
 public class SelectedVerticalIntention extends BDSRegister implements Serializable {
 
@@ -44,7 +59,10 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     protected SelectedVerticalIntention() {
     }
 
-    public SelectedVerticalIntention(byte[] message) throws BadFormatException {
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     */
+    public SelectedVerticalIntention(byte[] message) {
 
         super(message);
         setBds(BDSRegister.bdsCode.SELECTED_VERTICAL_INTENTION);
@@ -67,31 +85,63 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     // Getters
     // -------
 
-    public Integer getMcpFcuSelectedAltitudeValue() {
+    /**
+     * @return the MCP/FCU selected altitude. The data shall be derived from the mode control panel/flight control unit
+     * or equivalent equipment. Alerting devices may be used to provide data if it is not available from “control”
+     * equipment.
+     * The value range is [0, 65520] feet
+     */
+    public Integer getMcpFcuSelectedAltitude() {
         return computeSelectedAltitude(mcpFcuSelectedAltitudeStatus, mcpFcuSelectedAltitudeValue);
     }
 
-    public Integer getFmsSelectedAltitudeValue() {
+    /**
+     * @return the FMS selected altitude. The data shall de derived from the flight management system or equivalent
+     * equipment managing the vertical profile of the aircraft.
+     * The value range is [0, 65520] feet
+     */
+    public Integer getFmsSelectedAltitude() {
         return computeSelectedAltitude(fmsSelectedAltitudeStatus, fmsSelectedAltitudeValue);
     }
 
-    public Float getBarometricPressureSettingValue() {
+    /**
+     * @return the barometric pressure setting.The value range is [0, 410] mb
+     */
+    public Float getBarometricPressureSetting() {
         return computeBarometricPressureSetting(barometricPressureSettingStatus, barometricPressureSettingValue);
     }
 
+    /**
+     * @return whether the vertical navigation mode is active or not
+     */
     public Boolean isVnav() {
         return computeOthers(otherStatus, vnavValue);
     }
 
+    /**
+     * @return whether the altitude hold mode is active or not
+     */
     public Boolean isAltHold() {
         return computeOthers(otherStatus, altHoldValue);
     }
 
+    /**
+     * @return whether the approach mode is active or not
+     */
     public Boolean isApproach() {
         return computeOthers(otherStatus, approachValue);
     }
 
-    public Short getTargetAltSourceValue() {
+    /**
+     * @return the target altitude source
+     * <ul>
+     *     <li> 0 signifies unknown</li>
+     *     <li> 1 signifies aircraft altitude </li>
+     *     <li> 2 signifies FCU/MCP selected altitude </li>
+     *     <li> 3 signifies FMS selected altitud </li>
+     * </ul>
+     */
+    public Short getTargetAltSource() {
         return computeTargetAltSource(targetAltSourceStatus, targetAltSourceValue);
     }
 

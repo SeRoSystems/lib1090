@@ -1,11 +1,26 @@
 package de.serosystems.lib1090.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-
 import java.io.Serializable;
 
+/*
+ *  This file is part of de.serosystems.lib1090.
+ *
+ *  de.serosystems.lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  de.serosystems.lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
- * BDS 6,0
+ * Decoder for heading and speed (BDS 6,0)
  */
 public class HeadingAndSpeed extends BDSRegister implements Serializable {
 
@@ -39,7 +54,10 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     }
 
 
-    public HeadingAndSpeed(byte[] message) throws BadFormatException {
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     */
+    public HeadingAndSpeed(byte[] message) {
 
         super(message);
         setBds(BDSRegister.bdsCode.HEADING_AND_SPEED_REPORT);
@@ -63,22 +81,42 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     // Getters
     // -------
 
+    /**
+     * @return the magnetic heading.
+     * The value range is [-180, +180] degrees
+     */
     public Float getMagneticHeading() {
         return computeMagneticHeading(magneticHeadingStatus, magneticHeadingSign, magneticHeadingValue);
     }
 
+    /**
+     * @return the indicated airspeed
+     * The value range is [0, 1023] knots
+     */
     public Short getIndicatedAirspeed() {
         return computeIndicatedAirspeed(indicatedAirspeedStatus, indicatedAirspeedValue);
     }
 
+    /**
+     * @return the mach number
+     * The value range is [0, 4.092] MACH
+     */
     public Float getMatchNumber() {
         return computeMatchNumber(matchNumberStatus, matchNumberValue);
     }
 
+    /**
+     * @return the barometric altitude rate
+     * The value range is [-16384, +16352] feet/minute
+     */
     public Integer getBarometricAltitudeRate() {
         return computeBarometricAltitude(barometricAltitudeRateStatus, barometricAltitudeRateSign, barometricAltitudeRateValue);
     }
 
+    /**
+     * @return the inertial vertical rate.
+     * The value range is [-16384, +16352] feet/minute
+     */
     public Integer getInertialVerticalRate() {
         return computeInertialVerticalRate(inertialVerticalRateStatus, inertialVerticalRateSign, inertialVerticalRateValue);
     }
