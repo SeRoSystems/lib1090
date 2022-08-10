@@ -1,5 +1,8 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.bds.ACASActiveResolutionAdvisoryReport;
+import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -87,7 +90,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
     }
 
     @Test
-    public void threatIdentityData() {
+    public void threatIdentityData() throws BadFormatException {
 
         ThreatIdentityData threatIdentityData0 = ACASActiveResolutionAdvisoryReport.extractThreatIdentityData((short) 0, msg);
         Assert.assertNull(threatIdentityData0);
@@ -96,15 +99,15 @@ public class ACASActiveResolutionAdvisoryReportTest {
         Assert.assertNotNull(threatIdentityData1);
         Assert.assertEquals(0L, threatIdentityData1.getIcao24().longValue());
         Assert.assertNull(threatIdentityData1.getAltitudeCode());
-        Assert.assertNull(threatIdentityData1.getThreatIdentityDataRange());
-        Assert.assertNull(threatIdentityData1.getThreatIdentityDataBearing());
+        Assert.assertNull(threatIdentityData1.getEncodedRange());
+        Assert.assertNull(threatIdentityData1.getEncodedBearing());
 
         ThreatIdentityData threatIdentityData2 = ACASActiveResolutionAdvisoryReport.extractThreatIdentityData((short) 2, msg);
         Assert.assertNotNull(threatIdentityData2);
         Assert.assertNull(threatIdentityData2.getIcao24());
         Assert.assertEquals(0, threatIdentityData2.getAltitudeCode().shortValue());
-        Assert.assertEquals(0, threatIdentityData2.getThreatIdentityDataRange().shortValue());
-        Assert.assertEquals(0, threatIdentityData2.getThreatIdentityDataBearing().shortValue());
+        Assert.assertEquals(0, threatIdentityData2.getEncodedRange().shortValue());
+        Assert.assertEquals(0, threatIdentityData2.getEncodedBearing().shortValue());
 
         ThreatIdentityData threatIdentityData3 = ACASActiveResolutionAdvisoryReport.extractThreatIdentityData((short) 3, msg);
         Assert.assertNull(threatIdentityData3);

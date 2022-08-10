@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
 import java.io.Serializable;
 
@@ -22,6 +22,7 @@ import java.io.Serializable;
 /**
  * Decoder for heading and speed (BDS 6,0)
  */
+@SuppressWarnings("unused")
 public class HeadingAndSpeed extends BDSRegister implements Serializable {
 
     // Fields
@@ -34,9 +35,9 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     // Indicated Airspeed
     private boolean indicatedAirspeedStatus;
     private short indicatedAirspeedValue;
-    // Match Number
-    private boolean matchNumberStatus;
-    private short matchNumberValue;
+    // Mach Number
+    private boolean machNumberStatus;
+    private short machNumberValue;
     // Barometric Altitude Rate
     private boolean barometricAltitudeRateStatus;
     private boolean barometricAltitudeRateSign;
@@ -50,8 +51,7 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     // ------------
 
     /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected HeadingAndSpeed() {
-    }
+    protected HeadingAndSpeed() { }
 
 
     /**
@@ -67,8 +67,8 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
         this.magneticHeadingValue = extractMagneticHeadingValue(message);
         this.indicatedAirspeedStatus = extractIndicatedAirspeedStatus(message);
         this.indicatedAirspeedValue = extractIndicatedAirspeedValue(message);
-        this.matchNumberStatus = extractMatchNumberStatus(message);
-        this.matchNumberValue = extractMatchNumberValue(message);
+        this.machNumberStatus = extractMatchNumberStatus(message);
+        this.machNumberValue = extractMatchNumberValue(message);
         this.barometricAltitudeRateStatus = extractBarometricAltitudeRateStatus(message);
         this.barometricAltitudeRateSign = extractBarometricAltitudeRateSign(message);
         this.barometricAltitudeRateValue = extractBarometricAltitudeRateValue(message);
@@ -101,8 +101,8 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
      * @return the mach number
      * The value range is [0, 4.092] MACH
      */
-    public Float getMatchNumber() {
-        return computeMatchNumber(matchNumberStatus, matchNumberValue);
+    public Float getMachNumber() {
+        return computeMatchNumber(machNumberStatus, machNumberValue);
     }
 
     /**
@@ -121,79 +121,80 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
         return computeInertialVerticalRate(inertialVerticalRateStatus, inertialVerticalRateSign, inertialVerticalRateValue);
     }
 
-    // Public static methods
+    // static methods
     // ---------------------
 
-    public static boolean extractMagneticHeadingStatus(byte[] message) {
+    static boolean extractMagneticHeadingStatus(byte[] message) {
         return ((message[0] >>> 7) & 0x01) == 1;
     }
 
-    public static boolean extractMagneticHeadingSign(byte[] message) {
+    static boolean extractMagneticHeadingSign(byte[] message) {
         return ((message[0] >>> 6) & 0x01) == 1;
     }
 
-    public static short extractMagneticHeadingValue(byte[] message) {
+    static short extractMagneticHeadingValue(byte[] message) {
         return (short) ((((message[0] & 0x3F) << 4) | ((message[1] >>> 4) & 0x0F)) & 0x3FF);
     }
 
-    public static boolean extractIndicatedAirspeedStatus(byte[] message) {
+    static boolean extractIndicatedAirspeedStatus(byte[] message) {
         return ((message[1] >>> 3) & 0x01) == 1;
     }
 
-    public static short extractIndicatedAirspeedValue(byte[] message) {
+    static short extractIndicatedAirspeedValue(byte[] message) {
         return (short) ((((message[1] & 0x07) << 7) | ((message[2] >>> 1) & 0x7F)) & 0x3FF);
     }
 
-    public static boolean extractMatchNumberStatus(byte[] message) {
+    static boolean extractMatchNumberStatus(byte[] message) {
         return (message[2] & 0x01) == 1;
     }
 
-    public static short extractMatchNumberValue(byte[] message) {
+    static short extractMatchNumberValue(byte[] message) {
         return (short) (((message[3] << 2) | ((message[4] >>> 6) & 0x03)) & 0x3FF);
     }
 
-    public static boolean extractBarometricAltitudeRateStatus(byte[] message) {
+    static boolean extractBarometricAltitudeRateStatus(byte[] message) {
         return ((message[4] >>> 5) & 0x01) == 1;
     }
 
-    public static boolean extractBarometricAltitudeRateSign(byte[] message) {
+    static boolean extractBarometricAltitudeRateSign(byte[] message) {
         return ((message[4] >>> 4) & 0x01) == 1;
     }
 
-    public static short extractBarometricAltitudeRateValue(byte[] message) {
-        return (short) ((((message[4] & 0x0F) >>> 5) | ((message[5] >>> 3) & 0x1F)) & 0x1FF);
+    static short extractBarometricAltitudeRateValue(byte[] message) {
+        // FIXME Junzi p 132
+        return (short) ((((message[4] & 0x0F) << 5) | ((message[5] >>> 3) & 0x1F)) & 0x1FF);
     }
 
-    public static boolean extractInertialVerticalRateStatus(byte[] message) {
+    static boolean extractInertialVerticalRateStatus(byte[] message) {
         return ((message[5] >>> 2) & 0x01) == 1;
     }
 
-    public static boolean extractInertialVerticalRateSign(byte[] message) {
+    static boolean extractInertialVerticalRateSign(byte[] message) {
         return ((message[5] >>> 1) & 0x01) == 1;
     }
 
-    public static short extractInertialVerticalRateValue(byte[] message) {
+    static short extractInertialVerticalRateValue(byte[] message) {
         return (short) ((((message[5] & 0x01) << 8) | (message[6] & 0xFF)) & 0x1FF);
     }
 
-    public static Float computeMagneticHeading(boolean status, boolean sign, short value) {
-        return status ? sign ? (float) ((-Math.pow(2, 10) + value) * 90 / 512) : value * 90 / 512 : null;
+    static Float computeMagneticHeading(boolean status, boolean sign, short value) {
+        return status ? (sign ? (float) ((-Math.pow(2, 10) + value) * 90 / 512) : value * 90 / 512) : null;
     }
 
-    public static Short computeIndicatedAirspeed(boolean status, short value) {
+    static Short computeIndicatedAirspeed(boolean status, short value) {
         return status ? value : null;
     }
 
-    public static Float computeMatchNumber(boolean status, short value) {
+    static Float computeMatchNumber(boolean status, short value) {
         return status ? (float) (value * 2.048 / 512) : null;
     }
 
-    public static Integer computeBarometricAltitude(boolean status, boolean sign, short value) {
-        return status ? sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32 : null;
+    static Integer computeBarometricAltitude(boolean status, boolean sign, short value) {
+        return status ? (sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32) : null;
     }
 
-    public static Integer computeInertialVerticalRate(boolean status, boolean sign, short value) {
-        return status ? sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32 : null;
+    static Integer computeInertialVerticalRate(boolean status, boolean sign, short value) {
+        return status ? (sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32) : null;
     }
 
     // Override
@@ -207,8 +208,8 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
                 ", magneticHeadingValue=" + magneticHeadingValue +
                 ", indicatedAirspeedStatus=" + indicatedAirspeedStatus +
                 ", indicatedAirspeedValue=" + indicatedAirspeedValue +
-                ", matchNumberStatus=" + matchNumberStatus +
-                ", matchNumberValue=" + matchNumberValue +
+                ", matchNumberStatus=" + machNumberStatus +
+                ", matchNumberValue=" + machNumberValue +
                 ", barometricAltitudeRateStatus=" + barometricAltitudeRateStatus +
                 ", barometricAltitudeRateSign=" + barometricAltitudeRateSign +
                 ", barometricAltitudeRateValue=" + barometricAltitudeRateValue +

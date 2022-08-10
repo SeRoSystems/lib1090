@@ -1,5 +1,6 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.msgs.bds.CommonUsageGICBCapabilityReport;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

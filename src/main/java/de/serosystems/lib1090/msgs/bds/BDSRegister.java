@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -20,6 +20,7 @@ package de.serosystems.lib1090.bds;
 /**
  * Decoder for BDS register
  */
+@SuppressWarnings("unused")
 public class BDSRegister {
 
     // Enum
@@ -58,8 +59,7 @@ public class BDSRegister {
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    public BDSRegister() {
-    }
+    protected BDSRegister() { }
 
     /**
      * Copy constructor for subclasses
@@ -69,6 +69,8 @@ public class BDSRegister {
         this.bds = bdsRegister.getBds();
         this.message = bdsRegister.getMessage();
     }
+
+
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
@@ -106,10 +108,10 @@ public class BDSRegister {
         this.bds = bds;
     }
 
-    // Public static methods
+    // static methods
     // ---------------------
 
-    public static short extractBdsCode(byte[] message) {
+    static short extractBdsCode(byte[] message) {
         return (short) (((message[0] >>> 4) & 0x0F) * 10 + (message[0] & 0x0F));
     }
 

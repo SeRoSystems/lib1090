@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.bds;
+package de.serosystems.lib1090.msgs.bds;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import java.util.Map;
 /**
  * Decoder for COmmon usage GICB capability report (BDS 1,7)
  */
+@SuppressWarnings("unused")
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
 
     // Fields
@@ -36,8 +37,7 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
     // ------------
 
     /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected CommonUsageGICBCapabilityReport() {
-    }
+    protected CommonUsageGICBCapabilityReport() { }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
@@ -45,7 +45,7 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
     public CommonUsageGICBCapabilityReport(byte[] message) {
 
         super(message);
-        setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
+        setBds(bdsCode.COMMON_USAGE_GICB_CAPABILITY_REPORT);
 
         this.commonUsageGICBCapabilityReport = extractCommonGICBCapabilityReport(message);
 
@@ -61,10 +61,10 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
         return commonUsageGICBCapabilityReport;
     }
 
-    // Public static methods
+    // static methods
     // ---------------------
 
-    public static Map<String, Boolean> extractCommonGICBCapabilityReport(byte[] message) {
+    static Map<String, Boolean> extractCommonGICBCapabilityReport(byte[] message) {
 
         Map<String, Boolean> map = new HashMap<>();
 
