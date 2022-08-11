@@ -28,9 +28,25 @@ The following ADS-B formats are supported:
 * BDS 6,2: Target state and status messages
 * BDS 6,5: Operational status reports (airborne and surface)
 
-The Comm-B registers, Comm-D data link and military ES are not parsed. Comm-B and D will follow at some point.
-
 The formats are implemented according to RTCA DO-260B, i.e. ADS-B Version 2. The decoder properly takes care of older versions.
+
+
+Basic support for the following Comm-B registers is implemented:
+* BDS 1,0: Data link capability
+* BDS 1,7: Common usage GICB capability
+* BDS 2,0: Identification
+* BDS 3,0: ACAS resolution advisory
+* BDS 4,0: Selected vertical intention
+* BDS 5,0: Track and turn report
+* BDS 6,0: Heading and speed report
+
+The type of the Comm-B register cannot be inferred from the message itself. As a passive observer, who does not know
+the interrogation, some rule-based (or more sophisticated) approach needs to be applied to derive the type and
+instantiate the correct decoder class. This has not yet been implemented in the `StatefulModeSDecoder`.
+If required, users of this library need to explicitly call the correct Comm-B message decoder.
+
+The Comm-D data link and military ES are not parsed.
+
 
 ### Packaging
 
