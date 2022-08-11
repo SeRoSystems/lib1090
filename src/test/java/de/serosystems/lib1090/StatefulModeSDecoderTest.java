@@ -1,9 +1,12 @@
-package de.serosystems.lib1090.msgs;
+package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.adsb.OperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsg;
+import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsgTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +16,7 @@ import static org.junit.Assert.*;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class ModeSDecoderTest {
+public class StatefulModeSDecoderTest {
 
 	private StatefulModeSDecoder decoder;
 

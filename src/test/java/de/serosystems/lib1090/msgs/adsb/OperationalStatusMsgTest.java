@@ -1,4 +1,4 @@
-package de.serosystems.lib1090.msgs;
+package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
