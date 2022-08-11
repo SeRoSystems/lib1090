@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.CompactPositionReporting;
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -43,7 +43,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 	private boolean ground_track_status;
 	private byte ground_track_angle;
 	private byte ground_speed;
-	CompactPositionReporting.CPREncodedPosition position;
+	CPREncodedPosition position;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
 	protected CoarsePositionMsg() { }
@@ -99,7 +99,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 		short cpr_encoded_lat = (short) (((msg[4]&0xff)<<4) | ((msg[5]&0xff)>>4));
 		short cpr_encoded_lon = (short) (((msg[5]&0x0f)<<8) | (msg[6]&0xff));
 
-		position = new CompactPositionReporting.CPREncodedPosition(
+		position = new CPREncodedPosition(
 				cpr_format, cpr_encoded_lat, cpr_encoded_lon, 12, false,
 				timestamp == null ? System.currentTimeMillis() : timestamp);
 
@@ -171,7 +171,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 	}
 
 	@Override
-	public CompactPositionReporting.CPREncodedPosition getCPREncodedPosition() {
+	public CPREncodedPosition getCPREncodedPosition() {
 		return position;
 	}
 

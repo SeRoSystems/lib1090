@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs;
 
-import de.serosystems.lib1090.CompactPositionReporting;
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.Position;
 
 public interface PositionMsg {
@@ -13,7 +13,7 @@ public interface PositionMsg {
     /**
      * @return the CPR encoded position that was announced in this message
      */
-    CompactPositionReporting.CPREncodedPosition getCPREncodedPosition();
+    CPREncodedPosition getCPREncodedPosition();
 
     /**
      * @return whether altitude information is available
