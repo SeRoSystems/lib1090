@@ -90,7 +90,7 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
 
     /**
      * @return the true track angle.
-     * The value range is [-180, +180] degrees
+     * The value range is [-180, +180] degrees. Return value is null if the information is not available.
      */
     public Float getTrueTrackAngle() {
         return computeTrueTrackAngle(trueTrackAngleStatus, trueTrackAngleSign, trueTrackAngleValue);
@@ -98,7 +98,7 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
 
     /**
      * @return the ground speed.
-     * The value range is [0, 2046] knots
+     * The value range is [0, 2046] knots. Return value is null if the information is not available.
      */
     public Integer getGroundSpeed() {
         return computeGroundSpeed(groundSpeedStatus, groundSpeedValue);
@@ -106,7 +106,7 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
 
     /**
      * @return the track angle rate
-     * The value range is [-16, +16] degrees/seconds
+     * The value range is [-16, +16] degrees/seconds. Return value is null if the information is not available.
      */
     public Float getTrackAngleRate() {
         return computeTrackAngleRate(trackAngleRateStatus, trackAngleRateSign, trackAngleRateValue);
@@ -114,7 +114,7 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
 
     /**
      * @return the true airspeed
-     * The value range is [0, 2046] knots
+     * The value range is [0, 2046] knots. Return value is null if the information is not available.
      */
     public Integer getTrueAirspeed() {
         return computeTrueAirSpeed(trueAirSpeedStatus, trueAirSpeedValue);
