@@ -27,6 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S surveillance identify replies (DF 5)
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
+@SuppressWarnings("unused")
 public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = -724671008366358621L;
@@ -94,7 +95,7 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 	 * </ul>
 	 * @see #hasAlert()
 	 * @see #hasSPI()
-	 * @see #isOnGround()
+	 * @see #isAirborne()
 	 */
 	public byte getFlightStatus() {
 		return flight_status;
@@ -115,21 +116,16 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 	}
 
 	/**
-	 * @return whether flight status indicates that aircraft is on the ground.
-	 * For flight status &gt;= 4, this flag is unknown. Thus, a return value of false
-	 * does not indicate that the aircraft is airborne! See also {@link #isAirborne()}.
+	 * Whether flight status indicates that the aircraft is airborne.
+	 * @return true if airborne, false if on ground or null if ground status is unknown
 	 */
-	public boolean isOnGround() {
-		return flight_status==1 || flight_status==3;
-	}
-
-	/**
-	 * @return whether flight status indicates that aircraft is airborne.
-	 * For flight status &gt;= 4, this flag is unknown. Thus, a return value of false
-	 * does not indicate that the aircraft is on ground! See also {@link #isOnGround()} .
-	 */
-	public boolean isAirborne() {
-		return flight_status == 0 || flight_status == 2;
+	public Boolean isAirborne() {
+		if (flight_status == 0 || flight_status == 2) {
+			return true;
+		} else if (flight_status == 1 || flight_status == 3) {
+			return false;
+		}
+		return null;
 	}
 
 	/**
