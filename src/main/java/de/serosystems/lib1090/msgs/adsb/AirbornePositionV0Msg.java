@@ -30,6 +30,7 @@ import java.io.Serializable;
  * Decoder for ADS-B airborne position messages version 0 and 1.
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
+@SuppressWarnings("unused")
 public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 
 	private static final long serialVersionUID = 5661463389938495220L;
@@ -218,6 +219,21 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public byte getSurveillanceStatus() {
 		return surveillance_status;
+	}
+
+	/**
+	 * @return whether flight status indicates alert. The alert condition might be temporary. A permanent alert
+	 * (emergency) is indicated when {@link #getSurveillanceStatus()} is 1.
+	 */
+	public boolean hasAlert() {
+		return surveillance_status == 1 || surveillance_status == 2;
+	}
+
+	/**
+	 * @return whether flight status indicates special purpose indicator
+	 */
+	public boolean hasSPI() {
+		return surveillance_status == 3;
 	}
 
 	/**
