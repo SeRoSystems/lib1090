@@ -1,6 +1,7 @@
 package de.serosystems.lib1090;
 
-import de.serosystems.lib1090.cpr.StatefulPositionDecoder;
+import de.serosystems.lib1090.cpr.PositionDecoder;
+import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -37,16 +38,27 @@ import java.util.Map;
  *
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
+@SuppressWarnings("unused")
 public class StatefulModeSDecoder {
+
+	private final PositionDecoderSupplier positionDecoderSupplier;
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
 	private final Map<ModeSDownlinkMsg.QualifiedAddress, DecoderData> decoderData = new HashMap<>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
 
-	private DecoderData getDecoderData (ModeSDownlinkMsg.QualifiedAddress address) {
-		DecoderData dd = decoderData.computeIfAbsent(address, a -> new DecoderData());
-		dd.lastUsed = latestTimestamp;
-		return dd;
+	/**
+	 * Create an instance of the stateful decoder with the default position decoding logic.
+	 */
+	public StatefulModeSDecoder() {
+		this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
+	}
+
+	/**
+	 * Create an instance of the stateful decoder with custom position decoding logic.
+	 */
+	public StatefulModeSDecoder(PositionDecoderSupplier positionDecoderSupplier) {
+		this.positionDecoderSupplier = positionDecoderSupplier;
 	}
 
 	/**
@@ -536,15 +548,30 @@ public class StatefulModeSDecoder {
 		decoderData.values().removeIf(dd -> latestTimestamp - dd.lastUsed > 3600_000L);
 	}
 
+	private DecoderData getDecoderData (ModeSDownlinkMsg.QualifiedAddress address) {
+		DecoderData dd = decoderData.computeIfAbsent(
+				address,
+				a -> new DecoderData(positionDecoderSupplier.apply(a))
+		);
+		dd.lastUsed = latestTimestamp;
+		return dd;
+	}
+
 	/**
 	 * Represents the state of a decoder for a certain aircraft
 	 */
 	private static class DecoderData {
-		byte adsbVersion = 0;
+		byte adsbVersion;
 		boolean nicSupplA;
 		boolean nicSupplC;
 		Integer geoMinusBaro;
-		long lastUsed = System.currentTimeMillis();
-		StatefulPositionDecoder posDec = new StatefulPositionDecoder();
+		long lastUsed;
+		PositionDecoder posDec;
+
+		DecoderData(PositionDecoder posDec) {
+			adsbVersion = 0;
+			lastUsed = System.currentTimeMillis();
+			this.posDec = posDec;
+		}
 	}
 }

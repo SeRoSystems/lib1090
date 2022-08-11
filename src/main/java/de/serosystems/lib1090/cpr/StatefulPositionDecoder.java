@@ -7,7 +7,7 @@ import static java.lang.Math.abs;
 /**
  * Stateful decoder for positions. Use this one to decode positions.
  */
-public class StatefulPositionDecoder {
+public class StatefulPositionDecoder implements PositionDecoder {
 	private CPREncodedPosition last_even_airborne;
 	private CPREncodedPosition last_odd_airborne;
 	private Position last_pos; // lat lon
@@ -78,6 +78,7 @@ public class StatefulPositionDecoder {
 	 * if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
 	 * the position.
 	 */
+	@Override
 	public Position decodePosition(CPREncodedPosition cpr, Position receiver) {
 		return decodePosition(cpr, receiver, false);
 	}
