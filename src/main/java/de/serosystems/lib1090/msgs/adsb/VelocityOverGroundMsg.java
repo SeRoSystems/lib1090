@@ -234,10 +234,10 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return heading in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
+	 * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
 	 * The latter can also be checked with {@link #hasVelocityInfo()}.
 	 */
-	public Double getHeading() {
+	public Double getTrueTrackAngle() {
 		if (!velocity_info_available) return null;
 		double angle = Math.toDegrees(Math.atan2(
 				-this.getEastToWestVelocity(),
