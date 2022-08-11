@@ -28,6 +28,7 @@ import java.io.Serializable;
  * Decoder for Mode S surveillance Extended Length Messages (Comm-D ELM) (DF 24)
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
+@SuppressWarnings("unused")
 public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = 8539282448043078992L;

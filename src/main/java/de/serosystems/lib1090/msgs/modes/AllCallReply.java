@@ -27,6 +27,7 @@ import java.io.Serializable;
  * Decoder for Mode S all-call replies
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
+@SuppressWarnings("unused")
 public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
 	private static final long serialVersionUID = 2459589933570219472L;
@@ -87,21 +88,16 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 	}
 
 	/**
-	 * @return whether capabilities indicate that aircraft is on the ground.
-	 * Note that returning false does not indicate that the aircraft is airborne as status might be unknown!
-	 * See also {@link #isAirborne()}.
+	 * Whether capabilities indicate that aircraft is airborne.
+	 * @return true if airborne, false if on ground or null if ground status is unknown
 	 */
-	public boolean isOnGround() {
-		return capabilities == 4;
-	}
-
-	/**
-	 * @return whether capabilities indicate that aircraft is airborne.
-	 * Note that returning false does not indicate that the aircraft is on ground as status might be unknown!
-	 * See also {@link #isOnGround()}.
-	 */
-	public boolean isAirborne() {
-		return capabilities == 5;
+	public Boolean isAirborne() {
+		if (capabilities == 5) {
+			return true;
+		} else if (capabilities == 4) {
+			return false;
+		}
+		return null;
 	}
 
 
