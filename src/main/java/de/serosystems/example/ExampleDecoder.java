@@ -286,7 +286,7 @@ public class ExampleDecoder {
 			case ADSB_VELOCITY:
 				VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
 				System.out.println("["+icao24+"]: Velocity: "+(veloc.hasVelocityInfo() ? veloc.getVelocity() : "unknown")+" kt");
-				System.out.println("          Heading: "+(veloc.hasVelocityInfo() ? veloc.getHeading() : "unknown")+" °");
+				System.out.println("          True Track: "+(veloc.hasVelocityInfo() ? veloc.getTrueTrackAngle() : "unknown")+" °");
 				System.out.println("          Vertical rate: "+(veloc.hasVerticalRateInfo() ? veloc.getVerticalRate() : "unknown")+" ft/min");
 
 				// the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
