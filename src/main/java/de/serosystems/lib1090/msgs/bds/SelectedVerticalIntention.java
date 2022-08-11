@@ -89,7 +89,7 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
      * @return the MCP/FCU selected altitude. The data shall be derived from the mode control panel/flight control unit
      * or equivalent equipment. Alerting devices may be used to provide data if it is not available from “control”
      * equipment.
-     * The value range is [0, 65520] feet
+     * The value range is [0, 65520] feet. Return value is null if the information is not available.
      */
     public Integer getMcpFcuSelectedAltitude() {
         return computeSelectedAltitude(mcpFcuSelectedAltitudeStatus, mcpFcuSelectedAltitudeValue);
@@ -98,37 +98,37 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     /**
      * @return the FMS selected altitude. The data shall de derived from the flight management system or equivalent
      * equipment managing the vertical profile of the aircraft.
-     * The value range is [0, 65520] feet
+     * The value range is [0, 65520] feet. Return value is null if the information is not available.
      */
     public Integer getFmsSelectedAltitude() {
         return computeSelectedAltitude(fmsSelectedAltitudeStatus, fmsSelectedAltitudeValue);
     }
 
     /**
-     * @return the barometric pressure setting.The value range is [0, 410] mb
+     * @return the barometric pressure setting.The value range is [0, 410] mb, null if the information is not available
      */
     public Float getBarometricPressureSetting() {
         return computeBarometricPressureSetting(barometricPressureSettingStatus, barometricPressureSettingValue);
     }
 
     /**
-     * @return whether the vertical navigation mode is active or not
+     * @return whether the vertical navigation mode is active or not, null if the information is not available
      */
-    public Boolean isVnav() {
+    public Boolean hasVNAVModeEngaged() {
         return computeOthers(otherStatus, vnavValue);
     }
 
     /**
-     * @return whether the altitude hold mode is active or not
+     * @return whether the altitude hold mode is active or not, null if the information is not available
      */
-    public Boolean isAltHold() {
+    public Boolean hasActiveAltitudeHoldMode() {
         return computeOthers(otherStatus, altHoldValue);
     }
 
     /**
-     * @return whether the approach mode is active or not
+     * @return whether the approach mode is active or not, null if the information is not available
      */
-    public Boolean isApproach() {
+    public Boolean hasActiveApproachMode() {
         return computeOthers(otherStatus, approachValue);
     }
 
