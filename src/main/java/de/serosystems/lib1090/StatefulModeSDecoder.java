@@ -1,5 +1,6 @@
 package de.serosystems.lib1090;
 
+import de.serosystems.lib1090.cpr.StatefulPositionDecoder;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -544,6 +545,6 @@ public class StatefulModeSDecoder {
 		boolean nicSupplC;
 		Integer geoMinusBaro;
 		long lastUsed = System.currentTimeMillis();
-		CompactPositionReporting.StatefulPositionDecoder posDec = new CompactPositionReporting.StatefulPositionDecoder();
+		StatefulPositionDecoder posDec = new StatefulPositionDecoder();
 	}
 }
