@@ -255,7 +255,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * @return speed over ground in knots or null if information is not available. The latter can also be checked
 	 * with {@link #hasVelocityInfo()}.
 	 */
-	public Double getVelocity() {
+	public Double getGroundSpeed() {
 		if (!velocity_info_available) return null;
 		return Math.hypot(north_south_velocity, east_west_velocity);
 	}
