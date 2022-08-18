@@ -184,7 +184,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
                 break;
 
             case 2 :
-                short altitudeCode = (short) ((((message[3] & 0x03) << 11) | ((message[4] & 0xFF) << 3) | ((message[5] >>> 5) & 0x03)) & 0x1FFF);
+                short altitudeCode = (short) ((((message[3] & 0x03) << 11) | ((message[4] & 0xFF) << 3) | ((message[5] >>> 5) & 0x07)) & 0x1FFF);
                 short threatIdentityDataRange = (short) ((((message[5] & 0x1F) << 2) | ((message[6] >>> 6) & 0x03)) & 0x7F);
                 short threatIdentityDataBearing = (short) (message[6] & 0x3F);
                 threatIdentityData = new ThreatIdentityData(altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
