@@ -28,7 +28,7 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class ThreatIdentityData implements Serializable {
 
-    private Long icao24;
+    private Integer icao24;
     private Short altitudeCode;
     private Short range;
     private Short bearing;
@@ -42,7 +42,7 @@ public class ThreatIdentityData implements Serializable {
      *
      * @param icao24                        the ICAO 24-bit aircraft address
      */
-    public ThreatIdentityData(Long icao24) {
+    public ThreatIdentityData(Integer icao24) {
         this.icao24 = icao24;
         hasTransponderAddress = true;
     }
@@ -84,7 +84,7 @@ public class ThreatIdentityData implements Serializable {
      *
      * @return the ICAO 24-bit aircraft address if applicable
      */
-    public Long getIcao24() {
+    public Integer getIcao24() {
         return icao24;
     }
 
