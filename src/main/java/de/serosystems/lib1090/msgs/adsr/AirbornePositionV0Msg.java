@@ -11,6 +11,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.*;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -110,19 +112,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11: return 185.2;
-			case 12: return 370.4;
-			case 13: return 926;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16: return 18520;
-			case 17: return 37040;
-			default: return -1;
-		}
+		return typeCodeToHCR(getFormatTypeCode());
 	}
 
 	/**
@@ -135,18 +125,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 8;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: case 17: return 1;
-			default: return 0;
-		}
+		return typeCodeToNACp(getFormatTypeCode());
 	}
 
 	/**
@@ -161,38 +140,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: return 3;
-			case 10: return 10;
-			case 11: return 92.6;
-			case 12: return 185.2;
-			case 13: return 463;
-			case 14: return 926;
-			case 15: return 1852;
-			case 16: return 9260;
-			case 17: return 18520;
-			default: return -1;
-		}
+		return typeCodeToPositionUncertainty(getFormatTypeCode());
 	}
 
 	/**
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 9;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: return 3;
-			case 17: return 1;
-			default: return 0;
-		}
+		return typeCodeToNIC(getFormatTypeCode());
 	}
 
 	/**
@@ -208,10 +163,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			default: return 2;
-		}
+		return typeCodeToSIL(getFormatTypeCode());
 	}
 
 	/**
@@ -261,53 +213,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	@Override
 	public boolean hasValidAltitude() {
 		return altitude_available;
-	}
-
-	/**
-	 * This method converts a gray code encoded int to a standard decimal int
-	 * @param gray gray code encoded int of length bitlength
-	 *        bitlength bitlength of gray code
-	 * @return radix 2 encoded integer
-	 */
-	private static int grayToBin(int gray, int bitlength) {
-		int result = 0;
-		for (int i = bitlength-1; i >= 0; --i)
-			result = result|((((0x1<<(i+1))&result)>>>1)^((1<<i)&gray));
-		return result;
-	}
-
-	public static Integer decodeAltitude(short altitude_encoded) {
-		boolean Qbit = (altitude_encoded&0x10)!=0;
-		int N;
-		if (Qbit) { // altitude reported in 25ft increments
-			N = (altitude_encoded&0xF) | ((altitude_encoded&0xFE0)>>>1);
-			return 25*N-1000;
-		}
-		else { // altitude is above 50175ft, so we use 100ft increments
-
-			// it's decoded using the Gillham code
-			int C1 = (0x800&altitude_encoded)>>>11;
-			int A1 = (0x400&altitude_encoded)>>>10;
-			int C2 = (0x200&altitude_encoded)>>>9;
-			int A2 = (0x100&altitude_encoded)>>>8;
-			int C4 = (0x080&altitude_encoded)>>>7;
-			int A4 = (0x040&altitude_encoded)>>>6;
-			int B1 = (0x020&altitude_encoded)>>>5;
-			int B2 = (0x008&altitude_encoded)>>>3;
-			int D2 = (0x004&altitude_encoded)>>>2;
-			int B4 = (0x002&altitude_encoded)>>>1;
-			int D4 = (0x001&altitude_encoded);
-
-			// this is standard gray code
-			int N500 = grayToBin(D2<<7|D4<<6|A1<<5|A2<<4|A4<<3|B1<<2|B2<<1|B4, 8);
-
-			// 100-ft steps must be converted
-			int N100 = grayToBin(C1<<2|C2<<1|C4, 3)-1;
-			if (N100 == 6) N100=4;
-			if (N500%2 != 0) N100=4-N100; // invert it
-
-			return -1200+N500*500+N100*100;
-		}
 	}
 
 	/**

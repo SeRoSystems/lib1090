@@ -11,7 +11,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
-import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.decodeAltitude;
+import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.*;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -119,19 +119,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11: return 185.2;
-			case 12: return 370.4;
-			case 13: return 926;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16: return 18520;
-			case 17: return 37040;
-			default: return -1;
-		}
+		return typeCodeToHCR(getFormatTypeCode());
 	}
 
 	/**
@@ -144,18 +132,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 8;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: case 17: return 1;
-			default: return 0;
-		}
+		return typeCodeToNACp(getFormatTypeCode());
 	}
 
 	/**
@@ -170,38 +147,14 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: return 3;
-			case 10: return 10;
-			case 11: return 92.6;
-			case 12: return 185.2;
-			case 13: return 463;
-			case 14: return 926;
-			case 15: return 1852;
-			case 16: return 9260;
-			case 17: return 18520;
-			default: return -1;
-		}
+		return typeCodeToPositionUncertainty(getFormatTypeCode());
 	}
 
 	/**
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 9;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: return 3;
-			case 17: return 1;
-			default: return 0;
-		}
+		return typeCodeToNIC(getFormatTypeCode());
 	}
 
 	/**
@@ -217,10 +170,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			default: return 2;
-		}
+		return typeCodeToSIL(getFormatTypeCode());
 	}
 
 	/**
