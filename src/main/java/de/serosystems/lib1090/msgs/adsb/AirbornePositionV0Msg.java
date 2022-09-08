@@ -109,7 +109,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
+		return typeCodeToHCR(getFormatTypeCode());
+	}
+
+	/**
+	 * According to DO-260B Table N-4
+	 */
+	public static double typeCodeToHCR(byte formatTypeCode) {
+		switch (formatTypeCode) {
 			case 0: case 18: case 22: return -1;
 			case 9: case 20: return 7.5;
 			case 10: case 21: return 25;
@@ -134,7 +141,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		switch (getFormatTypeCode()) {
+		return typeCodeToNACp(getFormatTypeCode());
+	}
+
+	/**
+	 * According to DO-260B Table N-7
+	 */
+	public static byte typeCodeToNACp(byte formatTypeCode) {
+		switch (formatTypeCode) {
 			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 10: case 21: return 10;
@@ -160,7 +174,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		switch (getFormatTypeCode()) {
+		return typeCodeToPositionUncertainty(getFormatTypeCode());
+	}
+
+	/**
+	 * According to DO-260B Table N-7
+	 */
+	public static double typeCodeToPositionUncertainty(byte formatTypeCode) {
+		switch (formatTypeCode) {
 			case 0: case 18: case 22: return -1;
 			case 9: return 3;
 			case 10: return 10;
@@ -181,7 +202,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
+		return typeCodeToNIC(getFormatTypeCode());
+	}
+
+	/**
+	 * According to DO-260B Table 2-200.
+	 */
+	public static byte typeCodeToNIC(byte formatTypeCode) {
+		switch (formatTypeCode) {
 			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 6: case 10: case 21: return 10;
@@ -208,7 +236,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		switch (getFormatTypeCode()) {
+		return typeCodeToSIL(getFormatTypeCode());
+	}
+
+	/**
+	 * According to DO-260B Table N-8.
+	 */
+	public static byte typeCodeToSIL(byte formatTypeCode) {
+		switch (formatTypeCode) {
 			case 0: case 18: case 22: return 0;
 			default: return 2;
 		}
