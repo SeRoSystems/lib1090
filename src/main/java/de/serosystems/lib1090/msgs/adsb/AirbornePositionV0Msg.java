@@ -176,20 +176,21 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
+	 * Values according to DO-260B Table 2-200.
+	 *
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
 		switch (getFormatTypeCode()) {
 			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 9;
+			case 6: case 10: case 21: return 10;
+			case 7: case 11: return 8;
 			case 12: return 7;
 			case 13: return 6;
 			case 14: return 5;
 			case 15: return 4;
-			case 16: return 3;
-			case 17: return 1;
+			case 16: case 17: return 1;
 			default: return 0;
 		}
 	}
