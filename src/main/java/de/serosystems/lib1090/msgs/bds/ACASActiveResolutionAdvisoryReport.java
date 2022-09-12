@@ -45,6 +45,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
 
     /**
      * @param msg the 7-byte comm-b message (BDS register) as byte array
+     * @throws BadFormatException if message has wrong format
      */
     public ACASActiveResolutionAdvisoryReport(byte[] msg) throws BadFormatException {
 

@@ -56,6 +56,7 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * Create an instance of the stateful decoder with custom position decoding logic.
+	 * @param positionDecoderSupplier a custom {@link PositionDecoderSupplier}
 	 */
 	public StatefulModeSDecoder(PositionDecoderSupplier positionDecoderSupplier) {
 		this.positionDecoderSupplier = positionDecoderSupplier;
@@ -459,6 +460,7 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * Decode CPR encoded position from airborne position message.
+	 * @param address the aircraft's qualified address to decoode position for
 	 * @param msg which contains the encoded position
 	 * @param receiver position for reasonableness test (can be null)
 	 * @return decoded WGS84 position
@@ -506,6 +508,7 @@ public class StatefulModeSDecoder {
 	 * is of type {@link AirbornePositionV0Msg}, {@link AirbornePositionV1Msg} or {@link AirbornePositionV2Msg}
 	 * @param reply the ModeSReply to check
 	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @return true if provided reply is an airborne position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isAirbornePosition(T reply) {
 		if (reply == null) return false;
@@ -520,6 +523,7 @@ public class StatefulModeSDecoder {
 	 * is of type {@link SurfacePositionV0Msg}, {@link SurfacePositionV1Msg} or {@link SurfacePositionV2Msg}
 	 * @param reply the ModeSReply to check
 	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @return true if provided reply is a surface position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isSurfacePosition(T reply) {
 		if (reply == null) return false;
@@ -535,6 +539,7 @@ public class StatefulModeSDecoder {
 	 * @see #isSurfacePosition(ModeSDownlinkMsg)
 	 * @param reply the ModeSReply to check
 	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @return true if provided reply is an airborne or surface position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isPosition(T reply) {
 		return isAirbornePosition(reply) || isSurfacePosition(reply);

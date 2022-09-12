@@ -55,6 +55,7 @@ public class ThreatIdentityData implements Serializable {
      *                        by TCAS
      * @param bearing         the threat identity data bearing, i.e. the most recent estimated bearing of
      *                        the threat aircraft, relative to the TCAS aircraft heading.
+     * @throws BadFormatException if range outside the interval [0, 127] or bearing &gt; 60
      */
     public ThreatIdentityData(Short altitudeCode, Short range, Short bearing) throws BadFormatException {
         this.altitudeCode = altitudeCode;

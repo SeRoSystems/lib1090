@@ -114,6 +114,9 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	/**
 	 * According to DO-260B Table N-4
+	 *
+	 * @param formatTypeCode the messages' format type code
+	 * @return the derived HCR
 	 */
 	public static double typeCodeToHCR(byte formatTypeCode) {
 		switch (formatTypeCode) {
@@ -146,6 +149,9 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	/**
 	 * According to DO-260B Table N-7
+	 *
+	 * @param formatTypeCode the messages' format type code
+	 * @return the derived NACp
 	 */
 	public static byte typeCodeToNACp(byte formatTypeCode) {
 		switch (formatTypeCode) {
@@ -179,6 +185,9 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	/**
 	 * According to DO-260B Table N-7
+	 *
+	 * @param formatTypeCode the messages' format type code
+	 * @return the derived position uncertainty in meters
 	 */
 	public static double typeCodeToPositionUncertainty(byte formatTypeCode) {
 		switch (formatTypeCode) {
@@ -207,6 +216,9 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	/**
 	 * According to DO-260B Table 2-200.
+	 *
+	 * @param formatTypeCode the messages' format type code
+	 * @return the derived NIC
 	 */
 	public static byte typeCodeToNIC(byte formatTypeCode) {
 		switch (formatTypeCode) {
@@ -241,6 +253,8 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	/**
 	 * According to DO-260B Table N-8.
+	 * @param formatTypeCode the messages' format type code
+	 * @return the derived SIL
 	 */
 	public static byte typeCodeToSIL(byte formatTypeCode) {
 		switch (formatTypeCode) {

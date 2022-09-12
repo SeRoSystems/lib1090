@@ -66,6 +66,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	/**
 	 * @param raw_message raw TIS-B velocity message as byte array
 	 * @throws BadFormatException if message has wrong format
+	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
 	 */
 	public VelocityOverGroundMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));

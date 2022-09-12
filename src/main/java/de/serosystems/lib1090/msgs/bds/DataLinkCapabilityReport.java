@@ -131,14 +131,14 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
-     * @return
+     * @return whether it's a TCAS operational coordination message
      */
     public boolean isTcasOperationalCoordinationMessage() {
         return tcasOperationalCoordinationMessage;
     }
 
     /**
-     * @return
+     * @return the extended TCAS version number
      */
     public short getTcasExtendedVersionNumber() {
         return tcasExtendedVersionNumber;
@@ -172,7 +172,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
      *     <li> 4 signifies ICAO Doc 9871, Edition 1 </li>
      *     <li> 5 signifies ICAO Doc 9871, Edition 2 </li>
      *     <li> 6-127 Reserved </li>
-     * </lu>
+     * </ul>
      */
     public short getModeSSubNetworkVersionNumber() {
         return modeSSubNetworkVersionNumber;
@@ -183,7 +183,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
      * <ul>
      *     <li> 0 signifies a Level 2 to 4 transponder </li>
      *     <li> 1 signifies a Level 5 transponder </li>
-     * </lu>
+     * </ul>
      */
     public boolean isTransponderEnhancedProtocolIndicator() {
         return transponderEnhancedProtocolIndicator;
@@ -321,14 +321,14 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
-     * @return
+     * @return whether phase overlay in extended squitter is supported
      */
     public boolean isPhaseOverlayExtendedSquitterCapability() {
         return phaseOverlayExtendedSquitterCapability;
     }
 
     /**
-     * @return
+     * @return whether phase overlay for Mode S is supported
      */
     public boolean isPhaseOverlayModeSCapability() {
         return phaseOverlayModeSCapability;
@@ -341,15 +341,12 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
         return enhancedSurveillanceCapability;
     }
 
-    /**
-     * @return
-     */
     public short getActiveTransponderSideIndicator() {
         return activeTransponderSideIndicator;
     }
 
     /**
-     * @return
+     * @return whether change flag is set
      */
     public boolean isChangeFlag() {
         return changeFlag;
