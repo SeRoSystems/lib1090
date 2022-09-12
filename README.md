@@ -1,4 +1,4 @@
-lib1090
+lib1090 [![Maven Central](https://img.shields.io/maven-central/v/de.sero-systems/lib1090.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22de.sero-systems%22%20AND%20a:%22lib1090%22)
 =========
 
 This is a Mode S, ADS-B, TIS-B and ADS-R decoding library for Java. It was forked from the OpenSky Network's (http://www.opensky-network.org) java-adsb library and refactored entirely to accommodate TIS-B and ADS-R.
