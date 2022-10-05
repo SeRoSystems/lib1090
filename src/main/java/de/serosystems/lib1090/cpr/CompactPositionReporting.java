@@ -19,8 +19,6 @@ package de.serosystems.lib1090.cpr;
 
 import de.serosystems.lib1090.Position;
 
-import static java.lang.Math.abs;
-
 /**
  * Decoder for CPR encoded positions
  * @author Matthias Schaefer (schaefer@sero-systems.de)
@@ -82,10 +80,6 @@ public class CompactPositionReporting {
         double n_helper = Math.max(1.0, NL_helper - (pos.isOddFormat() ? 1.0 : 0.0));
         double Rlon = (angle / n_helper) * (mod(m, n_helper) + ((double) pos.getEncodedLon()) / ((double) (1 << pos.getNumBits())));
 
-        // correct longitude
-        if (Rlon < -180.0 && Rlon > -360.0) Rlon += 360.0;
-        if (Rlon > 180.0 && Rlon < 360.0) Rlon -= 360.0;
-
         if (pos.isSurface()) {
             // check the 4 possible solutions of the surface decoding
             Position candidate = new Position(Rlon, Rlat, 0.0);
@@ -94,8 +88,14 @@ public class CompactPositionReporting {
                 if (reference.haversine(alternative) < reference.haversine(candidate))
                     candidate = alternative;
             }
-            return candidate;
-        } else return new Position(Rlon, Rlat, null);
+            Rlon = candidate.getLongitude();
+        }
+
+        // correct longitude
+        if (Rlon < -180.0 && Rlon > -360.0) Rlon += 360.0;
+        if (Rlon > 180.0 && Rlon < 360.0) Rlon -= 360.0;
+
+        return new Position(Rlon, Rlat, null);
     }
 
     /**
