@@ -1,6 +1,5 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import de.serosystems.lib1090.msgs.bds.TrackAndTurn;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

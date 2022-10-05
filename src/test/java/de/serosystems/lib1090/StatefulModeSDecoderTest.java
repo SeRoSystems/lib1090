@@ -1,6 +1,5 @@
 package de.serosystems.lib1090;
 
-import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;

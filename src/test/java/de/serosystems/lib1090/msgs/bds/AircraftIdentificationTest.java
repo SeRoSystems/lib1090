@@ -1,7 +1,6 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.msgs.adsb.IdentificationMsg;
-import de.serosystems.lib1090.msgs.bds.AircraftIdentification;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

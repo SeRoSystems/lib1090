@@ -1,7 +1,7 @@
 package de.serosystems.lib1090.msgs;
 
-import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.Position;
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
 
 public interface PositionMsg {
 

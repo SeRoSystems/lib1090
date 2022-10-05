@@ -1,7 +1,7 @@
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.Position;
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
