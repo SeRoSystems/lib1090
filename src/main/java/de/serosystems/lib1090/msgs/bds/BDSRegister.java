@@ -23,9 +23,6 @@ package de.serosystems.lib1090.msgs.bds;
 @SuppressWarnings("unused")
 public class BDSRegister {
 
-    // Enum
-    // ----
-
     /**
      * Indicator set by all specializations of this class to tell
      * users which message format is encapsulated in this BDS register
@@ -47,14 +44,8 @@ public class BDSRegister {
 
     }
 
-    // Private fields
-    // --------------
-
     private bdsCode bds;
     private byte[] message;
-
-    // Constructors
-    // ------------
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -70,8 +61,6 @@ public class BDSRegister {
         this.message = bdsRegister.getMessage();
     }
 
-
-
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
@@ -79,9 +68,6 @@ public class BDSRegister {
         this.bds = bdsCode.UNKNOWN;
         this.message = message;
     }
-
-    // Getters
-    // -------
 
     /**
      * @return the bds code
@@ -98,9 +84,6 @@ public class BDSRegister {
         return message;
     }
 
-    // Setters
-    // -------
-
     /**
      * @param bds the bds code to set
      */
@@ -108,10 +91,7 @@ public class BDSRegister {
         this.bds = bds;
     }
 
-    // static methods
-    // ---------------------
-
-    static short extractBdsCode(byte[] message) {
+    public static short extractBdsCode(byte[] message) {
         return (short) (((message[0] >>> 4) & 0x0F) * 10 + (message[0] & 0x0F));
     }
 
