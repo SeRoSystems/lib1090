@@ -1,14 +1,14 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 public class SelectedVerticalIntentionTest {
 
     private static byte[] msg;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
 
         msg = new byte[]{
@@ -24,9 +24,9 @@ public class SelectedVerticalIntentionTest {
         int value = SelectedVerticalIntention.extractMcpFcuSelectedAltitudeValue(msg);
         Integer selectedAltitude = SelectedVerticalIntention.computeSelectedAltitude(status, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(188, value);
-        Assert.assertEquals(3008, selectedAltitude.intValue());
+        assertTrue(status);
+        assertEquals(188, value);
+        assertEquals(3008, selectedAltitude.intValue());
     }
 
     @Test
@@ -35,9 +35,9 @@ public class SelectedVerticalIntentionTest {
         int value = SelectedVerticalIntention.extractFmsSelectedAltitudeValue(msg);
         Integer fmsSelectedAltitude = SelectedVerticalIntention.computeSelectedAltitude(status, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(188, value);
-        Assert.assertEquals(3008, fmsSelectedAltitude.intValue());
+        assertTrue(status);
+        assertEquals(188, value);
+        assertEquals(3008, fmsSelectedAltitude.intValue());
     }
 
     @Test
@@ -46,9 +46,9 @@ public class SelectedVerticalIntentionTest {
         float value = SelectedVerticalIntention.extractBarometricPressureSettingValue(msg);
         Float barometricPressureSetting = SelectedVerticalIntention.computeBarometricPressureSetting(status, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(2200, value ,0.0);
-        Assert.assertEquals(1020, barometricPressureSetting, 0.0);
+        assertTrue(status);
+        assertEquals(2200, value ,0.0);
+        assertEquals(1020, barometricPressureSetting, 0.0);
     }
 
     @Test
@@ -61,13 +61,13 @@ public class SelectedVerticalIntentionTest {
         Boolean altHold = SelectedVerticalIntention.computeOthers(status, value2);
         Boolean approach = SelectedVerticalIntention.computeOthers(status, value3);
 
-        Assert.assertFalse(status);
-        Assert.assertFalse(value1);
-        Assert.assertFalse(value2);
-        Assert.assertFalse(value3);
-        Assert.assertNull(vnav);
-        Assert.assertNull(altHold);
-        Assert.assertNull(approach);
+        assertFalse(status);
+        assertFalse(value1);
+        assertFalse(value2);
+        assertFalse(value3);
+        assertNull(vnav);
+        assertNull(altHold);
+        assertNull(approach);
     }
 
     @Test
@@ -76,9 +76,9 @@ public class SelectedVerticalIntentionTest {
         short value = SelectedVerticalIntention.extractTargetAltSourceValue(msg);
         Short targetAltSource = SelectedVerticalIntention.computeTargetAltSource(status, value);
 
-        Assert.assertFalse(status);
-        Assert.assertEquals(0, value);
-        Assert.assertNull(targetAltSource);
+        assertFalse(status);
+        assertEquals(0, value);
+        assertNull(targetAltSource);
     }
 
 }

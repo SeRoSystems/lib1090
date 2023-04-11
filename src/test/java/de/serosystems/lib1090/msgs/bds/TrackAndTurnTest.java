@@ -1,14 +1,15 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TrackAndTurnTest {
 
     private static byte[] msg;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
 
         msg = new byte[]{
@@ -26,11 +27,11 @@ public class TrackAndTurnTest {
         short value = TrackAndTurn.extractRollAngleValue(msg);
         Float rollAngle = TrackAndTurn.computeRollAngle(true, true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertFalse(sign);
-        Assert.assertEquals(12, value);
-        Assert.assertNotNull(rollAngle);
-        Assert.assertEquals(-87.9, rollAngle, 0.1);
+        assertTrue(status);
+        assertFalse(sign);
+        assertEquals(12, value);
+        assertNotNull(rollAngle);
+        assertEquals(-87.9, rollAngle, 0.1);
 
     }
 
@@ -42,11 +43,11 @@ public class TrackAndTurnTest {
         short value = TrackAndTurn.extractTrueTrackAngleValue(msg);
         Float trueTrackAngle = TrackAndTurn.computeTrueTrackAngle(true, true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertFalse(sign);
-        Assert.assertEquals(650, value);
-        Assert.assertNotNull(trueTrackAngle);
-        Assert.assertEquals(-65.7, trueTrackAngle, 0.1);
+        assertTrue(status);
+        assertFalse(sign);
+        assertEquals(650, value);
+        assertNotNull(trueTrackAngle);
+        assertEquals(-65.7, trueTrackAngle, 0.1);
 
     }
 
@@ -57,10 +58,10 @@ public class TrackAndTurnTest {
         short value = TrackAndTurn.extractGroundSpeedValue(msg);
         Integer groundSpeed = TrackAndTurn.computeGroundSpeed(true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(219, value);
-        Assert.assertNotNull(groundSpeed);
-        Assert.assertEquals(438, groundSpeed.intValue());
+        assertTrue(status);
+        assertEquals(219, value);
+        assertNotNull(groundSpeed);
+        assertEquals(438, groundSpeed.intValue());
 
     }
 
@@ -72,11 +73,11 @@ public class TrackAndTurnTest {
         short value = TrackAndTurn.extractTrackAngleRateValue(msg);
         Float trackAngleRate = TrackAndTurn.computeTrackAngleRate(true, true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertFalse(sign);
-        Assert.assertEquals(4, value);
-        Assert.assertNotNull(trackAngleRate);
-        Assert.assertEquals(-15.8, trackAngleRate, 0.1);
+        assertTrue(status);
+        assertFalse(sign);
+        assertEquals(4, value);
+        assertNotNull(trackAngleRate);
+        assertEquals(-15.8, trackAngleRate, 0.1);
 
     }
 
@@ -87,10 +88,10 @@ public class TrackAndTurnTest {
         short value = TrackAndTurn.extractTrueAirSpeedValue(msg);
         Integer trueAirspeed = TrackAndTurn.computeTrueAirSpeed(true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(212, value);
-        Assert.assertNotNull(trueAirspeed);
-        Assert.assertEquals(424, trueAirspeed.intValue());
+        assertTrue(status);
+        assertEquals(212, value);
+        assertNotNull(trueAirspeed);
+        assertEquals(424, trueAirspeed.intValue());
 
     }
 

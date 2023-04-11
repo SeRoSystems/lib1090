@@ -1,14 +1,14 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 public class HeadingAndSpeedTest {
 
     private static byte[] msg;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
 
         msg = new byte[]{
@@ -26,11 +26,11 @@ public class HeadingAndSpeedTest {
         short value = HeadingAndSpeed.extractMagneticHeadingValue(msg);
         Float magneticHeading = HeadingAndSpeed.computeMagneticHeading(true, true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertTrue(sign);
-        Assert.assertEquals(1019, value);
-        Assert.assertNotNull(magneticHeading);
-        Assert.assertEquals(-0.87, magneticHeading, 0.1);
+        assertTrue(status);
+        assertTrue(sign);
+        assertEquals(1019, value);
+        assertNotNull(magneticHeading);
+        assertEquals(-0.87, magneticHeading, 0.1);
 
     }
 
@@ -41,10 +41,10 @@ public class HeadingAndSpeedTest {
         short value = HeadingAndSpeed.extractIndicatedAirspeedValue(msg);
         Short indicatedAirspeed = HeadingAndSpeed.computeIndicatedAirspeed(true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(336, value);
-        Assert.assertNotNull(indicatedAirspeed);
-        Assert.assertEquals(336, indicatedAirspeed, 0.1);
+        assertTrue(status);
+        assertEquals(336, value);
+        assertNotNull(indicatedAirspeed);
+        assertEquals(336, indicatedAirspeed, 0.1);
 
     }
 
@@ -55,10 +55,10 @@ public class HeadingAndSpeedTest {
         short value = HeadingAndSpeed.extractMatchNumberValue(msg);
         Float matchNumber = HeadingAndSpeed.computeMatchNumber(true, value);
 
-        Assert.assertTrue(status);
-        Assert.assertEquals(120, value);
-        Assert.assertNotNull(matchNumber);
-        Assert.assertEquals(0.48, matchNumber, 0.1);
+        assertTrue(status);
+        assertEquals(120, value);
+        assertNotNull(matchNumber);
+        assertEquals(0.48, matchNumber, 0.1);
 
     }
 
@@ -70,11 +70,11 @@ public class HeadingAndSpeedTest {
         short value = HeadingAndSpeed.extractBarometricAltitudeRateValue(msg);
         Integer barometricAltitudeRate = HeadingAndSpeed.computeBarometricAltitude(true, false, value);
 
-        Assert.assertTrue(status);
-        Assert.assertFalse(sign);
-        Assert.assertEquals(0, value);
-        Assert.assertNotNull(barometricAltitudeRate);
-        Assert.assertEquals(0, barometricAltitudeRate, 0.1);
+        assertTrue(status);
+        assertFalse(sign);
+        assertEquals(0, value);
+        assertNotNull(barometricAltitudeRate);
+        assertEquals(0, barometricAltitudeRate, 0.1);
 
     }
 
@@ -86,11 +86,11 @@ public class HeadingAndSpeedTest {
         short value = HeadingAndSpeed.extractInertialVerticalRateValue(msg);
         Integer inertialVerticalRate = HeadingAndSpeed.computeInertialVerticalRate(true, false, value);
 
-        Assert.assertTrue(status);
-        Assert.assertFalse(sign);
-        Assert.assertEquals(114, value);
-        Assert.assertNotNull(inertialVerticalRate);
-        Assert.assertEquals(3648, inertialVerticalRate, 0.1);
+        assertTrue(status);
+        assertFalse(sign);
+        assertEquals(114, value);
+        assertNotNull(inertialVerticalRate);
+        assertEquals(3648, inertialVerticalRate, 0.1);
 
     }
 

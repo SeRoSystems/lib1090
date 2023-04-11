@@ -5,15 +5,15 @@ import de.serosystems.lib1090.msgs.PositionMsg;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
 import java.util.Base64;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class SurfacePositionDecodingTest {
 
@@ -21,7 +21,7 @@ public class SurfacePositionDecodingTest {
 
     private StatefulModeSDecoder decoder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         decoder = new StatefulModeSDecoder();
     }

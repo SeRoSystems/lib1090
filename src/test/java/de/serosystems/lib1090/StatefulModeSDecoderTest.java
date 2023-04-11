@@ -6,10 +6,10 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.OperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsg;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsgTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -19,7 +19,7 @@ public class StatefulModeSDecoderTest {
 
 	private StatefulModeSDecoder decoder;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		decoder = new StatefulModeSDecoder();
 	}
