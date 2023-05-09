@@ -4,7 +4,7 @@ import de.serosystems.lib1090.msgs.adsb.IdentificationMsg;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AircraftIdentificationTest {
 
