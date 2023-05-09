@@ -232,7 +232,7 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
 	}
 
 	public static int decodeThreatIdentity(byte[] msg) {
-		return (((msg[3] & 0x3) << 24) | ((msg[4]&0xFF) << 16) | (msg[5] << 8) | (msg[6]&0xFF)) & 0x3FFFFFF;
+		return (((msg[3]&0x3) << 24) | ((msg[4]&0xFF) << 16) | ((msg[5]&0xFF) << 8) | (msg[6]&0xFF)) & 0x3FFFFFF;
 	}
 
 	public static byte decodeThreatType(byte[] msg) {
@@ -240,19 +240,19 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
 	}
 
 	public static boolean decodeMultiThreatEncounter(byte[] msg) {
-		return (msg[3] & 0x10) > 0;
+		return (msg[3]&0x10) > 0;
 	}
 
 	public static boolean decodeRaTerminated(byte[] msg) {
-		return (msg[3] & 0x20) > 0;
+		return (msg[3]&0x20) > 0;
 	}
 
 	public static byte decodeRacRecord(byte[] msg) {
-		return (byte) ((((msg[2] & 0x3) << 2) | (msg[3] >>> 6) & 0x3) & 0xF);
+		return (byte) ((((msg[2]&0x3) << 2) | (msg[3] >>> 6)&0x3) & 0xF);
 	}
 
 	public static short decodeActiveRa(byte[] msg) {
-		return (short) (((msg[2] >>> 2) & 0x3f | (msg[1] << 6)) & 0x3FFF);
+		return (short) (((msg[2] >>> 2)&0x3f | ((msg[1]&0xFF) << 6)) & 0x3FFF);
 	}
 
 	public static boolean[] extractActiveResolutionAdvisories(byte[] message) {

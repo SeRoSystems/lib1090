@@ -178,8 +178,7 @@ public class ExampleDecoder {
 			case ADSB_EMERGENCY:
 				EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
 				System.out.println("["+icao24+"]: "+status.getEmergencyStateText());
-				System.out.println("          Mode A code is "+status.getModeACode()[0]+
-						status.getModeACode()[1]+status.getModeACode()[2]+status.getModeACode()[3]);
+				System.out.println("          Mode A code is "+status.getIdentity());
 				break;
 			case ADSB_AIRSPEED:
 				AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;

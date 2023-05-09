@@ -204,13 +204,14 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 		return decodeIdentity(identity);
 	}
 
-	static String decodeIdentity(short identity) {
+	public static String decodeIdentity(short identity) {
 		int C1 = (0x1000&identity)>>>12;
 		int A1 = (0x800&identity)>>>11;
 		int C2 = (0x400&identity)>>>10;
 		int A2 = (0x200&identity)>>>9;
 		int C4 = (0x100&identity)>>>8;
 		int A4 = (0x080&identity)>>>7;
+		// ZERO
 		int B1 = (0x020&identity)>>>5;
 		int D1 = (0x010&identity)>>>4;
 		int B2 = (0x008&identity)>>>3;

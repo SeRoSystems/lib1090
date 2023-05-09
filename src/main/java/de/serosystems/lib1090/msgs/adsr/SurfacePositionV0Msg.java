@@ -33,7 +33,6 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-R surface position messages
  * @author Matthias Schäfer (schaefer@sero-systems.de)
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
 

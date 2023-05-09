@@ -87,8 +87,8 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 		valid_rac = payload[3] == 0x30;
 		active_resolution_advisories = (short) ((payload[4]<<6 | (payload[5]>>>2)&0x3F)&0x3FFF);
 		racs_record = (byte) ((payload[5]<<2 | (payload[6]>>>6)&0x3)&0xF);
-		ra_terminated = (payload[6]>>>5&0x1) == 1;
-		multiple_threat_encounter = (payload[6]>>>4&0x1) == 1;
+		ra_terminated = ((payload[6]>>>5)&0x1) == 1;
+		multiple_threat_encounter = ((payload[6]>>>4)&0x1) == 1;
 	}
 
 	/**
