@@ -31,41 +31,44 @@ public class StatefulPositionDecoder implements PositionDecoder {
 		if (cpr == null) return null;
 
 		// get last position in complementary format for global decoding
-		CPREncodedPosition last_other =
+		CPREncodedPosition lastOther =
 				cpr.isOddFormat() ? last_even_airborne : last_odd_airborne;
 
 		// store position message for global decoding
 		if (cpr.isOddFormat()) last_odd_airborne = cpr;
 		else last_even_airborne = cpr;
 
-		Position new_pos = cpr.decodePosition(last_other, last_pos != null ? last_pos : receiver);
+		// only use receiver as reference for surface positions (might be too far away for airborne)
+		Position refPos = last_pos != null ? last_pos : (cpr.isSurface() ? receiver : null);
 
-		if (new_pos == null) return null;
+		Position newPos = cpr.decodePosition(lastOther, refPos);
+
+		if (newPos == null) return null;
 
 		//////// apply some additional (stateful) reasonableness tests //////////
 
 		// check if it's realistic that the target covered this distance (faster than 1000 knots?)
 		if (!disableSpeedTest && last_pos != null && last_time != null && cpr.getTimestamp() != null) {
 			double td = abs((cpr.getTimestamp() - last_time) / 1_000.);
-			double groundSpeed = new_pos.haversine(last_pos) / td; // in meters per second
+			double groundSpeed = newPos.haversine(last_pos) / td; // in meters per second
 
-			if (groundSpeed > 514.4) new_pos.setReasonable(false);
+			if (groundSpeed > 514.4) newPos.setReasonable(false);
 		}
 
-		last_pos = new_pos;
+		last_pos = newPos;
 		last_time = cpr.getTimestamp();
 
-		if (!new_pos.isReasonable()) num_reasonable = 0; // reset
+		if (!newPos.isReasonable()) num_reasonable = 0; // reset
 			// at least n good msgs before we declare reasonable
-		else if (num_reasonable++ < 2) new_pos.setReasonable(false);
+		else if (num_reasonable++ < 2) newPos.setReasonable(false);
 
 		// apply additional reasonableness test
-		if (receiver != null && receiver.haversine(new_pos) > MAX_DIST_TO_SENDER) {
-			new_pos.setReasonable(false);
+		if (receiver != null && receiver.haversine(newPos) > MAX_DIST_TO_SENDER) {
+			newPos.setReasonable(false);
 			num_reasonable = 0;
 		}
 
-		return new_pos;
+		return newPos;
 	}
 
 	/**
