@@ -3,6 +3,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.IdentifyReply;
 
 import java.io.Serializable;
 
@@ -76,7 +77,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 		}
 
 		emergency_state = (byte) ((msg[1]&0xFF)>>>5);
-		mode_a_code = (short) (msg[2]|((msg[1]&0x1F)<<8));
+		mode_a_code = (short) (((msg[1]&0x1F)<<8) | (msg[2] & 0xFF));
 	}
 
 	/**
@@ -112,25 +113,12 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 	/**
 	 * @return the four-digit Mode A (4096) code (only ADS-B version 2)
 	 */
-	public byte[] getModeACode() {
-		// the sequence is C1, A1, C2, A2, C4, A4, ZERO, B1, D1, B2, D2, B4, D4
-		int C1 = (mode_a_code>>>12)&0x1;
-		int A1 = (mode_a_code>>>11)&0x1;
-		int C2 = (mode_a_code>>>10)&0x1;
-		int A2 = (mode_a_code>>>9)&0x1;
-		int C4 = (mode_a_code>>>8)&0x1;
-		int A4 = (mode_a_code>>>7)&0x1;
-		int B1 = (mode_a_code>>>5)&0x1;
-		int D1 = (mode_a_code>>>4)&0x1;
-		int B2 = (mode_a_code>>>3)&0x1;
-		int D2 = (mode_a_code>>>2)&0x1;
-		int B4 = (mode_a_code>>>1)&0x1;
-		int D4 = mode_a_code&0x1;
-		return new byte[] {
-				(byte) (A1+(A2<<1)+(A4<<2)),
-				(byte) (B1+(B2<<1)+(B4<<2)),
-				(byte) (C1+(C2<<1)+(C4<<2)),
-				(byte) (D1+(D2<<1)+(D4<<2))};
+	public short getModeACode() {
+		return mode_a_code;
+	}
+
+	public String getIdentity() {
+		return IdentifyReply.decodeIdentity(mode_a_code);
 	}
 
 	@Override
