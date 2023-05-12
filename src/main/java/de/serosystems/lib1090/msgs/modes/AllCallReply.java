@@ -61,7 +61,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
 	/**
 	 * @param reply Mode S reply containing this all-call reply
-	 * @throws BadFormatException if message is not all-call reply or 
+	 * @throws BadFormatException if message is not all-call reply or
 	 * contains wrong values.
 	 */
 	public AllCallReply(ModeSDownlinkMsg reply) throws BadFormatException {
@@ -75,7 +75,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 		capabilities = getFirstField();
 
 		// extract interrogator ID
-		this.parity_interrogator = calcParity()^getParity();
+		this.parity_interrogator = calcParityInt()^getParity();
 
 		code_label = (byte) ((parity_interrogator>>4)&0x7);
 	}
