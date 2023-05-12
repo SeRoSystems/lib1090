@@ -187,47 +187,107 @@ public class ModeSDownlinkMsg implements Serializable {
 	/**
 	 * polynomial for the cyclic redundancy check<br>
 	 * Note: we assume that the degree of the polynomial
-	 * is divisible by 8 (holds for Mode S) and the msb is left out
+	 * is divisible by 8 (holds for Mode S) and the msb is left out<br>
+	 * Deprecated, kept for compatibility. Use {@link #CRC_POLYNOMIAL} instead.
 	 */
+	@Deprecated
 	public static final byte[] CRC_polynomial = {
-			(byte)0xFF,
-			(byte)0xF4,
-			(byte)0x09 // according to Annex 10 V4
+			(byte) 0xFF,
+			(byte) 0xF4,
+			(byte) 0x09 // according to Annex 10 V4
 	};
 
 	/**
-	 * @param msg raw message as byte array
-	 * @return calculated parity field as 3-byte array. We used the implementation from<br>
-	 *         http://www.eurocontrol.int/eec/gallery/content/public/document/eec/report/1994/022_CRC_calculations_for_Mode_S.pdf
+	 * CRC Polynomial as of Annex 10 V4, without leading coefficient.
 	 */
-	public static byte[] calcParity(byte[] msg) {
-		byte[] pi = Arrays.copyOf(msg, CRC_polynomial.length);
+	public static final int CRC_POLYNOMIAL = 0xfff409;
 
-		boolean invert;
-		int byteidx, bitshift;
-		for (int i = 0; i < msg.length*8; ++i) { // bit by bit
-			invert = ((pi[0] & 0x80) != 0);
+	/**
+	 * Precomputed CRC table.
+	 * For an element CRC_TABLE[i]=j, interpret the bits (MSB = leading coefficient)
+	 * of index i as coefficients of a polynomial in group F2[X] and multiply it by X^24.
+	 * Then j is the remainder when dividing this polynomial by the generator polynomial defined by Annex 10 V4.
+	 */
+	private static final int[] CRC_TABLE = new int[]{
+			0x000000, 0xfff409, 0x001c1b, 0xffe812, 0x003836, 0xffcc3f, 0x00242d, 0xffd024,
+			0x00706c, 0xff8465, 0x006c77, 0xff987e, 0x00485a, 0xffbc53, 0x005441, 0xffa048,
+			0x00e0d8, 0xff14d1, 0x00fcc3, 0xff08ca, 0x00d8ee, 0xff2ce7, 0x00c4f5, 0xff30fc,
+			0x0090b4, 0xff64bd, 0x008caf, 0xff78a6, 0x00a882, 0xff5c8b, 0x00b499, 0xff4090,
+			0x01c1b0, 0xfe35b9, 0x01ddab, 0xfe29a2, 0x01f986, 0xfe0d8f, 0x01e59d, 0xfe1194,
+			0x01b1dc, 0xfe45d5, 0x01adc7, 0xfe59ce, 0x0189ea, 0xfe7de3, 0x0195f1, 0xfe61f8,
+			0x012168, 0xfed561, 0x013d73, 0xfec97a, 0x01195e, 0xfeed57, 0x010545, 0xfef14c,
+			0x015104, 0xfea50d, 0x014d1f, 0xfeb916, 0x016932, 0xfe9d3b, 0x017529, 0xfe8120,
+			0x038360, 0xfc7769, 0x039f7b, 0xfc6b72, 0x03bb56, 0xfc4f5f, 0x03a74d, 0xfc5344,
+			0x03f30c, 0xfc0705, 0x03ef17, 0xfc1b1e, 0x03cb3a, 0xfc3f33, 0x03d721, 0xfc2328,
+			0x0363b8, 0xfc97b1, 0x037fa3, 0xfc8baa, 0x035b8e, 0xfcaf87, 0x034795, 0xfcb39c,
+			0x0313d4, 0xfce7dd, 0x030fcf, 0xfcfbc6, 0x032be2, 0xfcdfeb, 0x0337f9, 0xfcc3f0,
+			0x0242d0, 0xfdb6d9, 0x025ecb, 0xfdaac2, 0x027ae6, 0xfd8eef, 0x0266fd, 0xfd92f4,
+			0x0232bc, 0xfdc6b5, 0x022ea7, 0xfddaae, 0x020a8a, 0xfdfe83, 0x021691, 0xfde298,
+			0x02a208, 0xfd5601, 0x02be13, 0xfd4a1a, 0x029a3e, 0xfd6e37, 0x028625, 0xfd722c,
+			0x02d264, 0xfd266d, 0x02ce7f, 0xfd3a76, 0x02ea52, 0xfd1e5b, 0x02f649, 0xfd0240,
+			0x0706c0, 0xf8f2c9, 0x071adb, 0xf8eed2, 0x073ef6, 0xf8caff, 0x0722ed, 0xf8d6e4,
+			0x0776ac, 0xf882a5, 0x076ab7, 0xf89ebe, 0x074e9a, 0xf8ba93, 0x075281, 0xf8a688,
+			0x07e618, 0xf81211, 0x07fa03, 0xf80e0a, 0x07de2e, 0xf82a27, 0x07c235, 0xf8363c,
+			0x079674, 0xf8627d, 0x078a6f, 0xf87e66, 0x07ae42, 0xf85a4b, 0x07b259, 0xf84650,
+			0x06c770, 0xf93379, 0x06db6b, 0xf92f62, 0x06ff46, 0xf90b4f, 0x06e35d, 0xf91754,
+			0x06b71c, 0xf94315, 0x06ab07, 0xf95f0e, 0x068f2a, 0xf97b23, 0x069331, 0xf96738,
+			0x0627a8, 0xf9d3a1, 0x063bb3, 0xf9cfba, 0x061f9e, 0xf9eb97, 0x060385, 0xf9f78c,
+			0x0657c4, 0xf9a3cd, 0x064bdf, 0xf9bfd6, 0x066ff2, 0xf99bfb, 0x0673e9, 0xf987e0,
+			0x0485a0, 0xfb71a9, 0x0499bb, 0xfb6db2, 0x04bd96, 0xfb499f, 0x04a18d, 0xfb5584,
+			0x04f5cc, 0xfb01c5, 0x04e9d7, 0xfb1dde, 0x04cdfa, 0xfb39f3, 0x04d1e1, 0xfb25e8,
+			0x046578, 0xfb9171, 0x047963, 0xfb8d6a, 0x045d4e, 0xfba947, 0x044155, 0xfbb55c,
+			0x041514, 0xfbe11d, 0x04090f, 0xfbfd06, 0x042d22, 0xfbd92b, 0x043139, 0xfbc530,
+			0x054410, 0xfab019, 0x05580b, 0xfaac02, 0x057c26, 0xfa882f, 0x05603d, 0xfa9434,
+			0x05347c, 0xfac075, 0x052867, 0xfadc6e, 0x050c4a, 0xfaf843, 0x051051, 0xfae458,
+			0x05a4c8, 0xfa50c1, 0x05b8d3, 0xfa4cda, 0x059cfe, 0xfa68f7, 0x0580e5, 0xfa74ec,
+			0x05d4a4, 0xfa20ad, 0x05c8bf, 0xfa3cb6, 0x05ec92, 0xfa189b, 0x05f089, 0xfa0480,
+	};
 
-			// shift left
-			pi[0] <<= 1;
-			for (int b = 1; b < CRC_polynomial.length; ++b) {
-				pi[b-1] |= (pi[b]>>>7) & 0x1;
-				pi[b] <<= 1;
-			}
-
-			// get next bit from message
-			byteidx = ((CRC_polynomial.length*8)+i) / 8;
-			bitshift = 7-(i%8);
-			if (byteidx < msg.length)
-				pi[pi.length-1] |= (msg[byteidx]>>>bitshift) & 0x1;
-
-			// xor
-			if (invert)
-				for (int b = 0; b < CRC_polynomial.length; ++b)
-					pi[b] ^= CRC_polynomial[b];
+	/**
+	 * Interpret a given message as coefficients of a polynomial of group F2[X], multiplied by X^24.
+	 * Then compute the remainder when dividing that polynomial by the CRC generator polynomial defined by Annex 10 V4.<br>
+	 * Note: multiplying the polynomial with X^24 has the same effect as appending 24 zero bits (i.e. zero 3 bytes) to the message.
+	 * The payload given into this function does not include the parity, thus this is exactly what we want here.<br>
+	 * We used a LUT optimized implementation of<br>
+	 * <a href="http://www.eurocontrol.int/eec/gallery/content/public/document/eec/report/1994/022_CRC_calculations_for_Mode_S.pdf">an algorithm described here</a>.
+	 *
+	 * @param msg raw message as byte array
+	 * @return parity field as 24 bit integer
+	 */
+	public static int calcParityInt(byte[] msg) {
+		int remainder = 0;
+		assert CRC_TABLE.length == 1 << 8;
+		for (byte b : msg) {
+			/* multiply remainder by X^8, creating a polynomial that has potentially a degree higher than 24.
+			   We split the remainder into a polynomial of those leading monomials (called dividend) and the rest (will be the new remainder).
+			   Furthermore, we add another 8 coefficients (corresponds to one byte) from the message.
+			   As we multiply those 8 coefficients by X^24, they will add to the dividend.
+			   Note: we have precomputed the outcome of this division in the lookup table.
+			 */
+			int dividend = remainder >>> (24 - 8); // extract leading coefficients that will have higher degree than 24 after multiplication
+			dividend = (dividend ^ b) & 0xff; // add new 8 coefficients (and remove some bits that are not 0 due to overflows and sign extension)
+			remainder <<= 8; // multiply by X^8
+			remainder ^= CRC_TABLE[dividend]; // compute remainder (i.e. look it up), then subtract it.
 		}
+		// return remainder and omit overflowing bits
+		return remainder & 0xffffff;
+	}
 
-		return Arrays.copyOf(pi, CRC_polynomial.length);
+	/**
+	 * See {@link #calcParityInt(byte[])}. This function converts the integer to a 3 byte array.
+	 * Deprecated, kept for compatibility.
+	 *
+	 * @param msg raw message as byte array
+	 * @return parity field as 3 byte array.
+	 */
+	@Deprecated
+	public static byte[] calcParity(byte[] msg) {
+		int parity = calcParityInt(msg);
+		return new byte[]{
+				(byte) ((parity >> 16) & 0xff),
+				(byte) ((parity >> 8) & 0xff),
+				(byte) (parity & 0xff)
+		};
 	}
 
 	public static int getExpectedLength(byte downlink_format) {
@@ -318,7 +378,7 @@ public class ModeSDownlinkMsg implements Serializable {
 			case 20: // Long Comm-B, altitude reply
 			case 21: // Long Comm-B, identity reply
 			case 24: // Long Comm-D (ELM)
-				address.address = noCRC ? parity : calcParity()^parity;
+				address.address = noCRC ? parity : calcParityInt()^parity;
 				break;
 
 			case 11: // all call replies
@@ -484,13 +544,13 @@ public class ModeSDownlinkMsg implements Serializable {
 	/**
 	 * @return fully qualified address (with type)
 	 */
-	public QualifiedAddress getAddress () {
+	public QualifiedAddress getAddress() {
 		return address;
 	}
 
 	/**
 	 * @return payload as 3- or 10-byte array containing the Mode S
-	 * reply without the first and the last three bytes. 
+	 * reply without the first and the last three bytes.
 	 */
 	public byte[] getPayload() {
 		return payload;
@@ -504,15 +564,15 @@ public class ModeSDownlinkMsg implements Serializable {
 	}
 
 	/**
-	 * @return calculates Mode S parity as 3-byte array
+	 * @return calculates Mode S parity as 24 bit integer
 	 */
-	public int calcParity() {
-		byte[] message = new byte[payload.length+1];
+	public int calcParityInt() {
+		byte[] message = new byte[payload.length + 1];
 
-		message[0] = (byte) (downlink_format<<3 | first_field);
+		message[0] = (byte) (downlink_format << 3 | first_field);
 		System.arraycopy(payload, 0, message, 1, payload.length);
 
-		return rawAPToInt(calcParity(message));
+		return calcParityInt(message);
 	}
 
 	/**
@@ -534,7 +594,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		byte[] msg = new byte[4+payload.length];
 		msg[0] = (byte) (downlink_format<<3 | first_field);
 		System.arraycopy(payload, 0, msg, 1, payload.length);
-		int crc = noCRC ? getParity()^calcParity() : getParity();
+		int crc = noCRC ? getParity()^ calcParityInt() : getParity();
 		msg[1+payload.length]   = (byte) ((crc>>16)&0xff);
 		msg[1+payload.length+1] = (byte) ((crc>>8)&0xff);
 		msg[1+payload.length+2] = (byte) (crc&0xff);
@@ -549,7 +609,7 @@ public class ModeSDownlinkMsg implements Serializable {
 	 * @return true if parity in message matched calculated parity
 	 */
 	public boolean checkParity() {
-		return calcParity() == getParity();
+		return calcParityInt() == getParity();
 	}
 
 	@Override
@@ -588,18 +648,18 @@ public class ModeSDownlinkMsg implements Serializable {
 		// while others do not touch it. This combination should be extremely
 		// rare so the performance can be more or less neglected.
 
-		if (this.getParity() == other.calcParity())
+		if (this.getParity() == other.calcParityInt())
 			return true;
 
-		if (this.calcParity() == other.getParity())
+		if (this.calcParityInt() == other.getParity())
 			return true;
 
 		if (this.getDownlinkFormat() == 11) {
 			// check interrogator code
-			if ((getParity()^calcParity()) == other.getParity())
+			if ((getParity() ^ calcParityInt()) == other.getParity())
 				return true;
 
-			if ((other.getParity()^other.calcParity()) == this.getParity())
+			if ((other.getParity()^other.calcParityInt()) == this.getParity())
 				return true;
 		}
 
@@ -627,7 +687,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		result = 31 * result + address.address;
 
 		int effective_parity = parity;
-		if (noCRC) effective_parity = parity^calcParity();
+		if (noCRC) effective_parity = parity^ calcParityInt();
 		result = 31 * result + effective_parity;
 
 		return result;
