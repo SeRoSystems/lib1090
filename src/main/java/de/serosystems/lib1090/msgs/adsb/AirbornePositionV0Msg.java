@@ -38,7 +38,9 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	private boolean horizontal_position_available;
 	private boolean altitude_available;
 	private byte surveillance_status;
-	private boolean nic_suppl_b;
+
+	// encodes "single antenna" flag for DO-260, and NIC supplement B for DO-260B
+	private boolean antenna_or_nic_suppl_b;
 	private short altitude_encoded;
 	private boolean time_flag;
 	private CPREncodedPosition position;
@@ -86,7 +88,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		horizontal_position_available = getFormatTypeCode() != 0;
 
 		surveillance_status = (byte) ((msg[0]>>>1)&0x3);
-		nic_suppl_b = (msg[0]&0x1) == 1;
+		antenna_or_nic_suppl_b = (msg[0]&0x1) == 1;
 
 		altitude_encoded = (short) (((msg[1]<<4)|((msg[2]>>>4)&0xF))&0xFFF);
 		altitude_available = altitude_encoded != 0;
@@ -307,7 +309,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return for ADS-B version 0 and 1 messages true, iff transmitting system uses only one antenna.
 	 */
 	public boolean hasSingleAntenna() {
-		return nic_suppl_b;
+		return antenna_or_nic_suppl_b;
 	}
 
 	/**
@@ -402,7 +404,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 				"horizontal_position_available=" + horizontal_position_available +
 				", altitude_available=" + altitude_available +
 				", surveillance_status=" + surveillance_status +
-				", single_antenna_flag=" + nic_suppl_b +
+				", single_antenna_flag=" + antenna_or_nic_suppl_b +
 				", altitude_encoded=" + altitude_encoded +
 				", time_flag=" + time_flag +
 				", position=" + position +
