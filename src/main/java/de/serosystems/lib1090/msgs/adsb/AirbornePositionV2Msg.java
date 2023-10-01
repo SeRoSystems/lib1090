@@ -84,7 +84,6 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
 		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
 			case 9: case 20: return 7.5;
 			case 10: case 21: return 25;
 			case 11:
@@ -98,6 +97,7 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 			case 16:
 				return hasNICSupplementB() && hasNICSupplementA() ? 7408 : 14816;
 			case 17: return 37040;
+			// case 0: case 18: case 22: return -1;
 			default: return -1;
 		}
 	}
@@ -108,7 +108,6 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 */
 	public byte getNIC() {
 		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 10: case 21: return 10;
 			case 11:
@@ -120,6 +119,7 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 			case 16:
 				return (byte) (hasNICSupplementB() && hasNICSupplementA() ? 3 : 2);
 			case 17: return 1;
+			// case 0: case 18: case 22: return 0;
 			default: return 0;
 		}
 	}
