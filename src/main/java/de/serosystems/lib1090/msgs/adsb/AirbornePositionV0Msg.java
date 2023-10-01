@@ -123,7 +123,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public static double typeCodeToHCR(byte formatTypeCode) {
 		switch (formatTypeCode) {
-			case 0: case 18: case 22: return -1;
 			case 9: case 20: return 7.5;
 			case 10: case 21: return 25;
 			case 11: return 185.2;
@@ -133,6 +132,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 			case 15: return 3704;
 			case 16: return 18520;
 			case 17: return 37040;
+			// case 0: case 18: case 22: return -1;
 			default: return -1;
 		}
 	}
@@ -158,7 +158,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public static byte typeCodeToNACp(byte formatTypeCode) {
 		switch (formatTypeCode) {
-			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 10: case 21: return 10;
 			case 11: return 8;
@@ -167,6 +166,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 			case 14: return 5;
 			case 15: return 4;
 			case 16: case 17: return 1;
+			// case 0: case 18: case 22: return 0;
 			default: return 0;
 		}
 	}
@@ -194,7 +194,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public static double typeCodeToPositionUncertainty(byte formatTypeCode) {
 		switch (formatTypeCode) {
-			case 0: case 18: case 22: return -1;
 			case 9: return 3;
 			case 10: return 10;
 			case 11: return 92.6;
@@ -204,6 +203,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 			case 15: return 1852;
 			case 16: return 9260;
 			case 17: return 18520;
+			// case 0: case 18: case 22: return -1;
 			default: return -1;
 		}
 	}
@@ -225,7 +225,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 */
 	public static byte typeCodeToNIC(byte formatTypeCode) {
 		switch (formatTypeCode) {
-			case 0: case 18: case 22: return 0;
 			case 9: case 20: return 11;
 			case 6: case 10: case 21: return 10;
 			case 7: case 11: return 8;
@@ -234,6 +233,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 			case 14: return 5;
 			case 15: return 4;
 			case 16: case 17: return 1;
+			// case 0: case 18: case 22: return 0;
 			default: return 0;
 		}
 	}
