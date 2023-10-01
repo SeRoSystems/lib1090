@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -11,8 +12,6 @@ import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
-
-import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.*;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -113,7 +112,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		return typeCodeToHCR(getFormatTypeCode());
+		return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
 	}
 
 	/**
@@ -126,7 +125,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		return typeCodeToNACp(getFormatTypeCode());
+		return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
 	}
 
 	/**
@@ -141,14 +140,14 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		return typeCodeToPositionUncertainty(getFormatTypeCode());
+		return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
 	}
 
 	/**
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		return typeCodeToNIC(getFormatTypeCode());
+		return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
 	}
 
 	/**
@@ -164,7 +163,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		return typeCodeToSIL(getFormatTypeCode());
+		return AirbornePosition.typeCodeToSIL(getFormatTypeCode());
 	}
 
 	/**

@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -112,29 +113,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		return typeCodeToHCR(getFormatTypeCode());
-	}
-
-	/**
-	 * According to DO-260B Table N-4
-	 *
-	 * @param formatTypeCode the messages' format type code
-	 * @return the derived HCR
-	 */
-	public static double typeCodeToHCR(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11: return 185.2;
-			case 12: return 370.4;
-			case 13: return 926;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16: return 18520;
-			case 17: return 37040;
-			// case 0: case 18: case 22: return -1;
-			default: return -1;
-		}
+		return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
 	}
 
 	/**
@@ -147,28 +126,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV1Msg}.
 	 */
 	public byte getNACp() {
-		return typeCodeToNACp(getFormatTypeCode());
-	}
-
-	/**
-	 * According to DO-260B Table N-7
-	 *
-	 * @param formatTypeCode the messages' format type code
-	 * @return the derived NACp
-	 */
-	public static byte typeCodeToNACp(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return 8;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: case 17: return 1;
-			// case 0: case 18: case 22: return 0;
-			default: return 0;
-		}
+		return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
 	}
 
 	/**
@@ -183,29 +141,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		return typeCodeToPositionUncertainty(getFormatTypeCode());
-	}
-
-	/**
-	 * According to DO-260B Table N-7
-	 *
-	 * @param formatTypeCode the messages' format type code
-	 * @return the derived position uncertainty in meters
-	 */
-	public static double typeCodeToPositionUncertainty(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 9: return 3;
-			case 10: return 10;
-			case 11: return 92.6;
-			case 12: return 185.2;
-			case 13: return 463;
-			case 14: return 926;
-			case 15: return 1852;
-			case 16: return 9260;
-			case 17: return 18520;
-			// case 0: case 18: case 22: return -1;
-			default: return -1;
-		}
+		return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
 	}
 
 	/**
@@ -214,28 +150,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		return typeCodeToNIC(getFormatTypeCode());
-	}
-
-	/**
-	 * According to DO-260B Table 2-200.
-	 *
-	 * @param formatTypeCode the messages' format type code
-	 * @return the derived NIC
-	 */
-	public static byte typeCodeToNIC(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 9: case 20: return 11;
-			case 6: case 10: case 21: return 10;
-			case 7: case 11: return 8;
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: case 17: return 1;
-			// case 0: case 18: case 22: return 0;
-			default: return 0;
-		}
+		return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
 	}
 
 	/**
@@ -251,19 +166,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
-		return typeCodeToSIL(getFormatTypeCode());
-	}
-
-	/**
-	 * According to DO-260B Table N-8.
-	 * @param formatTypeCode the messages' format type code
-	 * @return the derived SIL
-	 */
-	public static byte typeCodeToSIL(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 0: case 18: case 22: return 0;
-			default: return 2;
-		}
+		return AirbornePosition.typeCodeToSIL(getFormatTypeCode());
 	}
 
 	/**

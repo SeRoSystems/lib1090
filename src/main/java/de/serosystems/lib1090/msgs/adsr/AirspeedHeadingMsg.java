@@ -6,6 +6,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.Airspeed.decodeNACv;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -184,18 +186,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 * "unknown" or &gt;10m
 	 */
 	public double getNACv() {
-		switch(navigation_accuracy_category) {
-			case 1:
-				return 10;
-			case 2:
-				return 3;
-			case 3:
-				return 1;
-			case 4:
-				return 0.3F;
-			default:
-				return -1;
-		}
+		return decodeNACv(navigation_accuracy_category);
 	}
 
 	/**
