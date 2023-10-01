@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
@@ -225,7 +226,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	@Override
 	public Integer getAltitude() {
 		if (!altitude_available) return null;
-		return decodeAltitude(altitude_encoded);
+		return Altitude.decode12BitAltitude(altitude_encoded);
 	}
 
 	@Override

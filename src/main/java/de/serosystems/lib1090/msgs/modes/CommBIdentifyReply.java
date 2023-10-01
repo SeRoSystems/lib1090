@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.Identity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -214,7 +215,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
 	 * </ul>
 	 */
 	public String getIdentity() {
-		return IdentifyReply.decodeIdentity(identity);
+		return Identity.decodeIdentity(identity);
 	}
 
 	@Override
