@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
@@ -223,7 +224,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	@Override
 	public Integer getAltitude() {
 		if (!hasValidAltitude()) return null;
-		return decodeAltitude(encoded_altitude);
+		return Altitude.decode12BitAltitude(encoded_altitude);
 	}
 
 	@Override

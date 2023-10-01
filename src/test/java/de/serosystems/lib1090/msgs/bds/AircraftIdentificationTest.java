@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import de.serosystems.lib1090.msgs.adsb.IdentificationMsg;
+import de.serosystems.lib1090.decoding.Identification;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +32,8 @@ public class AircraftIdentificationTest {
     @Test
     public void aircraftIdentification() {
 
-        byte[] identityByteArray = IdentificationMsg.decodeAircraftIdentification(msg);
-        char[] identityCharArray = IdentificationMsg.mapChar(identityByteArray);
+        byte[] identityByteArray = Identification.decodeAircraftIdentification(msg);
+        char[] identityCharArray = Identification.mapChar(identityByteArray);
 
         assertEquals("KLM1017 ", String.valueOf(identityCharArray));
 

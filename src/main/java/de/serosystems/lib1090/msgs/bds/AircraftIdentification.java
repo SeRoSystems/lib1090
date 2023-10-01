@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs.bds;
 
-import de.serosystems.lib1090.msgs.adsb.IdentificationMsg;
+import de.serosystems.lib1090.decoding.Identification;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
         setBds(BDSRegister.bdsCode.AIRCRAFT_IDENTIFICATION);
 
         this.bdsCode = extractBdsCode(message);
-        this.aircraftIdentification = IdentificationMsg.decodeAircraftIdentification(message);
+        this.aircraftIdentification = Identification.decodeAircraftIdentification(message);
 
     }
 
@@ -64,7 +64,7 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
      * @return The call sign as 8 characters array
      */
     public char[] getAircraftIdentification() {
-        return IdentificationMsg.mapChar(aircraftIdentification);
+        return Identification.mapChar(aircraftIdentification);
     }
 
     // Override

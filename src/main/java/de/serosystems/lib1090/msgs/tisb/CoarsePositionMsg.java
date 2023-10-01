@@ -9,7 +9,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
-import static de.serosystems.lib1090.msgs.adsb.AirbornePositionV0Msg.decodeAltitude;
+import static de.serosystems.lib1090.decoding.Altitude.decode12BitAltitude;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -183,7 +183,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 	@Override
 	public Integer getAltitude() {
 		if (!hasValidAltitude()) return null;
-		return decodeAltitude(encoded_altitude);
+		return decode12BitAltitude(encoded_altitude);
 	}
 
 	@Override

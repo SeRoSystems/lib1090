@@ -1,9 +1,9 @@
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.Identity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.modes.IdentifyReply;
 
 import java.io.Serializable;
 
@@ -118,7 +118,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 	}
 
 	public String getIdentity() {
-		return IdentifyReply.decodeIdentity(mode_a_code);
+		return Identity.decodeIdentity(mode_a_code);
 	}
 
 	@Override
