@@ -2,6 +2,7 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.PositionMsg;
@@ -12,6 +13,11 @@ import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+
+import static de.serosystems.lib1090.decoding.SurfacePosition.groundSpeed;
+import static de.serosystems.lib1090.decoding.SurfacePosition.groundSpeedResolution;
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeEPU;
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -111,13 +117,8 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: case 8: return -1;
-			case 5: return 7.5;
-			case 6: return 25;
-			case 7: return 185.2;
-			default: return -1;
-		}
+		return decodeHCR(getFormatTypeCode());
+
 	}
 
 	/**
@@ -145,26 +146,14 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		switch (getFormatTypeCode()) {
-			case 0: case 8: return -1;
-			case 5: return 3;
-			case 6: return 10;
-			case 7: return 92.6;
-			default: return -1;
-		}
+		return decodeEPU(getFormatTypeCode());
 	}
 
 	/**
 	 * @return Navigation integrity category. A NIC of 0 means "unkown". Values according to DO-260B Table N-4.
 	 */
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: case 8: return 0;
-			case 5: return 11;
-			case 6: return 10;
-			case 7: return 8;
-			default: return 0;
-		}
+		return SurfacePosition.decodeNIC(getFormatTypeCode());
 	}
 
 	/**
@@ -195,28 +184,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 	 * {@link #hasGroundSpeed()}.
 	 */
 	public Double getGroundSpeed() {
-		double speed;
-
-		if (movement == 1)
-			speed = 0;
-		else if (movement >= 2 && movement <= 8)
-			speed = 0.125+(movement-2)*0.125;
-		else if (movement >= 9 && movement <= 12)
-			speed = 1+(movement-9)*0.25;
-		else if (movement >= 13 && movement <= 38)
-			speed = 2+(movement-13)*0.5;
-		else if (movement >= 39 && movement <= 93)
-			speed = 15+(movement-39);
-		else if (movement >= 94 && movement <= 108)
-			speed = 70+(movement-94)*2;
-		else if (movement >= 109 && movement <= 123)
-			speed = 100+(movement-109)*5;
-		else if (movement == 124)
-			speed = 175;
-		else
-			return null;
-
-		return speed;
+		return groundSpeed(movement);
 	}
 
 	/**
@@ -224,26 +192,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 	 * checked with {@link #hasGroundSpeed()}.
 	 */
 	public Double getGroundSpeedResolution() {
-		double resolution;
-
-		if (movement >= 1 && movement <= 8)
-			resolution = 0.125;
-		else if (movement >= 9 && movement <= 12)
-			resolution = 0.25;
-		else if (movement >= 13 && movement <= 38)
-			resolution = 0.5;
-		else if (movement >= 39 && movement <= 93)
-			resolution = 1;
-		else if (movement >= 94 && movement <= 108)
-			resolution = 2;
-		else if (movement >= 109 && movement <= 123)
-			resolution = 5;
-		else if (movement == 124)
-			resolution = 175;
-		else
-			return null;
-
-		return resolution;
+		return groundSpeedResolution(movement);
 	}
 
 	/**

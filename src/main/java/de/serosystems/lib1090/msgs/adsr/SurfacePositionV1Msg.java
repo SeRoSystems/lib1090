@@ -7,6 +7,9 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeNIC;
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
+
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  * @author Matthias Schäfer (schaefer@sero-systems.de)
@@ -77,16 +80,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 	 */
 	@Override
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: return -1;
-			case 5: return 7.5;
-			case 6: return 25;
-			case 7:
-				return hasNICSupplementA() ? 75 : 185.2;
-			case 8:
-				return 185.2;
-			default: return -1;
-		}
+		return decodeHCR(getFormatTypeCode(), hasNICSupplementA());
 	}
 
 	/**
@@ -96,14 +90,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 	 */
 	@Override
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: case 8: return 0;
-			case 5: return 11;
-			case 6: return 10;
-			case 7:
-				return (byte) (hasNICSupplementA() ? 9 : 8);
-			default: return 0;
-		}
+		return decodeNIC(getFormatTypeCode(), hasNICSupplementA());
 	}
 
 	@Override

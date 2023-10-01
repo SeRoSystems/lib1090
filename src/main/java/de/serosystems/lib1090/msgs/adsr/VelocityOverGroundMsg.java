@@ -6,6 +6,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.VelocityOverGround.decodeAccuracyBound;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -173,18 +175,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * "unknown" or &gt;10m
 	 */
 	public float getAccuracyBound() {
-		switch(navigation_accuracy_category) {
-			case 1:
-				return 10;
-			case 2:
-				return 3;
-			case 3:
-				return 1;
-			case 4:
-				return 0.3f;
-			default:
-				return -1;
-		}
+		return decodeAccuracyBound(navigation_accuracy_category);
 	}
 
 

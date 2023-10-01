@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.VelocityOverGround;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -173,20 +174,8 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * "unknown" or &gt;10m
 	 */
 	public float getAccuracyBound() {
-		switch(navigation_accuracy_category) {
-			case 1:
-				return 10;
-			case 2:
-				return 3;
-			case 3:
-				return 1;
-			case 4:
-				return 0.3f;
-			default:
-				return -1;
-		}
+		return VelocityOverGround.decodeAccuracyBound(navigation_accuracy_category);
 	}
-
 
 	/**
 	 * @return velocity from east to south in knots or null if information is not available
@@ -196,7 +185,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return (direction_west ? east_west_velocity : -east_west_velocity);
 	}
 
-
 	/**
 	 * @return velocity from north to south in knots or null if information is not available
 	 */
@@ -205,14 +193,12 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return (direction_south ? north_south_velocity : -north_south_velocity);
 	}
 
-
 	/**
 	 * @return whether altitude is derived by barometric sensor or GNSS
 	 */
 	public boolean isBarometricVerticalSpeed() {
 		return vertical_source;
 	}
-
 
 	/**
 	 * @return vertical rate in feet/min (negative value means descending) or null if information is not available. The
@@ -222,7 +208,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		if (!vertical_rate_info_available) return null;
 		return (vertical_rate_down ? -vertical_rate : vertical_rate);
 	}
-
 
 	/**
 	 * @return difference between barometric and geometric altitude in feet or null if information is not available. The

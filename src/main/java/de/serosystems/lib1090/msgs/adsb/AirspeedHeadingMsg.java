@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.Airspeed;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -184,18 +185,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 * "unknown" or &gt;10m
 	 */
 	public double getNACv() {
-		switch(navigation_accuracy_category) {
-			case 1:
-				return 10;
-			case 2:
-				return 3;
-			case 3:
-				return 1;
-			case 4:
-				return 0.3F;
-			default:
-				return -1;
-		}
+		return Airspeed.decodeNACv(navigation_accuracy_category);
 	}
 
 	/**
@@ -206,7 +196,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		if (!airspeed_available) return null;
 		return (int) airspeed;
 	}
-
 
 	/**
 	 * @return whether altitude is derived by barometric sensor or GNSS

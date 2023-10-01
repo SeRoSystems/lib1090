@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.OperationalStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -191,33 +192,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	 * @return the airplane's length in meters; -1 for unknown
 	 */
 	public int getAirplaneLength() {
-		switch (airplane_len_width) {
-			case 1:
-				return 15;
-			case 2:
-			case 3:
-				return 25;
-			case 4:
-			case 5:
-				return 35;
-			case 6:
-			case 7:
-				return 45;
-			case 8:
-			case 9:
-				return 55;
-			case 10:
-			case 11:
-				return 65;
-			case 12:
-			case 13:
-				return 75;
-			case 14:
-			case 15:
-				return 85;
-			default:
-				return -1;
-		}
+		return OperationalStatus.decodeAirplaneLength(airplane_len_width);
 	}
 
 	/**
@@ -225,24 +200,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	 * @return the airplane's width in meters
 	 */
 	public double getAirplaneWidth() {
-		switch (airplane_len_width) {
-			case 1: return 23;
-			case 2: return 28.5;
-			case 3: return 34;
-			case 4: return 33;
-			case 5: return 38;
-			case 6: return 39.5;
-			case 7: return 45;
-			case 8: return 45;
-			case 9: return 52;
-			case 10: return 59.5;
-			case 11: return 67;
-			case 12: return 72.5;
-			case 13: return 80;
-			case 14: return 80;
-			case 15: return 90;
-			default: return -1;
-		}
+		return OperationalStatus.decodeAirplaneWidth(airplane_len_width);
 	}
 
 	/**

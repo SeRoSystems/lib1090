@@ -7,6 +7,9 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.AirbornePosition.decodeNIC;
+import static de.serosystems.lib1090.decoding.AirbornePosition.decodeHCR;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -94,19 +97,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 	 *         for better precision.
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return -1;
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11: return nic_suppl_a ? 75.0 : 185.2;
-			case 12: return 370.4;
-			case 13: return nic_suppl_a ? 1111.2 : 926;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16: return nic_suppl_a ? 7408 : 14816;
-			case 17: return 37040;
-			default: return -1;
-		}
+		return decodeHCR(getFormatTypeCode(), nic_suppl_a);
 	}
 
 	/**
@@ -114,19 +105,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 	 * @return Navigation integrity category. A NIC of 0 means "unkown".
 	 */
 	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: case 18: case 22: return 0;
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11: return (byte) (nic_suppl_a ? 9 : 8);
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16: return (byte) (nic_suppl_a ? 3 : 2);
-			case 17: return 1;
-			default: return 0;
-		}
+		return decodeNIC(getFormatTypeCode(), nic_suppl_a);
 	}
 
 	@Override
