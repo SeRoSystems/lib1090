@@ -6,6 +6,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.OperationalStatus.nacPtoEPU;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -215,20 +217,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
-		switch (nac_pos) {
-			case 1: return 18520;
-			case 2: return 7408;
-			case 3: return 3704;
-			case 4: return 1852.0;
-			case 5: return 926.0;
-			case 6: return 555.6;
-			case 7: return 185.2;
-			case 8: return 92.6;
-			case 9: return 30.0;
-			case 10: return 10.0;
-			case 11: return 3.0;
-			default: return -1;
-		}
+		return nacPtoEPU(nac_pos);
 	}
 
 	/**
