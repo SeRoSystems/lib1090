@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.modes;
 
+import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -202,7 +203,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 	 * @return the decoded altitude in feet
 	 */
 	public Integer getAltitude() {
-		return AltitudeReply.decodeAltitude(altitude_code);
+		return Altitude.decode13BitAltitude(altitude_code);
 	}
 
 	@Override

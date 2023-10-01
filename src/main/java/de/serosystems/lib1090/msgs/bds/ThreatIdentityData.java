@@ -1,7 +1,7 @@
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.modes.AltitudeReply;
 
 import java.io.Serializable;
 
@@ -128,7 +128,7 @@ public class ThreatIdentityData implements Serializable {
      * @return the decoded barometric altitude in feet if applicable
      */
     public Integer getAltitude() {
-        return AltitudeReply.decodeAltitude(altitudeCode);
+        return Altitude.decode13BitAltitude(altitudeCode);
     }
 
     /**
