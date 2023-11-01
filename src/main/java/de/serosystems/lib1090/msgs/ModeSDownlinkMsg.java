@@ -35,7 +35,7 @@ public class ModeSDownlinkMsg implements Serializable {
 	/*
 	 * Attributes
 	 */
-	private byte downlink_format; // 0-31
+	private byte downlink_format; // 0-24
 	private byte first_field; // the 3 bits after downlink format
 	private byte[] payload; // 3 or 10 bytes
 	private int parity; // 3 bytes
@@ -355,6 +355,16 @@ public class ModeSDownlinkMsg implements Serializable {
 		downlink_format = reply[0];
 		first_field = (byte) (downlink_format & 0x7);
 		downlink_format = (byte) (downlink_format>>>3 & 0x1F);
+
+		// DF 24 is a special case
+		if (downlink_format > 23) {
+			// verify that the third most significant bit is 1
+			if ((downlink_format & 0b00000100) != 0) {
+				throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 1");
+			}
+
+			downlink_format = 24;
+		}
 
 		if (reply.length != getExpectedLength(downlink_format)) {
 			throw new BadFormatException(

@@ -69,7 +69,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
 		super(reply);
 		setType(subtype.COMM_D_ELM);
 
-		if (getDownlinkFormat() < 24) {
+		if (getDownlinkFormat() != 24) {
 			throw new BadFormatException("Message is not an extended length message!");
 		}
 
