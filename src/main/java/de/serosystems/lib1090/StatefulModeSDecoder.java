@@ -405,10 +405,8 @@ public class StatefulModeSDecoder {
 				return modes; // this should never happen
 			case 20: return new CommBAltitudeReply(modes);
 			case 21: return new CommBIdentifyReply(modes);
-			default:
-				if (modes.getDownlinkFormat()>=24)
-					return new CommDExtendedLengthMsg(modes);
-				else return modes; // unknown mode s reply
+			case 24: return new CommDExtendedLengthMsg(modes);
+			default: return modes; // unknown mode s reply
 		}
 	}
 
