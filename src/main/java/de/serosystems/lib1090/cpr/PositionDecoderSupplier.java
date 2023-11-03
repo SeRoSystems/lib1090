@@ -9,4 +9,8 @@ public interface PositionDecoderSupplier extends Function<ModeSDownlinkMsg.Quali
 	static PositionDecoderSupplier statefulPositionDecoder() {
 		return address -> new StatefulPositionDecoder();
 	}
+
+	static PositionDecoderSupplier statefulPositionDecoder(final boolean disableSpeedTest) {
+		return address -> new StatefulPositionDecoder(disableSpeedTest);
+	}
 }

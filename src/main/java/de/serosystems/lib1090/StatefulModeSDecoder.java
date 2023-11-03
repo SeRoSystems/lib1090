@@ -48,10 +48,20 @@ public class StatefulModeSDecoder {
 	private long latestTimestamp;
 
 	/**
-	 * Create an instance of the stateful decoder with the default position decoding logic.
+	 * Create an instance of the stateful decoder with the default position decoding logic. Note that
+	 * the default logic uses quite strict reasonableness tests. If your data comes from a heterogenous
+	 * receiver network with fluctuating timestamps, you might want to use {@link #StatefulModeSDecoder(boolean)}.
 	 */
 	public StatefulModeSDecoder() {
 		this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
+	}
+
+	/**
+	 * Constructor that allows for disabling the speed reasonableness test. See also {@link #StatefulModeSDecoder()}.
+	 * @param disableSpeedTest set to true if your data comes from a heterogeneous network with varying timestamp stability
+	 */
+	public StatefulModeSDecoder(boolean disableSpeedTest) {
+		this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder(disableSpeedTest);
 	}
 
 	/**

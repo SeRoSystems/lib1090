@@ -13,6 +13,22 @@ public class StatefulPositionDecoder implements PositionDecoder {
 	private Position last_pos; // lat lon
 	private Long last_time; // in ms
 	private int num_reasonable; // number of successive reasonable msgs
+	private boolean disableSpeedTest = false;
+
+	/**
+	 * Default constructor that uses speed test
+	 */
+	public StatefulPositionDecoder () {}
+
+	/**
+	 * Constructor that allows disabling of speed-based reasonableness test. Use this
+	 * if you have a network of heterogeneous receivers with variable data delay and
+	 * no deduplication.
+	 * @param disableSpeedTest true if speed test should not be applied
+	 */
+	public StatefulPositionDecoder (boolean disableSpeedTest) {
+		this.disableSpeedTest = disableSpeedTest;
+	}
 
 	// distance to receiver threshold
 	private static final int MAX_DIST_TO_SENDER = 700000; // 700km
@@ -52,7 +68,10 @@ public class StatefulPositionDecoder implements PositionDecoder {
 			double td = abs((cpr.getTimestamp() - last_time) / 1_000.);
 			double groundSpeed = newPos.haversine(last_pos) / td; // in meters per second
 
-			if (groundSpeed > 514.4) newPos.setReasonable(false);
+			if (groundSpeed > 514.4) {
+				newPos.setReasonable(false);
+				System.out.printf("Ground speed was: %.2f%n", groundSpeed);
+			}
 		}
 
 		last_pos = newPos;
@@ -83,7 +102,7 @@ public class StatefulPositionDecoder implements PositionDecoder {
 	 */
 	@Override
 	public Position decodePosition(CPREncodedPosition cpr, Position receiver) {
-		return decodePosition(cpr, receiver, false);
+		return decodePosition(cpr, receiver, disableSpeedTest);
 	}
 
 }
