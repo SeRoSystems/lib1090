@@ -70,7 +70,6 @@ public class StatefulPositionDecoder implements PositionDecoder {
 
 			if (groundSpeed > 514.4) {
 				newPos.setReasonable(false);
-				System.out.printf("Ground speed was: %.2f%n", groundSpeed);
 			}
 		}
 
