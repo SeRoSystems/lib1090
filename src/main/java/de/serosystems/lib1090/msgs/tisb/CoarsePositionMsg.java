@@ -10,6 +10,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 import static de.serosystems.lib1090.decoding.Altitude.decode12BitAltitude;
+import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 
 /*
  *  This file is part of de.serosystems.lib1090.
@@ -189,6 +190,15 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 	@Override
 	public Position.AltitudeType getAltitudeType () {
 		return Position.AltitudeType.BAROMETRIC_ALTITUDE;
+	}
+
+	/**
+	 * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+	 * @return value of the Q bit or null if message does not contain a valid altitude
+	 */
+	public Boolean hasQBit() {
+		if (!hasValidAltitude()) return null;
+		return decode12BitQBit(encoded_altitude);
 	}
 
 	@Override

@@ -13,6 +13,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -233,6 +235,15 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 		else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
 			return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
 		else return Position.AltitudeType.UNKNOWN;
+	}
+
+	/**
+	 * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+	 * @return value of the Q bit or null if message does not contain a valid altitude
+	 */
+	public Boolean hasQBit() {
+		if (!hasValidAltitude()) return null;
+		return decode12BitQBit(encoded_altitude);
 	}
 
 	@Override
