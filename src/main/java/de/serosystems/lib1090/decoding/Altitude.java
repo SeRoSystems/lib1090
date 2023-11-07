@@ -68,7 +68,7 @@ public final class Altitude {
 	/**
 	 * Decode altitude according to DO-260B 2.2.3.2.3.4.3 <br>
 	 * @param altitude_encoded 12 bit encoded altitude
-	 * @return
+	 * @return altitude in feet
 	 */
 	public static Integer decode12BitAltitude(short altitude_encoded) {
 		// In contrast to the decodeAltitude method in {@link de.serosystems.lib1090.msgs.modes.AltitudeReply}, input

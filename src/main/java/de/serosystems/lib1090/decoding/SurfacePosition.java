@@ -70,13 +70,7 @@ public final class SurfacePosition {
 	 * @return Navigation integrity category. A NIC of 0 means "unkown". Values according to DO-260B Table N-4.
 	 */
 	public static byte decodeNIC(byte formatTypeCode) {
-		switch (formatTypeCode) {
-			case 5: return 11;
-			case 6: return 10;
-			case 7: return 8;
-			// case 0: case 8: return 0;
-			default: return 0;
-		}
+		return decodeNIC(formatTypeCode, false);
 	}
 
 	/**
@@ -124,11 +118,10 @@ public final class SurfacePosition {
 	 */
 	public static byte decodeNIC(byte formatTypeCode, boolean nicSupplA) {
 		switch (formatTypeCode) {
-			case 0: case 8: return 0;
 			case 5: return 11;
 			case 6: return 10;
-			case 7:
-				return (byte) (nicSupplA ? 9 : 8);
+			case 7: return (byte) (nicSupplA ? 9 : 8);
+			// case 0: case 8: return 0;
 			default: return 0;
 		}
 	}
@@ -147,10 +140,8 @@ public final class SurfacePosition {
 		switch (formatTypeCode) {
 			case 5: return 7.5;
 			case 6: return 25;
-			case 7:
-				return nicSupplA ? 75 : 185.2;
-			case 8:
-				return 185.2;
+			case 7: return nicSupplA ? 75 : 185.2;
+			case 8: return 185.2;
 			// case 0: return -1;
 			default: return -1;
 		}
