@@ -31,6 +31,7 @@ public final class Altitude {
 
 		boolean Mbit = (altitude_code&0x40)!=0;
 		if (!Mbit) {
+			// deliberately not using #decode13BitQBit for performance
 			boolean Qbit = (altitude_code&0x10)!=0;
 			if (Qbit) { // altitude reported in 25ft increments
 				int N = (altitude_code&0x0F) | ((altitude_code&0x20)>>>1) | ((altitude_code&0x1F80)>>>2);
@@ -66,6 +67,16 @@ public final class Altitude {
 	}
 
 	/**
+	 * Decode Q bit for altitude code according to Annex 10 V4 3.1.2.6.5.4
+	 * @param altitude_code as provided in most Mode S replies (13 bits)
+	 * @return value of the Q bit, null if MBit is set or altitude is not available
+	 */
+	public static Boolean decode13BitQBit(short altitude_code) {
+		boolean Mbit = (altitude_code&0x40)!=0;
+		return !Mbit && ((altitude_code&0x10)!=0);
+	}
+
+	/**
 	 * Decode altitude according to DO-260B 2.2.3.2.3.4.3 <br>
 	 * @param altitude_encoded 12 bit encoded altitude
 	 * @return altitude in feet
@@ -73,7 +84,7 @@ public final class Altitude {
 	public static Integer decode12BitAltitude(short altitude_encoded) {
 		// In contrast to the decodeAltitude method in {@link de.serosystems.lib1090.msgs.modes.AltitudeReply}, input
 		// does not contain the MBit
-		boolean Qbit = (altitude_encoded&0x10)!=0;
+		boolean Qbit = decode12BitQBit(altitude_encoded);
 		int N;
 		if (Qbit) { // altitude reported in 25ft increments
 			N = (altitude_encoded&0xF) | ((altitude_encoded&0xFE0)>>>1);
@@ -104,5 +115,14 @@ public final class Altitude {
 
 			return -1200+N500*500+N100*100;
 		}
+	}
+
+	/**
+	 * Decode the Q bit for an altitude provided according to DO-260B 2.2.3.2.3.4.3 <br>
+	 * @param altitude_encoded 12 bit encoded altitude
+	 * @return value of the Q bit
+	 */
+	public static boolean decode12BitQBit(short altitude_encoded) {
+		return (altitude_encoded&0x10)!=0;
 	}
 }

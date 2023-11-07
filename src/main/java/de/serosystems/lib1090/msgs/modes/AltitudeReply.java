@@ -7,6 +7,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
 
+import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
+
 /*
  *  This file is part of de.serosystems.lib1090.
  *
@@ -190,10 +192,18 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
 	}
 
 	/**
-	 * @return the decoded altitude in feet
+	 * @return the decoded altitude in feet or null if not available
 	 */
 	public Integer getAltitude() {
 		return Altitude.decode13BitAltitude(altitude_code);
+	}
+
+	/**
+	 * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
+	 * @return value of the Q bit, null if altitude is not available or M bit is set
+	 */
+	public Boolean hasQBit() {
+		return Altitude.decode13BitQBit(altitude_code);
 	}
 
 	@Override

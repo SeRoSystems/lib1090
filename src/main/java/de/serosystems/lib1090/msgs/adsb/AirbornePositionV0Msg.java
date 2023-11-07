@@ -255,6 +255,15 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		else return Position.AltitudeType.UNKNOWN;
 	}
 
+	/**
+	 * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+	 * @return value of the Q bit or null if message does not contain a valid altitude
+	 */
+	public Boolean hasQBit() {
+		if (!altitude_available) return null;
+		return Altitude.decode12BitQBit(altitude_encoded);
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + "\n\tAirbornePositionV0Msg{" +
