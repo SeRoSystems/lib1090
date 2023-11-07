@@ -15,16 +15,11 @@ public final class Airspeed {
 	 */
 	public static double decodeNACv(byte navigationAccuracyCategory) {
 		switch(navigationAccuracyCategory) {
-			case 1:
-				return 10;
-			case 2:
-				return 3;
-			case 3:
-				return 1;
-			case 4:
-				return 0.3F;
-			default:
-				return -1;
+			case 1: return 10;
+			case 2: return 3;
+			case 3: return 1;
+			case 4: return 0.3F;
+			default: return -1;
 		}
 	}
 }
