@@ -1,5 +1,21 @@
 # Changelog for lib1090
 
+## v4.1.0
+
+### New Features
+- Added option to disable speed-based reasonableness tests for CPR decoding
+- Added getter for Q bit
+
+### Improvements
+- Limited receiver as reference to surface positions
+- Optimized CRC implementation
+- Access to `extractBdsCode` method
+
+### Bug Fixes
+- Decoding error in identity code of emergency status messages
+- Decoding error in DF 24
+
+
 ## v4.0.0
 
 This is the first release of `lib1090` after its fork from [java-adsb](https://github.com/openskynetwork/java-adsb).
