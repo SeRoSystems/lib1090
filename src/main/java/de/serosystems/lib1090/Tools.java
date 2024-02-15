@@ -59,6 +59,27 @@ public class Tools {
 	}
 
 	/**
+	 * Converts an integer in a hex string ensuring a minimum number of digits
+	 * @param input value to be converted
+	 * @param minDigits minimum number of digits the result shall contain
+	 * @return hex representation of input integer
+	 */
+	public static String toHexString(int input, int minDigits) {
+		StringBuilder hex = new StringBuilder();
+		while (input > 0) {
+			int digit = input % 16;
+			hex.insert(0, hexDigits[digit]);
+			input = input / 16;
+		}
+		// ensures leading zeros based on min digits
+		while (hex.length() < minDigits) {
+			hex.insert(0, "0");
+		}
+
+		return hex.toString();
+	}
+
+	/**
 	 * Converts a hex string to an array of bytes.<br>
 	 * Source: https://stackoverflow.com/a/140861/3485023
 	 * @param str the hex string to convert
