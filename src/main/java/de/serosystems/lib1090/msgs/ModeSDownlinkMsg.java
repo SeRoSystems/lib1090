@@ -148,7 +148,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		 * @return address as 6 digit hex string
 		 */
 		public String getHexAddress() {
-			return String.format("%06x", address);
+			return Tools.toHexString(address, 6);
 		}
 
 		@Override
