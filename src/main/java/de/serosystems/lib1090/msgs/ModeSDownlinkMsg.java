@@ -131,6 +131,20 @@ public class ModeSDownlinkMsg implements Serializable {
 		private Type type;
 
 		/**
+		 * protected no-arg constructor e.g. internal usage or for serialization with Kryo
+		 **/
+		protected QualifiedAddress() { }
+
+		public QualifiedAddress(int address, Type type) {
+			this.address = address;
+			this.type = type;
+		}
+
+		public QualifiedAddress(String address, Type type) {
+			this(Integer.parseInt(address, 16), type);
+		}
+
+		/**
 		 * @return type of address (e.g. ICAO 24-bit)
 		 */
 		public Type getType() {
