@@ -81,7 +81,7 @@ public class SurfacePositionV2Msg extends SurfacePositionV1Msg implements Serial
 			case 5: return 7.5;
 			case 6: return 25;
 			case 7:
-				return (byte) (hasNICSupplementA() ? 75 : 185.2);
+				return hasNICSupplementA() ? 75 : 185.2;
 			case 8:
 				if (hasNICSupplementC() && hasNICSupplementA())
 					return 370.4;

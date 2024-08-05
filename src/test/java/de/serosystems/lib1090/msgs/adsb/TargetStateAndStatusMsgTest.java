@@ -15,7 +15,7 @@ public class TargetStateAndStatusMsgTest {
 	// A TSS report observed in reality, decomposed by single bits
 	public static final String TSS_WITHOUT_HEADING =
 				// 10001 => DF 17
-				//   101 => FF (firs field, node needed here)
+				//   101 => FF (first field, not needed here)
 				"8d" +
 
 				// ICAO 24 bit address
