@@ -1,5 +1,15 @@
 # Changelog for lib1090
 
+## v4.1.1
+
+### Improvements
+- Improved usability of `QualifiedAddress`
+- Performance improvement of int to hex conversion
+
+### Bug Fixes
+- Decoding error for horizontal containment radius limit in `SurfacePositionV2Msg`
+
+
 ## v4.1.0
 
 ### New Features
