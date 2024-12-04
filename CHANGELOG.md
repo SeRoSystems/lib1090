@@ -1,5 +1,12 @@
 # Changelog for lib1090
 
+## v4.1.2
+
+### Bug Fixes
+- Fixed Data Link Capability Change Indication in BDS 1,0
+- Fixed TCAS version in BDS 1,0 (DataLinkCapabilityReport)
+
+
 ## v4.1.1
 
 ### Improvements
