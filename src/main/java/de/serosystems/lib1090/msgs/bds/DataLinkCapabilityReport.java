@@ -421,7 +421,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     static short extractTcasVersionNumber(byte[] message) {
-        return (short) (message[4] & 0x03);
+        return (short) ( ((message[4]<<1) & 0x02) | ((message[4]>>>1) & 0x01) );
     }
 
     static boolean extractBasicDataFlashCapability(byte[] message) {

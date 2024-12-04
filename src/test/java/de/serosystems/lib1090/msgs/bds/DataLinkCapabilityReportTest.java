@@ -106,7 +106,7 @@ public class DataLinkCapabilityReportTest {
 
     @Test
     public void tcasVersionNumber() {
-        assertEquals(1, DataLinkCapabilityReport.extractTcasVersionNumber(msg));
+        assertEquals(2, DataLinkCapabilityReport.extractTcasVersionNumber(msg));
     }
 
     @Test
@@ -139,4 +139,43 @@ public class DataLinkCapabilityReportTest {
         assertTrue(DataLinkCapabilityReport.extractChangeFlag(msg));
     }
 
+    @Test
+    void tcacsVersion0() {
+       byte[] message =  new byte[]{
+               (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+               (byte) 0b11111100,
+               (byte) 0xff, (byte) 0xff
+       };
+        assertEquals(0, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+    }
+
+    @Test
+    void tcacsVersion1() {
+        byte[] message =  new byte[]{
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0b11111110,
+                (byte) 0xff, (byte) 0xff
+        };
+        assertEquals(1, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+    }
+
+    @Test
+    void tcacsVersion2() {
+        byte[] message =  new byte[]{
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0b11111101,
+                (byte) 0xff, (byte) 0xff
+        };
+        assertEquals(2, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+    }
+
+    @Test
+    void tcacsVersion3() {
+        byte[] message =  new byte[]{
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0b11111111,
+                (byte) 0xff, (byte) 0xff
+        };
+        assertEquals(3, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+    }
 }
