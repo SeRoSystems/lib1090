@@ -20,7 +20,7 @@ import java.io.Serializable;
  */
 
 /**
- * Decoder for Datalink Capability Report (BDS 1,0)
+ * Decoder for Datalink Capability Report (BDS 1,0) based on DO-181F Table B- B-3-16a
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
@@ -445,7 +445,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     static boolean extractChangeFlag(byte[] message) {
-        return ((message[5] >>> 5) & 0x01) == 1;
+        return ((message[6] >>> 5) & 0x01) == 1;
     }
 
     // Override
