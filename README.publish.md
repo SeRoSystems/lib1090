@@ -5,19 +5,8 @@
 - You PGP key needs to be uploaded to one of the common PGP key servers, e.g.
   `https://pgp.mit.edu/`
 - You need to be registered with Sonatype and allowed to publish our project
-- Enter your Sonatype credentials in `~/.m2/settings.xml:`
-
-```xml
-<settings>
-    <servers>
-        <server>
-            <id>ossrh-sero</id>
-            <username>SONATYPE_JIRA_USERNAME</username>
-            <password>SECRET</password>
-        </server>
-    </servers>
-</settings>
-```
+- Generate a user token at `https://central.sonatype.com/account`
+- It will show you the `<server>` entry for your `~/.m2/settings.xml` file. Paste the entry there.
 
 
 ## Publish
