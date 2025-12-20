@@ -146,7 +146,7 @@ public class Position implements Serializable {
 	/**
 	 * Calculates the two-dimensional great circle distance (haversine)
 	 * @param other position to which we calculate the distance
-	 * @return distance between the this and other position in meters
+	 * @return distance between this and other position in meters
 	 */
 	public Double haversine(Position other) {
 		double lon0r = toRadians(this.longitude);
@@ -200,7 +200,7 @@ public class Position implements Serializable {
 		// correct for numerical instability in altitude near exact poles:
 		// after this correction, error is about 2 millimeters, which is about
 		// the same as the numerical precision of the overall function
-		if (abs(x) < 1 & abs(y) < 1)
+		if (abs(x) < 1 && abs(y) < 1)
 			alt = abs(z) - b;
 
 		return new Position(toDegrees(lon), toDegrees(lat), Tools.meters2Feet(alt), AltitudeType.ABOVE_WGS84_ELLIPSOID);
