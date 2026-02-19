@@ -30,6 +30,7 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 	private static final long serialVersionUID = -2032348919695227545L;
 
+	private byte geometric_vertical_accuracy; // bit 49 and 50
 	private boolean sil_supplement;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
@@ -67,7 +68,34 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 		if ((byte) (msg[5]>>>5) != 2)
 			throw new BadFormatException("Not a DO-260B/version 2 status message.");
 
+		geometric_vertical_accuracy = (byte) ((msg[6] >>> 6) & 0x3);
 		sil_supplement = ((msg[6] & 0x2) != 0);
+	}
+
+	/**
+	 * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
+	 */
+	public byte getGVA() {
+		return geometric_vertical_accuracy;
+	}
+
+	/**
+	 * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
+	 */
+	public int getGeometricVerticalAccuracy() {
+		if (geometric_vertical_accuracy == 1)
+			return 150;
+		else if (geometric_vertical_accuracy == 2)
+			return 45;
+		else return -1;
+	}
+
+	/**
+	 * For interpretation see Table 2-65 in DO-260B
+	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+	 */
+	public byte getSystemDesignAssurance() {
+		return (byte) ((operational_mode_code&0x300)>>>8);
 	}
 
 	/**
@@ -81,8 +109,10 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 	@Override
 	public String toString() {
-		return super.toString() + "\n\tAirborneOperationalStatusV2Msg{" +
-				"sil_supplement=" + sil_supplement +
+		return "AirborneOperationalStatusV2Msg{" +
+				"geometric_vertical_accuracy=" + geometric_vertical_accuracy +
+				", sil_supplement=" + sil_supplement +
+				", operational_mode_code=" + operational_mode_code +
 				'}';
 	}
 }

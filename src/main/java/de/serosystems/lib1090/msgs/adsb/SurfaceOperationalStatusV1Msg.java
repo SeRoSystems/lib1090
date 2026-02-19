@@ -35,13 +35,12 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	private static final long serialVersionUID = -3513411664476607448L;
 
 	private byte subtype_code;
-	private int capability_class_code; // actually 16 bit unsigned
-	private int operational_mode_code; // actually 16 bit unsigned
+	protected int capability_class_code; // actually 16 bit unsigned
+	protected int operational_mode_code; // actually 16 bit unsigned
 	private byte airplane_len_width; // only in subtype_code == 1 surface msgs
 	private byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
-	private byte geometric_vertical_accuracy; // bit 49 and 50
 	private byte sil; // surveillance integrity level
 	private boolean nic_trk_hdg; // NIC baro for airborne status, heading/ground track info else
 	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
@@ -100,7 +99,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 		nic_suppl = ((msg[5] & 0x10) != 0);
 		nac_pos = (byte) (msg[5] & 0xF);
-		geometric_vertical_accuracy = (byte) ((msg[6] >>> 6) & 0x3);
 		sil = (byte) ((msg[6]>>>4)&0x3);
 		nic_trk_hdg = ((msg[6] & 0x8) != 0);
 		hrd = ((msg[6] & 0x4) != 0);
@@ -144,13 +142,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return NIC supplement C for use on the surface
-	 */
-	public boolean getNICSupplementC() {
-		return (capability_class_code & 0x10) != 0;
-	}
-
-	/**
 	 * @return whether TCAS Resolution Advisory (RA) is active
 	 */
 	public boolean hasTCASResolutionAdvisory() {
@@ -169,14 +160,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	 */
 	public boolean hasSingleAntenna() {
 		return (operational_mode_code&0x400) != 0;
-	}
-
-	/**
-	 * For interpretation see Table 2-65 in DO-260B
-	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
-	 */
-	public byte getSystemDesignAssurance() {
-		return (byte) ((operational_mode_code&0x300)>>>8);
 	}
 
 	/**
@@ -237,17 +220,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return the geometric vertical accuracy in meters or -1 for unknown
-	 */
-	public int getGeometricVerticalAccuracy() {
-		if (geometric_vertical_accuracy == 1)
-			return 150;
-		else if (geometric_vertical_accuracy == 2)
-			return 45;
-		else return -1;
-	}
-
-	/**
 	 * 0: unknown or &gt; 1e-3, 1: &lt;= 1e-3, 2: &lt;= 1e-5, 3: &lt;= 1e-7
 	 * @return the source integrity level (SIL) which indicates the propability of exceeding
 	 *         the NIC containment radius (see table A-15 in RCTA DO-260B)
@@ -283,7 +255,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 				", version=" + version +
 				", nic_suppl=" + nic_suppl +
 				", nac_pos=" + nac_pos +
-				", geometric_vertical_accuracy=" + geometric_vertical_accuracy +
 				", sil=" + sil +
 				", nic_trk_hdg=" + nic_trk_hdg +
 				", hrd=" + hrd +

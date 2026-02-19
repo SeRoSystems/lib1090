@@ -216,7 +216,6 @@ public class StatefulModeSDecoder {
 								case 1:
 									SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
 									dd.nicSupplA = s1.hasNICSupplementA();
-									dd.nicSupplC = s1.getNICSupplementC();
 									return s1;
 								case 2:
 									SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);

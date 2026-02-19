@@ -35,11 +35,10 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
 	private byte subtype_code;
 	private int capability_class_code; // actually 16 bit unsigned
-	private int operational_mode_code; // actually 16 bit unsigned
+	protected int operational_mode_code; // actually 16 bit unsigned
 	private byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
-	private byte geometric_vertical_accuracy; // bit 49 and 50
 	private byte sil; // surveillance integrity level
 	private boolean nic_trk_hdg; // NIC baro for airborne status, heading/ground track info else
 	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
@@ -97,7 +96,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
 		nic_suppl = ((msg[5] & 0x10) != 0);
 		nac_pos = (byte) (msg[5] & 0xF);
-		geometric_vertical_accuracy = (byte) ((msg[6] >>> 6) & 0x3);
 		sil = (byte) ((msg[6]>>>4)&0x3);
 		nic_trk_hdg = ((msg[6] & 0x8) != 0);
 		hrd = ((msg[6] & 0x4) != 0);
@@ -170,14 +168,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	}
 
 	/**
-	 * For interpretation see Table 2-65 in DO-260B
-	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
-	 */
-	public byte getSystemDesignAssurance() {
-		return (byte) ((operational_mode_code&0x300)>>>8);
-	}
-
-	/**
 	 * @return the version number of the formats and protocols in use on the aircraft installation.<br>
 	 *         0: Conformant to DO-260/ED-102 and DO-242<br>
 	 *         1: Conformant to DO-260A and DO-242A<br>
@@ -208,24 +198,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	 */
 	public double getPositionUncertainty() {
 		return OperationalStatus.nacPtoEPU(nac_pos);
-	}
-
-	/**
-	 * @return the geometric vertical accuracy in meters or -1 for unknown
-	 */
-	public int getGeometricVerticalAccuracy() {
-		if (geometric_vertical_accuracy == 1)
-			return 150;
-		else if (geometric_vertical_accuracy == 2)
-			return 45;
-		else return -1;
-	}
-
-	/**
-	 * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
-	 */
-	public byte getGVA() {
-		return geometric_vertical_accuracy;
 	}
 
 	/**
@@ -262,7 +234,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 				", version=" + version +
 				", nic_suppl=" + nic_suppl +
 				", nac_pos=" + nac_pos +
-				", geometric_vertical_accuracy=" + geometric_vertical_accuracy +
 				", sil=" + sil +
 				", nic_trk_hdg=" + nic_trk_hdg +
 				", hrd=" + hrd +

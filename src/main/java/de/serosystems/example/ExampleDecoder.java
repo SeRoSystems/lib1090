@@ -215,7 +215,6 @@ public class ExampleDecoder {
 				AirborneOperationalStatusV1Msg opstatA1 = (AirborneOperationalStatusV1Msg) msg;
 				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA1.getVersion());
 				System.out.println("          Barometric altitude cross-checked: "+opstatA1.getBarometricAltitudeIntegrityCode());
-				System.out.println("          Gemoetric vertical accuracy: "+opstatA1.getGeometricVerticalAccuracy()+"m");
 
 				if (opstatA1.getHorizontalReferenceDirection())
 					System.out.println("          Horizontal reference: true north");
@@ -225,7 +224,6 @@ public class ExampleDecoder {
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatA1.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatA1.hasNICSupplementA());
 				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA1.getSIL());
-				System.out.println("          System design assurance: " + opstatA1.getSystemDesignAssurance());
 				System.out.println("          Has 1090ES in: " + opstatA1.has1090ESIn());
 				System.out.println("          IDENT switch active: " + opstatA1.hasActiveIDENTSwitch());
 				System.out.println("          Has operational TCAS: " + opstatA1.hasOperationalTCAS());
@@ -234,8 +232,9 @@ public class ExampleDecoder {
 				System.out.println("          Uses single antenna: " + opstatA1.hasSingleAntenna());
 				System.out.println("          Supports air-referenced velocity reports: " + opstatA1.hasAirReferencedVelocity());
 
-				// SIL supplement in version 2
 				if (msg instanceof AirborneOperationalStatusV2Msg) {
+					System.out.println("          Gemoetric vertical accuracy: "+((AirborneOperationalStatusV2Msg) msg).getGeometricVerticalAccuracy()+"m");
+					System.out.println("          System design assurance: " + ((AirborneOperationalStatusV2Msg) msg).getSystemDesignAssurance());
 					System.out.println("          Has SIL supplement: " + ((AirborneOperationalStatusV2Msg) msg).hasSILSupplement());
 				}
 
@@ -245,7 +244,6 @@ public class ExampleDecoder {
 				SurfaceOperationalStatusV1Msg opstatS1 = (SurfaceOperationalStatusV1Msg) msg;
 
 				System.out.println("["+icao24+"]: Using ADS-B version "+opstatS1.getVersion());
-				System.out.println("          Gemoetric vertical accuracy: "+opstatS1.getGeometricVerticalAccuracy()+"m");
 
 				if (opstatS1.getHorizontalReferenceDirection())
 					System.out.println("          Horizontal reference: true north");
@@ -254,9 +252,7 @@ public class ExampleDecoder {
 				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS1.getNACp());
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatS1.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatS1.hasNICSupplementA());
-				System.out.println("          Has NIC supplement C: " + opstatS1.getNICSupplementC());
 				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS1.getSIL());
-				System.out.println("          System design assurance: " + opstatS1.getSystemDesignAssurance());
 				System.out.println("          Has 1090ES in: " + opstatS1.has1090ESIn());
 				System.out.println("          IDENT switch active: " + opstatS1.hasActiveIDENTSwitch());
 				System.out.println("          Has TCAS resolution advisory: " + opstatS1.hasTCASResolutionAdvisory());
@@ -269,8 +265,9 @@ public class ExampleDecoder {
 				System.out.println("          Encoded GPS antenna offset: " + opstatS1.getGPSAntennaOffset());
 				System.out.println("          Has track heading info: " + opstatS1.hasTrackHeadingInfo());
 
-				// SIL supplement in version 2
 				if (msg instanceof SurfaceOperationalStatusV2Msg) {
+					System.out.println("          Has NIC supplement C: " + ((SurfaceOperationalStatusV2Msg) msg).getNICSupplementC());
+					System.out.println("          System design assurance: " + ((SurfaceOperationalStatusV2Msg) msg).getSystemDesignAssurance());
 					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
 				}
 
