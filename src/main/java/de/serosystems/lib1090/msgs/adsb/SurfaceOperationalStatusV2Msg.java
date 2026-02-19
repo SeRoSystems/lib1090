@@ -71,6 +71,21 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	}
 
 	/**
+	 * @return NIC supplement C for use on the surface
+	 */
+	public boolean getNICSupplementC() {
+		return (capability_class_code & 0x10) != 0;
+	}
+
+	/**
+	 * For interpretation see Table 2-65 in DO-260B
+	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+	 */
+	public byte getSystemDesignAssurance() {
+		return (byte) ((operational_mode_code&0x300)>>>8);
+	}
+
+	/**
 	 * DO-260B 2.2.3.2.7.2.14
 	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
 	 * 			it's based on "per hour".
@@ -81,8 +96,10 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 	@Override
 	public String toString() {
-		return super.toString() + "\n\tSurfaceOperationalStatusV2Msg{" +
+		return "SurfaceOperationalStatusV2Msg{" +
 				"sil_supplement=" + sil_supplement +
+				", capability_class_code=" + capability_class_code +
+				", operational_mode_code=" + operational_mode_code +
 				'}';
 	}
 }
