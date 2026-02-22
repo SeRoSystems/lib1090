@@ -60,8 +60,13 @@ public class CompactPositionReporting {
         double Rlat1 = Dlat1 * (mod(j, 59.0) + ((double) odd.getEncodedLat()) / ((double) (1 << odd.getNumBits())));
 
         // Southern hemisphere?
-        if (Rlat0 >= 270.0 && Rlat0 <= 360.0) Rlat0 -= 360.0;
-        if (Rlat1 >= 270.0 && Rlat1 <= 360.0) Rlat1 -= 360.0;
+        if (!pos.isSurface()) {
+            if (Rlat0 >= 270.0 && Rlat0 <= 360.0) Rlat0 -= 360.0;
+            if (Rlat1 >= 270.0 && Rlat1 <= 360.0) Rlat1 -= 360.0;
+        } else {
+            if (Rlat0 - reference.getLatitude() > 45.0) Rlat0 -= 90.0;
+            if (Rlat1 - reference.getLatitude() > 45.0) Rlat1 -= 90.0;
+        }
 
         // ensure that the number of even longitude zones are equal
         if (NL(Rlat0) != NL(Rlat1)) return null; // position straddle
