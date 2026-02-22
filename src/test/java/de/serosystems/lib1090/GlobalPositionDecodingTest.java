@@ -105,4 +105,28 @@ public class GlobalPositionDecodingTest {
         }
     }
 
+    @Test
+    void testSanityChecks() {
+        // Test same format (both even)
+        CPREncodedPosition cprEven1 = new CPREncodedPosition(false, 0x06AF1, 0x09C16, 17, false, null);
+        CPREncodedPosition cprEven2 = new CPREncodedPosition(false, 0x04706, 0x04D58, 17, false, null);
+        assertNull(CompactPositionReporting.decodeGlobalPosition(cprEven1, cprEven2, null));
+
+        // Test same format (both odd)
+        CPREncodedPosition cprOdd1 = new CPREncodedPosition(true, 0x06AF1, 0x09C16, 17, false, null);
+        CPREncodedPosition cprOdd2 = new CPREncodedPosition(true, 0x04706, 0x04D58, 17, false, null);
+        assertNull(CompactPositionReporting.decodeGlobalPosition(cprOdd1, cprOdd2, null));
+
+        // Test mixing airborne and surface positions
+        CPREncodedPosition cprAirborne = new CPREncodedPosition(false, 0x06AF1, 0x09C16, 17, false, null);
+        CPREncodedPosition cprSurface = new CPREncodedPosition(true, 0x11C19, 0x13560, 17, true, null);
+        assertNull(CompactPositionReporting.decodeGlobalPosition(cprAirborne, cprSurface, null));
+        assertNull(CompactPositionReporting.decodeGlobalPosition(cprSurface, cprAirborne, null));
+
+        // Test surface position without reference position
+        CPREncodedPosition cprSurfaceEven = new CPREncodedPosition(false, 0x1ABC2, 0x07058, 17, true, null);
+        CPREncodedPosition cprSurfaceOdd = new CPREncodedPosition(true, 0x11C19, 0x13560, 17, true, null);
+        assertNull(CompactPositionReporting.decodeGlobalPosition(cprSurfaceEven, cprSurfaceOdd, null));
+    }
+
 }
