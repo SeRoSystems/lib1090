@@ -64,8 +64,10 @@ public class CompactPositionReporting {
             if (Rlat0 >= 270.0 && Rlat0 <= 360.0) Rlat0 -= 360.0;
             if (Rlat1 >= 270.0 && Rlat1 <= 360.0) Rlat1 -= 360.0;
         } else {
-            if (Rlat0 - reference.getLatitude() > 45.0) Rlat0 -= 90.0;
-            if (Rlat1 - reference.getLatitude() > 45.0) Rlat1 -= 90.0;
+            if (Rlat0 == 0 && reference.getLatitude() > 45) Rlat0 = 90.0;
+            else if (Rlat0 - reference.getLatitude() > 45.0) Rlat0 -= 90.0;
+            if (Rlat1 == 0 && reference.getLatitude() > 45) Rlat1 = 90.0;
+            else if (Rlat1 - reference.getLatitude() > 45.0) Rlat1 -= 90.0;
         }
 
         // ensure that the number of even longitude zones are equal

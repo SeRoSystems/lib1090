@@ -103,6 +103,12 @@ public class GlobalPositionDecodingTest {
             Position ref = new Position(-110., -10., 0.);
             test(true, 0x179ED, 0x1595F, 0x037E4, 0x0EC11, ref, expected);
         }
+        {
+            // Special cases: Equator vs Poles
+            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,10.,0.), new Position(0.,0.,0.));
+            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,60.,0.), new Position(0.,90.,0.));
+            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,-60.,0.), new Position(0.,-90.,0.));
+        }
     }
 
     @Test
