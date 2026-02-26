@@ -228,7 +228,6 @@ public class ExampleDecoder {
 				System.out.println("          IDENT switch active: " + opstatA1.hasActiveIDENTSwitch());
 				System.out.println("          Has operational TCAS: " + opstatA1.hasOperationalTCAS());
 				System.out.println("          Has TCAS resolution advisory: " + opstatA1.hasTCASResolutionAdvisory());
-				System.out.println("          Uses single antenna: " + opstatA1.hasSingleAntenna());
 				System.out.println("          Supports air-referenced velocity reports: " + opstatA1.hasAirReferencedVelocity());
 
 				if (msg instanceof AirborneOperationalStatusV2Msg) {
@@ -236,6 +235,7 @@ public class ExampleDecoder {
 					System.out.println("          System design assurance: " + ((AirborneOperationalStatusV2Msg) msg).getSystemDesignAssurance());
 					System.out.println("          Has UAT in: " + ((AirborneOperationalStatusV2Msg) msg).hasUATIn());
 					System.out.println("          Has SIL supplement: " + ((AirborneOperationalStatusV2Msg) msg).hasSILSupplement());
+					System.out.println("          Uses single antenna: " + ((AirborneOperationalStatusV2Msg) msg).hasSingleAntenna());
 				}
 
 				break;
@@ -256,11 +256,9 @@ public class ExampleDecoder {
 				System.out.println("          Has operational CDTI: " + opstatS1.hasOperationalCDTI());
 				System.out.println("          IDENT switch active: " + opstatS1.hasActiveIDENTSwitch());
 				System.out.println("          Has TCAS resolution advisory: " + opstatS1.hasTCASResolutionAdvisory());
-				System.out.println("          Uses single antenna: " + opstatS1.hasSingleAntenna());
 				System.out.println("          Airplane length: " + opstatS1.getAirplaneLength() + "m");
 				System.out.println("          Airplane width: " + opstatS1.getAirplaneWidth() + "m");
 				System.out.println("          Low (<70W) TX power: " + opstatS1.hasLowTxPower());
-				System.out.println("          Encoded GPS antenna offset: " + opstatS1.getGPSAntennaOffset());
 				System.out.println("          Has track heading info: " + opstatS1.hasTrackHeadingInfo());
 
 				if (msg instanceof SurfaceOperationalStatusV2Msg) {
@@ -269,6 +267,8 @@ public class ExampleDecoder {
 					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + ((SurfaceOperationalStatusV2Msg) msg).getNACv());
 					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
 					System.out.println("          Has UAT in: " + ((SurfaceOperationalStatusV2Msg) msg).hasUATIn());
+					System.out.println("          Encoded GPS antenna offset: " + ((SurfaceOperationalStatusV2Msg) msg).getGPSAntennaOffset());
+					System.out.println("          Uses single antenna: " + ((SurfaceOperationalStatusV2Msg) msg).hasSingleAntenna());
 				}
 
 				break;
