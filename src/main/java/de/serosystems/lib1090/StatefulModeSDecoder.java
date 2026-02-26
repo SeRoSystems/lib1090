@@ -474,6 +474,10 @@ public class StatefulModeSDecoder {
 	 * @return decoded WGS84 position
 	 */
 	public Position extractPosition(ModeSDownlinkMsg.QualifiedAddress address, PositionMsg msg, Position receiver) {
+		if (!msg.hasValidPosition()) {
+			return null;
+		}
+
 		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
