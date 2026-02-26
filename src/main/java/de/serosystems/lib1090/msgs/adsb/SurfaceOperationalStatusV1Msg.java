@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.OperationalStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -45,12 +46,15 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	private boolean nic_trk_hdg; // NIC baro for airborne status, heading/ground track info else
 	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected SurfaceOperationalStatusV1Msg() { }
+	/**
+	 * protected no-arg constructor e.g. for serialization with Kryo
+	 **/
+	protected SurfaceOperationalStatusV1Msg() {
+	}
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV1Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -59,7 +63,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV1Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -68,8 +72,8 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or ADS-B version or is not a surface
-	 * 								operational status message or the capability code is invalid.
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not a surface
+	 *                                operational status message or the capability code is invalid.
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -81,42 +85,44 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		}
 
 		byte[] msg = this.getMessage();
+		BitReader b = BitReader.forBigEndian(msg);
 
-		subtype_code = (byte)(msg[0] & 0x7);
+		subtype_code = b.readByte(6, 8);
 		if (subtype_code > 1) { // currently only 0 and 1 specified, 2-7 are reserved
 			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
 		} else if (subtype_code != 1) {
 			throw new BadFormatException("Not surface operational status message");
 		}
 
-		capability_class_code = ((msg[1]&0xFF)<<4)|((msg[2]&0xF0)>>>4);
-		airplane_len_width = (byte) (msg[2]&0xF);
-		operational_mode_code = ((msg[3]&0xFF)<<8)|(msg[4]&0xFF);
-		version = (byte) ((msg[5]>>>5) & 0x07);
+		capability_class_code = b.readInt(9, 20);
+		airplane_len_width = b.readByte(21, 24);
+		operational_mode_code = b.readInt(25, 40);
+		version = b.readByte(41, 43);
 
 		if ((capability_class_code & 0xE00) != 0)
 			throw new BadFormatException("Unknown capability class code!");
 
-		nic_suppl = ((msg[5] & 0x10) != 0);
-		nac_pos = (byte) (msg[5] & 0xF);
-		sil = (byte) ((msg[6]>>>4)&0x3);
-		nic_trk_hdg = ((msg[6] & 0x8) != 0);
-		hrd = ((msg[6] & 0x4) != 0);
+		nic_suppl = b.readByte(44, 44) == 1;
+		nac_pos = b.readByte(45, 48);
+		// bits 49 and 50 reserved
+		sil = b.readByte(51, 52);
+		nic_trk_hdg = b.readByte(53, 53) == 1;
+		hrd = b.readByte(54, 54) == 1;
 	}
 
 	/**
 	 * @return the subtype code is 0 for airborne operational status msgs
-	 *         and 1 for surface operational status msgs; all other codes
-	 *         are "reserved"
+	 * and 1 for surface operational status msgs; all other codes
+	 * are "reserved"
 	 */
 	public byte getSubtypeCode() {
 		return subtype_code;
 	}
 
 	/**
-	 * @return whether 1090ES IN is available 
+	 * @return whether 1090ES IN is available
 	 */
-	public boolean has1090ESIn() {
+	public boolean hasOperationalCDTI() {
 		return (capability_class_code & 0x1000) != 0;
 	}
 
@@ -128,50 +134,44 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return whether aircraft has an UAT receiver
+	 * @return true if POA bit is 1.
 	 */
-	public boolean hasUATIn() {
-		return (capability_class_code & 0x100) != 0;
-	}
-
-	/**
-	 * @return navigation accuracy category for velocity
-	 */
-	public byte getNACv() {
-		return (byte) ((capability_class_code & 0xE0)>>>5);
+	public boolean hasPositionOffsetApplied() {
+		return (capability_class_code & 0x2) != 0;
 	}
 
 	/**
 	 * @return whether TCAS Resolution Advisory (RA) is active
 	 */
 	public boolean hasTCASResolutionAdvisory() {
-		return (operational_mode_code&0x2000) != 0;
+		return (operational_mode_code & 0x2000) != 0;
 	}
 
 	/**
 	 * @return whether the IDENT switch is active
 	 */
 	public boolean hasActiveIDENTSwitch() {
-		return (operational_mode_code&0x1000) != 0;
+		return (operational_mode_code & 0x1000) != 0;
 	}
 
 	/**
 	 * @return whether aircraft uses a single antenna or two
 	 */
 	public boolean hasSingleAntenna() {
-		return (operational_mode_code&0x400) != 0;
+		return (operational_mode_code & 0x400) != 0;
 	}
 
 	/**
 	 * @return encoded longitudinal distance of the GPS Antenna from the NOSE of the aircraft
-	 *         (see Table A-34, RTCA DO-260B)
+	 * (see Table A-34, RTCA DO-260B)
 	 */
 	public byte getGPSAntennaOffset() {
-		return (byte) (operational_mode_code&0xFF);
+		return (byte) (operational_mode_code & 0xFF);
 	}
 
 	/**
 	 * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2
+	 *
 	 * @return the airplane's length in meters; -1 for unknown
 	 */
 	public int getAirplaneLength() {
@@ -180,6 +180,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2.
+	 *
 	 * @return the airplane's width in meters
 	 */
 	public double getAirplaneWidth() {
@@ -188,10 +189,10 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * @return the version number of the formats and protocols in use on the aircraft installation.<br>
-	 *         0: Conformant to DO-260/ED-102 and DO-242<br>
-	 *         1: Conformant to DO-260A and DO-242A<br>
-	 *         2: Conformant to DO-260B/ED-102A and DO-242B<br>
-	 *         3-7: reserved
+	 * 0: Conformant to DO-260/ED-102 and DO-242<br>
+	 * 1: Conformant to DO-260A and DO-242A<br>
+	 * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
+	 * 3-7: reserved
 	 */
 	public byte getVersion() {
 		return version;
@@ -213,6 +214,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * Get the 95% horizontal accuracy bounds (EPU), see table A-13 in RCTA DO-260B
+	 *
 	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
 	 */
 	public double getPositionUncertainty() {
@@ -221,18 +223,20 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	/**
 	 * 0: unknown or &gt; 1e-3, 1: &lt;= 1e-3, 2: &lt;= 1e-5, 3: &lt;= 1e-7
+	 *
 	 * @return the source integrity level (SIL) which indicates the propability of exceeding
-	 *         the NIC containment radius (see table A-15 in RCTA DO-260B)
+	 * the NIC containment radius (see table A-15 in RCTA DO-260B)
 	 */
 	public byte getSIL() {
 		return sil;
 	}
 
 	// TODO use in Surface position message?
+
 	/**
 	 * @return the Track Angle/Heading allows correct interpretation of the data
-	 *         contained in the Heading/Ground Track subfield of ADS-B Surface
-	 *         Position Messages.
+	 * contained in the Heading/Ground Track subfield of ADS-B Surface
+	 * Position Messages.
 	 */
 	public boolean hasTrackHeadingInfo() {
 		return nic_trk_hdg;
@@ -247,7 +251,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	@Override
 	public String toString() {
-		return super.toString() + "\n\tSurfaceOperationalStatusV1Msg{" +
+		return "SurfaceOperationalStatusV1Msg{" +
 				"subtype_code=" + subtype_code +
 				", capability_class_code=" + capability_class_code +
 				", operational_mode_code=" + operational_mode_code +

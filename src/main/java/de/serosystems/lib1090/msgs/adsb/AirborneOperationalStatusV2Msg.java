@@ -33,12 +33,15 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	private byte geometric_vertical_accuracy; // bit 49 and 50
 	private boolean sil_supplement;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirborneOperationalStatusV2Msg() { }
+	/**
+	 * protected no-arg constructor e.g. for serialization with Kryo
+	 **/
+	protected AirborneOperationalStatusV2Msg() {
+	}
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public AirborneOperationalStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -47,7 +50,7 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 	/**
 	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public AirborneOperationalStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -56,7 +59,7 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 	/**
 	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -65,11 +68,33 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 		byte[] msg = this.getMessage();
 
-		if ((byte) (msg[5]>>>5) != 2)
+		if ((byte) (msg[5] >>> 5) != 2)
 			throw new BadFormatException("Not a DO-260B/version 2 status message.");
 
-		geometric_vertical_accuracy = (byte) ((msg[6] >>> 6) & 0x3);
+		geometric_vertical_accuracy = baq;
+		// Bit 55
 		sil_supplement = ((msg[6] & 0x2) != 0);
+	}
+
+	/**
+	 * @return whether operational TCAS is available
+	 */
+	public boolean hasOperationalTCAS() {
+		return (capability_class_code & 0x2000) != 0;
+	}
+
+	/**
+	 * @return whether 1090ES IN / CDTI is available
+	 */
+	public boolean has1090ESIn() {
+		return (capability_class_code & 0x1000) != 0;
+	}
+
+	/**
+	 * @return whether aircraft has an UAT receiver
+	 */
+	public boolean hasUATIn() {
+		return (capability_class_code & 0x20) != 0;
 	}
 
 	/**
@@ -92,19 +117,25 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 	/**
 	 * For interpretation see Table 2-65 in DO-260B
+	 *
 	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
 	 */
 	public byte getSystemDesignAssurance() {
-		return (byte) ((operational_mode_code&0x300)>>>8);
+		return (byte) ((operational_mode_code & 0x300) >>> 8);
 	}
 
 	/**
 	 * DO-260B 2.2.3.2.7.2.14
+	 *
 	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-	 * 			it's based on "per hour".
+	 * it's based on "per hour".
 	 */
 	public boolean hasSILSupplement() {
 		return sil_supplement;
+	}
+
+	public byte getBAQ() {
+		throw new UnsupportedOperationException("BAQ not present in version 2");
 	}
 
 	@Override
@@ -112,7 +143,9 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 		return "AirborneOperationalStatusV2Msg{" +
 				"geometric_vertical_accuracy=" + geometric_vertical_accuracy +
 				", sil_supplement=" + sil_supplement +
+				", capability_class_code=" + capability_class_code +
 				", operational_mode_code=" + operational_mode_code +
+				", baq=" + baq +
 				'}';
 	}
 }
