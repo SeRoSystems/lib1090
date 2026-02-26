@@ -102,12 +102,27 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	}
 
 	/**
+	 * @return whether aircraft uses a single antenna or two
+	 */
+	public boolean hasSingleAntenna() {
+		return (operational_mode_code & 0x400) != 0;
+	}
+
+	/**
 	 * For interpretation see Table 2-65 in DO-260B
 	 *
 	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
 	 */
 	public byte getSystemDesignAssurance() {
 		return (byte) ((operational_mode_code & 0x300) >>> 8);
+	}
+
+	/**
+	 * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft
+	 * (see Table A-33 and A-34, RTCA DO-260B)
+	 */
+	public byte getGPSAntennaOffset() {
+		return (byte) (operational_mode_code & 0xFF);
 	}
 
 	/**

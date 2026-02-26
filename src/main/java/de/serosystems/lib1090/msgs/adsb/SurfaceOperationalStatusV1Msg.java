@@ -154,20 +154,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		return (operational_mode_code & 0x1000) != 0;
 	}
 
-	/**
-	 * @return whether aircraft uses a single antenna or two
-	 */
-	public boolean hasSingleAntenna() {
-		return (operational_mode_code & 0x400) != 0;
-	}
-
-	/**
-	 * @return encoded longitudinal distance of the GPS Antenna from the NOSE of the aircraft
-	 * (see Table A-34, RTCA DO-260B)
-	 */
-	public byte getGPSAntennaOffset() {
-		return (byte) (operational_mode_code & 0xFF);
-	}
 
 	/**
 	 * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2
@@ -230,8 +216,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	public byte getSIL() {
 		return sil;
 	}
-
-	// TODO use in Surface position message?
 
 	/**
 	 * @return the Track Angle/Heading allows correct interpretation of the data

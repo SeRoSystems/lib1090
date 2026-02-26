@@ -98,6 +98,13 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	}
 
 	/**
+	 * @return whether aircraft uses a single antenna or two
+	 */
+	public boolean hasSingleAntenna() {
+		return (operational_mode_code & 0x400) != 0;
+	}
+
+	/**
 	 * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
 	 */
 	public byte getGVA() {
