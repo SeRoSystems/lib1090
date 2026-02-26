@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-B operational status message as specified in DO-260 (ADS-B version 0).
+ *
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable {
@@ -33,12 +34,15 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	private byte enroute_capabilities;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected OperationalStatusV0Msg() { }
+	/**
+	 * protected no-arg constructor e.g. for serialization with Kryo
+	 **/
+	protected OperationalStatusV0Msg() {
+	}
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public OperationalStatusV0Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -47,7 +51,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public OperationalStatusV0Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -56,7 +60,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -69,12 +73,12 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 		byte[] msg = this.getMessage();
 
-		if ((msg[5]>>>5) != 0)
+		if ((msg[5] >>> 5) != 0)
 			throw new BadFormatException("Not a DO-260/version 0 status message.");
 
-		byte subtype_code = (byte)(msg[0] & 0x7);
+		byte subtype_code = (byte) (msg[0] & 0x7);
 		if (subtype_code > 0) // all others are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype "+subtype_code+" reserved.");
+			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
 
 		enroute_capabilities = msg[1];
 		// All other capability fields are "TBD" in standard
@@ -82,7 +86,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * DO-260 2.2.3.2.7.3.3.1
-	 * @return true if TCAS is operational or unknown
+	 *
+	 * @return true if TCAS is operational or unknown, false if TCAS is not operational.
 	 */
 	public boolean hasOperationalTCAS() {
 		// first three bits zero
@@ -91,7 +96,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * DO-260 2.2.3.2.7.3.3.1
-	 * @return true if CDTI is operational or unknown
+	 *
+	 * @return true if CDTI is operational or unknown, false if CDTI is not operational.
 	 */
 	public boolean hasOperationalCDTI() {
 		// status of 4th bit when first two bits zero
@@ -100,10 +106,11 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * the version number of the formats and protocols in use on the aircraft installation.<br>
-	 * 	       0: Conformant to DO-260/ED-102 and DO-242<br>
-	 * 	       1: Conformant to DO-260A and DO-242A<br>
-	 * 	       2: Conformant to DO-260B/ED-102A and DO-242B<br>
-	 * 	       3-7: reserved
+	 * 0: Conformant to DO-260/ED-102 and DO-242<br>
+	 * 1: Conformant to DO-260A and DO-242A<br>
+	 * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
+	 * 3-7: reserved
+	 *
 	 * @return always 0
 	 */
 	public byte getVersion() {

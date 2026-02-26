@@ -32,12 +32,15 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 	private boolean sil_supplement;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected SurfaceOperationalStatusV2Msg() { }
+	/**
+	 * protected no-arg constructor e.g. for serialization with Kryo
+	 **/
+	protected SurfaceOperationalStatusV2Msg() {
+	}
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -46,7 +49,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 	/**
 	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
@@ -55,7 +58,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 	/**
 	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -64,25 +67,84 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 		byte[] msg = this.getMessage();
 
-		if ((byte) (msg[5]>>>5) != 2)
+		if ((byte) (msg[5] >>> 5) != 2)
 			throw new BadFormatException("Not a DO-260B/version 2 status message.");
 
 		sil_supplement = ((msg[6] & 0x2) != 0);
 	}
 
 	/**
+	 * @return whether 1090ES IN is available
+	 */
+	public boolean has1090ESIn() {
+		return (capability_class_code & 0x1000) != 0;
+	}
+
+	/**
+	 * @return whether aircraft has an UAT receiver
+	 */
+	public boolean hasUATIn() {
+		return (capability_class_code & 0x100) != 0;
+	}
+
+	/**
+	 * @return navigation accuracy category for velocity
+	 */
+	public byte getNACv() {
+		return (byte) ((capability_class_code & 0xE0) >>> 5);
+	}
+
+	/**
+	 * @return NIC supplement C for use on the surface
+	 */
+	public boolean getNICSupplementC() {
+		return (capability_class_code & 0x10) != 0;
+	}
+
+	/**
+	 * @return whether aircraft uses a single antenna or two
+	 */
+	public boolean hasSingleAntenna() {
+		return (operational_mode_code & 0x400) != 0;
+	}
+
+	/**
+	 * For interpretation see Table 2-65 in DO-260B
+	 *
+	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+	 */
+	public byte getSystemDesignAssurance() {
+		return (byte) ((operational_mode_code & 0x300) >>> 8);
+	}
+
+	/**
+	 * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft
+	 * (see Table A-33 and A-34, RTCA DO-260B)
+	 */
+	public byte getGPSAntennaOffset() {
+		return (byte) (operational_mode_code & 0xFF);
+	}
+
+	/**
 	 * DO-260B 2.2.3.2.7.2.14
+	 *
 	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-	 * 			it's based on "per hour".
+	 * it's based on "per hour".
 	 */
 	public boolean hasSILSupplement() {
 		return sil_supplement;
 	}
 
+	public boolean hasPositionOffsetApplied() {
+		throw new UnsupportedOperationException("POA not present in version 2");
+	}
+
 	@Override
 	public String toString() {
-		return super.toString() + "\n\tSurfaceOperationalStatusV2Msg{" +
+		return "SurfaceOperationalStatusV2Msg{" +
 				"sil_supplement=" + sil_supplement +
+				", capability_class_code=" + capability_class_code +
+				", operational_mode_code=" + operational_mode_code +
 				'}';
 	}
 }

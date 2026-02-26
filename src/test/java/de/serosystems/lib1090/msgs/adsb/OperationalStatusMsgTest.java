@@ -39,7 +39,7 @@ public class OperationalStatusMsgTest {
 
 	@Test
 	public void testDecodeAirborneOpstat() throws UnspecifiedFormatError, BadFormatException {
-		final AirborneOperationalStatusV1Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
+		final AirborneOperationalStatusV2Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
 
 		assertEquals("4d0131", opstat.getAddress().getHexAddress());
 		assertEquals(31, opstat.getFormatTypeCode());
