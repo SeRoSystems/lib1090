@@ -11,7 +11,8 @@ public interface PositionMsg {
     boolean hasValidPosition();
 
     /**
-     * @return the CPR encoded position that was announced in this message
+     * @return the CPR encoded position that was announced in this message.
+	 *         The method may return an invalid position if #hasValidPosition() is true.
      */
     CPREncodedPosition getCPREncodedPosition();
 
