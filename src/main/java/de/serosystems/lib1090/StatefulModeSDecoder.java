@@ -477,7 +477,7 @@ public class StatefulModeSDecoder {
 		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
-		if (pos != null && msg.hasValidAltitude()) {
+		if (pos != null && msg.hasValidAltitude() && msg.hasValidPosition()) {
 			pos.setAltitude(Double.valueOf(msg.getAltitude()));
 			pos.setAltitudeType(msg.getAltitudeType());
 		}
