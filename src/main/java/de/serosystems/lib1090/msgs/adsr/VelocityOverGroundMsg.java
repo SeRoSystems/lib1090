@@ -110,7 +110,12 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 
 		vertical_source = (msg[4]&0x10)>0;
 		vertical_rate_down = (msg[4]&0x08)>0;
-		vertical_rate = (short) ((((msg[4]&0x07)<<6 | (msg[5]>>>2)&0x3F)-1)<<6);
+		int raw_vr = ((msg[4]&0x07)<<6 | (msg[5]>>>2)&0x3F);
+		if (raw_vr == 0) {
+			vertical_rate_info_available = false;
+		} else {
+			vertical_rate = (short) ((raw_vr-1)<<6);
+		}
 
 		geo_minus_baro = msg[6]&0x7F;
 		if (geo_minus_baro == 0) geo_minus_baro_available = false;
@@ -228,7 +233,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * @return heading in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
 	 * The latter can also be checked with {@link #hasVelocityInfo()}.
 	 */
-	public Double getHeading() {
+	public Double getTrueTrackAngle() {
 		if (!velocity_info_available) return null;
 		double angle = Math.toDegrees(Math.atan2(
 				-this.getEastToWestVelocity(),
