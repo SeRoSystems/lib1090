@@ -74,13 +74,6 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	}
 
 	/**
-	 * @return whether 1090ES IN is available
-	 */
-	public boolean has1090ESIn() {
-		return (capability_class_code & 0x1000) != 0;
-	}
-
-	/**
 	 * @return whether aircraft has an UAT receiver
 	 */
 	public boolean hasUATIn() {
