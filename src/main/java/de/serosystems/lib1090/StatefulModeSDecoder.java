@@ -6,6 +6,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
 import de.serosystems.lib1090.msgs.tisb.CoarsePositionMsg;
@@ -43,7 +44,7 @@ public class StatefulModeSDecoder {
 
 	private final PositionDecoderSupplier positionDecoderSupplier;
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
-	private final Map<ModeSDownlinkMsg.QualifiedAddress, DecoderData> decoderData = new HashMap<>();
+	private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
 
@@ -472,11 +473,10 @@ public class StatefulModeSDecoder {
 	 * @param receiver position for reasonableness test (can be null)
 	 * @return decoded WGS84 position
 	 */
-	public Position extractPosition(ModeSDownlinkMsg.QualifiedAddress address, PositionMsg msg, Position receiver) {
+	public Position extractPosition(QualifiedAddress address, PositionMsg msg, Position receiver) {
 		if (!msg.hasValidPosition()) {
 			return null;
 		}
-
 		DecoderData dd = getDecoderData(address);
 		Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
 
@@ -564,7 +564,7 @@ public class StatefulModeSDecoder {
 		decoderData.values().removeIf(dd -> latestTimestamp - dd.lastUsed > 3600_000L);
 	}
 
-	private DecoderData getDecoderData (ModeSDownlinkMsg.QualifiedAddress address) {
+	private DecoderData getDecoderData (QualifiedAddress address) {
 		DecoderData dd = decoderData.computeIfAbsent(
 				address,
 				a -> new DecoderData(positionDecoderSupplier.apply(a))
