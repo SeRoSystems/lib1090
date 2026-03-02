@@ -122,7 +122,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	/**
 	 * @return whether 1090ES IN is available
 	 */
-	public boolean hasOperationalCDTI() {
+	public boolean has1090ESIn() {
 		return (capability_class_code & 0x1000) != 0;
 	}
 

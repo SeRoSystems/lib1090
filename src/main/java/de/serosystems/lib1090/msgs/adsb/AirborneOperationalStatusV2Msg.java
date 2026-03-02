@@ -84,13 +84,6 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	}
 
 	/**
-	 * @return whether 1090ES IN / CDTI is available
-	 */
-	public boolean has1090ESIn() {
-		return (capability_class_code & 0x1000) != 0;
-	}
-
-	/**
 	 * @return whether aircraft has an UAT receiver
 	 */
 	public boolean hasUATIn() {

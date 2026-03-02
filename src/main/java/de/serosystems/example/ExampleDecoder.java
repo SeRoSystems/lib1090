@@ -224,7 +224,7 @@ public class ExampleDecoder {
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatA1.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatA1.hasNICSupplementA());
 				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA1.getSIL());
-				System.out.println("          Has operational CDTI: " + opstatA1.hasOperationalCDTI());
+				System.out.println("          Has 1090 ES In: " + opstatA1.has1090ESIn());
 				System.out.println("          IDENT switch active: " + opstatA1.hasActiveIDENTSwitch());
 				System.out.println("          Has operational TCAS: " + opstatA1.hasOperationalTCAS());
 				System.out.println("          Has TCAS resolution advisory: " + opstatA1.hasTCASResolutionAdvisory());
@@ -253,7 +253,7 @@ public class ExampleDecoder {
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatS1.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatS1.hasNICSupplementA());
 				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS1.getSIL());
-				System.out.println("          Has operational CDTI: " + opstatS1.hasOperationalCDTI());
+				System.out.println("          Has 1090 ES In: " + opstatS1.has1090ESIn());
 				System.out.println("          IDENT switch active: " + opstatS1.hasActiveIDENTSwitch());
 				System.out.println("          Has TCAS resolution advisory: " + opstatS1.hasTCASResolutionAdvisory());
 				System.out.println("          Airplane length: " + opstatS1.getAirplaneLength() + "m");
