@@ -1,10 +1,10 @@
 package de.serosystems.lib1090.cpr;
 
-import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.QualifiedAddress;
 
 import java.util.function.Function;
 
-public interface PositionDecoderSupplier extends Function<ModeSDownlinkMsg.QualifiedAddress, PositionDecoder> {
+public interface PositionDecoderSupplier extends Function<QualifiedAddress, PositionDecoder> {
 
 	static PositionDecoderSupplier statefulPositionDecoder() {
 		return address -> new StatefulPositionDecoder();

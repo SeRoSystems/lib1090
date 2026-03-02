@@ -106,92 +106,6 @@ public class ModeSDownlinkMsg implements Serializable {
 	}
 	private subtype type;
 
-	public static class QualifiedAddress {
-		/**
-		 * Different types of addresses in the AA field (see Table 2-11 in DO-260B)
-		 */
-		public enum Type {
-			// ICAO 24-bit address
-			ICAO24,
-			// NON-ICAO 24-bit address
-			NON_ICAO,
-			// Anonymous address or ground vehicle address or fixed obstacle address of transmitting ADS-B Participant
-			ANONYMOUS, // DF=18 with CF=1 or CF=6 and IMF=1
-			// 12-bit Mode A code and track file number
-			MODEA_TRACK, // DF=18 with CF=2/3 and IMF=1
-			// TIS-B/ADS-R management information
-			TISB_MANAGEMENT_INFO, // DF=18 with CF=4
-			// Reserved (e.g. for military use)
-			RESERVED, // DF=19 with AF>0 or DF=18 with CF=5 and IMF=1 or DF=18 and CF=7
-			// Not (yet) determined
-			UNKNOWN
-		}
-
-		private int address;
-		private Type type;
-
-		/**
-		 * protected no-arg constructor e.g. internal usage or for serialization with Kryo
-		 **/
-		protected QualifiedAddress() { }
-
-		public QualifiedAddress(int address, Type type) {
-			this.address = address;
-			this.type = type;
-		}
-
-		public QualifiedAddress(String address, Type type) {
-			this(Integer.parseInt(address, 16), type);
-		}
-
-		/**
-		 * @return type of address (e.g. ICAO 24-bit)
-		 */
-		public Type getType() {
-			return type;
-		}
-
-		/**
-		 * @return the address in integer representation
-		 */
-		public int getAddress() {
-			return address;
-		}
-
-		/**
-		 * @return address as 6 digit hex string
-		 */
-		public String getHexAddress() {
-			return Tools.toHexString(address, 6);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			QualifiedAddress that = (QualifiedAddress) o;
-
-			if (address != that.address) return false;
-			return type == that.type;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = address;
-			result = 31 * result + (type != null ? type.hashCode() : 0);
-			return result;
-		}
-
-		@Override
-		public String toString() {
-			return "QualifiedAddress{" +
-					"address=" + address +
-					", type=" + type +
-					'}';
-		}
-	}
-
 	private QualifiedAddress address;
 
 	/*
@@ -393,7 +307,8 @@ public class ModeSDownlinkMsg implements Serializable {
 		parity = rawAPToInt(Arrays.copyOfRange(reply,reply.length-3, reply.length));
 
 		// extract ICAO24 address
-		address = new QualifiedAddress();
+		QualifiedAddress.Type type = null;
+		int addr = 0;
 		switch (downlink_format) {
 			case 0: // Short air-air (ACAS)
 			case 4: // Short altitude reply
@@ -402,14 +317,14 @@ public class ModeSDownlinkMsg implements Serializable {
 			case 20: // Long Comm-B, altitude reply
 			case 21: // Long Comm-B, identity reply
 			case 24: // Long Comm-D (ELM)
-				address.address = noCRC ? parity : calcParityInt()^parity;
+				addr = noCRC ? parity : calcParityInt()^parity;
 				break;
 
 			case 11: // all call replies
 			case 17: case 18: case 19: // Extended squitter
 				byte[] raw_address = new byte[3];
 				System.arraycopy(payload, 0, raw_address, 0, 3);
-				address.address = rawAPToInt(raw_address);
+				addr = rawAPToInt(raw_address);
 
 				if (downlink_format == 18 && first_field==4)
 					throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented.");
@@ -431,48 +346,49 @@ public class ModeSDownlinkMsg implements Serializable {
 			// check CF
 			switch (first_field) {
 				case 0:
-					address.type = QualifiedAddress.Type.ICAO24;
+					type = QualifiedAddress.Type.ICAO24;
 					break;
 				case 1:
-					address.type = QualifiedAddress.Type.ANONYMOUS;
+					type = QualifiedAddress.Type.ANONYMOUS;
 					break;
 				case 2:
 				case 5:
 				case 6:
 					Boolean imf = extractIMF(payload);
 					if (imf == null)
-						address.type = QualifiedAddress.Type.UNKNOWN;
+						type = QualifiedAddress.Type.UNKNOWN;
 					else if (first_field == 2) // TIS-B
-						address.type = imf ? QualifiedAddress.Type.MODEA_TRACK : QualifiedAddress.Type.ICAO24;
+						type = imf ? QualifiedAddress.Type.MODEA_TRACK : QualifiedAddress.Type.ICAO24;
 					else if (first_field == 5) // TIS-B
-						address.type = imf ? QualifiedAddress.Type.RESERVED : QualifiedAddress.Type.NON_ICAO;
+						type = imf ? QualifiedAddress.Type.RESERVED : QualifiedAddress.Type.NON_ICAO;
 					else // first_field == 6 // ADS-R
-						address.type = imf ? QualifiedAddress.Type.ANONYMOUS : QualifiedAddress.Type.ICAO24;
+						type = imf ? QualifiedAddress.Type.ANONYMOUS : QualifiedAddress.Type.ICAO24;
 					break;
 				case 3:
 					// coarse position
 					if ((payload[3]&0x80) > 0) // IMF field
-						address.type = QualifiedAddress.Type.ICAO24;
+						type = QualifiedAddress.Type.ICAO24;
 					else
-						address.type = QualifiedAddress.Type.MODEA_TRACK;
+						type = QualifiedAddress.Type.MODEA_TRACK;
 
 					break;
 				case 4:
-					address.type = QualifiedAddress.Type.TISB_MANAGEMENT_INFO;
+					type = QualifiedAddress.Type.TISB_MANAGEMENT_INFO;
 					break;
 				case 7:
-					address.type = QualifiedAddress.Type.RESERVED;
+					type = QualifiedAddress.Type.RESERVED;
 					break;
 				default:
-					address.type = QualifiedAddress.Type.UNKNOWN;
+					type = QualifiedAddress.Type.UNKNOWN;
 			}
 		} else if (downlink_format == 19) {
 			// check AF field
-			address.type = first_field == 0 ? QualifiedAddress.Type.ICAO24 : QualifiedAddress.Type.RESERVED;
+			type = first_field == 0 ? QualifiedAddress.Type.ICAO24 : QualifiedAddress.Type.RESERVED;
 		} else {
-			address.type = QualifiedAddress.Type.ICAO24;
+			type = QualifiedAddress.Type.ICAO24;
 		}
 
+		address = new QualifiedAddress(addr, type);
 		setType(subtype.MODES_REPLY);
 	}
 
@@ -528,9 +444,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		parity = reply.parity;
 		type = reply.type;
 		noCRC = reply.noCRC;
-		address = new QualifiedAddress();
-		address.address = reply.address.address;
-		address.type = reply.address.type;
+		address = new QualifiedAddress(reply.address);
 	}
 
 	/**
@@ -687,8 +601,8 @@ public class ModeSDownlinkMsg implements Serializable {
 				return true;
 		}
 
-		return this.getAddress().address == other.getParity() ||
-				this.getParity() == other.getAddress().address;
+		return this.getAddress().getAddress() == other.getParity() ||
+				this.getParity() == other.getAddress().getAddress();
 	}
 
 	@Override
@@ -708,7 +622,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		int result = downlink_format;
 		result = 31 * result + (int) first_field;
 		result = 31 * result + Arrays.hashCode(payload);
-		result = 31 * result + address.address;
+		result = 31 * result + address.getAddress();
 
 		int effective_parity = parity;
 		if (noCRC) effective_parity = parity^ calcParityInt();
