@@ -1,5 +1,18 @@
 # Changelog for lib1090
 
+## v4.1.3
+
+### Bug Fixes
+- `PositionMsg`: Added note on invalid position
+- `StatefulModeSDecoder`: only decode valid positions
+- Added special case for lat=0 in position decoding
+- Fixed global CPR decoding for surface positions
+- Fixed vertical rate availability `VelocityOverGroundMsg`
+- Fixed geo-minus-baro and vertical rate in `AirspeedHeadingMsg`
+- Fixed haversine distance in `Position`
+- Fixed check for Extended Squitter decoding
+
+
 ## v4.1.2
 
 ### Bug Fixes
