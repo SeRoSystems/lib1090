@@ -2,62 +2,276 @@ package de.serosystems.lib1090.cpr;
 
 import de.serosystems.lib1090.Position;
 
-@SuppressWarnings("unused")
-public class CPREncodedPosition {
+import java.util.Objects;
 
-	private final boolean is_odd;
-	private final int encoded_lat;
-	private final int encoded_lon;
-	private final int nbits;
-	private final boolean surface;
+/**
+ * CPR encoded position with decoding functions.
+ */
+public final class CPREncodedPosition {
+	/**
+	 * Number of bits in {@link #yz} and {@link #xz}.
+	 */
+	private final int nBits;
+
+	/**
+	 * Whether this encoded position originates from an odd message.
+	 */
+	private final boolean isOdd;
+
+	/**
+	 * Whether this encoded position originates from a surface position message
+	 */
+	private final boolean isSurface;
+
+	/**
+	 * Whether the corresponding surface position message indicated a high or unknown speed.
+	 * False (and not applicable) if {@link #isSurface} is false.
+	 */
+	private final boolean isHighSurfaceSpeed;
+
+	/**
+	 * Y coordinate within CPR Zone.
+	 */
+	private final int yz;
+
+	/**
+	 * X coordinate within CPR Zone.
+	 */
+	private final int xz;
+
+	/**
+	 * Timestamp of position message.
+	 */
 	private final Long timestamp;
 
 	/**
-	 * @param is_odd      true if it is a odd format, false if it is even (format field in most position messags)
-	 * @param encoded_lat CPR encoded latitude
-	 * @param encoded_lon CPR encoded longitude
-	 * @param nbits       number of bits used to encode latitude and longitude; 17 for airborne position, 14 for intent,
-	 *                    and 12 for TIS-B
-	 * @param surface     true if encoded position is surface position
-	 * @param timestamp   timestamp when this position was received in milliseconds (null disables all tests based on time)
+	 * Scaling factor for encoded values
 	 */
-	public CPREncodedPosition(boolean is_odd, int encoded_lat, int encoded_lon, int nbits, boolean surface, Long timestamp) {
-		this.is_odd = is_odd;
-		this.encoded_lat = encoded_lat;
-		this.encoded_lon = encoded_lon;
-		this.nbits = nbits;
-		this.surface = surface;
-		this.timestamp = timestamp;
-	}
+	private final double scale;
 
 	/**
-	 * @return timestamp of this position message in milliseconds
+	 * New CPR Encoded Position.
+	 *
+	 * @param nBits              number of bits for encoded latitude and longitude. Must be 12, 14, or 17
+	 * @param isOdd              whether this encoded position originates from an odd position message
+	 * @param isSurface          whether this encoded position originates from a surface position message
+	 * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
+	 * @param yz                 Y coordinate within CPR zone, i.e. encoded latitude as in position message
+	 * @param xz                 X coordinate within CPR zone, i.e. encoded longitude as in position message
+	 * @param timestamp          timestamp of position message (null disables all tests based on time)
 	 */
+	public CPREncodedPosition(int nBits,
+	                          boolean isOdd,
+	                          boolean isSurface,
+	                          boolean isHighSurfaceSpeed,
+	                          int yz,
+	                          int xz,
+	                          Long timestamp) {
+		if (nBits != 12 && nBits != 14 && nBits != 17)
+			throw new IllegalArgumentException("Unexpected number of bits");
+		this.nBits = nBits;
+		this.isOdd = isOdd;
+		this.isSurface = isSurface;
+		// note: setting to this to false if !isSurface makes equals/hashCode easier
+		this.isHighSurfaceSpeed = isSurface && isHighSurfaceSpeed;
+		this.yz = yz;
+		this.xz = xz;
+		this.timestamp = timestamp;
+
+		scale = 1L << nBits;
+	}
+
+	public int getNBits() {
+		return nBits;
+	}
+
+	public boolean isOddFormat() {
+		return isOdd;
+	}
+
+	public boolean isSurface() {
+		return isSurface;
+	}
+
+	public int yz() {
+		return yz;
+	}
+
+	public int xz() {
+		return xz;
+	}
+
 	public Long getTimestamp() {
 		return timestamp;
 	}
 
 	/**
-	 * @return true if message was odd format
+	 * Get maximum time gap between messages, based on their type.
+	 * This is only applicable if messages are of different CPR format (even/odd).
+	 *
+	 * @param other other message, see constraints above
+	 * @return maximum duration [ms] between messages
 	 */
-	public boolean isOddFormat() {
-		return is_odd;
+	public long maxGap(CPREncodedPosition other) {
+		if (isSurface && other.isSurface) {
+			if (isHighSurfaceSpeed || other.isHighSurfaceSpeed)
+				return 25_000L;
+			else
+				return 50_000L;
+		} else {
+			return 10_000L;
+		}
 	}
 
-	public int getEncodedLat() {
-		return encoded_lat;
+	/**
+	 * Reconstruct zone index.
+	 *
+	 * @param zones number of even zones
+	 * @param even  CPR coordinate (xz or yz) of even message
+	 * @param odd   CPR coordinate (xz or yz) of odd message
+	 * @return reconstructed zone index
+	 */
+	private int zoneIndex(int zones, int even, int odd) {
+		int halfScale = 1 << (nBits - 1);
+		return (zones * (even - odd) - even + halfScale) >> nBits;
 	}
 
-	public int getEncodedLon() {
-		return encoded_lon;
+	/**
+	 * Compact Position Reporting: Global decoding.
+	 * Can only be used if another position report with a different format (even/odd) is available.
+	 *
+	 * @param other     position message of the other format (even/odd). Note that the time between those message must not exceed {@link #maxGap(CPREncodedPosition)}
+	 * @param reference reference (e.g. receiver's) position to determine the correct surface position; use arbitrary (or null) for airborne (will be ignored)
+	 * @return globally unambiguously decoded position or empty if the two encoded positions cannot be combined or if the position is otherwise unavailable or invalid
+	 */
+	public Position decodeGlobal(CPREncodedPosition other, Position reference) {
+		/* early sanity checks */
+		if (other.nBits != nBits) return null;
+		if (isOdd == other.isOdd) return null;
+		if (isSurface != other.isSurface) return null;
+		if (isSurface && reference == null) return null;
+		if (timestamp != null && other.timestamp != null) {
+			long gap = Math.abs(timestamp - other.timestamp);
+			if (gap > maxGap(other)) return null;
+		}
+
+		final CPREncodedPosition even = isOdd ? other : this;
+		final CPREncodedPosition odd = isOdd ? this : other;
+
+		final double angle = isSurface ? 90. : 360.;
+
+		// latitude index
+		int j = zoneIndex(60, even.yz, odd.yz);
+
+		// global latitudes
+		final double refLat = reference == null ? 0. : reference.getLatitude();
+		final L0Latitude Rlat0L = L0Latitude.ofGlobal(even, j, refLat);
+		final L0Latitude Rlat1L = L0Latitude.ofGlobal(odd, j, refLat);
+
+		// additional check against invalid latitudes
+		if (!Rlat0L.isValid() || !Rlat1L.isValid())
+			return null;
+
+		// require that the number of longitude zones are equal
+		final int nLon = Rlat0L.NL();
+		if (nLon != Rlat1L.NL()) return null; // straddling position
+
+		// reconstruct latitude
+		final double Rlat = isOdd ? Rlat1L.toDegrees() : Rlat0L.toDegrees();
+
+		// reconstruct longitude
+		double Rlon;
+		if (nLon != 1) {
+			// longitude index
+			int m = zoneIndex(nLon, even.xz, odd.xz);
+			// global longitude
+			int n_helper = nLon - (isOdd ? 1 : 0);
+			Rlon = reconstructGlobal(angle, n_helper, m, xz);
+		} else {
+			Rlon = angle * (xz / scale);
+		}
+
+		if (isSurface) {
+			double delta = normalize(reference.getLongitude() - Rlon);
+			int k = (int) Math.round(delta / 90.);
+			Rlon = normalize(Rlon + k * 90);
+		} else {
+			Rlon = normalize(Rlon);
+		}
+
+		return new Position(Rlon, Rlat, 0.);
 	}
 
-	public boolean isSurface() {
-		return surface;
+	/**
+	 * Normalize angle to [-180, 180).
+	 *
+	 * @param phi angle in degrees
+	 * @return normalized angle
+	 */
+	private static double normalize(double phi) {
+		return phi - 360.0 * Math.floor((phi + 180.0) / 360.0);
 	}
 
-	public int getNumBits() {
-		return nbits;
+	/**
+	 * Compact Position Reporting: Local decoding.
+	 * <br>
+	 * This function uses a locally unambiguous decoding for airborne position messages.
+	 * It uses a reference position known to be within 180NM (airborne) resp. within 45NM (surface) the target's true position.
+	 * This reference position may be a previously decoded position that has been confirmed by global decoding, see
+	 * {@link #decodeGlobal(CPREncodedPosition, Position)}.
+	 * <br>
+	 * Note that the returned position can still be invalid, e.g. it is possible to construct latitudes that are not within [-90,90]°.
+	 *
+	 * @param reference reference position
+	 * @return decoded position
+	 */
+	Position decodeLocal(Position reference) {
+		if (reference == null)
+			return null;
+
+		// latitude/longitude zone size
+		final double angle = isSurface ? 90. : 360.;
+
+		// decode position latitude
+		final L0Latitude RlatL = L0Latitude.ofLocal(this, reference.getLatitude());
+		final double Rlat = RlatL.toDegrees();
+
+		// number of longitude zones
+		int nLon = Math.max(1, RlatL.NL() - (isOdd ? 1 : 0));
+
+		// decode position longitude
+		double Rlon = reconstructLocal(angle, nLon, reference.getLongitude(), xz);
+
+		return new Position(Rlon, Rlat, 0.);
+	}
+
+	/**
+	 * Reconstruct latitude resp. longitude from an CPR encoded number and a reference position.
+	 *
+	 * @param angle      full range angle
+	 * @param zones      number of zones
+	 * @param ref        reference latitude resp. longitude
+	 * @param coordinate CPR coordinate (xz or yz)
+	 * @return reconstructed latitude resp. longitude
+	 */
+	private double reconstructLocal(double angle, int zones, double ref, int coordinate) {
+		final double D = angle / zones;
+		final double scaled = coordinate / scale;
+		final double zone = Math.floor(0.5 + ref / D - scaled);
+		return D * (zone + scaled);
+	}
+
+	/**
+	 * Reconstruct latitude resp. longitude from an CPR encoded number its zone index.
+	 *
+	 * @param angle      full range angle
+	 * @param zones      number of zones
+	 * @param zone       zone index
+	 * @param coordinate CPR coordinate (xz or yz)
+	 * @return reconstructed latitude resp. longitude
+	 */
+	private double reconstructGlobal(double angle, int zones, int zone, int coordinate) {
+		return angle / zones * (Util.mod(zone, zones) + coordinate / scale);
 	}
 
 	/**
@@ -71,27 +285,11 @@ public class CPREncodedPosition {
 	 * @return the decoded position or null if could not be decoded
 	 */
 	public Position decodePosition(CPREncodedPosition other, Position reference) {
-		// can we apply global decoding?
-		boolean global = other != null && // need other pos for global decoding
-				this.is_odd != other.is_odd && // other pos must be complementary format
-				this.surface == other.surface && // cannot combine surface and airborne
-				(!this.surface || reference != null); // we need reference position for surface positions
-
-		// time-based tests
-		global = global && this.timestamp != null && other.timestamp != null &&
-				(this.surface || Math.abs(this.timestamp - other.timestamp) < 10_000L) && // airborne should not be more than 10 seconds apart
-				(!this.surface || Math.abs(this.timestamp - other.timestamp) < 25_000L); // surface should not be more than 25 seconds apart
-
-		// can we apply local decoding?
-		boolean local = reference != null; // need reference position for local decoding
-
-		Position globalPos = null;
 		// apply global decoding
-		if (global) globalPos = CompactPositionReporting.decodeGlobalPosition(this, other, reference);
+		Position globalPos = other == null ? null : decodeGlobal(other, reference);
 
-		Position localPos = null;
 		// apply local decoding
-		if (local) localPos = CompactPositionReporting.decodeLocalPosition(this, reference);
+		Position localPos = reference != null ? decodeLocal(reference) : null;
 
 		//////// Reasonableness Test //////////
 		// see A.1.7.10.2 of DO-260B
@@ -105,26 +303,26 @@ public class CPREncodedPosition {
 
 		// use local CPR to verify even and odd position
 		if (globalPos != null) {
-			Position localThis = CompactPositionReporting.decodeLocalPosition(this, globalPos);
+			Position localThis = decodeLocal(globalPos);
 
 			// check local/global dist of new message
 			if (globalPos.haversine(localThis) > mu)
 				reasonable = false;
 
 			// check if distance to other is within limits
-			Position globalOther = CompactPositionReporting.decodeGlobalPosition(other, this, reference);
-			Position localOther = CompactPositionReporting.decodeLocalPosition(other, globalPos);
+			Position globalOther = other.decodeGlobal(this, reference);
+			Position localOther = other.decodeLocal(globalPos);
 
 			// should be within 3 NM (= 555.6 m/s * 10 seconds)
-			if (globalOther != null && !surface && globalOther.haversine(globalPos) > 5556)
+			if (globalOther != null && !isSurface && globalOther.haversine(globalPos) > 5556)
 				reasonable = false;
 
-			if (localOther != null && !surface && localOther.haversine(globalPos) > 5556)
+			if (localOther != null && !isSurface && localOther.haversine(globalPos) > 5556)
 				reasonable = false;
 		}
 
 		// prefer global over local position
-		Position ret = global ? globalPos : localPos;
+		Position ret = globalPos != null ? globalPos : localPos;
 
 		if (ret != null) {
 			// is it a valid coordinate?
@@ -138,14 +336,33 @@ public class CPREncodedPosition {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (obj == null || obj.getClass() != this.getClass()) return false;
+		final CPREncodedPosition that = (CPREncodedPosition) obj;
+		return this.nBits == that.nBits &&
+				this.isOdd == that.isOdd &&
+				this.isSurface == that.isSurface &&
+				this.isHighSurfaceSpeed == that.isHighSurfaceSpeed &&
+				this.yz == that.yz &&
+				this.xz == that.xz &&
+				Objects.equals(this.timestamp, that.timestamp);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nBits, isOdd, isSurface, isHighSurfaceSpeed, yz, xz, timestamp);
+	}
+
+	@Override
 	public String toString() {
-		return "CPREncodedPosition{" +
-				"is_odd=" + is_odd +
-				", encoded_lat=" + encoded_lat +
-				", encoded_lon=" + encoded_lon +
-				", nbits=" + nbits +
-				", surface=" + surface +
-				", timestamp=" + timestamp +
-				'}';
+		return "CPREncodedPosition[" +
+				"nBits=" + nBits + ", " +
+				"isOdd=" + isOdd + ", " +
+				"isSurface=" + isSurface + ", " +
+				"isHighSurfaceSpeed=" + isHighSurfaceSpeed + ", " +
+				"yz=" + yz + ", " +
+				"xz=" + xz + ", " +
+				"timestamp=" + timestamp + ']';
 	}
 }

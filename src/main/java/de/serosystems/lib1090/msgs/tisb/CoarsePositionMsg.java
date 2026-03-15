@@ -100,8 +100,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 		short cpr_encoded_lat = (short) (((msg[4]&0xff)<<4) | ((msg[5]&0xff)>>4));
 		short cpr_encoded_lon = (short) (((msg[5]&0x0f)<<8) | (msg[6]&0xff));
 
-		position = new CPREncodedPosition(
-				cpr_format, cpr_encoded_lat, cpr_encoded_lon, 12, false,
+		position = new CPREncodedPosition(12, cpr_format, false, false, cpr_encoded_lat, cpr_encoded_lon,
 				timestamp == null ? System.currentTimeMillis() : timestamp);
 
 	}

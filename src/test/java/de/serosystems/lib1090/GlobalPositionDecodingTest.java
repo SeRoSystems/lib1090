@@ -1,7 +1,6 @@
 package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
-import de.serosystems.lib1090.cpr.CompactPositionReporting;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,11 +19,11 @@ public class GlobalPositionDecodingTest {
      * @param expect  expected decoded position
      */
     private static void test(boolean surface, int latEven, int lonEven, int latOdd, int lonOdd, Position ref, Position expect) {
-        CPREncodedPosition cprEven = new CPREncodedPosition(false, latEven, lonEven, 17, surface, null);
-        CPREncodedPosition cprOdd = new CPREncodedPosition(true, latOdd, lonOdd, 17, surface, null);
+        CPREncodedPosition cprEven = new CPREncodedPosition(17, false, surface, false, latEven, lonEven, null);
+        CPREncodedPosition cprOdd = new CPREncodedPosition(17, true, surface, false, latOdd, lonOdd, null);
 
-        Position even = CompactPositionReporting.decodeGlobalPosition(cprEven, cprOdd, ref);
-        Position odd = CompactPositionReporting.decodeGlobalPosition(cprOdd, cprEven, ref);
+        Position even = cprEven.decodeGlobal(cprOdd, ref);
+        Position odd = cprOdd.decodeGlobal(cprEven, ref);
 
         if (expect == null) {
             assertNull(even);
@@ -114,25 +113,25 @@ public class GlobalPositionDecodingTest {
     @Test
     void testSanityChecks() {
         // Test same format (both even)
-        CPREncodedPosition cprEven1 = new CPREncodedPosition(false, 0x06AF1, 0x09C16, 17, false, null);
-        CPREncodedPosition cprEven2 = new CPREncodedPosition(false, 0x04706, 0x04D58, 17, false, null);
-        assertNull(CompactPositionReporting.decodeGlobalPosition(cprEven1, cprEven2, null));
+        CPREncodedPosition cprEven1 = new CPREncodedPosition(17, false, false, false, 0x06AF1, 0x09C16, null);
+        CPREncodedPosition cprEven2 = new CPREncodedPosition(17, false, false, false, 0x04706, 0x04D58, null);
+        assertNull(cprEven1.decodeGlobal(cprEven2, null));
 
         // Test same format (both odd)
-        CPREncodedPosition cprOdd1 = new CPREncodedPosition(true, 0x06AF1, 0x09C16, 17, false, null);
-        CPREncodedPosition cprOdd2 = new CPREncodedPosition(true, 0x04706, 0x04D58, 17, false, null);
-        assertNull(CompactPositionReporting.decodeGlobalPosition(cprOdd1, cprOdd2, null));
+        CPREncodedPosition cprOdd1 = new CPREncodedPosition(17, true, false, false, 0x06AF1, 0x09C16, null);
+        CPREncodedPosition cprOdd2 = new CPREncodedPosition(17, true, false, false, 0x04706, 0x04D58, null);
+        assertNull(cprOdd1.decodeGlobal(cprOdd2, null));
 
         // Test mixing airborne and surface positions
-        CPREncodedPosition cprAirborne = new CPREncodedPosition(false, 0x06AF1, 0x09C16, 17, false, null);
-        CPREncodedPosition cprSurface = new CPREncodedPosition(true, 0x11C19, 0x13560, 17, true, null);
-        assertNull(CompactPositionReporting.decodeGlobalPosition(cprAirborne, cprSurface, null));
-        assertNull(CompactPositionReporting.decodeGlobalPosition(cprSurface, cprAirborne, null));
+        CPREncodedPosition cprAirborne = new CPREncodedPosition(17, false, false, false, 0x06AF1, 0x09C16, null);
+        CPREncodedPosition cprSurface = new CPREncodedPosition(17, true, true, false, 0x11C19, 0x13560, null);
+        assertNull(cprAirborne.decodeGlobal(cprSurface, null));
+        assertNull(cprSurface.decodeGlobal(cprAirborne, null));
 
         // Test surface position without reference position
-        CPREncodedPosition cprSurfaceEven = new CPREncodedPosition(false, 0x1ABC2, 0x07058, 17, true, null);
-        CPREncodedPosition cprSurfaceOdd = new CPREncodedPosition(true, 0x11C19, 0x13560, 17, true, null);
-        assertNull(CompactPositionReporting.decodeGlobalPosition(cprSurfaceEven, cprSurfaceOdd, null));
+        CPREncodedPosition cprSurfaceEven = new CPREncodedPosition(17, false, true, false, 0x1ABC2, 0x07058, null);
+        CPREncodedPosition cprSurfaceOdd = new CPREncodedPosition(17, true, true, false, 0x11C19, 0x13560, null);
+        assertNull(cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
     }
 
 }
