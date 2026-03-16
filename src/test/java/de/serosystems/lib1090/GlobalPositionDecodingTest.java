@@ -134,4 +134,85 @@ public class GlobalPositionDecodingTest {
         assertNull(cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
     }
 
+    @Test
+    void testAirborneTimingGap() {
+        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, 0L);
+
+        assertEquals(10_000L, cprEven.maxGap(cprOdd));
+        assertEquals(10_000L, cprOdd.maxGap(cprEven));
+    }
+
+    private static void testAirborneTiming(long t1, long t2, boolean expectSuccess) {
+        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, t1);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, t2);
+
+        Position even = cprEven.decodeGlobal(cprOdd, null);
+        Position odd = cprOdd.decodeGlobal(cprEven, null);
+
+        if (expectSuccess) {
+            assertNotNull(even);
+            assertNotNull(odd);
+        } else {
+            assertNull(even);
+            assertNull(odd);
+        }
+    }
+
+    @Test
+    void testAirborneTimingChecks() {
+        testAirborneTiming(0L, 0L, true);
+        testAirborneTiming(0L, 10_000L, true);
+        testAirborneTiming(0, 10_001L, false);
+        testAirborneTiming(10_000L, 0L, true);
+        testAirborneTiming(10_001L, 0L, false);
+    }
+
+    private static void testSurfaceTimingGap(boolean hs1, boolean hs2, int expect) {
+        CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, 0L);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofSurface(17, true, hs2, 0x11C19, 0x13560, 0L);
+
+        assertEquals(expect, cprEven.maxGap(cprOdd));
+        assertEquals(expect, cprOdd.maxGap(cprEven));
+    }
+
+    @Test
+    void testSurfaceTimingGap() {
+        testSurfaceTimingGap(false, false, 50_000);
+        testSurfaceTimingGap(false, true, 25_000);
+        testSurfaceTimingGap(true, false, 25_000);
+        testSurfaceTimingGap(true, true, 25_000);
+    }
+
+    private static void testSurfaceTiming(long t1, boolean hs1, long t2, boolean hs2, boolean expectSuccess) {
+        Position ref = new Position(30., 80., 0.);
+
+        CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, t1);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofSurface(17, true, hs2, 0x11C19, 0x13560, t2);
+
+        Position even = cprEven.decodeGlobal(cprOdd, ref);
+        Position odd = cprOdd.decodeGlobal(cprEven, ref);
+
+        if (expectSuccess) {
+            assertNotNull(even);
+            assertNotNull(odd);
+        } else {
+            assertNull(even);
+            assertNull(odd);
+        }
+    }
+
+    @Test
+    void testSurfaceTimingChecks() {
+        testSurfaceTiming(0L, false, 0L, false, true);
+        testSurfaceTiming(50_001L, false, 0L, false, false);
+
+        testSurfaceTiming(0L, true, 0L, false, true);
+        testSurfaceTiming(0L, true, 25_000L, false, true);
+        testSurfaceTiming(0L, true, 25_001L, false, false);
+        testSurfaceTiming(0L, false, 25_001L, true, false);
+        testSurfaceTiming(25_0001L, false, 0L, true, false);
+        testSurfaceTiming(25_0001L, true, 0L, false, false);
+    }
+
 }
