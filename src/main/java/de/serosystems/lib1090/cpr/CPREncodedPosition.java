@@ -42,7 +42,7 @@ public final class CPREncodedPosition {
 	/**
 	 * Timestamp of position message.
 	 */
-	private final Long timestamp;
+	private final long timestamp;
 
 	/**
 	 * Scaling factor for encoded values
@@ -58,15 +58,15 @@ public final class CPREncodedPosition {
 	 * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
 	 * @param yz                 Y coordinate within CPR zone, i.e. encoded latitude as in position message
 	 * @param xz                 X coordinate within CPR zone, i.e. encoded longitude as in position message
-	 * @param timestamp          timestamp of position message (null disables all tests based on time)
+	 * @param timestamp          timestamp of position message
 	 */
-	public CPREncodedPosition(int nBits,
+	private CPREncodedPosition(int nBits,
 	                          boolean isOdd,
 	                          boolean isSurface,
 	                          boolean isHighSurfaceSpeed,
 	                          int yz,
 	                          int xz,
-	                          Long timestamp) {
+	                          long timestamp) {
 		if (nBits != 12 && nBits != 14 && nBits != 17)
 			throw new IllegalArgumentException("Unexpected number of bits");
 		this.nBits = nBits;
@@ -79,6 +79,44 @@ public final class CPREncodedPosition {
 		this.timestamp = timestamp;
 
 		scale = 1L << nBits;
+	}
+
+	/**
+	 * New CPR Encoded Position for an airborne position message.
+	 *
+	 * @param nBits number of bits for encoded latitude and longitude. Must be 12, 14, or 17
+	 * @param isOdd whether this encoded position originates from an odd position message
+	 * @param yz Y coordinate within CPR zone, i.e. encoded latitude as in position message
+	 * @param xz X coordinate within CPR zone, i.e. encoded longitude as in position message
+	 * @param timestamp timestamp of position message
+	 * @return CPR encoded position
+	 */
+	public static CPREncodedPosition ofAirborne(int nBits,
+	                                            boolean isOdd,
+	                                            int yz,
+	                                            int xz,
+	                                            long timestamp) {
+		return new CPREncodedPosition(nBits, isOdd, false, false, yz, xz, timestamp);
+	}
+
+	/**
+	 * New CPR Encoded Position for a surface position message.
+	 *
+	 * @param nBits number of bits for encoded latitude and longitude. Must be 12, 14, or 17
+	 * @param isOdd whether this encoded position originates from an odd position message
+	 * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
+	 * @param yz Y coordinate within CPR zone, i.e. encoded latitude as in position message
+	 * @param xz X coordinate within CPR zone, i.e. encoded longitude as in position message
+	 * @param timestamp timestamp of position message
+	 * @return CPR encoded position
+	 */
+	public static CPREncodedPosition ofSurface(int nBits,
+	                                           boolean isOdd,
+	                                           boolean isHighSurfaceSpeed,
+	                                           int yz,
+	                                           int xz,
+	                                           long timestamp) {
+		return new CPREncodedPosition(nBits, isOdd, true, isHighSurfaceSpeed, yz, xz, timestamp);
 	}
 
 	public int getNBits() {
@@ -101,7 +139,7 @@ public final class CPREncodedPosition {
 		return xz;
 	}
 
-	public Long getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 
@@ -150,10 +188,8 @@ public final class CPREncodedPosition {
 		if (isOdd == other.isOdd) return null;
 		if (isSurface != other.isSurface) return null;
 		if (isSurface && reference == null) return null;
-		if (timestamp != null && other.timestamp != null) {
-			long gap = Math.abs(timestamp - other.timestamp);
-			if (gap > maxGap(other)) return null;
-		}
+		long gap = Math.abs(timestamp - other.timestamp);
+		if (gap > maxGap(other)) return null;
 
 		final CPREncodedPosition even = isOdd ? other : this;
 		final CPREncodedPosition odd = isOdd ? this : other;
@@ -346,7 +382,7 @@ public final class CPREncodedPosition {
 				this.isHighSurfaceSpeed == that.isHighSurfaceSpeed &&
 				this.yz == that.yz &&
 				this.xz == that.xz &&
-				Objects.equals(this.timestamp, that.timestamp);
+				this.timestamp == that.timestamp;
 	}
 
 	@Override

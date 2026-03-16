@@ -18,9 +18,9 @@ public class GlobalPositionDecodingTest {
      * @param ref     reference position, may be null if not surface
      * @param expect  expected decoded position
      */
-    private static void test(boolean surface, int latEven, int lonEven, int latOdd, int lonOdd, Position ref, Position expect) {
-        CPREncodedPosition cprEven = new CPREncodedPosition(17, false, surface, false, latEven, lonEven, null);
-        CPREncodedPosition cprOdd = new CPREncodedPosition(17, true, surface, false, latOdd, lonOdd, null);
+    private static void testAirborneTiming(boolean surface, int latEven, int lonEven, int latOdd, int lonOdd, Position ref, Position expect) {
+        CPREncodedPosition cprEven = surface ? CPREncodedPosition.ofSurface(17, false, false, latEven, lonEven, 0L) : CPREncodedPosition.ofAirborne(17, false, latEven, lonEven, 0L);
+        CPREncodedPosition cprOdd = surface ? CPREncodedPosition.ofSurface(17, true, false, latOdd, lonOdd, 0L) : CPREncodedPosition.ofAirborne(17, true, latOdd, lonOdd, 0L);
 
         Position even = cprEven.decodeGlobal(cprOdd, ref);
         Position odd = cprOdd.decodeGlobal(cprEven, ref);
@@ -45,8 +45,8 @@ public class GlobalPositionDecodingTest {
     @Test
     void testStraddle() {
         // whether straddling positions are handled properly
-        test(false, 0x0afd9, 0x0, 0x0d79c, 0x00000, null, null);
-        test(true, 0x0bf7e, 0x0, 0x15e70, 0x00000, new Position(0., 0., 0.), null);
+        testAirborneTiming(false, 0x0afd9, 0x0, 0x0d79c, 0x00000, null, null);
+        testAirborneTiming(true, 0x0bf7e, 0x0, 0x15e70, 0x00000, new Position(0., 0., 0.), null);
     }
 
     @Test
@@ -55,22 +55,22 @@ public class GlobalPositionDecodingTest {
         {
             // DXB
             Position expected = new Position(55.3657, 25.2532, 0.);
-            test(false, 0x06AF1, 0x09C16, 0x04706, 0x04D58, null, expected);
+            testAirborneTiming(false, 0x06AF1, 0x09C16, 0x04706, 0x04D58, null, expected);
         }
         {
             // LAX
             Position expected = new Position(-118.4085, 33.9416, 0.);
-            test(false, 0x1505A, 0x1C43E, 0x12014, 0x06CA5, null, expected);
+            testAirborneTiming(false, 0x1505A, 0x1C43E, 0x12014, 0x06CA5, null, expected);
         }
         {
             // SYD
             Position expected = new Position(151.1753, -33.9399, 0.);
-            test(false, 0x0AFCC, 0x1273D, 0x0E011, 0x0503C, null, expected);
+            testAirborneTiming(false, 0x0AFCC, 0x1273D, 0x0E011, 0x0503C, null, expected);
         }
         {
             // SCL
             Position expected = new Position(-70.7858, -33.3928, 0.);
-            test(false, 0x0DE7B, 0x05658, 0x10DF9, 0x0BB04, null, expected);
+            testAirborneTiming(false, 0x0DE7B, 0x05658, 0x10DF9, 0x0BB04, null, expected);
         }
     }
 
@@ -82,55 +82,55 @@ public class GlobalPositionDecodingTest {
             // DXB
             Position expected = new Position(55.3657, 25.2532, 0.);
             Position ref = new Position(30., 80., 0.);
-            test(true, 0x1ABC2, 0x07058, 0x11C19, 0x13560, ref, expected);
+            testAirborneTiming(true, 0x1ABC2, 0x07058, 0x11C19, 0x13560, ref, expected);
         }
         {
             // LAX
             Position expected = new Position(-118.4085, 33.9416, 0.);
             Position ref = new Position(-120., -10., 0.);
-            test(true, 0x14166, 0x110F9, 0x0804F, 0x1B296, ref, expected);
+            testAirborneTiming(true, 0x14166, 0x110F9, 0x0804F, 0x1B296, ref, expected);
         }
         {
             // SYD
             Position expected = new Position(151.1753, -33.9399, 0.);
             Position ref = new Position(120., 10., 0.);
-            test(true, 0x0BF2E, 0x09CF4, 0x18043, 0x140EF, ref, expected);
+            testAirborneTiming(true, 0x0BF2E, 0x09CF4, 0x18043, 0x140EF, ref, expected);
         }
         {
             // SCL
             Position expected = new Position(-70.7858, -33.3928, 0.);
             Position ref = new Position(-110., -10., 0.);
-            test(true, 0x179ED, 0x1595F, 0x037E4, 0x0EC11, ref, expected);
+            testAirborneTiming(true, 0x179ED, 0x1595F, 0x037E4, 0x0EC11, ref, expected);
         }
         {
             // Special cases: Equator vs Poles
-            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,10.,0.), new Position(0.,0.,0.));
-            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,60.,0.), new Position(0.,90.,0.));
-            test(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0.,-60.,0.), new Position(0.,-90.,0.));
+            testAirborneTiming(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0., 10., 0.), new Position(0., 0., 0.));
+            testAirborneTiming(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0., 60., 0.), new Position(0., 90., 0.));
+            testAirborneTiming(true, 0x00000, 0x00000, 0x00000, 0x00000, new Position(0., -60., 0.), new Position(0., -90., 0.));
         }
     }
 
     @Test
     void testSanityChecks() {
         // Test same format (both even)
-        CPREncodedPosition cprEven1 = new CPREncodedPosition(17, false, false, false, 0x06AF1, 0x09C16, null);
-        CPREncodedPosition cprEven2 = new CPREncodedPosition(17, false, false, false, 0x04706, 0x04D58, null);
+        CPREncodedPosition cprEven1 = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
+        CPREncodedPosition cprEven2 = CPREncodedPosition.ofAirborne(17, false, 0x04706, 0x04D58, 0L);
         assertNull(cprEven1.decodeGlobal(cprEven2, null));
 
         // Test same format (both odd)
-        CPREncodedPosition cprOdd1 = new CPREncodedPosition(17, true, false, false, 0x06AF1, 0x09C16, null);
-        CPREncodedPosition cprOdd2 = new CPREncodedPosition(17, true, false, false, 0x04706, 0x04D58, null);
+        CPREncodedPosition cprOdd1 = CPREncodedPosition.ofAirborne(17, true, 0x06AF1, 0x09C16, 0L);
+        CPREncodedPosition cprOdd2 = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, 0L);
         assertNull(cprOdd1.decodeGlobal(cprOdd2, null));
 
         // Test mixing airborne and surface positions
-        CPREncodedPosition cprAirborne = new CPREncodedPosition(17, false, false, false, 0x06AF1, 0x09C16, null);
-        CPREncodedPosition cprSurface = new CPREncodedPosition(17, true, true, false, 0x11C19, 0x13560, null);
+        CPREncodedPosition cprAirborne = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
+        CPREncodedPosition cprSurface = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, 0L);
         assertNull(cprAirborne.decodeGlobal(cprSurface, null));
         assertNull(cprSurface.decodeGlobal(cprAirborne, null));
 
         // Test surface position without reference position
-        CPREncodedPosition cprSurfaceEven = new CPREncodedPosition(17, false, true, false, 0x1ABC2, 0x07058, null);
-        CPREncodedPosition cprSurfaceOdd = new CPREncodedPosition(17, true, true, false, 0x11C19, 0x13560, null);
+        CPREncodedPosition cprSurfaceEven = CPREncodedPosition.ofSurface(17, false, false, 0x1ABC2, 0x07058, 0L);
+        CPREncodedPosition cprSurfaceOdd = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, 0L);
         assertNull(cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
     }
 
