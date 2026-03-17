@@ -229,7 +229,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 
 	@Override
 	public Position.AltitudeType getAltitudeType () {
-		if (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18)
+		if (getFormatTypeCode() == 0 || (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18))
 			return Position.AltitudeType.BAROMETRIC_ALTITUDE;
 		else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
 			return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
