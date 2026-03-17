@@ -173,9 +173,9 @@ public class StatefulModeSDecoder {
 					if (ftc == 28) { // aircraft status message, check subtype
 						int subtype = es1090.getMessage()[0] & 0x7;
 
-						if (subtype == 1) // emergency/priority status
+						if (subtype == 1)
 							return new EmergencyOrPriorityStatusMsg(es1090);
-						if (subtype == 2) // TCAS resolution advisory report
+						if (subtype == 2 && dd.adsbVersion > 1)
 							return new TCASResolutionAdvisoryMsg(es1090);
 					}
 
