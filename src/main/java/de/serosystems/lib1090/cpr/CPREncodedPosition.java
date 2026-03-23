@@ -261,7 +261,7 @@ public final class CPREncodedPosition {
 	 * @param reference reference position
 	 * @return decoded position
 	 */
-	Position decodeLocal(Position reference) {
+	public Position decodeLocal(Position reference) {
 		if (reference == null)
 			return null;
 
