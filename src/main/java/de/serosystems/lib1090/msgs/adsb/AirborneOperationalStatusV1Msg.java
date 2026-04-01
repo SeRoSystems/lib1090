@@ -167,6 +167,13 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	}
 
 	/**
+	 * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
+	 */
+	public boolean hasReceivingATCServices() {
+		return (operational_mode_code & 0x800) != 0;
+	}
+
+	/**
 	 * @return the version number of the formats and protocols in use on the aircraft installation.<br>
 	 * 0: Conformant to DO-260/ED-102 and DO-242<br>
 	 * 1: Conformant to DO-260A and DO-242A<br>
