@@ -60,7 +60,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
 	/**
 	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version or enroute capabilities
+	 *                                are invalid
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -81,6 +82,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
 
 		enroute_capabilities = msg[1];
+		if ((enroute_capabilities & 0xC0) != 0)
+			throw new BadFormatException("Unknown enroute capabilities code!");
 		// All other capability fields are "TBD" in standard
 	}
 
@@ -90,8 +93,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 	 * @return true if TCAS is operational or unknown, false if TCAS is not operational.
 	 */
 	public boolean hasOperationalTCAS() {
-		// first three bits zero
-		return (enroute_capabilities & 0xe0) == 0;
+		return (enroute_capabilities & 0x20) == 0;
 	}
 
 	/**
@@ -100,8 +102,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 	 * @return true if CDTI is operational or unknown, false if CDTI is not operational.
 	 */
 	public boolean hasOperationalCDTI() {
-		// status of 4th bit when first two bits zero
-		return (enroute_capabilities & 0xd0) == 16;
+		return (enroute_capabilities & 0x10) != 0;
 	}
 
 	/**
