@@ -1,6 +1,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,9 +19,8 @@ class AirborneOperationalStatusV1MsgTest {
 
 	@Test
 	public void testOperationalModeCodeWithHighByte() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8000000802900000000");
-		AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
-		assertEquals(1, status.getVersion());
+		byte[] msg = Tools.hexStringToByteArray("8D000000F8000280492900000000");
+		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
 	}
 
 	@Test
