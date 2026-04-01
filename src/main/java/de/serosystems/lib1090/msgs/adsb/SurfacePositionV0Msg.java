@@ -5,7 +5,7 @@ import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Decoder for ADS-B surface position messages
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsgWithTime {
 
 	private static final long serialVersionUID = 2276395317830182763L;
 
@@ -198,11 +198,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 		return ground_track*360D/128D;
 	}
 
-	/**
-	 * @return flag which will indicate whether or not the Time of Applicability of the message
-	 *         is synchronized with UTC time. False will denote that the time is not synchronized
-	 *         to UTC. True will denote that Time of Applicability is synchronized to UTC time.
-	 */
+	@Override
 	public boolean hasTimeFlag() {
 		return time_flag;
 	}
