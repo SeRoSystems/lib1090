@@ -43,7 +43,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
 	private byte sil; // surveillance integrity level
-	private boolean nic_trk_hdg; // NIC baro for airborne status, heading/ground track info else
+	private boolean trk_hdg; // heading/ground track info
 	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
 
 	/**
@@ -109,7 +109,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		nac_pos = b.readByte(45, 48);
 		// bits 49 and 50 reserved
 		sil = b.readByte(51, 52);
-		nic_trk_hdg = b.readByte(53, 53) == 1;
+		trk_hdg = b.readByte(53, 53) == 1;
 		hrd = b.readByte(54, 54) == 1;
 	}
 
@@ -233,7 +233,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	 * Position Messages.
 	 */
 	public boolean hasTrackHeadingInfo() {
-		return nic_trk_hdg;
+		return trk_hdg;
 	}
 
 	/**
@@ -254,7 +254,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 				", nic_suppl=" + nic_suppl +
 				", nac_pos=" + nac_pos +
 				", sil=" + sil +
-				", nic_trk_hdg=" + nic_trk_hdg +
+				", trk_hdg=" + trk_hdg +
 				", hrd=" + hrd +
 				'}';
 	}
