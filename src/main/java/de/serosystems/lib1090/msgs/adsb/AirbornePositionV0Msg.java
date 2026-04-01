@@ -6,7 +6,7 @@ import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -33,7 +33,7 @@ import java.io.Serializable;
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 @SuppressWarnings("unused")
-public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsgWithTime {
 
 	private static final long serialVersionUID = 5661463389938495220L;
 
@@ -215,11 +215,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 		return antenna_or_nic_suppl_b;
 	}
 
-	/**
-	 * @return flag which will indicate whether or not the Time of Applicability of the message
-	 *         is synchronized with UTC time. False will denote that the time is not synchronized
-	 *         to UTC. True will denote that Time of Applicability is synchronized to UTC time.
-	 */
+	@Override
 	public boolean hasTimeFlag() {
 		return time_flag;
 	}
