@@ -157,6 +157,13 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		return (operational_mode_code & 0x1000) != 0;
 	}
 
+	/**
+	 * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
+	 */
+	public boolean hasReceivingATCServices() {
+		return (operational_mode_code & 0x800) != 0;
+	}
+
 
 	/**
 	 * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2
