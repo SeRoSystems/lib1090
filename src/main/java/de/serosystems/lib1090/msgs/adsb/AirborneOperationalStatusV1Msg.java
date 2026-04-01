@@ -73,7 +73,8 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	/**
 	 * @param squitter extended squitter which contains this message
 	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
-	 *                                operational status message or the capability code is invalid.
+	 *                                operational status message or the capability class code or operational mode
+	 *                                code is invalid.
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
 	public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -101,6 +102,8 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
 		if ((capability_class_code & 0xC000) != 0)
 			throw new BadFormatException("Unknown capability class code!");
+		if ((operational_mode_code & 0xC000) != 0)
+			throw new BadFormatException("Unknown operational mode code!");
 
 		nic_suppl = b.readByte(44, 44) == 1;
 		nac_pos = b.readByte(45, 48);
