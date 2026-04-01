@@ -118,6 +118,12 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 		return (byte) (operational_mode_code & 0xFF);
 	}
 
+	@Override
+	public boolean hasPositionOffsetApplied() {
+		// Note: using definition of ED-129B, which is a bit more explicit than DO-260B
+		return getGPSAntennaOffset() == 0x1;
+	}
+
 	/**
 	 * DO-260B 2.2.3.2.7.2.14
 	 *
@@ -126,10 +132,6 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 */
 	public boolean hasSILSupplement() {
 		return sil_supplement;
-	}
-
-	public boolean hasPositionOffsetApplied() {
-		throw new UnsupportedOperationException("POA not present in version 2");
 	}
 
 	@Override
