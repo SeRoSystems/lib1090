@@ -112,7 +112,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 	/**
 	 * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft
-	 * (see Table A-33 and A-34, RTCA DO-260B)
+	 * (see Table 2-66 and 2-67, RTCA DO-260B)
 	 */
 	public byte getGPSAntennaOffset() {
 		return (byte) (operational_mode_code & 0xFF);
@@ -122,6 +122,46 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	public boolean hasPositionOffsetApplied() {
 		// Note: using definition of ED-129B, which is a bit more explicit than DO-260B
 		return getGPSAntennaOffset() == 0x1;
+	}
+
+	/**
+	 * Get lateral axis GPS antenna offset.
+	 * <ul>
+	 *     <li>values are measured from the longitudinal center line (=roll axis) of the aircraft</li>
+	 *     <li>values are given in meters</li>
+	 *     <li>positive values mean "toward left wing tip"</li>
+	 *     <li>negative values mean "toward right wind tip</li>
+	 *     <li>values have a resolution of 2m</li>
+	 *     <li>values are capped at 6m</li>
+	 *     <li>{@code null} means "no data"</li>
+	 * </ul>
+	 *
+	 * @return lateral axis GPS Antenna offset in meters
+	 * @see #hasPositionOffsetApplied() to check if the aircraft already corrects the antenna offset. In that case, this function won't return meaningful data.
+	 */
+	public Integer getLateralAxisGPSAntennaOffset() {
+		int offset = getGPSAntennaOffset() & 0x60;
+		boolean right = (getGPSAntennaOffset() & 0x80) != 0;
+		return !right && offset == 0 ? null :
+				2 * (right ? -offset : offset);
+	}
+
+	/**
+	 * Get longitudinal axis GPS antenna offset.
+	 * <ul>
+	 *     <li>values are measured from the nose of the aircraft</li>
+	 *     <li>values are given in meters</li>
+	 *     <li>values have a resolution of 2m</li>
+	 *     <li>values are capped at 60m</li>
+	 *     <li>{@code null} means "no data"</li>
+	 * </ul>
+	 *
+	 * @return longitudinal axis GPS Antenna offset in meters
+	 * @see #hasPositionOffsetApplied() to check if the aircraft already corrects the antenna offset. In that case, this function won't return meaningful data.
+	 */
+	public Integer getLongitudinalAxisGPSAntennaOffset() {
+		int offset = getGPSAntennaOffset() & 0x1e;
+		return (offset & 0x30) == 0 ? null : 2 * (offset - 1);
 	}
 
 	/**
