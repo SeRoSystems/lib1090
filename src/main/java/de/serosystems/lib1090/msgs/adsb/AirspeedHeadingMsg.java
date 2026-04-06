@@ -96,7 +96,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		vertical_rate_info_available = true;
 		geo_minus_baro_available = true;
 
-		// heading available in ADS-B version 1+, indicates true/magnetic north for version 0
+		// heading available
 		heading_status_bit = (msg[1]&0x4)>0;
 		heading = ((msg[1]&0x3)<<8 | msg[2]&0xFF) * 360./1024.;
 
@@ -128,14 +128,9 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	}
 
 	/**
-	 * For ADS-B version 1 and 2 this must be checked before retrieving heading information.
-	 * 
-	 * @return Depending on the ADS-B version, different interpretations:
-	 * 	<ul>
-	 * 	    <li><strong>Version 0</strong> the flag indicates whether heading is relative to magnetic north (true) or
-	 * 	    	true north (false)</li>
-	 * 	    <li><strong>Version 1+</strong> the flag indicates whether heading information is available or not</li>
-	 * 	</ul>
+	 * This must be checked before retrieving heading information.
+	 *
+	 * @return the flag indicates whether heading information is available or not
 	 */
 	public boolean hasHeadingStatusFlag() {
 		return heading_status_bit;
@@ -143,16 +138,16 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
 	/**
 	 * Must be checked before accessing airspeed!
-	 * 
+	 *
 	 * @return whether airspeed info is available
 	 */
 	public boolean hasAirspeedInfo() {
 		return airspeed_available;
 	}
-	
+
 	/**
 	 * Must be checked before accessing vertical rate!
-	 * 
+	 *
 	 * @return whether vertical rate info is available
 	 */
 	public boolean hasVerticalRateInfo() {
@@ -161,7 +156,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
 	/**
 	 * Must be checked before accessing geo minus baro!
-	 * 
+	 *
 	 * @return whether geo-baro difference info is available
 	 */
 	public boolean hasGeoMinusBaroInfo() {
@@ -174,7 +169,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	public boolean isSupersonic() {
 		return msg_subtype == 4;
 	}
-	
+
 	/**
 	 * @return true, if aircraft wants to change altitude for instance
 	 */
@@ -235,7 +230,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		if (!geo_minus_baro_available) return null;
 		return geo_minus_baro;
 	}
-	
+
 	/**
 	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
 	 * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
@@ -244,7 +239,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		if (!heading_status_bit) return null;
 		return heading;
 	}
-	
+
 	/**
 	 * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
 	 */
