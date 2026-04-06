@@ -211,8 +211,8 @@ public class StatefulModeSDecoder {
 						} else if (subtype == 1) {
 							// surface
 							switch (dd.adsbVersion) {
-								case 0:
-									return new OperationalStatusV0Msg(es1090);
+								case 0: // undefined subtype for v0, handle like any other undefined subtype
+									break;
 								case 1:
 									SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
 									dd.nicSupplA = s1.hasNICSupplementA();
