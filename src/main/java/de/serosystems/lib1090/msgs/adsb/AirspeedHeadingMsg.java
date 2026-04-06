@@ -1,6 +1,5 @@
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.AirborneVelocity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -28,7 +27,7 @@ import java.io.Serializable;
  * Decoder for ADS-B airspeed and heading messages
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable {
+public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMessage {
 
 	private static final long serialVersionUID = 6901092011249128775L;
 
@@ -145,20 +144,12 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		return airspeed_available;
 	}
 
-	/**
-	 * Must be checked before accessing vertical rate!
-	 *
-	 * @return whether vertical rate info is available
-	 */
+	@Override
 	public boolean hasVerticalRateInfo() {
 		return vertical_rate_info_available;
 	}
 
-	/**
-	 * Must be checked before accessing geo minus baro!
-	 *
-	 * @return whether geo-baro difference info is available
-	 */
+	@Override
 	public boolean hasGeoMinusBaroInfo() {
 		return geo_minus_baro_available;
 	}
@@ -170,36 +161,19 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		return msg_subtype == 4;
 	}
 
-	/**
-	 * @return true, if aircraft wants to change altitude for instance
-	 */
+	@Override
 	public boolean hasChangeIntent() {
 		return intent_change;
 	}
 
-	/**
-	 * Note: only in ADS-B version 0 and 1 transponders!!
-	 * @return true, iff aircraft has equipage class A1 or higher
-	 */
+	@Override
 	public boolean hasIFRCapability() {
 		return ifr_capability;
 	}
 
-	/**
-	 * @return the raw encoded Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5
-	 */
+	@Override
 	public byte getNACv() {
 		return navigation_accuracy_category;
-	}
-
-	/**
-	 * The 95% accuracy for horizontal velocity. We interpret the coding according to
-	 * DO-260B Table 2-22 for all ADS-B versions.
-	 * @return Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5 in m/s, -1 means
-	 * "unknown" or &gt;10m
-	 */
-	public float getAccuracyBound() {
-		return AirborneVelocity.decodeAccuracyBound(navigation_accuracy_category);
 	}
 
 	/**
@@ -211,28 +185,20 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		return (int) airspeed;
 	}
 
-	/**
-	 * @return whether altitude is derived by barometric sensor or GNSS
-	 */
+	@Override
 	public boolean isBarometricVerticalSpeed() {
 		return vertical_source;
 	}
 
 
-	/**
-	 * @return vertical rate in feet/min (negative value means descending) or null if information is not available. The
-	 * latter can also be checked with {@link #hasVerticalRateInfo()}.
-	 */
+	@Override
 	public Integer getVerticalRate() {
 		if (!vertical_rate_info_available) return null;
 		return (vertical_rate_down ? -vertical_rate : vertical_rate);
 	}
 
 
-	/**
-	 * @return difference between barometric and geometric altitude in feet or null if no information is available.
-	 * The latter can also be checked using {@link #hasGeoMinusBaroInfo()}.
-	 */
+	@Override
 	public Integer getGeoMinusBaro() {
 		if (!geo_minus_baro_available) return null;
 		return geo_minus_baro;

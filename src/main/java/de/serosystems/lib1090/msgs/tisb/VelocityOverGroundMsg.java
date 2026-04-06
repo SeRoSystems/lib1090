@@ -1,6 +1,5 @@
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.decoding.AirborneVelocity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
@@ -30,7 +29,7 @@ import java.io.Serializable;
  * Decoder for TIS-B velocity message (DO-260B, 2.2.17.3.4).
  * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable {
+public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMessage {
 
 	private static final long serialVersionUID = 4633940058263818959L;
 
@@ -135,9 +134,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		}
 	}
 
-	/**
-	 * @return the ICAO Mode A Flag (for address type determination)
-	 */
+	@Override
 	public boolean getIMF () {
 		return imf;
 	}
@@ -149,16 +146,12 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return velocity_info_available;
 	}
 
-	/**
-	 * @return whether vertical rate info is available
-	 */
+	@Override
 	public boolean hasVerticalRateInfo() {
 		return vertical_rate_info_available;
 	}
 
-	/**
-	 * @return whether geo-baro difference info is available
-	 */
+	@Override
 	public boolean hasGeoMinusBaroInfo() {
 		return geo_minus_baro != null;
 	}
@@ -170,25 +163,9 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return msg_subtype == 2;
 	}
 
-	/**
-	 * @return the raw encoded Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5 or null
-	 * if not available
-	 */
+	@Override
 	public Byte getNACv() {
 		return nacv;
-	}
-
-	/**
-	 * The 95% accuracy for horizontal velocity. We interpret the coding according to
-	 * DO-260B Table 2-22 for all ADS-B versions.
-	 * @return Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5 in m/s, -1 means
-	 * "unknown" or &gt;10m; null if not reported in this message
-	 */
-	public Float getAccuracyBound() {
-		if (nacv == null)
-			return null;
-
-		return AirborneVelocity.decodeAccuracyBound(nacv);
 	}
 
 
@@ -209,20 +186,14 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 		return (direction_south ? north_south_velocity : -north_south_velocity);
 	}
 
-	/**
-	 * @return vertical rate in feet/min (negative value means descending) or null if information is not available. The
-	 * latter can also be checked with {@link #hasVerticalRateInfo()}
-	 */
+	@Override
 	public Integer getVerticalRate() {
 		if (!vertical_rate_info_available) return null;
 		return (vertical_rate_down ? -vertical_rate : vertical_rate);
 	}
 
 
-	/**
-	 * @return difference between barometric and geometric altitude in feet or null if information is not available. The
-	 * latter can also be checked with {@link #hasGeoMinusBaroInfo()}
-	 */
+	@Override
 	public Integer getGeoMinusBaro() {
 		return geo_minus_baro;
 	}
