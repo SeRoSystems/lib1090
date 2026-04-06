@@ -35,6 +35,12 @@ class AirspeedHeadingMsgTest {
 	}
 
 	@Test
+	public void testImplementsAirborneVelocityMessage() throws Exception {
+		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		assertInstanceOf(AirborneVelocityMessage.class, msg);
+	}
+
+	@Test
 	public void testVerticalRate() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.hasVerticalRateInfo());
