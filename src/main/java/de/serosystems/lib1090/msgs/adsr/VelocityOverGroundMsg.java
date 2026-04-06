@@ -6,7 +6,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
-import static de.serosystems.lib1090.decoding.VelocityOverGround.decodeAccuracyBound;
+import static de.serosystems.lib1090.decoding.AirborneVelocity.decodeAccuracyBound;
 
 /*
  *  This file is part of de.serosystems.lib1090.

@@ -27,6 +27,13 @@ class VelocityOverGroundMsgTest {
 	}
 
 	@Test
+	public void testNACvRawAndAccuracyBound_485020() throws Exception {
+		VelocityOverGroundMsg msg = new VelocityOverGroundMsg("8D485020994409940838175B284F");
+		assertEquals(0, msg.getNACv());
+		assertEquals(-1.0f, msg.getAccuracyBound());
+	}
+
+	@Test
 	public void testGeoMinusBaro_485020() throws Exception {
 		VelocityOverGroundMsg msg = new VelocityOverGroundMsg("8D485020994409940838175B284F");
 		assertTrue(msg.hasGeoMinusBaroInfo());

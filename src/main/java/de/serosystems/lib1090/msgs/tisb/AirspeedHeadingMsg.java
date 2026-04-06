@@ -1,5 +1,6 @@
 package de.serosystems.lib1090.msgs.tisb;
 
+import de.serosystems.lib1090.decoding.AirborneVelocity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
@@ -204,18 +205,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 		if (nacv == null)
 			return null;
 
-		switch(nacv) {
-			case 1:
-				return 10.f;
-			case 2:
-				return 3.f;
-			case 3:
-				return 1.f;
-			case 4:
-				return 0.3f;
-			default:
-				return -1.f;
-		}
+		return AirborneVelocity.decodeAccuracyBound(nacv);
 	}
 
 	/**

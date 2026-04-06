@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.Airspeed;
+import de.serosystems.lib1090.decoding.AirborneVelocity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -186,13 +186,20 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	}
 
 	/**
+	 * @return the raw encoded Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5
+	 */
+	public byte getNACv() {
+		return navigation_accuracy_category;
+	}
+
+	/**
 	 * The 95% accuracy for horizontal velocity. We interpret the coding according to
 	 * DO-260B Table 2-22 for all ADS-B versions.
 	 * @return Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5 in m/s, -1 means
 	 * "unknown" or &gt;10m
 	 */
-	public double getNACv() {
-		return Airspeed.decodeNACv(navigation_accuracy_category);
+	public float getAccuracyBound() {
+		return AirborneVelocity.decodeAccuracyBound(navigation_accuracy_category);
 	}
 
 	/**
