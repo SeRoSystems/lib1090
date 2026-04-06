@@ -3,6 +3,8 @@ package de.serosystems.lib1090;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.adsb.ModeACodeV1Msg;
+import de.serosystems.lib1090.msgs.adsb.ModeACodeV1MsgTest;
 import de.serosystems.lib1090.msgs.adsb.OperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsgV1;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsgV1Test;
@@ -65,6 +67,17 @@ public class StatefulModeSDecoderTest {
 		TargetStateAndStatusMsgV1 tss = (TargetStateAndStatusMsgV1) reply;
 
 		assertEquals(9, tss.getNACp());
+	}
+
+	@Test
+	public void modeACodeV1_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
+		decoder.decode(TargetStateAndStatusMsgV1Test.A_OPSTAT_V1, 0L);
+
+		final ModeSDownlinkMsg reply = decoder.decode(ModeACodeV1MsgTest.MODE_A_CODE_V1, 0L);
+
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_MODE_A_CODE_V1, reply.getType());
+		assertTrue(reply instanceof ModeACodeV1Msg);
+		assertEquals("6513", ((ModeACodeV1Msg) reply).getIdentity());
 	}
 
 }
