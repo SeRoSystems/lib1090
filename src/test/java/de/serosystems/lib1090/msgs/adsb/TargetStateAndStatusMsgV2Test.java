@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class TargetStateAndStatusMsgTest {
+public class TargetStateAndStatusMsgV2Test {
 
 	// A TSS report observed in reality, decomposed by single bits
 	public static final String TSS_WITHOUT_HEADING =
@@ -120,7 +120,7 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithoutHeading() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
+		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -130,6 +130,7 @@ public class TargetStateAndStatusMsgTest {
 		assertFalse(tss.isFMSSelectedAltitude());
 		assertTrue(tss.hasSelectedAltitudeInfo());
 
+		assertEquals(1220, tss.getSelectedAltitudeRaw());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
 		assertFalse(tss.hasSelectedHeadingInfo());
@@ -148,7 +149,7 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithHeadingLt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
+		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -158,10 +159,11 @@ public class TargetStateAndStatusMsgTest {
 		assertFalse(tss.isFMSSelectedAltitude());
 		assertTrue(tss.hasSelectedAltitudeInfo());
 
+		assertEquals(1220, tss.getSelectedAltitudeRaw());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
 		assertTrue(tss.hasSelectedHeadingInfo());
-		assertEquals(32 * 0.703125, tss.getSelectedHeading(), 0.0001);
+		assertEquals(32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
 		assertEquals(9, tss.getNACp());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
@@ -176,7 +178,7 @@ public class TargetStateAndStatusMsgTest {
 
 	@Test
 	public void testTssWithHeadingGt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
+		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -186,10 +188,11 @@ public class TargetStateAndStatusMsgTest {
 		assertFalse(tss.isFMSSelectedAltitude());
 		assertTrue(tss.hasSelectedAltitudeInfo());
 
+		assertEquals(1220, tss.getSelectedAltitudeRaw());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
 		assertTrue(tss.hasSelectedHeadingInfo());
-		assertEquals(180 + 32 * 0.703125, tss.getSelectedHeading(), 0.0001);
+		assertEquals(180 + 32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
 		assertEquals(9, tss.getNACp());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
@@ -205,7 +208,7 @@ public class TargetStateAndStatusMsgTest {
 	@Test
 	public void testInvalidReservedBits_shouldThrowBadFormatException() {
 		try {
-			final TargetStateAndStatusMsg tss = new TargetStateAndStatusMsg(Tools.hexStringToByteArray(INVALID_TSS));
+			final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(INVALID_TSS));
 			fail();
 		} catch (BadFormatException e) {
 			// NOP

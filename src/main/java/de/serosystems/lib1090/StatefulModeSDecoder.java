@@ -181,11 +181,10 @@ public class StatefulModeSDecoder {
 
 					if (ftc == 29) {
 						int subtype = (es1090.getMessage()[0]>>>1) & 0x3;
-						// DO-260B 2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
-						boolean hasMe11Bit = (es1090.getMessage()[1]&0x20) != 0;
-
-						if (subtype == 1 && (dd.adsbVersion > 0 || !hasMe11Bit)) {
-							return new TargetStateAndStatusMsg(es1090);
+						if (subtype == 0 && dd.adsbVersion == 1) {
+							return new TargetStateAndStatusMsgV1(es1090);
+						} else if (subtype == 1 && dd.adsbVersion == 2) {
+							return new TargetStateAndStatusMsgV2(es1090);
 						}
 					}
 
