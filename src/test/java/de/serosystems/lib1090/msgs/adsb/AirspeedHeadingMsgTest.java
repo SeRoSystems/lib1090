@@ -28,6 +28,13 @@ class AirspeedHeadingMsgTest {
 	}
 
 	@Test
+	public void testNACvRawAndAccuracyBound() throws Exception {
+		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		assertEquals(0, msg.getNACv());
+		assertEquals(-1.0f, msg.getAccuracyBound());
+	}
+
+	@Test
 	public void testVerticalRate() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.hasVerticalRateInfo());

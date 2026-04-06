@@ -1,6 +1,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.VelocityOverGround;
+import de.serosystems.lib1090.decoding.AirborneVelocity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -179,7 +179,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * "unknown" or &gt;10m
 	 */
 	public float getAccuracyBound() {
-		return VelocityOverGround.decodeAccuracyBound(navigation_accuracy_category);
+		return AirborneVelocity.decodeAccuracyBound(navigation_accuracy_category);
 	}
 
 	/**
