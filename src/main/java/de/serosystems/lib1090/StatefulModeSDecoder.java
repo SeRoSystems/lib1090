@@ -164,6 +164,12 @@ public class StatefulModeSDecoder {
 						}
 					}
 
+					if (ftc == 23) { // Test Message, check subtype
+						int subtype = es1090.getMessage()[0] & 0x7;
+						if (subtype == 7 && dd.adsbVersion == 1) // Mode A code
+							return new ModeACodeV1Msg(es1090);
+					}
+
 					if (ftc == 24) {
 						int subtype = es1090.getMessage()[0] & 0x7;
 						if (subtype == 1)
