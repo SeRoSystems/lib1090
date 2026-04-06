@@ -30,7 +30,14 @@ public interface TargetStateAndStatusMsg {
 	boolean hasSelectedHeadingInfo();
 
 	/**
-	 * @return the selected heading in decimal degrees ([0, 360]) clockwise, or {@code null} if unavailable
+	  * The selected heading info according to DO-260B 2.2.3.2.7.1.3.7
+	  * <p>
+	  * Look at {@link SurfaceOperationalStatusV1Msg#getHorizontalReferenceDirection()} resp.
+	  * {@link AirborneOperationalStatusV1Msg#getHorizontalReferenceDirection()} to determine whether this heading
+	  * is referring to true north or magnetic north.
+	  * If information is not available, assume magnetic north as the de-facto standard.
+	  *
+	  * @return the selected heading in decimal degrees ([0, 360]) clockwise, or {@code null} if unavailable
 	 */
 	Float getSelectedHeading();
 
