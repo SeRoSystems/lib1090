@@ -36,8 +36,8 @@ public class TargetStateAndStatusMsgV2 extends ExtendedSquitter implements Seria
 	private boolean selected_altitude_type;
 	private int selected_altitude;
 	private int barometric_pressure_setting;
-	private boolean selectected_heading_status;
-	private boolean selectected_heading_sign;
+	private boolean selected_heading_status;
+	private boolean selected_heading_sign;
 	private int selected_heading;
 	private byte nac_p;
 	private boolean nic_baro;
@@ -100,8 +100,8 @@ public class TargetStateAndStatusMsgV2 extends ExtendedSquitter implements Seria
 
 		barometric_pressure_setting = (((msg[2]&0x0F)<<5) | ((msg[3]>>>3)&0x1F)) & 0x1FF;
 
-		selectected_heading_status = ((msg[3] & 0x04) != 0);
-		selectected_heading_sign = ((msg[3] & 0x02) != 0);
+		selected_heading_status = ((msg[3] & 0x04) != 0);
+		selected_heading_sign = ((msg[3] & 0x02) != 0);
 
 		selected_heading = (((msg[3]&0x01)<<7) | ((msg[4]>>>1)&0x7F)) & 0xFF;
 		nac_p = (byte) ((((msg[4]&0x01)<<3) | ((msg[5]>>>5)&0x07)) & 0x0F);
@@ -185,16 +185,16 @@ public class TargetStateAndStatusMsgV2 extends ExtendedSquitter implements Seria
 
 	@Override
 	public boolean hasSelectedHeadingInfo() {
-		return selectected_heading_status;
+		return selected_heading_status;
 	}
 
 	@Override
 	public Float getSelectedHeading() {
-		if (!selectected_heading_status) {
+		if (!selected_heading_status) {
 			return null;
 		}
 
-		return selected_heading * (180.f / 256) + (selectected_heading_sign ? 180F : 0F);
+		return selected_heading * (180.f / 256) + (selected_heading_sign ? 180F : 0F);
 	}
 
 	@Override
@@ -303,8 +303,8 @@ public class TargetStateAndStatusMsgV2 extends ExtendedSquitter implements Seria
 				", selected_altitude_type=" + selected_altitude_type +
 				", selected_altitude=" + selected_altitude +
 				", barometric_pressure_setting=" + barometric_pressure_setting +
-				", selectected_heading_status=" + selectected_heading_status +
-				", selectected_heading_sign=" + selectected_heading_sign +
+				", selectected_heading_status=" + selected_heading_status +
+				", selectected_heading_sign=" + selected_heading_sign +
 				", selected_heading=" + selected_heading +
 				", nac_p=" + nac_p +
 				", nic_baro=" + nic_baro +
