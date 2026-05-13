@@ -27,6 +27,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class ThreatIdentityData implements Serializable {
+    private static final long serialVersionUID = -2962790317508395221L;
 
     private Integer icao24;
     private Short altitudeCode;

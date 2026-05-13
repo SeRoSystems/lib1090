@@ -24,6 +24,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = 2607206512004324831L;
 
     // Fields
     // ------

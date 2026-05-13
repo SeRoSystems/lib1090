@@ -30,6 +30,7 @@ import static de.serosystems.lib1090.msgs.adsb.TCASResolutionAdvisoryMsg.*;
  */
 @SuppressWarnings("unused")
 public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = -5637418816699536015L;
 
     private byte racRecord;
     private boolean raTerminated;
