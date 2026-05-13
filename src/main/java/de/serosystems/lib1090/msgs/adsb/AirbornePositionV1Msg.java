@@ -98,7 +98,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 
 	/**
 	 * Values according to DO-260B Table N-11
-	 * @return Navigation integrity category. A NIC of 0 means "unkown".
+	 * @return Navigation integrity category. A NIC of 0 means "unknown".
 	 */
 	public byte getNIC() {
 		return AirbornePosition.decodeNIC(getFormatTypeCode(), nic_suppl_a);

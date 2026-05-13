@@ -239,7 +239,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	}
 
 	/**
-	 * @return the source integrity level (SIL) which indicates the propability of exceeding
+	 * @return the source integrity level (SIL) which indicates the probability of exceeding
 	 *         the NIC containment radius (see table A-15 in RCTA DO-260B)
 	 */
 	public byte getSIL() {
