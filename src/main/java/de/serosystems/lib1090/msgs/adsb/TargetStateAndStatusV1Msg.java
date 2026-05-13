@@ -28,7 +28,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B target state and status message as specified in DO-260A (ADS-B version 1).
  */
-public class TargetStateAndStatusMsgV1 extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg {
+public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg {
 
 	private static final long serialVersionUID = -3226687215928593692L;
 
@@ -49,14 +49,14 @@ public class TargetStateAndStatusMsgV1 extends ExtendedSquitter implements Seria
 	private byte emergency_priority_status;
 
 	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected TargetStateAndStatusMsgV1() { }
+	protected TargetStateAndStatusV1Msg() { }
 
 	/**
 	 * @param raw_message The full Mode S message in hex representation
 	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public TargetStateAndStatusMsgV1(String raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public TargetStateAndStatusV1Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -65,7 +65,7 @@ public class TargetStateAndStatusMsgV1 extends ExtendedSquitter implements Seria
 	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public TargetStateAndStatusMsgV1(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
+	public TargetStateAndStatusV1Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
 		this(new ExtendedSquitter(raw_message));
 	}
 
@@ -74,7 +74,7 @@ public class TargetStateAndStatusMsgV1 extends ExtendedSquitter implements Seria
 	 * @throws BadFormatException if message has the wrong typecode
 	 * @throws UnspecifiedFormatError if message has the wrong subtype
 	 */
-	public TargetStateAndStatusMsgV1(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+	public TargetStateAndStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
 		setType(subtype.ADSB_TARGET_STATE_AND_STATUS);
 

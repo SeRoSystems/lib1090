@@ -31,14 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TargetStateAndStatusMsgV1Test {
+public class TargetStateAndStatusV1MsgTest {
 
-	public static final String TSS_V1 = withSubtype(TargetStateAndStatusMsgV2Test.TSS_WITHOUT_HEADING, 0);
+	public static final String TSS_V1 = withSubtype(TargetStateAndStatusV2MsgTest.TSS_WITHOUT_HEADING, 0);
 	public static final String A_OPSTAT_V1 = withAddress("8D000000F8000200492900000000", "89653e");
 
 	@Test
 	public void testDecodeTssV1() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsgV1 tss = new TargetStateAndStatusMsgV1(Tools.hexStringToByteArray(TSS_V1));
+		final TargetStateAndStatusV1Msg tss = new TargetStateAndStatusV1Msg(Tools.hexStringToByteArray(TSS_V1));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());

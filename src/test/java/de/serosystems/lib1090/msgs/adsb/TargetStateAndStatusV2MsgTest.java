@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class TargetStateAndStatusMsgV2Test {
+public class TargetStateAndStatusV2MsgTest {
 
 	// A TSS report observed in reality, decomposed by single bits
 	public static final String TSS_WITHOUT_HEADING =
@@ -138,7 +138,7 @@ public class TargetStateAndStatusMsgV2Test {
 
 	@Test
 	public void testTssWithoutHeading() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
+		final TargetStateAndStatusV2Msg tss = new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -167,7 +167,7 @@ public class TargetStateAndStatusMsgV2Test {
 
 	@Test
 	public void testTssWithHeadingLt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
+		final TargetStateAndStatusV2Msg tss = new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(TSS_HEADING_LT_180_DEG));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -196,7 +196,7 @@ public class TargetStateAndStatusMsgV2Test {
 
 	@Test
 	public void testTssWithHeadingGt180Degrees() throws UnspecifiedFormatError, BadFormatException {
-		final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
+		final TargetStateAndStatusV2Msg tss = new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(TSS_HEADING_GT_180_DEG));
 
 		assertEquals("89653e", tss.getAddress().getHexAddress());
 		assertEquals(17, tss.getDownlinkFormat());
@@ -226,7 +226,7 @@ public class TargetStateAndStatusMsgV2Test {
 	@Test
 	public void testInvalidReservedBits_shouldThrowBadFormatException() {
 		try {
-			final TargetStateAndStatusMsgV2 tss = new TargetStateAndStatusMsgV2(Tools.hexStringToByteArray(INVALID_TSS));
+			final TargetStateAndStatusV2Msg tss = new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(INVALID_TSS));
 			fail();
 		} catch (BadFormatException e) {
 			// NOP
