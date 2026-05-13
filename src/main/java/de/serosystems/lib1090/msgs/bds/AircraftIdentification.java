@@ -27,6 +27,7 @@ import java.util.Arrays;
  */
 @SuppressWarnings("unused")
 public class AircraftIdentification extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = -8005492828828163576L;
 
 
     // Fields

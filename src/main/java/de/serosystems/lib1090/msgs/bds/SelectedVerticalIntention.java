@@ -24,6 +24,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class SelectedVerticalIntention extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = 4359765861426574750L;
 
     // Fields
     // ------

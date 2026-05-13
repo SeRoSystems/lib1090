@@ -26,6 +26,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = 2537138385702205527L;
 
     // Fields
     // ------

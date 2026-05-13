@@ -24,6 +24,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class TrackAndTurn extends BDSRegister implements Serializable {
+    private static final long serialVersionUID = 4009313088718180688L;
 
     // Fields
     // ------
