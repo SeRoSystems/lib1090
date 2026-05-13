@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for TIS-B airspeed+heading message (DO-260B, 2.2.17.3.4).
  * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMessage {
+public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
 	private static final long serialVersionUID = 944130622021621845L;
 

@@ -16,14 +16,14 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.tisb;
+package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.AirborneVelocity;
 
 /**
- * Common API for TIS-B airborne velocity messages across message subtypes.
+ * Common API for ADS-R airborne velocity messages across message subtypes.
  */
-public interface AirborneVelocityMessage {
+public interface AirborneVelocityMsg {
 
 	/**
 	 * @return the ICAO Mode A Flag used for address type determination
@@ -31,25 +31,32 @@ public interface AirborneVelocityMessage {
 	boolean getIMF();
 
 	/**
+	 * Note: only defined for ADS-R version 0 and 1.
+	 * @return true if the aircraft reports IFR capability
+	 */
+	boolean hasIFRCapability();
+
+	/**
+	 * @return the raw encoded Navigation Accuracy Category for velocity
+	 */
+	byte getNACv();
+
+	/**
+	 * @return the interpreted 95% horizontal velocity accuracy in m/s, or -1 if unknown or greater than 10m/s
+	 */
+	default float getAccuracyBound() {
+		return AirborneVelocity.decodeAccuracyBound(getNACv());
+	}
+
+	/**
 	 * @return whether the vertical rate field is available
 	 */
 	boolean hasVerticalRateInfo();
 
 	/**
-	 * @return the raw encoded Navigation Accuracy Category for velocity, or {@code null} if unavailable
+	 * @return whether the reported vertical speed is barometric
 	 */
-	Byte getNACv();
-
-	/**
-	 * @return the interpreted 95% horizontal velocity accuracy in m/s, or {@code null} if unavailable
-	 */
-	default Float getAccuracyBound() {
-		Byte nacv = getNACv();
-		if (nacv == null) {
-			return null;
-		}
-		return AirborneVelocity.decodeAccuracyBound(nacv);
-	}
+	boolean isBarometricVerticalSpeed();
 
 	/**
 	 * @return the vertical rate in feet/min, or {@code null} if unavailable

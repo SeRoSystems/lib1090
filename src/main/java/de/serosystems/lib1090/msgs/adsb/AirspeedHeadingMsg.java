@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Decoder for ADS-B airspeed and heading messages
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMessage {
+public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
 	private static final long serialVersionUID = 6901092011249128775L;
 

@@ -54,7 +54,7 @@ class VelocityOverGroundMsgTest {
 	@Test
 	public void testImplementsAirborneVelocityMessage() throws Exception {
 		VelocityOverGroundMsg msg = new VelocityOverGroundMsg("8D485020994409940838175B284F");
-		assertInstanceOf(AirborneVelocityMessage.class, msg);
+		assertInstanceOf(AirborneVelocityMsg.class, msg);
 	}
 
 	@Test
