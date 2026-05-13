@@ -242,7 +242,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
 	 * version 1 and 2.
 	 *
-	 * @return the source integrity level (SIL) which indicates the propability of exceeding
+	 * @return the source integrity level (SIL) which indicates the probability of exceeding
 	 *         the NIC containment radius. Returns null if not available.
 	 */
 	public Byte getSIL() {

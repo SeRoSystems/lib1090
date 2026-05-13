@@ -190,7 +190,7 @@ public class ExampleDecoder {
 			case ADSB_AIRSPEED:
 				AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;
 				System.out.println("["+icao24+"]: Airspeed: "+
-						(airspeed.hasAirspeedInfo() ? airspeed.getAirspeed()+" kt" : "unkown"));
+						(airspeed.hasAirspeedInfo() ? airspeed.getAirspeed()+" kt" : "unknown"));
 
 				if (decoder.getAdsbVersion(msg) == 0) {
 					// version 0 flag indicates true or magnetic north
@@ -199,12 +199,12 @@ public class ExampleDecoder {
 				} else {
 					// version 1+ flag indicates if heading is available at all
 					System.out.println("          Heading: "+
-							(airspeed.hasHeadingStatusFlag() ? airspeed.getHeading()+"°" : "unkown"));
+							(airspeed.hasHeadingStatusFlag() ? airspeed.getHeading()+"°" : "unknown"));
 				}
 
 				if (airspeed.hasVerticalRateInfo())
 					System.out.println("          Vertical rate: "+
-							(airspeed.hasVerticalRateInfo() ? airspeed.getVerticalRate()+" ft/min" : "unkown"));
+							(airspeed.hasVerticalRateInfo() ? airspeed.getVerticalRate()+" ft/min" : "unknown"));
 				break;
 			case ADSB_IDENTIFICATION:
 				IdentificationMsg ident = (IdentificationMsg) msg;

@@ -337,7 +337,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
 				break;
 
-			default: // unkown downlink format
+			default: // unknown downlink format
 				// throw exception
 				throw new BadFormatException(
 						String.format("Invalid downlink format %d detected.", downlink_format));

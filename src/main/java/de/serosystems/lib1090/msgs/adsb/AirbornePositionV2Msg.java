@@ -78,7 +78,7 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 *
 	 * The horizontal containment radius is also known as "horizontal protection level".
 	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
 	 *         If aircraft uses ADS-B version 2, set NIC supplement A from Operational Status Message
 	 *         for better precision. Otherwise, we'll be pessimistic.
 	 */
@@ -104,7 +104,7 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 
 	/**
 	 * According to DO-260B Table 2-14.
-	 * @return Navigation integrity category. A NIC of 0 means "unkown".
+	 * @return Navigation integrity category. A NIC of 0 means "unknown".
 	 */
 	public byte getNIC() {
 		switch (getFormatTypeCode()) {

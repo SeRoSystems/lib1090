@@ -244,7 +244,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 	/**
 	 * DO-260B 2.2.3.2.7.1.3.10
 	 *
-	 * @return the source integrity level (SIL) which indicates the propability of exceeding
+	 * @return the source integrity level (SIL) which indicates the probability of exceeding
 	 *         the NIC containment radius (see table A-15 in RCTA DO-260B)
 	 */
 	public byte getSIL() {

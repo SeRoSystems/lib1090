@@ -123,7 +123,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 		String[] desc = {
 				"No condition information",
 				"Permanent alert (emergency condition)",
-				"Temporary alert (change in Mode A identity code oter than emergency condition)",
+				"Temporary alert (change in Mode A identity code other than emergency condition)",
 				"SPI condition"
 		};
 

@@ -11,7 +11,7 @@ public final class AirbornePosition {
 
 	/**
 	 * Values according to DO-260B Table N-11
-	 * @return Navigation integrity category. A NIC of 0 means "unkown".
+	 * @return Navigation integrity category. A NIC of 0 means "unknown".
 	 */
 	public static byte decodeNIC(byte formatTypeCode, boolean nicSupplA) {
 		switch (formatTypeCode) {

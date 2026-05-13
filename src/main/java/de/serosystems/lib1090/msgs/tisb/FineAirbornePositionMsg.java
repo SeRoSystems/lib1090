@@ -117,7 +117,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 *
 	 *  The horizontal containment radius is also known as "horizontal protection level".
 	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
 		return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
@@ -152,7 +152,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	}
 
 	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unkown".
+	 * @return Navigation integrity category. A NIC of 0 means "unknown".
 	 */
 	public byte getNIC() {
 		return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
@@ -167,7 +167,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	 * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
 	 * version 1 and 2.
 	 *
-	 * @return the source integrity level (SIL) which indicates the propability of exceeding
+	 * @return the source integrity level (SIL) which indicates the probability of exceeding
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {
@@ -199,7 +199,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 		String[] desc = {
 				"No condition information",
 				"Permanent alert (emergency condition)",
-				"Temporary alert (change in Mode A identity code oter than emergency condition)",
+				"Temporary alert (change in Mode A identity code other than emergency condition)",
 				"SPI condition"
 		};
 

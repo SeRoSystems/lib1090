@@ -81,7 +81,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 
 	/**
 	 * Values according to DO-260B Table N-11
-	 * @return Navigation integrity category. A NIC of 0 means "unkown". If aircraft uses ADS-B version 1+,
+	 * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-B version 1+,
 	 * set NIC supplement A from Operational Status Message for better precision.
 	 */
 	@Override

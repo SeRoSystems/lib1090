@@ -18,7 +18,7 @@ package de.serosystems.lib1090;
  */
 
 /**
- * Some useful functions when working with libadsb. Mostly we need these
+ * Some useful functions when working with lib1090. Mostly we need these
  * functions since the library often works with arrays of bytes which are
  * not really readable for humans or basic operations are missing.
  * @author Matthias Schäfer (schaefer@sero-systems.de)

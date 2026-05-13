@@ -22,7 +22,7 @@ import java.util.Map;
  */
 
 /**
- * Decoder for COmmon usage GICB capability report (BDS 1,7)
+ * Decoder for Common usage GICB capability report (BDS 1,7)
  */
 @SuppressWarnings("unused")
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {

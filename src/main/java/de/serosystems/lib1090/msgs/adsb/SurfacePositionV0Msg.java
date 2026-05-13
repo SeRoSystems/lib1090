@@ -101,7 +101,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	 *
 	 *  The horizontal containment radius is also known as "horizontal protection level".
 	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
 	 */
 	public double getHorizontalContainmentRadiusLimit() {
 		return SurfacePosition.decodeHCR(getFormatTypeCode());
@@ -136,7 +136,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	}
 
 	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unkown". Values according to DO-260B Table N-4.
+	 * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
 	 */
 	public byte getNIC() {
 		return SurfacePosition.decodeNIC(getFormatTypeCode());
@@ -151,7 +151,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	 * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
 	 * version 1 and 2.
 	 *
-	 * @return the source integrity level (SIL) which indicates the propability of exceeding
+	 * @return the source integrity level (SIL) which indicates the probability of exceeding
 	 *         the NIC containment radius.
 	 */
 	public byte getSIL() {

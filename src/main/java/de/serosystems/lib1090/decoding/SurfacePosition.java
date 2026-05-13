@@ -67,7 +67,7 @@ public final class SurfacePosition {
 	}
 
 	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unkown". Values according to DO-260B Table N-4.
+	 * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
 	 */
 	public static byte decodeNIC(byte formatTypeCode) {
 		return decodeNIC(formatTypeCode, false);
@@ -99,7 +99,7 @@ public final class SurfacePosition {
 	 *
 	 *  The horizontal containment radius is also known as "horizontal protection level".
 	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unkown".
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
 	 */
 	public static double decodeHCR(byte formatTypeCode) {
 		switch (formatTypeCode) {
@@ -113,7 +113,7 @@ public final class SurfacePosition {
 
 	/**
 	 * Values according to DO-260B Table N-11
-	 * @return Navigation integrity category. A NIC of 0 means "unkown". If aircraft uses ADS-B version 1+,
+	 * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-B version 1+,
 	 * set NIC supplement A from Operational Status Message for better precision.
 	 */
 	public static byte decodeNIC(byte formatTypeCode, boolean nicSupplA) {
