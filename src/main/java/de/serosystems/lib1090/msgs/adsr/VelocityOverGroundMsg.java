@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Decoder for ADS-R velocity messages
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMessage {
+public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
 	private static final long serialVersionUID = -4871907161197614315L;
 

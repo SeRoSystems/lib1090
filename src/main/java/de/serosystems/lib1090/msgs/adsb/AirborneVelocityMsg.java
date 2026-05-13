@@ -23,7 +23,7 @@ import de.serosystems.lib1090.decoding.AirborneVelocity;
 /**
  * Common API for ADS-B airborne velocity messages across message subtypes.
  */
-public interface AirborneVelocityMessage {
+public interface AirborneVelocityMsg {
 
 	/**
 	 * @return true if the aircraft indicates an intent to change altitude or a similar flight status change
