@@ -300,8 +300,8 @@ public class ExampleDecoder {
 				break;
 			case ADSB_TARGET_STATE_AND_STATUS:
 				System.out.println("["+icao24+"]: Target State and Status reported");
-				if (msg instanceof TargetStateAndStatusMsgV1) {
-					TargetStateAndStatusMsgV1 tStatus = (TargetStateAndStatusMsgV1) msg;
+				if (msg instanceof TargetStateAndStatusV1Msg) {
+					TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
 					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
 					System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
 					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
@@ -318,7 +318,7 @@ public class ExampleDecoder {
 					}
 				} else {
 
-					TargetStateAndStatusMsgV2 tStatus = (TargetStateAndStatusMsgV2) msg;
+					TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
 					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
 					System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
 					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
