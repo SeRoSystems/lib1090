@@ -37,8 +37,6 @@ import java.util.Map;
 
 /**
  * Generic stateful decoder for Mode S Messages.
- *
- * @author Markus Fuchs (fuchs@opensky-network.org)
  */
 @SuppressWarnings("unused")
 public class StatefulModeSDecoder {
@@ -60,6 +58,7 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * Constructor that allows for disabling the speed reasonableness test. See also {@link #StatefulModeSDecoder()}.
+	 *
 	 * @param disableSpeedTest set to true if your data comes from a heterogeneous network with varying timestamp stability
 	 */
 	public StatefulModeSDecoder(boolean disableSpeedTest) {
@@ -68,6 +67,7 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * Create an instance of the stateful decoder with custom position decoding logic.
+	 *
 	 * @param positionDecoderSupplier a custom {@link PositionDecoderSupplier}
 	 */
 	public StatefulModeSDecoder(PositionDecoderSupplier positionDecoderSupplier) {
@@ -78,11 +78,12 @@ public class StatefulModeSDecoder {
 	 * This function decodes a half-decoded Mode S reply to its
 	 * deepest possible specialization. Use getType() to check its
 	 * actual type afterwards.
-	 * @param modes the incompletely decoded Mode S message
+	 *
+	 * @param modes     the incompletely decoded Mode S message
 	 * @param timestamp time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
+	 * @throws BadFormatException     if format contains error
 	 */
 	public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
@@ -90,348 +91,375 @@ public class StatefulModeSDecoder {
 		latestTimestamp = timestamp;
 
 		switch (modes.getDownlinkFormat()) {
-			case 0: return new ShortACAS(modes);
-			case 4: return new AltitudeReply(modes);
-			case 5: return new IdentifyReply(modes);
-			case 11: return new AllCallReply(modes);
-			case 16: return new LongACAS(modes);
-			case 17: case 18: case 19:
+			case 0:
+				return new ShortACAS(modes);
+			case 4:
+				return new AltitudeReply(modes);
+			case 5:
+				return new IdentifyReply(modes);
+			case 11:
+				return new AllCallReply(modes);
+			case 16:
+				return new LongACAS(modes);
+			case 17:
+			case 18:
+			case 19:
 				// check whether this is an ADS-B message (see Figure 2-2, RTCA DO-260B)
 				if (modes.getDownlinkFormat() == 17 ||
 						modes.getDownlinkFormat() == 18 && modes.getFirstField() < 2 ||
 						modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0) {
 
-					// interpret ME field as standard ADS-B
-					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+					return decodeADSB(modes, timestamp);
 
-					// we need stateful decoding, because ADS-B version > 0 can only be assumed
-					// if matching version info in operational status has been found.
-					DecoderData dd = getDecoderData(modes.getAddress());
-
-					// what kind of extended squitter?
-					byte ftc = es1090.getFormatTypeCode();
-
-					if (ftc >= 1 && ftc <= 4) // identification message
-						return new de.serosystems.lib1090.msgs.adsb.IdentificationMsg(es1090);
-
-					if (ftc >= 5 && ftc <= 8) {
-						// surface position message
-						switch(dd.adsbVersion) {
-							case 1:
-								SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090, timestamp);
-								s1.setNICSupplementA(dd.nicSupplA);
-								return s1;
-							case 2:
-								SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090, timestamp);
-								s2.setNICSupplementA(dd.nicSupplA);
-								s2.setNICSupplementC(dd.nicSupplC);
-								return s2;
-							default:
-								// implicit by version 0
-								return new SurfacePositionV0Msg(es1090, timestamp);
-						}
-					}
-
-					if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
-						// airborne position message
-						switch(dd.adsbVersion) {
-							case 1:
-								AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090, timestamp);
-								a1.setNICSupplementA(dd.nicSupplA);
-								return a1;
-							case 2:
-								AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090, timestamp);
-								a2.setNICSupplementA(dd.nicSupplA);
-								return a2;
-							default:
-								// implicit by version 0
-								return new AirbornePositionV0Msg(es1090, timestamp);
-						}
-					}
-
-					if (ftc == 19) { // possible velocity message, check subtype
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						if (subtype == 1 || subtype == 2) { // velocity over ground
-							de.serosystems.lib1090.msgs.adsb.VelocityOverGroundMsg velocity =
-									new de.serosystems.lib1090.msgs.adsb.VelocityOverGroundMsg(es1090);
-							if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
-							return velocity;
-						} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
-							de.serosystems.lib1090.msgs.adsb.AirspeedHeadingMsg airspeed =
-									new de.serosystems.lib1090.msgs.adsb.AirspeedHeadingMsg(es1090);
-							if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
-							return airspeed;
-						}
-					}
-
-					if (ftc == 23) { // Test Message, check subtype
-						int subtype = es1090.getMessage()[0] & 0x7;
-						if (subtype == 7 && dd.adsbVersion == 1) // Mode A code
-							return new ModeACodeV1Msg(es1090);
-					}
-
-					if (ftc == 24) {
-						int subtype = es1090.getMessage()[0] & 0x7;
-						if (subtype == 1)
-							return new MLATSystemStatusMsg(es1090);
-					}
-
-					if (ftc == 28) { // aircraft status message, check subtype
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						if (subtype == 1)
-							return new EmergencyOrPriorityStatusMsg(es1090);
-						if (subtype == 2 && dd.adsbVersion > 1)
-							return new TCASResolutionAdvisoryMsg(es1090);
-					}
-
-					if (ftc == 29) {
-						int subtype = (es1090.getMessage()[0]>>>1) & 0x3;
-						if (subtype == 0 && dd.adsbVersion == 1) {
-							return new TargetStateAndStatusMsgV1(es1090);
-						} else if (subtype == 1 && dd.adsbVersion == 2) {
-							return new TargetStateAndStatusMsgV2(es1090);
-						}
-					}
-
-					if (ftc == 31) { // operational status message
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						dd.adsbVersion = (byte) ((es1090.getMessage()[5]>>>5) & 0x7);
-						if (subtype == 0) {
-							// airborne
-							switch (dd.adsbVersion) {
-								case 0:
-									return new OperationalStatusV0Msg(es1090);
-								case 1:
-									AirborneOperationalStatusV1Msg s1 = new AirborneOperationalStatusV1Msg(es1090);
-									dd.nicSupplA = s1.hasNICSupplementA();
-									return s1;
-								case 2:
-									AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
-									dd.nicSupplA = s2.hasNICSupplementA();
-									return s2;
-								default:
-									throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
-							}
-						} else if (subtype == 1) {
-							// surface
-							switch (dd.adsbVersion) {
-								case 0: // undefined subtype for v0, handle like any other undefined subtype
-									break;
-								case 1:
-									SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
-									dd.nicSupplA = s1.hasNICSupplementA();
-									return s1;
-								case 2:
-									SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
-									dd.nicSupplA = s2.hasNICSupplementA();
-									dd.nicSupplC = s2.getNICSupplementC();
-									return s2;
-								default:
-									throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
-							}
-						}
-					}
-
-					return es1090; // unknown extended squitter
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 2 ||
 						modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
 
-					// interpret ME field as standard ADS-B
-					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+					return decodeTISB(modes, timestamp);
 
-					// we need stateful decoding, because ADS-B version > 0 can only be assumed
-					// if matching version info in operational status has been found.
-					DecoderData dd = getDecoderData(modes.getAddress());
-
-					// what kind of extended squitter?
-					byte ftc = es1090.getFormatTypeCode();
-
-					if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
-						return new FineAirbornePositionMsg(es1090, timestamp);
-					} else if (ftc >= 5 && ftc <= 8) {
-						return new FineSurfacePositionMsg(es1090, timestamp);
-					} else if (ftc == 19) {
-						int subtype = es1090.getMessage()[0] & 0x7;
-						if (subtype == 1 || subtype == 2) {
-							de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
-									new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
-							if (vog.hasGeoMinusBaroInfo())
-								dd.geoMinusBaro = vog.getGeoMinusBaro();
-							return vog;
-						} else if (subtype == 3 || subtype == 4) {
-							de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
-									new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
-							if (ash.hasGeoMinusBaroInfo())
-								dd.geoMinusBaro = ash.getGeoMinusBaro();
-							return ash;
-						}
-					} else if (ftc >= 1 && ftc <= 4) {
-						return new de.serosystems.lib1090.msgs.tisb.IdentificationMsg(es1090);
-					}
-
-					return es1090; // unknown TIS-B message
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 3) {
 					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 					return new CoarsePositionMsg(es1090, timestamp);
+
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
 					// TIS-B or ADS-R Management Message
 					return new ManagementMessage(new ExtendedSquitter(modes));
+
 				} else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
+					return decodeADSR(modes, timestamp);
 
-					// interpret ME field as ADS-R
-					ExtendedSquitter es1090 = new ExtendedSquitter(modes);
-
-					// we need stateful decoding, because ADS-R version > 0 can only be assumed
-					// if matching version info in operational status has been found.
-					DecoderData dd = getDecoderData(modes.getAddress());
-
-					// what kind of extended squitter?
-					byte ftc = es1090.getFormatTypeCode();
-
-					if (ftc >= 1 && ftc <= 4) // identification message
-						return new de.serosystems.lib1090.msgs.adsr.IdentificationMsg(es1090);
-
-					if (ftc >= 5 && ftc <= 8) {
-						// surface position message
-						switch(dd.adsbVersion) {
-							case 1:
-								de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg s1 =
-										new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg(es1090, timestamp);
-								s1.setNICSupplementA(dd.nicSupplA);
-								return s1;
-							case 2:
-								de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg s2 =
-										new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg(es1090, timestamp);
-								s2.setNICSupplementA(dd.nicSupplA);
-								s2.setNICSupplementC(dd.nicSupplC);
-								return s2;
-							default:
-								// implicit by version 0
-								return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV0Msg(es1090, timestamp);
-						}
-					}
-
-					if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
-						// airborne position message
-						switch(dd.adsbVersion) {
-							case 1:
-								de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg a1 =
-										new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg(es1090, timestamp);
-								a1.setNICSupplementA(dd.nicSupplA);
-								return a1;
-							case 2:
-								de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg a2 =
-										new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg(es1090, timestamp);
-								a2.setNICSupplementA(dd.nicSupplA);
-								return a2;
-							default:
-								// implicit by version 0
-								return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV0Msg(es1090, timestamp);
-						}
-					}
-
-					if (ftc == 19) { // possible velocity message, check subtype
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						if (subtype == 1 || subtype == 2) { // velocity over ground
-							de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg velocity =
-									new de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg(es1090);
-							if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
-							return velocity;
-						} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
-							de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg airspeed =
-									new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg(es1090);
-							if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
-							return airspeed;
-						}
-					}
-
-					if (ftc == 28) { // aircraft status message, check subtype
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						if (subtype == 1) // emergency/priority status
-							return new de.serosystems.lib1090.msgs.adsr.EmergencyOrPriorityStatusMsg(es1090);
-					}
-
-					if (ftc == 29) {
-						int subtype = (es1090.getMessage()[0]>>>1) & 0x3;
-						// DO-260B 2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
-						boolean hasMe11Bit = (es1090.getMessage()[1]&0x20) != 0;
-
-						if (subtype == 1 && (dd.adsbVersion > 0 || !hasMe11Bit)) {
-							return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusMsg(es1090);
-						}
-					}
-
-					if (ftc == 31) { // operational status message
-						int subtype = es1090.getMessage()[0] & 0x7;
-
-						dd.adsbVersion = (byte) ((es1090.getMessage()[5]>>>5) & 0x7);
-						if (subtype == 0) {
-							// airborne
-							switch (dd.adsbVersion) {
-								case 0:
-									return new de.serosystems.lib1090.msgs.adsr.OperationalStatusV0Msg(es1090);
-								case 1:
-									// TODO: store NIC supplement B as well
-									de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg s1 =
-											new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg(es1090);
-									dd.nicSupplA = s1.hasNICSupplementA();
-									return s1;
-								case 2:
-									// TODO: store NIC supplement B as well
-									de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
-											new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
-									dd.nicSupplA = s2.hasNICSupplementA();
-									return s2;
-								default:
-									throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
-							}
-						} else if (subtype == 1) {
-							// surface
-							switch (dd.adsbVersion) {
-								case 0:
-									return new de.serosystems.lib1090.msgs.adsr.OperationalStatusV0Msg(es1090);
-								case 1:
-									de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg s1 =
-											new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg(es1090);
-									dd.nicSupplA = s1.hasNICSupplementA();
-									dd.nicSupplC = s1.getNICSupplementC();
-									return s1;
-								case 2:
-									de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg s2 =
-											new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg(es1090);
-									dd.nicSupplA = s2.hasNICSupplementA();
-									dd.nicSupplC = s2.getNICSupplementC();
-									return s2;
-								default:
-									throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
-							}
-						}
-					}
-
-					return es1090; // unknown extended squitter
 				} else if (modes.getDownlinkFormat() == 19) {
 					return new MilitaryExtendedSquitter(modes);
 				}
 
 				return modes; // this should never happen
-			case 20: return new CommBAltitudeReply(modes);
-			case 21: return new CommBIdentifyReply(modes);
-			case 24: return new CommDExtendedLengthMsg(modes);
-			default: return modes; // unknown mode s reply
+			case 20:
+				return new CommBAltitudeReply(modes);
+			case 21:
+				return new CommBIdentifyReply(modes);
+			case 24:
+				return new CommDExtendedLengthMsg(modes);
+			default:
+				return modes; // unknown mode s reply
 		}
+	}
+
+	private ExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		// interpret ME field as ADS-R
+		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+
+		// we need stateful decoding, because ADS-R version > 0 can only be assumed
+		// if matching version info in operational status has been found.
+		DecoderData dd = getDecoderData(modes.getAddress());
+
+		// what kind of extended squitter?
+		byte ftc = es1090.getFormatTypeCode();
+
+		if (ftc >= 1 && ftc <= 4) // identification message
+			return new de.serosystems.lib1090.msgs.adsr.IdentificationMsg(es1090);
+
+		if (ftc >= 5 && ftc <= 8) {
+			// surface position message
+			switch (dd.adsbVersion) {
+				case 1:
+					de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg s1 =
+							new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg(es1090, timestamp);
+					s1.setNICSupplementA(dd.nicSupplA);
+					return s1;
+				case 2:
+					de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg s2 =
+							new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg(es1090, timestamp);
+					s2.setNICSupplementA(dd.nicSupplA);
+					s2.setNICSupplementC(dd.nicSupplC);
+					return s2;
+				default:
+					// implicit by version 0
+					return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV0Msg(es1090, timestamp);
+			}
+		}
+
+		if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
+			// airborne position message
+			switch (dd.adsbVersion) {
+				case 1:
+					de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg a1 =
+							new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg(es1090, timestamp);
+					a1.setNICSupplementA(dd.nicSupplA);
+					return a1;
+				case 2:
+					de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg a2 =
+							new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg(es1090, timestamp);
+					a2.setNICSupplementA(dd.nicSupplA);
+					return a2;
+				default:
+					// implicit by version 0
+					return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV0Msg(es1090, timestamp);
+			}
+		}
+
+		if (ftc == 19) { // possible velocity message, check subtype
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			if (subtype == 1 || subtype == 2) { // velocity over ground
+				de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg velocity =
+						new de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg(es1090);
+				if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
+				return velocity;
+			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
+				de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg airspeed =
+						new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg(es1090);
+				if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
+				return airspeed;
+			}
+		}
+
+		if (ftc == 28) { // aircraft status message, check subtype
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			if (subtype == 1) // emergency/priority status
+				return new de.serosystems.lib1090.msgs.adsr.EmergencyOrPriorityStatusMsg(es1090);
+		}
+
+		if (ftc == 29) {
+			int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
+			// DO-260B 2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
+			boolean hasMe11Bit = (es1090.getMessage()[1] & 0x20) != 0;
+
+			if (subtype == 1 && (dd.adsbVersion > 0 || !hasMe11Bit)) {
+				return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusMsg(es1090);
+			}
+		}
+
+		if (ftc == 31) { // operational status message
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+			if (subtype == 0) {
+				// airborne
+				switch (dd.adsbVersion) {
+					case 0:
+						return new de.serosystems.lib1090.msgs.adsr.OperationalStatusV0Msg(es1090);
+					case 1:
+						// TODO: store NIC supplement B as well
+						de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg s1 =
+								new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg(es1090);
+						dd.nicSupplA = s1.hasNICSupplementA();
+						return s1;
+					case 2:
+						// TODO: store NIC supplement B as well
+						de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
+								new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
+						dd.nicSupplA = s2.hasNICSupplementA();
+						return s2;
+					default:
+						throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
+				}
+			} else if (subtype == 1) {
+				// surface
+				switch (dd.adsbVersion) {
+					case 0:
+						return new de.serosystems.lib1090.msgs.adsr.OperationalStatusV0Msg(es1090);
+					case 1:
+						de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg s1 =
+								new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg(es1090);
+						dd.nicSupplA = s1.hasNICSupplementA();
+						dd.nicSupplC = s1.getNICSupplementC();
+						return s1;
+					case 2:
+						de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg s2 =
+								new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg(es1090);
+						dd.nicSupplA = s2.hasNICSupplementA();
+						dd.nicSupplC = s2.getNICSupplementC();
+						return s2;
+					default:
+						throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
+				}
+			}
+		}
+
+		return es1090;
+	}
+
+	private ExtendedSquitter decodeTISB(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException {
+		// interpret ME field as standard ADS-B
+		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+
+		// we need stateful decoding, because ADS-B version > 0 can only be assumed
+		// if matching version info in operational status has been found.
+		DecoderData dd = getDecoderData(modes.getAddress());
+
+		// what kind of extended squitter?
+		byte ftc = es1090.getFormatTypeCode();
+
+		if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
+			return new FineAirbornePositionMsg(es1090, timestamp);
+		} else if (ftc >= 5 && ftc <= 8) {
+			return new FineSurfacePositionMsg(es1090, timestamp);
+		} else if (ftc == 19) {
+			int subtype = es1090.getMessage()[0] & 0x7;
+			if (subtype == 1 || subtype == 2) {
+				de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
+						new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
+				if (vog.hasGeoMinusBaroInfo())
+					dd.geoMinusBaro = vog.getGeoMinusBaro();
+				return vog;
+			} else if (subtype == 3 || subtype == 4) {
+				de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
+						new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
+				if (ash.hasGeoMinusBaroInfo())
+					dd.geoMinusBaro = ash.getGeoMinusBaro();
+				return ash;
+			}
+		} else if (ftc >= 1 && ftc <= 4) {
+			return new de.serosystems.lib1090.msgs.tisb.IdentificationMsg(es1090);
+		}
+
+		return es1090;
+	}
+
+	private ExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+		// interpret ME field as standard ADS-B
+		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+
+		// we need stateful decoding, because ADS-B version > 0 can only be assumed
+		// if matching version info in operational status has been found.
+		DecoderData dd = getDecoderData(modes.getAddress());
+
+		// what kind of extended squitter?
+		byte ftc = es1090.getFormatTypeCode();
+
+		if (ftc >= 1 && ftc <= 4) // identification message
+			return new IdentificationMsg(es1090);
+
+		if (ftc >= 5 && ftc <= 8) {
+			// surface position message
+			switch (dd.adsbVersion) {
+				case 1:
+					SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090, timestamp);
+					s1.setNICSupplementA(dd.nicSupplA);
+					return s1;
+				case 2:
+					SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090, timestamp);
+					s2.setNICSupplementA(dd.nicSupplA);
+					s2.setNICSupplementC(dd.nicSupplC);
+					return s2;
+				default:
+					// implicit by version 0
+					return new SurfacePositionV0Msg(es1090, timestamp);
+			}
+		}
+
+		if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
+			// airborne position message
+			switch (dd.adsbVersion) {
+				case 1:
+					AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090, timestamp);
+					a1.setNICSupplementA(dd.nicSupplA);
+					return a1;
+				case 2:
+					AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090, timestamp);
+					a2.setNICSupplementA(dd.nicSupplA);
+					return a2;
+				default:
+					// implicit by version 0
+					return new AirbornePositionV0Msg(es1090, timestamp);
+			}
+		}
+
+		if (ftc == 19) { // possible velocity message, check subtype
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			if (subtype == 1 || subtype == 2) { // velocity over ground
+				VelocityOverGroundMsg velocity =
+						new VelocityOverGroundMsg(es1090);
+				if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
+				return velocity;
+			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
+				AirspeedHeadingMsg airspeed =
+						new AirspeedHeadingMsg(es1090);
+				if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
+				return airspeed;
+			}
+		}
+
+		if (ftc == 23) { // Test Message, check subtype
+			int subtype = es1090.getMessage()[0] & 0x7;
+			if (subtype == 7 && dd.adsbVersion == 1) // Mode A code
+				return new ModeACodeV1Msg(es1090);
+		}
+
+		if (ftc == 24) {
+			int subtype = es1090.getMessage()[0] & 0x7;
+			if (subtype == 1)
+				return new MLATSystemStatusMsg(es1090);
+		}
+
+		if (ftc == 28) { // aircraft status message, check subtype
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			if (subtype == 1)
+				return new EmergencyOrPriorityStatusMsg(es1090);
+			if (subtype == 2 && dd.adsbVersion > 1)
+				return new TCASResolutionAdvisoryMsg(es1090);
+		}
+
+		if (ftc == 29) {
+			int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
+			if (subtype == 0 && dd.adsbVersion == 1) {
+				return new TargetStateAndStatusMsgV1(es1090);
+			} else if (subtype == 1 && dd.adsbVersion == 2) {
+				return new TargetStateAndStatusMsgV2(es1090);
+			}
+		}
+
+		if (ftc == 31) { // operational status message
+			int subtype = es1090.getMessage()[0] & 0x7;
+
+			dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+			if (subtype == 0) {
+				// airborne
+				switch (dd.adsbVersion) {
+					case 0:
+						return new OperationalStatusV0Msg(es1090);
+					case 1:
+						AirborneOperationalStatusV1Msg s1 = new AirborneOperationalStatusV1Msg(es1090);
+						dd.nicSupplA = s1.hasNICSupplementA();
+						return s1;
+					case 2:
+						AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
+						dd.nicSupplA = s2.hasNICSupplementA();
+						return s2;
+					default:
+						throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
+				}
+			} else if (subtype == 1) {
+				// surface
+				switch (dd.adsbVersion) {
+					case 0: // undefined subtype for v0, handle like any other undefined subtype
+						break;
+					case 1:
+						SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
+						dd.nicSupplA = s1.hasNICSupplementA();
+						return s1;
+					case 2:
+						SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
+						dd.nicSupplA = s2.hasNICSupplementA();
+						dd.nicSupplC = s2.getNICSupplementC();
+						return s2;
+					default:
+						throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
+				}
+			}
+		}
+
+		return es1090;
 	}
 
 	/**
 	 * @param raw_message the Mode S message as byte array
-	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @param timestamp   time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
+	 * @throws BadFormatException     if format contains error
 	 */
 	public ModeSDownlinkMsg decode(byte[] raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSDownlinkMsg(raw_message), timestamp);
@@ -439,11 +467,11 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * @param raw_message the Mode S message as byte array
-	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
-	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @param noCRC       indicates whether the CRC has been subtracted from the parity field
+	 * @param timestamp   time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
+	 * @throws BadFormatException     if format contains error
 	 */
 	public ModeSDownlinkMsg decode(byte[] raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSDownlinkMsg(raw_message, noCRC), timestamp);
@@ -451,10 +479,10 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * @param raw_message the Mode S message in hex representation
-	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @param timestamp   time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
+	 * @throws BadFormatException     if format contains error
 	 */
 	public ModeSDownlinkMsg decode(String raw_message, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSDownlinkMsg(raw_message), timestamp);
@@ -462,20 +490,21 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * @param raw_message the Mode S message in hex representation
-	 * @param noCRC indicates whether the CRC has been subtracted from the parity field
-	 * @param timestamp time of applicability (or reception) of the message in milliseconds
+	 * @param noCRC       indicates whether the CRC has been subtracted from the parity field
+	 * @param timestamp   time of applicability (or reception) of the message in milliseconds
 	 * @return an instance of the most specialized ModeSReply possible
 	 * @throws UnspecifiedFormatError if format is not specified
-	 * @throws BadFormatException if format contains error
+	 * @throws BadFormatException     if format contains error
 	 */
 	public ModeSDownlinkMsg decode(String raw_message, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
 		return decode(new ModeSDownlinkMsg(raw_message, noCRC), timestamp);
 	}
 
 	/**
-	 * Decode CPR encoded position from airborne position message.
-	 * @param address the aircraft's qualified address to decoode position for
-	 * @param msg which contains the encoded position
+	 * Decode CPR encoded position from airborne position messages.
+	 *
+	 * @param address  the aircraft's qualified address to decoode position for
+	 * @param msg      which contains the encoded position
 	 * @param receiver position for reasonableness test (can be null)
 	 * @return decoded WGS84 position
 	 */
@@ -496,9 +525,9 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * @param reply a Mode S message
+	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
+	 *              for a higher version is received for the given aircraft.
 	 * @return the ADS-B version as tracked by the decoder. Version 0 is assumed until an Operational Status message
-	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
-	 * for a higher version is received for the given aircraft.
 	 */
 	public <T extends ModeSDownlinkMsg> byte getAdsbVersion(T reply) {
 		if (reply == null) return 0;
@@ -510,8 +539,9 @@ public class StatefulModeSDecoder {
 	 * Get the difference between geometric and barometric altitude as tracked by the decoder. The value is derived
 	 * from ADS-B {@link AirspeedHeadingMsg} and {@link VelocityOverGroundMsg}. The method returns the most recent
 	 * value.
+	 *
 	 * @param reply a Mode S message
-	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return the difference between geometric and barometric altitude in feet or null if not present
 	 */
 	public <T extends ModeSDownlinkMsg> Integer getGeoMinusBaro(T reply) {
@@ -523,8 +553,9 @@ public class StatefulModeSDecoder {
 	/**
 	 * Check whether a ModeSReply is an airborne position (of any version), i.e., it
 	 * is of type {@link AirbornePositionV0Msg}, {@link AirbornePositionV1Msg} or {@link AirbornePositionV2Msg}
+	 *
 	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return true if provided reply is an airborne position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isAirbornePosition(T reply) {
@@ -538,8 +569,9 @@ public class StatefulModeSDecoder {
 	/**
 	 * Check whether a ModeSReply is a surface position (of any version), i.e., it
 	 * is of type {@link SurfacePositionV0Msg}, {@link SurfacePositionV1Msg} or {@link SurfacePositionV2Msg}
+	 *
 	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return true if provided reply is a surface position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isSurfacePosition(T reply) {
@@ -552,11 +584,12 @@ public class StatefulModeSDecoder {
 
 	/**
 	 * Check whether a ModeSReply is either an airborne or a surface position
+	 *
+	 * @param reply the ModeSReply to check
+	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
+	 * @return true if provided reply is an airborne or surface position report
 	 * @see #isAirbornePosition(ModeSDownlinkMsg)
 	 * @see #isSurfacePosition(ModeSDownlinkMsg)
-	 * @param reply the ModeSReply to check
-	 * @param <T> {@link ModeSDownlinkMsg} or one of its sub classes
-	 * @return true if provided reply is an airborne or surface position report
 	 */
 	public static <T extends ModeSDownlinkMsg> boolean isPosition(T reply) {
 		return isAirbornePosition(reply) || isSurfacePosition(reply);
@@ -570,7 +603,7 @@ public class StatefulModeSDecoder {
 		decoderData.values().removeIf(dd -> latestTimestamp - dd.lastUsed > 3600_000L);
 	}
 
-	private DecoderData getDecoderData (QualifiedAddress address) {
+	private DecoderData getDecoderData(QualifiedAddress address) {
 		DecoderData dd = decoderData.computeIfAbsent(
 				address,
 				a -> new DecoderData(positionDecoderSupplier.apply(a))
