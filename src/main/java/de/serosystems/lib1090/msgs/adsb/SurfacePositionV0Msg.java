@@ -160,6 +160,13 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	}
 
 	/**
+	 * @return the raw movement field value (7 bit)
+	 */
+	public byte getMovementRaw() {
+		return movement;
+	}
+
+	/**
 	 * @return whether ground speed information is available
 	 */
 	public boolean hasGroundSpeed() {
