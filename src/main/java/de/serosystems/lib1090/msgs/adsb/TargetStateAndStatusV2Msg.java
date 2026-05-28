@@ -79,7 +79,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
 	 */
 	public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSB_TARGET_STATE_AND_STATUS);
+		setType(subtype.ADSB_TARGET_STATE_AND_STATUS_V2);
 
 		if (getFormatTypeCode() != 29) {
 			throw new BadFormatException("Target state and status messages must have typecode 29.");

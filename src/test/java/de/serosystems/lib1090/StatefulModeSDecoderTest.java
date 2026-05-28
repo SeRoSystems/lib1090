@@ -52,7 +52,8 @@ public class StatefulModeSDecoderTest {
 		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, 0L);
 
 		assertEquals(ModeSDownlinkMsg.subtype.EXTENDED_SQUITTER, reply.getType());
-		assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
+		assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V2, reply.getType());
 	}
 
 	@Test
@@ -63,7 +64,7 @@ public class StatefulModeSDecoderTest {
 		// decode message with ME bit 11 set
 		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, 0L);
 
-		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V2, reply.getType());
 
 		TargetStateAndStatusV2Msg tss = (TargetStateAndStatusV2Msg) reply;
 
@@ -78,7 +79,7 @@ public class StatefulModeSDecoderTest {
 
 		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV1MsgTest.TSS_V1, 0L);
 
-		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS, reply.getType());
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
 
 		assertTrue(reply instanceof TargetStateAndStatusV1Msg);
 
