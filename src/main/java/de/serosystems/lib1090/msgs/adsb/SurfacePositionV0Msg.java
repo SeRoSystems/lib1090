@@ -190,6 +190,13 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	}
 
 	/**
+	 * @return the raw heading field value (7 bit)
+	 */
+	public byte getHeadingRaw() {
+		return ground_track;
+	}
+
+	/**
 	 * @return whether valid heading information is available
 	 */
 	public boolean hasValidHeading() {
