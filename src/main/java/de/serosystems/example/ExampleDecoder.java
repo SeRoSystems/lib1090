@@ -298,7 +298,8 @@ public class ExampleDecoder {
 					System.out.println("          Has IFR capability: " + veloc.hasIFRCapability());
 
 				break;
-			case ADSB_TARGET_STATE_AND_STATUS:
+			case ADSB_TARGET_STATE_AND_STATUS_V1:
+			case ADSB_TARGET_STATE_AND_STATUS_V2:
 				System.out.println("["+icao24+"]: Target State and Status reported");
 				if (msg instanceof TargetStateAndStatusV1Msg) {
 					TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
