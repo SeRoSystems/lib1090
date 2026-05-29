@@ -60,6 +60,12 @@ public interface TargetStateAndStatusMsg {
 	Float getSelectedHeading();
 
 	/**
+	 * Get raw selected heading including sign bit.
+	 * @return the raw selected heading (named. target heading track in V1) field value including sign bit
+	 */
+	int getSelectedHeadingRaw();
+
+	/**
 	 * @return the navigation accuracy category for position
 	 */
 	byte getNACp();

@@ -199,6 +199,11 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
 	}
 
 	@Override
+	public int getSelectedHeadingRaw() {
+		return ((selected_heading_sign ? 1 : 0) << 8) | selected_heading;
+	}
+
+	@Override
 	public byte getNACp() {
 		return nac_p;
 	}
