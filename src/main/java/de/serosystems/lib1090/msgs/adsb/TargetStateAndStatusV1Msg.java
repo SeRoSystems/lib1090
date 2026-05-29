@@ -144,6 +144,11 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
 	}
 
 	@Override
+	public int getSelectedHeadingRaw() {
+		return target_heading_track_angle;
+	}
+
+	@Override
 	public byte getNACp() {
 		return nac_p;
 	}
