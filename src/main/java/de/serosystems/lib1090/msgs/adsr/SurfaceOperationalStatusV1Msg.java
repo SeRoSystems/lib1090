@@ -199,6 +199,13 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
+	 * @return raw aircraft vehicle length and width code (4 bit)
+	 */
+	public byte getAircraftVehicleLengthAndWidthCode() {
+		return airplane_len_width;
+	}
+
+	/**
 	 * According to DO-260B Table 2-74. Compatible with ADS-R version 1 and 2
 	 * @return the airplane's length in meters; -1 for unknown
 	 */
