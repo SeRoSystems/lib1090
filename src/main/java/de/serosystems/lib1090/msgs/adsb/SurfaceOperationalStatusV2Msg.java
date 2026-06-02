@@ -131,7 +131,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 *     <li>values are measured from the longitudinal center line (=roll axis) of the aircraft</li>
 	 *     <li>values are given in meters</li>
 	 *     <li>positive values mean "toward left wing tip"</li>
-	 *     <li>negative values mean "toward right wind tip</li>
+	 *     <li>negative values mean "toward right wind tip"</li>
 	 *     <li>values have a resolution of 2m</li>
 	 *     <li>values are capped at 6m</li>
 	 *     <li>{@code null} means "no data"</li>
