@@ -37,7 +37,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	private boolean ifr_capability;
 	private byte navigation_accuracy_category;
 	private boolean heading_status_bit;
-	private double heading; // in degrees
+	private short heading; // raw value
 	private boolean true_airspeed; // 0 = indicated AS, 1 = true AS
 	private short airspeed; // in knots
 	private boolean airspeed_available;
@@ -98,7 +98,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
 		// heading available
 		heading_status_bit = (msg[1]&0x4)>0;
-		heading = ((msg[1]&0x3)<<8 | msg[2]&0xFF) * 360./1024.;
+		heading = (short) (((msg[1]&0x3)<<8) | (msg[2]&0xFF));
 
 		true_airspeed = (msg[3]&0x80)>0;
 		airspeed = (short) (((msg[3]&0x7F)<<3 | msg[4]>>>5&0x07)-1);
@@ -206,12 +206,20 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	}
 
 	/**
+	 * @return raw heading field value (10 bit). Check {@link #hasHeadingStatusFlag()} to determine whether this value
+	 *         is valid.
+	 */
+	public int getHeadingRaw() {
+		return heading;
+	}
+
+	/**
 	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
 	 * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
 	 */
 	public Double getHeading() {
 		if (!heading_status_bit) return null;
-		return heading;
+		return heading * 360. / 1024.;
 	}
 
 	/**
