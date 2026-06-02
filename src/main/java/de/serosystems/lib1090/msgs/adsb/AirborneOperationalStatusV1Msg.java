@@ -32,11 +32,11 @@ import java.io.Serializable;
  *
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable {
+public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, OperationalStatusV1Msg {
 
 	private static final long serialVersionUID = -4371842571556132611L;
+	private static final byte SUBTYPE_CODE = 0;
 
-	private byte subtype_code;
 	protected int capability_class_code; // actually 16 bit unsigned
 	protected int operational_mode_code; // actually 16 bit unsigned
 	private byte version;
@@ -90,10 +90,10 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
 		BitReader b = BitReader.forBigEndian(msg);
 
-		subtype_code = b.readByte(6, 8);
-		if (subtype_code > 1) { // currently only 0 and 1 specified, 2-7 are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
-		} else if (subtype_code != 0) {
+		byte subtypeCode = b.readByte(6, 8);
+		if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
+			throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
+		} else if (subtypeCode != SUBTYPE_CODE) {
 			throw new BadFormatException("Not an airborne operational status message");
 		}
 
@@ -113,6 +113,14 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 		nic_baro = b.readByte(53, 53) == 1;
 
 		hrd = b.readByte(54, 54) == 1;
+	}
+
+	/**
+	 * @return the subtype code, 0 for airborne operational status messages
+	 */
+	@Override
+	public byte getSubtypeCode() {
+		return SUBTYPE_CODE;
 	}
 
 	/**
@@ -258,7 +266,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	@Override
 	public String toString() {
 		return "AirborneOperationalStatusV1Msg{" +
-				"subtype_code=" + subtype_code +
 				", capability_class_code=" + capability_class_code +
 				", operational_mode_code=" + operational_mode_code +
 				", version=" + version +

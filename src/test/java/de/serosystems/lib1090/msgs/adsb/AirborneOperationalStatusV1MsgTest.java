@@ -46,6 +46,8 @@ class AirborneOperationalStatusV1MsgTest {
 		// ME = F8 00 02 00 49 29 00
 		byte[] msg = Tools.hexStringToByteArray("8D000000F8000200492900000000");
 		AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
+		assertTrue(status instanceof OperationalStatusV1Msg);
+		assertEquals(0, status.getSubtypeCode());
 		assertEquals(1, status.getVersion());
 		assertEquals(9, status.getNACp());
 	}
