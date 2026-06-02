@@ -31,6 +31,7 @@ class SurfaceOperationalStatusV1MsgTest {
 	public void testValidVersion1Message() throws Exception {
 		byte[] msg = Tools.hexStringToByteArray("8D000000F9000000002000000000");
 		SurfaceOperationalStatusV1Msg status = new SurfaceOperationalStatusV1Msg(msg);
+		assertEquals(1, status.getSubtypeCode());
 		assertEquals(1, status.getVersion());
 	}
 

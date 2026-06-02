@@ -32,8 +32,10 @@ class OperationalStatusV0MsgTest {
 	public void testValidEnrouteCapabilities() throws Exception {
 		byte[] msg = Tools.hexStringToByteArray("8D000000F8300000000000000000");
 		OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
+		assertTrue(status instanceof OperationalStatusMsg);
 		assertFalse(status.hasOperationalTCAS());
 		assertTrue(status.hasOperationalCDTI());
+		assertTrue(status.has1090ESIn());
 	}
 
 	@Test

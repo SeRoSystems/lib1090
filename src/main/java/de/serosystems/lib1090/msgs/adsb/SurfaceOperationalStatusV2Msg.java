@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg implements Serializable {
+public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg implements Serializable, OperationalStatusV2Msg {
 
 	private static final long serialVersionUID = 5774750859726557576L;
 
@@ -77,6 +77,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	/**
 	 * @return whether aircraft has an UAT receiver
 	 */
+	@Override
 	public boolean hasUATIn() {
 		return (capability_class_code & 0x100) != 0;
 	}
@@ -98,6 +99,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	/**
 	 * @return whether aircraft uses a single antenna or two
 	 */
+	@Override
 	public boolean hasSingleAntenna() {
 		return (operational_mode_code & 0x400) != 0;
 	}
@@ -107,6 +109,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 *
 	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
 	 */
+	@Override
 	public byte getSystemDesignAssurance() {
 		return (byte) ((operational_mode_code & 0x300) >>> 8);
 	}
@@ -171,6 +174,7 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
 	 * it's based on "per hour".
 	 */
+	@Override
 	public boolean hasSILSupplement() {
 		return sil_supplement;
 	}

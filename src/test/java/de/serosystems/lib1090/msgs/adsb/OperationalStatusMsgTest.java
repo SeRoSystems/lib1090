@@ -55,14 +55,19 @@ public class OperationalStatusMsgTest {
 			// parity (correct, not test here)
 			"209514";
 
+	// Surface operational status message with ADS-B version 2
+	public static final String S_OPSTAT_V2 = "8D000000F9000000004000000000";
+
 	@Test
 	public void testDecodeAirborneOpstat() throws UnspecifiedFormatError, BadFormatException {
 		final AirborneOperationalStatusV2Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
+		assertTrue(opstat instanceof OperationalStatusV2Msg);
 
 		assertEquals("4d0131", opstat.getAddress().getHexAddress());
 		assertEquals(31, opstat.getFormatTypeCode());
 
 		assertEquals(2, opstat.getVersion());
+		assertFalse(opstat.has1090ESIn());
 		assertFalse(opstat.hasNICSupplementA());
 		assertEquals(9, opstat.getNACp());
 
@@ -70,5 +75,18 @@ public class OperationalStatusMsgTest {
 		assertEquals(3, opstat.getSIL());
 		assertTrue(opstat.getBarometricAltitudeIntegrityCode());
 		assertFalse(opstat.getHorizontalReferenceDirection());
+	}
+
+	@Test
+	public void testDecodeSurfaceOpstat() throws UnspecifiedFormatError, BadFormatException {
+		final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
+		assertTrue(opstat instanceof OperationalStatusV2Msg);
+
+		assertEquals(2, opstat.getVersion());
+		assertFalse(opstat.has1090ESIn());
+		assertFalse(opstat.hasUATIn());
+		assertFalse(opstat.hasSingleAntenna());
+		assertEquals(0, opstat.getSystemDesignAssurance());
+		assertFalse(opstat.hasSILSupplement());
 	}
 }

@@ -29,7 +29,7 @@ import java.io.Serializable;
  *
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable {
+public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg {
 
 	private static final long serialVersionUID = -8925123066831152922L;
 
@@ -104,6 +104,15 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 	 */
 	public boolean hasOperationalCDTI() {
 		return (enroute_capabilities & 0x10) != 0;
+	}
+
+	/**
+	 * @return whether 1090ES IN is available
+	 * @see #hasOperationalCDTI() alias: the field has been renamed in V1
+	 */
+	@Override
+	public boolean has1090ESIn() {
+		return hasOperationalCDTI();
 	}
 
 	/**

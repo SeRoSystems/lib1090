@@ -32,14 +32,14 @@ import static de.serosystems.lib1090.decoding.OperationalStatus.nacPtoEPU;
  * @author Matthias Schaefer (schaefer@sero-systems.de)
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable {
+public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, OperationalStatusV1Msg {
 
 	private static final long serialVersionUID = -3513411664476607448L;
+	private static final byte SUBTYPE_CODE = 1;
 
-	private byte subtype_code;
 	protected int capability_class_code; // actually 16 bit unsigned
 	protected int operational_mode_code; // actually 16 bit unsigned
-	private byte airplane_len_width; // only in subtype_code == 1 surface msgs
+	private byte airplane_len_width; // only for surface messages
 	private byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
@@ -89,10 +89,10 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		byte[] msg = this.getMessage();
 		BitReader b = BitReader.forBigEndian(msg);
 
-		subtype_code = b.readByte(6, 8);
-		if (subtype_code > 1) { // currently only 0 and 1 specified, 2-7 are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
-		} else if (subtype_code != 1) {
+		byte subtypeCode = b.readByte(6, 8);
+		if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
+			throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
+		} else if (subtypeCode != SUBTYPE_CODE) {
 			throw new BadFormatException("Not surface operational status message");
 		}
 
@@ -119,8 +119,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	 * and 1 for surface operational status msgs; all other codes
 	 * are "reserved"
 	 */
+	@Override
 	public byte getSubtypeCode() {
-		return subtype_code;
+		return SUBTYPE_CODE;
 	}
 
 	/**
@@ -254,7 +255,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	@Override
 	public String toString() {
 		return "SurfaceOperationalStatusV1Msg{" +
-				"subtype_code=" + subtype_code +
 				", capability_class_code=" + capability_class_code +
 				", operational_mode_code=" + operational_mode_code +
 				", airplane_len_width=" + airplane_len_width +
