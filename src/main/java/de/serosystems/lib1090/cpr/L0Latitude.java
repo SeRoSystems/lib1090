@@ -145,7 +145,14 @@ class L0Latitude {
      * @return number of longitude zones for this latitude.
      */
     public int NL() {
-        int idx = Arrays.binarySearch(T_LAT, Math.abs(lat));
+        int abslat = Math.abs(lat);
+        // The topmost transition latitude (87°, = T_LAT[last]) lands exactly on a
+        // lattice point. Per DO-260B (and NASA's reference nl_double), NL == 1 for
+        // |lat| >= 87°, so the top boundary is *exclusive* for the NL=2 zone: a
+        // position sitting exactly on it belongs to the polar cap (NL=1). Without
+        // this, an exact binarySearch hit on T_LAT[last] would yield NL=2.
+        if (abslat >= T_LAT[T_LAT.length - 1]) return 1;
+        int idx = Arrays.binarySearch(T_LAT, abslat);
         if (idx < 0) idx = -idx - 1;
         return T_LAT.length - idx + 1;
     }
