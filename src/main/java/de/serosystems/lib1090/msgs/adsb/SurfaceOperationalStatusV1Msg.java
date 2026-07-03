@@ -101,7 +101,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		operational_mode_code = b.readInt(25, 40);
 		version = b.readByte(41, 43);
 
-		if ((capability_class_code & 0xE00) != 0)
+		if ((capability_class_code & 0xC00) != 0)
 			throw new BadFormatException("Unknown capability class code!");
 		if ((operational_mode_code & 0xC000) != 0)
 			throw new BadFormatException("Unknown operational mode code!");
@@ -125,24 +125,24 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return whether 1090ES IN is available
+	 * @return whether 1090ES IN / CDTI is available
 	 */
 	public boolean has1090ESIn() {
-		return (capability_class_code & 0x1000) != 0;
+		return (capability_class_code & 0x100) != 0;
 	}
 
 	/**
 	 * @return whether transponder has less than 70 Watts transmit power
 	 */
 	public boolean hasLowTxPower() {
-		return (capability_class_code & 0x200) != 0;
+		return (capability_class_code & 0x20) != 0;
 	}
 
 	/**
 	 * @return true if POA bit is 1.
 	 */
 	public boolean hasPositionOffsetApplied() {
-		return (capability_class_code & 0x2) != 0;
+		return (capability_class_code & 0x200) != 0;
 	}
 
 	/**

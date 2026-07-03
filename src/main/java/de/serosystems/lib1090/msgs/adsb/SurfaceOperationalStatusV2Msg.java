@@ -79,21 +79,21 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 */
 	@Override
 	public boolean hasUATIn() {
-		return (capability_class_code & 0x100) != 0;
+		return (capability_class_code & 0x10) != 0;
 	}
 
 	/**
 	 * @return navigation accuracy category for velocity
 	 */
 	public byte getNACv() {
-		return (byte) ((capability_class_code & 0xE0) >>> 5);
+		return (byte) ((capability_class_code & 0xE) >>> 1);
 	}
 
 	/**
 	 * @return NIC supplement C for use on the surface
 	 */
 	public boolean getNICSupplementC() {
-		return (capability_class_code & 0x10) != 0;
+		return (capability_class_code & 0x1) != 0;
 	}
 
 	/**
