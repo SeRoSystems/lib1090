@@ -69,9 +69,6 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 		byte[] msg = this.getMessage();
 
-		if ((byte) (msg[5] >>> 5) != 2)
-			throw new BadFormatException("Not a DO-260B/version 2 status message.");
-
 		geometric_vertical_accuracy = baq;
 		// Bit 55
 		sil_supplement = ((msg[6] & 0x2) != 0);

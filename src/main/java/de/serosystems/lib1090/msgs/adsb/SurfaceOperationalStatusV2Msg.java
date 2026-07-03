@@ -68,9 +68,6 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 		byte[] msg = this.getMessage();
 
-		if ((byte) (msg[5] >>> 5) != 2)
-			throw new BadFormatException("Not a DO-260B/version 2 status message.");
-
 		sil_supplement = ((msg[6] & 0x2) != 0);
 	}
 
