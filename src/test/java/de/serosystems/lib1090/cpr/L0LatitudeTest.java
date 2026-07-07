@@ -29,22 +29,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class L0LatitudeTest {
 
     /**
-     * Per DO-260B / NASA reference: NL == 1 for |lat| >= 87°. Because 87.0°
-     * is an exact lattice point and the topmost transition latitude, the top
-     * boundary must be exclusive for the NL=2 zone. This is the regression
-     * for the off-by-one that returned NL=2 exactly at 87°.
+     * DO-260B §A.1.7.2 defines NL(87°) = 2 explicitly. Only strictly above 87°
+     * does NL drop to 1.
      */
     @Test
-    public void nlAtPolarBoundaryIsOne() {
-        assertEquals(1, L0Latitude.ofDegrees(87.0).NL(), "NL at exactly 87.0° must be 1");
-        assertEquals(1, L0Latitude.ofDegrees(-87.0).NL(), "NL at exactly -87.0° must be 1");
+    public void nlAtPolarBoundaryIsTwo() {
+        assertEquals(2, L0Latitude.ofDegrees(87.0).NL(), "NL at exactly 87.0° must be 2 per DO-260B");
+        assertEquals(2, L0Latitude.ofDegrees(-87.0).NL(), "NL at exactly -87.0° must be 2 per DO-260B");
+    }
+
+    /**
+     * Strictly above 87° (and at the pole) NL is 1.
+     */
+    @Test
+    public void nlAbovePolarBoundaryIsOne() {
         assertEquals(1, L0Latitude.ofDegrees(88.5).NL(), "NL above 87° must be 1");
         assertEquals(1, L0Latitude.ofDegrees(90.0).NL(), "NL at the pole must be 1");
     }
 
     /**
-     * Just below the polar boundary NL must still be 2 (the boundary is
-     * exclusive only at the top edge, the zone below is unaffected).
+     * Just below 87° NL is still 2 (the NL=2 zone covers up to and including 87°).
      */
     @Test
     public void nlJustBelowPolarBoundaryIsTwo() {
