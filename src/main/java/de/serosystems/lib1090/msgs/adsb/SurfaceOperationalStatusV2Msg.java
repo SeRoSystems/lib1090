@@ -68,6 +68,9 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 
 		byte[] msg = this.getMessage();
 
+		if (version < 2)
+			throw new BadFormatException("Unsupported operational status version " + version);
+
 		sil_supplement = ((msg[6] & 0x2) != 0);
 	}
 

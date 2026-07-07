@@ -39,8 +39,8 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
 	protected int capability_class_code; // actually 16 bit unsigned
 	protected int operational_mode_code; // actually 16 bit unsigned
-	private byte airplane_len_width; // only for surface messages
-	private byte version;
+	private byte airplane_len_width; // length / width code
+	protected byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
 	private byte sil; // surveillance integrity level
@@ -100,6 +100,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		airplane_len_width = b.readByte(21, 24);
 		operational_mode_code = b.readInt(25, 40);
 		version = b.readByte(41, 43);
+
+		if (version < 1)
+			throw new BadFormatException("Unsupported operational status version " + version);
 
 		if ((capability_class_code & 0xC00) != 0)
 			throw new BadFormatException("Unknown capability class code!");

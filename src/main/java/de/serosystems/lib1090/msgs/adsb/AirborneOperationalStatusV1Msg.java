@@ -39,7 +39,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
 	protected int capability_class_code; // actually 16 bit unsigned
 	protected int operational_mode_code; // actually 16 bit unsigned
-	private byte version;
+	protected byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
 	private byte sil; // surveillance integrity level
@@ -100,6 +100,9 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 		capability_class_code = b.readInt(9, 24);
 		operational_mode_code = b.readInt(25, 40);
 		version = b.readByte(41, 43);
+
+		if (version < 1)
+			throw new BadFormatException("Unsupported operational status version " + version);
 
 		if ((capability_class_code & 0xC000) != 0)
 			throw new BadFormatException("Unknown capability class code!");

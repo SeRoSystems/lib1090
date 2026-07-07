@@ -69,6 +69,9 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 
 		byte[] msg = this.getMessage();
 
+		if (version < 2)
+			throw new BadFormatException("Unsupported operational status version " + version);
+
 		geometric_vertical_accuracy = baq;
 		// Bit 55
 		sil_supplement = ((msg[6] & 0x2) != 0);
