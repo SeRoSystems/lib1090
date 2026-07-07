@@ -51,4 +51,12 @@ class AirborneOperationalStatusV1MsgTest {
 		assertEquals(1, status.getVersion());
 		assertEquals(9, status.getNACp());
 	}
+
+	@Test
+	public void testRejectVersion0Message() throws Exception {
+		byte[] msg = Tools.hexStringToByteArray("8D000000F8000200492900000000");
+		msg[9] = 0x09;
+
+		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
+	}
 }

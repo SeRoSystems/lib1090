@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import org.junit.jupiter.api.Test;
@@ -88,5 +89,21 @@ public class OperationalStatusMsgTest {
 		assertFalse(opstat.hasSingleAntenna());
 		assertEquals(0, opstat.getSystemDesignAssurance());
 		assertFalse(opstat.hasSILSupplement());
+	}
+
+	@Test
+	public void testRejectAirborneVersion1AsV2() throws Exception {
+		byte[] msg = Tools.hexStringToByteArray(A_OPSTAT_V2);
+		msg[9] = 0x29;
+
+		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV2Msg(msg));
+	}
+
+	@Test
+	public void testRejectSurfaceVersion1AsV2() throws Exception {
+		byte[] msg = Tools.hexStringToByteArray(S_OPSTAT_V2);
+		msg[9] = 0x20;
+
+		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
 	}
 }

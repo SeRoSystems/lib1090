@@ -38,6 +38,14 @@ class SurfaceOperationalStatusV1MsgTest {
 	}
 
 	@Test
+	public void testRejectVersion0Message() throws Exception {
+		byte[] msg = Tools.hexStringToByteArray("8D000000F9000000002000000000");
+		msg[9] = 0x00;
+
+		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
+	}
+
+	@Test
 	public void testOperationalModeCodeWithHighByte() throws Exception {
 		byte[] msg = Tools.hexStringToByteArray("8D000000F9000080002000000000");
 		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
