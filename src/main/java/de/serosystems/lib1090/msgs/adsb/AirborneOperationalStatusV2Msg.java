@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.SingleAntennaMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -27,7 +28,7 @@ import java.io.Serializable;
 /**
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1Msg implements Serializable, OperationalStatusV2Msg {
+public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1Msg implements Serializable, OperationalStatusV2Msg, SingleAntennaMsg {
 
 	private static final long serialVersionUID = -2032348919695227545L;
 

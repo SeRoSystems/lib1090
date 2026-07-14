@@ -18,115 +18,210 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.AirbornePosition;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
-/**
- * Decoder for ADS-B airborne position version 2 (DO-260B).
- * @author Markus Fuchs (fuchs@opensky-network.org)
- */
-public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Serializable {
+public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg {
 
-	private static final long serialVersionUID = 6818077074609060141L;
+    private static final long serialVersionUID = 6818077074609060141L;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirbornePositionV2Msg() { }
+    private boolean horizontalPositionAvailable;
+    private boolean altitudeAvailable;
+    private byte surveillanceStatus;
+    private boolean nicSupplementB;
+    private short altitudeEncoded;
+    private boolean timeFlag;
+    private CPREncodedPosition position;
 
-	/**
-	 * @param raw_message raw ADS-B airborne position message as hex string
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirbornePositionV2Msg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected AirbornePositionV2Msg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-B airborne position message as byte array
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirbornePositionV2Msg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw ADS-B airborne position message as hex string
+     * @param timestamp  timestamp for this position message
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public AirbornePositionV2Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param squitter extended squitter containing the airborne position msg
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public AirbornePositionV2Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
-		super(squitter, timestamp);
-		setType(subtype.ADSB_AIRBORN_POSITION_V2);
-	}
+    /**
+     * @param rawMessage raw ADS-B airborne position message as byte array
+     * @param timestamp  timestamp for this position message
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public AirbornePositionV2Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * NIC supplement B as introduced in ADS-B version 2. The flag indicated single antenna in previous versions.
-	 * @return NIC supplement B to refine horizontal containment radius limit and navigation integrity category
-	 */
-	public boolean hasNICSupplementB() {
-		return super.hasSingleAntenna();
-	}
+    /**
+     * @param squitter  extended squitter containing the airborne position msg
+     * @param timestamp timestamp for this position message
+     * @throws BadFormatException if message has wrong format
+     */
+    public AirbornePositionV2Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+        super(squitter);
+        setType(subtype.ADSB_AIRBORN_POSITION_V2);
 
-	/**
-	 * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-	 * (NACp) see {@link AirborneOperationalStatusV2Msg}. According to DO-260B Table 2-14.
-	 *
-	 * The horizontal containment radius is also known as "horizontal protection level".
-	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-	 *         If aircraft uses ADS-B version 2, set NIC supplement A from Operational Status Message
-	 *         for better precision. Otherwise, we'll be pessimistic.
-	 */
-	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 9: case 20: return 7.5;
-			case 10: case 21: return 25;
-			case 11:
-				return hasNICSupplementB() && hasNICSupplementA() ? 75 : 185.2;
-			case 12: return 370.4;
-			case 13:
-				if (!hasNICSupplementB()) return 926;
-				else return hasNICSupplementA() ? 1111.2 : 555.6;
-			case 14: return 1852;
-			case 15: return 3704;
-			case 16:
-				return hasNICSupplementB() && hasNICSupplementA() ? 7408 : 14816;
-			case 17: return 37040;
-			// case 0: case 18: case 22: return -1;
-			default: return -1;
-		}
-	}
+        byte formatTypeCode = getFormatTypeCode();
+        AirbornePosition.validateAirbornePositionFormat(formatTypeCode);
 
-	/**
-	 * According to DO-260B Table 2-14.
-	 * @return Navigation integrity category. A NIC of 0 means "unknown".
-	 */
-	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 9: case 20: return 11;
-			case 10: case 21: return 10;
-			case 11:
-				return (byte) (hasNICSupplementB() && hasNICSupplementA() ? 9 : 8);
-			case 12: return 7;
-			case 13: return 6;
-			case 14: return 5;
-			case 15: return 4;
-			case 16:
-				return (byte) (hasNICSupplementB() && hasNICSupplementA() ? 3 : 2);
-			case 17: return 1;
-			// case 0: case 18: case 22: return 0;
-			default: return 0;
-		}
-	}
+        horizontalPositionAvailable = formatTypeCode != 0;
+        BitReader br = BitReader.forBigEndian(getMessage());
+        surveillanceStatus = br.readByte(6, 7);
+        nicSupplementB = br.readByte(8, 8) == 1;
+        altitudeEncoded = br.readShort(9, 20);
+        altitudeAvailable = altitudeEncoded != 0;
+        timeFlag = br.readByte(21, 21) == 1;
+        position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tAirbornePositionV2Msg{}";
-	}
+    public boolean hasNICSupplementB() {
+        return nicSupplementB;
+    }
+
+    /**
+     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 2.
+     */
+    public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA) {
+        return AirbornePosition.decodeHCR(getFormatTypeCode(), nicSupplementA, nicSupplementB);
+    }
+
+    @Override
+    public double getHorizontalContainmentRadiusLimit() {
+        return getHorizontalContainmentRadiusLimit(false);
+    }
+
+    /**
+     * Navigation integrity category for ADS-B version 2.
+     */
+    public byte getNIC(boolean nicSupplementA) {
+        return AirbornePosition.decodeNIC(getFormatTypeCode(), nicSupplementA, nicSupplementB);
+    }
+
+    @Override
+    public byte getNIC() {
+        return getNIC(false);
+    }
+
+    @Override
+    public byte getNACp() {
+        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
+    }
+
+    @Override
+    public double getPositionUncertainty() {
+        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    }
+
+    @Override
+    public byte getSurveillanceStatusEncoded() {
+        return surveillanceStatus;
+    }
+
+    @Override
+    public boolean hasTimeFlag() {
+        return timeFlag;
+    }
+
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
+
+    @Override
+    public boolean hasValidPosition() {
+        return horizontalPositionAvailable;
+    }
+
+    @Override
+    public boolean hasValidAltitude() {
+        return altitudeAvailable;
+    }
+
+    @Override
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
+    }
+
+    @Override
+    public String toString() {
+        return "AirbornePositionV2Msg{" + super.toString() +
+                ", horizontalPositionAvailable=" + horizontalPositionAvailable +
+                ", altitudeAvailable=" + altitudeAvailable +
+                ", surveillanceStatus=" + surveillanceStatus +
+                ", nicSupplementB=" + nicSupplementB +
+                ", altitudeEncoded=" + altitudeEncoded +
+                ", timeFlag=" + timeFlag +
+                ", position=" + position +
+                '}';
+    }
+
+    /**
+     * Variant of {@link AirbornePositionV2Msg} that stores the NIC supplement A bit, e.g., as
+     * obtained from the corresponding operational status message, so that {@link #getNIC()} and
+     * {@link #getHorizontalContainmentRadiusLimit()} can take it into account.
+     */
+    public static class WithNICSupplementA extends AirbornePositionV2Msg {
+
+        private static final long serialVersionUID = -1023456391807826494L;
+
+        private final boolean nicSupplementA;
+
+        /**
+         * @param rawMessage     raw ADS-B airborne position message as hex string
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @throws BadFormatException     if message has wrong format
+         * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+         */
+        public WithNICSupplementA(String rawMessage, Instant timestamp, boolean nicSupplementA) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA);
+        }
+
+        /**
+         * @param rawMessage     raw ADS-B airborne position message as byte array
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @throws BadFormatException     if message has wrong format
+         * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+         */
+        public WithNICSupplementA(byte[] rawMessage, Instant timestamp, boolean nicSupplementA) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA);
+        }
+
+        /**
+         * @param squitter       extended squitter containing the airborne position msg
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @throws BadFormatException if message has wrong format
+         */
+        public WithNICSupplementA(ExtendedSquitter squitter, Instant timestamp, boolean nicSupplementA) throws BadFormatException {
+            super(squitter, timestamp);
+            this.nicSupplementA = nicSupplementA;
+        }
+
+        @Override
+        public double getHorizontalContainmentRadiusLimit() {
+            return getHorizontalContainmentRadiusLimit(nicSupplementA);
+        }
+
+        @Override
+        public byte getNIC() {
+            return getNIC(nicSupplementA);
+        }
+    }
 }
