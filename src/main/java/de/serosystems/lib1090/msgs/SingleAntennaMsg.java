@@ -16,32 +16,17 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
-
-import de.serosystems.lib1090.msgs.SingleAntennaMsg;
+package de.serosystems.lib1090.msgs;
 
 /**
- * Common API for ADS-B operational status version 2 messages.
+ * Common API for messages that expose the single-antenna flag.
  */
-public interface OperationalStatusV2Msg extends OperationalStatusV1Msg, SingleAntennaMsg {
+public interface SingleAntennaMsg {
 
 	/**
-	 * @return whether aircraft has an UAT receiver
-	 */
-	boolean hasUATIn();
-
-	/**
-	 * For interpretation see Table 2-65 in DO-260B
+	 * Whether the transmitting system uses a single antenna.
 	 *
-	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+	 * @return true if the transmitting system uses a single antenna
 	 */
-	byte getSystemDesignAssurance();
-
-	/**
-	 * DO-260B 2.2.3.2.7.2.14
-	 *
-	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-	 * it's based on "per hour".
-	 */
-	boolean hasSILSupplement();
+	boolean hasSingleAntenna();
 }

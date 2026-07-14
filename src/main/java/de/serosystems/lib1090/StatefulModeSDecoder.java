@@ -34,6 +34,7 @@ import de.serosystems.lib1090.msgs.tisb.ManagementMessage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.time.Instant;
 
 /**
  * Generic stateful decoder for Mode S Messages.
@@ -358,16 +359,12 @@ public class StatefulModeSDecoder {
 			// airborne position message
 			switch (dd.adsbVersion) {
 				case 0:
-					return new AirbornePositionV0Msg(es1090, timestamp);
+					return new AirbornePositionV0Msg(es1090, Instant.ofEpochMilli(timestamp));
 				case 1:
-					AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090, timestamp);
-					a1.setNICSupplementA(dd.nicSupplA);
-					return a1;
+					return new AirbornePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
 				case 2:
 				default:
-					AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090, timestamp);
-					a2.setNICSupplementA(dd.nicSupplA);
-					return a2;
+					return new AirbornePositionV2Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
 			}
 		}
 

@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.SingleAntennaMsg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,9 +64,11 @@ public class OperationalStatusMsgTest {
 	public void testDecodeAirborneOpstat() throws UnspecifiedFormatError, BadFormatException {
 		final AirborneOperationalStatusV2Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
 		assertTrue(opstat instanceof OperationalStatusV2Msg);
+		assertTrue(opstat instanceof SingleAntennaMsg);
 
 		assertEquals("4d0131", opstat.getAddress().getHexAddress());
 		assertEquals(31, opstat.getFormatTypeCode());
+		assertFalse(opstat.hasSingleAntenna());
 
 		assertEquals(2, opstat.getVersion());
 		assertFalse(opstat.has1090ESIn());
@@ -82,6 +85,7 @@ public class OperationalStatusMsgTest {
 	public void testDecodeSurfaceOpstat() throws UnspecifiedFormatError, BadFormatException {
 		final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
 		assertTrue(opstat instanceof OperationalStatusV2Msg);
+		assertTrue(opstat instanceof SingleAntennaMsg);
 
 		assertEquals(2, opstat.getVersion());
 		assertFalse(opstat.has1090ESIn());

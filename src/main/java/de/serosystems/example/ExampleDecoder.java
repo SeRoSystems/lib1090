@@ -84,48 +84,42 @@ public class ExampleDecoder {
 			case ADSB_AIRBORN_POSITION_V0:
 			case ADSB_AIRBORN_POSITION_V1:
 			case ADSB_AIRBORN_POSITION_V2:
-				AirbornePositionV0Msg ap0 = (AirbornePositionV0Msg) msg;
+				AirbornePositionMsg ap = (AirbornePositionMsg) msg;
 				System.out.print("["+icao24+"]: ");
 
 				// use CPR to decode position
 				// CPR needs at least 2 positions or a reference, otherwise we get null here
-				Position c0 = decoder.extractPosition(ap0.getAddress(), ap0, receiver);
+				Position c0 = decoder.extractPosition(msg.getAddress(), ap, receiver);
 				if (c0 == null)
 					System.out.println("Cannot decode position yet.");
 				else
 					System.out.println("Now at position (" + c0.getLatitude() + "," + c0.getLongitude() + ")");
 				System.out.println("          Horizontal containment radius limit/protection level: " +
-						ap0.getHorizontalContainmentRadiusLimit() + " m");
+						ap.getHorizontalContainmentRadiusLimit() + " m");
 
-				if (ap0.hasValidAltitude()) {
-					System.out.println("          Altitude: " + ap0.getAltitude() + " ft");
-					System.out.println("          Altitude Reference System: " + ap0.getAltitudeType());
+				if (ap.hasValidAltitude()) {
+					System.out.println("          Altitude: " + ap.getAltitude() + " ft");
+					System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
 				}
 
 				Integer geoMinusBaro = decoder.getGeoMinusBaro(msg);
-				if (ap0.hasValidAltitude() && ap0.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
-					System.out.println("          Height (geom.): " + ap0.getAltitude() + geoMinusBaro + " ft");
+				if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
+					System.out.println("          Height (geom.): " + ap.getAltitude() + geoMinusBaro + " ft");
 				}
 
-				System.out.println("          Navigation Integrity Category: " + ap0.getNIC());
-				System.out.println("          Surveillance status: " + ap0.getSurveillanceStatusDescription());
+				System.out.println("          Navigation Integrity Category: " + ap.getNIC());
+				System.out.println("          Surveillance status: " + ap.getSurveillanceStatusDescription());
 
 				// we want to inspect fields for ADS-B of different versions
 				switch(msg.getType()) {
 					case ADSB_AIRBORN_POSITION_V0:
 						// NACp and SIL for newer ADS-B versions contained in operational status message
-						System.out.println("          Navigation Accuracy Category for position (NACp): " + ap0.getNACp());
-						System.out.println("          Position Uncertainty (based on NACp): " + ap0.getPositionUncertainty());
-						System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSIL());
-						break;
-					case ADSB_AIRBORN_POSITION_V1:
-						AirbornePositionV1Msg ap1 = (AirbornePositionV1Msg) msg;
-						System.out.println("          NIC supplement A set: " + ap1.hasNICSupplementA());
+						System.out.println("          Navigation Accuracy Category for position (NACp): " + ap.getNACp());
+						System.out.println("          Position Uncertainty (based on NACp): " + ap.getPositionUncertainty());
+						System.out.println("          Surveillance Integrity Level (SIL): " + ap.getSIL());
 						break;
 					case ADSB_AIRBORN_POSITION_V2:
 						AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
-						// NIC supplement A contained in operational status messages is set by the decoder if present
-						System.out.println("          NIC supplement A set: " + ap2.hasNICSupplementA());
 						System.out.println("          NIC supplement B set: " + ap2.hasNICSupplementB());
 						break;
 				}

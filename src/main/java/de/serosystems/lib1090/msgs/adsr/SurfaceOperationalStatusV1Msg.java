@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.SingleAntennaMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -32,7 +33,7 @@ import static de.serosystems.lib1090.decoding.OperationalStatus.decodeAirplaneWi
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  * @author Markus Fuchs (fuchs@opensky-network.org)
  */
-public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable {
+public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SingleAntennaMsg {
 
 	private static final long serialVersionUID = 1146349460486137986L;
 
@@ -178,6 +179,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	/**
 	 * @return whether aircraft uses a single antenna or two
 	 */
+	@Override
 	public boolean hasSingleAntenna() {
 		return (operational_mode_code&0x400) != 0;
 	}
