@@ -45,14 +45,14 @@ public class TargetStateAndStatusV1MsgTest {
 		assertEquals(29, tss.getFormatTypeCode());
 
 		assertEquals(0, tss.getVerticalDataAvailableAndSourceIndicator());
-		assertTrue(tss.hasSelectedAltitudeInfo());
-		assertEquals(144, tss.getSelectedAltitudeRaw());
+		assertTrue(tss.hasSelectedAltitude());
+		assertEquals(144, tss.getSelectedAltitudeEncoded());
 		assertEquals(13400, tss.getSelectedAltitude());
-		assertTrue(tss.hasSelectedHeadingInfo());
+		assertTrue(tss.hasSelectedHeading());
 		assertNotNull(tss.getSelectedHeading());
-		assertEquals(9, tss.getNACp());
+		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
-		assertEquals(3, tss.getSIL());
+		assertEquals(3, tss.getSILEncoded());
 		assertTrue(tss.hasOperationalTCAS());
 		assertTrue(tss.hasActiveTCASResolutionAdvisory());
 		assertEquals(4, tss.getEmergencyPriorityStatus());
