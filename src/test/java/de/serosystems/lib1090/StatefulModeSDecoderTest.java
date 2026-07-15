@@ -85,7 +85,7 @@ public class StatefulModeSDecoderTest {
 
 		TargetStateAndStatusV1Msg tss = (TargetStateAndStatusV1Msg) reply;
 
-		assertEquals(9, tss.getNACp());
+		assertEquals(9, tss.getNACpEncoded());
 	}
 
 	@Test

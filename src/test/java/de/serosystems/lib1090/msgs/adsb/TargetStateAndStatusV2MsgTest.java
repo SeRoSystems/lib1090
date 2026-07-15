@@ -146,17 +146,17 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(29, tss.getFormatTypeCode());
 		assertFalse(tss.hasSILSupplement());
 		assertFalse(tss.isFMSSelectedAltitude());
-		assertTrue(tss.hasSelectedAltitudeInfo());
+		assertTrue(tss.hasSelectedAltitude());
 
-		assertEquals(1220, tss.getSelectedAltitudeRaw());
+		assertEquals(1220, tss.getSelectedAltitudeEncoded());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
-		assertFalse(tss.hasSelectedHeadingInfo());
+		assertFalse(tss.hasSelectedHeading());
 		assertNull(tss.getSelectedHeading());
 
-		assertEquals(9, tss.getNACp());
+		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
-		assertEquals(3, tss.getSIL());
+		assertEquals(3, tss.getSILEncoded());
 		assertTrue(tss.hasModeInfo());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());
@@ -175,17 +175,17 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(29, tss.getFormatTypeCode());
 		assertFalse(tss.hasSILSupplement());
 		assertFalse(tss.isFMSSelectedAltitude());
-		assertTrue(tss.hasSelectedAltitudeInfo());
+		assertTrue(tss.hasSelectedAltitude());
 
-		assertEquals(1220, tss.getSelectedAltitudeRaw());
+		assertEquals(1220, tss.getSelectedAltitudeEncoded());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
-		assertTrue(tss.hasSelectedHeadingInfo());
+		assertTrue(tss.hasSelectedHeading());
 		assertEquals(32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
-		assertEquals(9, tss.getNACp());
+		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
-		assertEquals(3, tss.getSIL());
+		assertEquals(3, tss.getSILEncoded());
 		assertTrue(tss.hasModeInfo());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());
@@ -204,17 +204,17 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(29, tss.getFormatTypeCode());
 		assertFalse(tss.hasSILSupplement());
 		assertFalse(tss.isFMSSelectedAltitude());
-		assertTrue(tss.hasSelectedAltitudeInfo());
+		assertTrue(tss.hasSelectedAltitude());
 
-		assertEquals(1220, tss.getSelectedAltitudeRaw());
+		assertEquals(1220, tss.getSelectedAltitudeEncoded());
 		assertEquals(39008, tss.getSelectedAltitude().intValue());
 		assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
-		assertTrue(tss.hasSelectedHeadingInfo());
+		assertTrue(tss.hasSelectedHeading());
 		assertEquals(180 + 32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
-		assertEquals(9, tss.getNACp());
+		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
-		assertEquals(3, tss.getSIL());
+		assertEquals(3, tss.getSILEncoded());
 		assertTrue(tss.hasModeInfo());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());

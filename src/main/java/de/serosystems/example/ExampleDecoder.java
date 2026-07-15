@@ -294,16 +294,16 @@ public class ExampleDecoder {
 				System.out.println("["+icao24+"]: Target State and Status reported");
 				if (msg instanceof TargetStateAndStatusV1Msg) {
 					TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
-					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
+					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
 					System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
+					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSILEncoded());
 					System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
-					if (tStatus.hasSelectedAltitudeInfo()) {
+					if (tStatus.hasSelectedAltitude()) {
 						System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
 					} else {
 						System.out.println("          No selected altitude info");
 					}
-					if (tStatus.hasSelectedHeadingInfo()) {
+					if (tStatus.hasSelectedHeading()) {
 						System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
 					} else {
 						System.out.println("          No selected heading info");
@@ -311,26 +311,26 @@ public class ExampleDecoder {
 				} else {
 
 					TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
-					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
+					System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
 					System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
+					System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSILEncoded());
 					System.out.println("          Has SIL supplement: " + tStatus.hasSILSupplement());
 					System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
 
 					System.out.printf("          Selected altitude is derived from %s\n", tStatus.isFMSSelectedAltitude() ? "FMS" : "MCP/FCU");
-					if (tStatus.hasSelectedAltitudeInfo()) {
+					if (tStatus.hasSelectedAltitude()) {
 						System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
 					} else {
 						System.out.println("          No selected altitude info");
 					}
 
-					if (tStatus.hasBarometricPressureSettingInfo()) {
+					if (tStatus.hasBarometricPressureSetting()) {
 						System.out.println("          Barometric pressure setting (minus 800 mbar): " + tStatus.getBarometricPressureSetting() + " mbar");
 					} else {
 						System.out.println("          No barometric pressure setting info");
 					}
 
-					if (tStatus.hasSelectedHeadingInfo()) {
+					if (tStatus.hasSelectedHeading()) {
 						System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
 					} else {
 						System.out.println("          No selected heading info");

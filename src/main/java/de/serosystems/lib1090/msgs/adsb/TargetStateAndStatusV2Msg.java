@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -26,302 +27,294 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-B target state and status message as specified in DO-260B §2.2.3.2.7.1
- *
- * @author Markus Fuchs (fuchs@opensky-network.org)
  */
 public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg {
 
-	private static final long serialVersionUID = 7485953168219273935L;
+    private static final long serialVersionUID = 7485953168219273935L;
 
-	private boolean sil_suppl;
-	private boolean selected_altitude_type;
-	private int selected_altitude;
-	private int barometric_pressure_setting;
-	private boolean selected_heading_status;
-	private boolean selected_heading_sign;
-	private int selected_heading;
-	private byte nac_p;
-	private boolean nic_baro;
-	private byte sil;
-	private boolean mcp_fcu_status;
-	private boolean autopilot_engaged;
-	private boolean vnav_mode_engaged;
-	private boolean altitude_hold_mode;
-	private boolean approach_mode;
-	private boolean has_operational_tcas;
-	private boolean lnav_mode_engaged;
+    private boolean silSupplement;
+    private boolean selectedAltitudeType;
+    private int selectedAltitude;
+    private int barometricPressureSetting;
+    private boolean selectedHeadingStatus;
+    private boolean selectedHeadingSign;
+    private int selectedHeading;
+    private byte nacP;
+    private boolean nicBaro;
+    private byte sil;
+    private boolean mcpFcuStatus;
+    private boolean autopilotEngaged;
+    private boolean vnavModeEngaged;
+    private boolean altitudeHoldMode;
+    private boolean approachMode;
+    private boolean operationalTcas;
+    private boolean lnavModeEngaged;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected TargetStateAndStatusV2Msg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected TargetStateAndStatusV2Msg() {
+    }
 
-	/**
-	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public TargetStateAndStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public TargetStateAndStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public TargetStateAndStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message as byte array
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public TargetStateAndStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or if reserved bits are set
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
-		super(squitter);
-		setType(subtype.ADSB_TARGET_STATE_AND_STATUS_V2);
+    /**
+     * @param squitter extended squitter which contains this message
+     * @throws BadFormatException     if message has the wrong typecode or if reserved bits are set
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+        super(squitter);
+        setType(subtype.ADSB_TARGET_STATE_AND_STATUS_V2);
 
-		if (getFormatTypeCode() != 29) {
-			throw new BadFormatException("Target state and status messages must have typecode 29.");
-		}
+        if (getFormatTypeCode() != 29)
+            throw new BadFormatException("Target state and status messages must have typecode 29.");
 
-		byte[] msg = this.getMessage();
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-		byte subtype_code = (byte) ((msg[0]>>>1) & 0x3);
-		if (subtype_code != 1) // all others are reserved
-			throw new UnspecifiedFormatError("Target state and status message subtype "+subtype_code+" reserved.");
+        byte subtypeCode = b.readByte(6, 7);
+        if (subtypeCode != 1) // all others are reserved
+            throw new UnspecifiedFormatError("Target state and status message subtype " + subtypeCode + " reserved.");
 
-		// message with ME bit 11 set to 1 should be discarded, but only for ADS-B v0 transmitters
-		// ModeSDecoder class takes care of that as ADS-B version is unknown at this place
+        silSupplement = b.readByte(8, 8) == 1;
+        selectedAltitudeType = b.readByte(9, 9) == 1;
 
-		sil_suppl = ((msg[0] & 0x01) != 0);
-		selected_altitude_type = (((msg[1]>>>7) & 0x01) != 0);
+        selectedAltitude = b.readShort(10, 20);
 
-		selected_altitude = (((msg[1]&0x7F)<<4) | ((msg[2]>>>4)&0x0F)) & 0x7FF;
+        barometricPressureSetting = b.readShort(21, 29);
 
-		barometric_pressure_setting = (((msg[2]&0x0F)<<5) | ((msg[3]>>>3)&0x1F)) & 0x1FF;
+        selectedHeadingStatus = b.readByte(30, 30) == 1;
+        selectedHeadingSign = b.readByte(31, 31) == 1;
+        selectedHeading = b.readShort(32, 39);
+        nacP = b.readByte(40, 43);
 
-		selected_heading_status = ((msg[3] & 0x04) != 0);
-		selected_heading_sign = ((msg[3] & 0x02) != 0);
+        nicBaro = b.readByte(44, 44) == 1;
+        sil = b.readByte(45, 46);
 
-		selected_heading = (((msg[3]&0x01)<<7) | ((msg[4]>>>1)&0x7F)) & 0xFF;
-		nac_p = (byte) ((((msg[4]&0x01)<<3) | ((msg[5]>>>5)&0x07)) & 0x0F);
+        mcpFcuStatus = b.readByte(47, 47) == 1;
 
-		nic_baro = ((msg[5] & 0x10) != 0);
-		sil = (byte) ((msg[5]>>>2)&0x3);
+        // the following are only valid if mcpFcuStatus is true
+        autopilotEngaged = b.readByte(48, 48) == 1;
+        vnavModeEngaged = b.readByte(49, 49) == 1;
+        altitudeHoldMode = b.readByte(50, 50) == 1;
+        approachMode = b.readByte(52, 52) == 1;
+        lnavModeEngaged = b.readByte(54, 54) == 1;
 
-		mcp_fcu_status = ((msg[5] & 0x02) != 0);
+        // this is always set and valid
+        operationalTcas = b.readByte(53, 53) == 1;
 
-		// the following are only valid if mcp_fcu_status is true
-		autopilot_engaged = ((msg[5] & 0x01) != 0);
-		vnav_mode_engaged = ((msg[6] & 0x80) != 0);
-		altitude_hold_mode = ((msg[6] & 0x40) != 0);
-		approach_mode = ((msg[6] & 0x10) != 0);
-		lnav_mode_engaged = ((msg[6] & 0x04) != 0);
+        // DO-260B 2.2.3.2.7.1.3.19
+        if (b.readByte(55, 56) != 0)
+            throw new BadFormatException("Target state and status message reserved bits must be 0.");
+    }
 
-		// this is always set and valid
-		has_operational_tcas = ((msg[6] & 0x08) != 0);
+    /**
+     * DO-260B 2.2.3.2.7.1.3.1
+     *
+     * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
+     * it's based on "per hour".
+     */
+    public boolean hasSILSupplement() {
+        return silSupplement;
+    }
 
-		// DO-260B 2.2.3.2.7.1.3.19
-		if ((msg[6]&0x03) != 0)
-			throw new BadFormatException("Target state and status message reserved bits must be 0.");
-	}
+    @Override
+    public boolean hasSelectedAltitude() {
+        return selectedAltitude > 0;
+    }
 
-	/**
-	 * DO-260B 2.2.3.2.7.1.3.1
-	 *
-	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-	 * 			it's based on "per hour".
-	 */
-	public boolean hasSILSupplement() {
-		return sil_suppl;
-	}
+    @Override
+    public Integer getSelectedAltitude() {
+        return selectedAltitude != 0 ? (selectedAltitude - 1) * 32 : null;
+    }
 
-	@Override
-	public boolean hasSelectedAltitudeInfo() {
-		return selected_altitude > 0;
-	}
+    @Override
+    public int getSelectedAltitudeEncoded() {
+        return selectedAltitude;
+    }
 
-	@Override
-	public Integer getSelectedAltitude() {
-		return selected_altitude != 0 ? (selected_altitude  - 1) * 32 : null;
-	}
+    /**
+     * Source for selected altitude according to DO-260B 2.2.3.2.7.1.3.2
+     *
+     * @return true is the value of {@link #getSelectedAltitude()} is derived from the Flight Management System (FMS),
+     * false if it is derived from the Control Panel/Flight Control Unit (MCP/FCU)
+     */
+    public boolean isFMSSelectedAltitude() {
+        return selectedAltitudeType;
+    }
 
-	@Override
-	public int getSelectedAltitudeRaw() {
-		return selected_altitude;
-	}
+    /**
+     * DO-260B 2.2.3.2.7.1.3.4
+     *
+     * @return whether the Barometric Pressure Setting is available, i.e. {@link #getBarometricPressureSetting()}
+     * returns a non-null value
+     */
+    public boolean hasBarometricPressureSetting() {
+        return barometricPressureSetting != 0;
+    }
 
-	/**
-	 * Source for selected altitude according to DO-260B 2.2.3.2.7.1.3.2
-	 *
-	 * @return true is the value of {@link #getSelectedAltitude()} is derived from the Flight Management System (FMS),
-	 *         false if it is derived from the Control Panel/Flight Control Unit (MCP/FCU)
-	 */
-	public boolean isFMSSelectedAltitude() {
-		return selected_altitude_type;
-	}
+    /**
+     * The barometric pressure setting (minus 800 millibars) according to DO-260B 2.2.3.2.7.1.3.4
+     * <p>
+     * Availability of this information can also be checked with {@link #hasBarometricPressureSetting()}.
+     *
+     * @return the barometric pressure settings that has been adjusted by subtracting 800 millibars from the pressure
+     * source (in millibars), or null if the information is not available.
+     */
+    public Float getBarometricPressureSetting() {
+        return barometricPressureSetting != 0 ? (barometricPressureSetting - 1) * 0.8F : null;
+    }
 
-	/**
-	 * DO-260B 2.2.3.2.7.1.3.4
-	 *
-	 * @return whether the Barometric Pressure Setting info is available, i.e. {@link #getBarometricPressureSetting()}
-	 *         returns a non-null value
-	 */
-	public boolean hasBarometricPressureSettingInfo() {
-		return barometric_pressure_setting != 0;
-	}
+    @Override
+    public boolean hasSelectedHeading() {
+        return selectedHeadingStatus;
+    }
 
-	/**
-	 * The barometric pressure setting (minus 800 millibars) according to DO-260B 2.2.3.2.7.1.3.4
-	 *
-	 * Availability of this information can also be checked with {@link #hasBarometricPressureSettingInfo()}.
-	 *
-	 * @return the barometric pressure settings that has been adjusted by subtracting 800 millibars from the pressure
-	 *         source (in millibars), or null if the information is not available.
-	 */
-	public Float getBarometricPressureSetting() {
-		return barometric_pressure_setting != 0 ? (barometric_pressure_setting - 1) * 0.8F : null;
-	}
+    @Override
+    public Float getSelectedHeading() {
+        if (!hasSelectedHeading()) return null;
 
-	@Override
-	public boolean hasSelectedHeadingInfo() {
-		return selected_heading_status;
-	}
+        return selectedHeading * (180.f / 256) + (selectedHeadingSign ? 180F : 0F);
+    }
 
-	@Override
-	public Float getSelectedHeading() {
-		if (!selected_heading_status) {
-			return null;
-		}
+    @Override
+    public int getSelectedHeadingEncoded() {
+        return ((selectedHeadingSign ? 1 : 0) << 8) | selectedHeading;
+    }
 
-		return selected_heading * (180.f / 256) + (selected_heading_sign ? 180F : 0F);
-	}
+    @Override
+    public byte getNACpEncoded() {
+        return nacP;
+    }
 
-	@Override
-	public int getSelectedHeadingRaw() {
-		return ((selected_heading_sign ? 1 : 0) << 8) | selected_heading;
-	}
+    @Override
+    public boolean getBarometricAltitudeIntegrityCode() {
+        return nicBaro;
+    }
 
-	@Override
-	public byte getNACp() {
-		return nac_p;
-	}
+    @Override
+    public byte getSILEncoded() {
+        return sil;
+    }
 
-	// TODO generify getPositionUncertainty() method from AirborneOperationalStatusV0 message and provide here as well
+    /**
+     * MCP/FCU mode status bit information according to DO-260B 2.2.3.2.7.1.3.11
+     * <p>
+     * A value of false indidates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
+     * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
+     *
+     * @return true if Mode information is deliberately being provided, false otherwise
+     */
+    public boolean hasModeInfo() {
+        return mcpFcuStatus;
+    }
 
-	@Override
-	public boolean getBarometricAltitudeIntegrityCode() {
-		return nic_baro;
-	}
+    /**
+     * Auto pilot engaged flag according to DO-260B 2.2.3.2.7.1.3.12
+     * <p>
+     * Information is only available if {@link #hasModeInfo()} is true.
+     *
+     * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if information
+     * is not available.
+     */
+    public Boolean hasAutopilotEngaged() {
+        if (!mcpFcuStatus) return null;
+        return autopilotEngaged;
+    }
 
-	@Override
-	public byte getSIL() {
-		return sil;
-	}
+    /**
+     * VNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.13
+     * <p>
+     * Information is only available if {@link #hasModeInfo()} is true.
+     *
+     * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if information is
+     * not available
+     */
+    public Boolean hasVNAVModeEngaged() {
+        if (!mcpFcuStatus) return null;
+        return vnavModeEngaged;
+    }
 
-	/**
-	 * MCP/FCU mode status bit information according to DO-260B 2.2.3.2.7.1.3.11
-	 *
-	 * A value of false indidates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
-	 * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
-	 *
-	 * @return true if Mode information is deliberately being provided, false otherwise
-	 */
-	public boolean hasModeInfo() {
-		return mcp_fcu_status;
-	}
+    /**
+     * Altitude Hold Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.14
+     * <p>
+     * Information is only available if {@link #hasModeInfo()} is true.
+     *
+     * @return true if altitude hold mode is active, false if inactive or status unknown, null if information is not
+     * available
+     */
+    public Boolean hasActiveAltitudeHoldMode() {
+        if (!mcpFcuStatus) return null;
+        return altitudeHoldMode;
+    }
 
-	/**
-	 * Auto pilot engaged flag according to DO-260B 2.2.3.2.7.1.3.12
-	 *
-	 * Information is only available if {@link #hasModeInfo()} is true.
-	 *
-	 * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if information
-	 *         is not available.
-	 */
-	public Boolean hasAutopilotEngaged() {
-		if (!mcp_fcu_status) return null;
-		return autopilot_engaged;
-	}
+    /**
+     * Approach Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.16
+     * <p>
+     * Information is only available if {@link #hasModeInfo()} is true.
+     *
+     * @return true if approach mode is active, false if inactive or status unknown, null if information is not
+     * available
+     */
+    public Boolean hasActiveApproachMode() {
+        if (!mcpFcuStatus) return null;
+        return approachMode;
+    }
 
-	/**
-	 * VNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.13
-	 *
-	 * Information is only available if {@link #hasModeInfo()} is true.
-	 *
-	 * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if information is
-	 *         not available
-	 */
-	public Boolean hasVNAVModeEngaged() {
-		if (!mcp_fcu_status) return null;
-		return vnav_mode_engaged;
-	}
+    @Override
+    public boolean hasOperationalTCAS() {
+        return operationalTcas;
+    }
 
-	/**
-	 * Altitude Hold Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.14
-	 *
-	 * Information is only available if {@link #hasModeInfo()} is true.
-	 *
-	 * @return true if altitude hold mode is active, false if inactive or status unknown, null if information is not
-	 *         available
-	 */
-	public Boolean hasActiveAltitudeHoldMode() {
-		if (!mcp_fcu_status) return null;
-		return altitude_hold_mode;
-	}
+    /**
+     * LNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.18
+     * <p>
+     * Information is only available if {@link #hasModeInfo()} is true.
+     *
+     * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if information
+     * is not available
+     */
+    public Boolean hasLNAVModeEngaged() {
+        if (!mcpFcuStatus) return null;
+        return lnavModeEngaged;
+    }
 
-	/**
-	 * Approach Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.16
-	 *
-	 * Information is only available if {@link #hasModeInfo()} is true.
-	 *
-	 * @return true if approach mode is active, false if inactive or status unknown, null if information is not
-	 *         available
-	 */
-	public Boolean hasActiveApproachMode() {
-		if (!mcp_fcu_status) return null;
-		return approach_mode;
-	}
-
-	@Override
-	public boolean hasOperationalTCAS() {
-		return has_operational_tcas;
-	}
-
-	/**
-	 * LNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.18
-	 *
-	 * Information is only available if {@link #hasModeInfo()} is true.
-	 *
-	 * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if information
-	 *         is not available
-	 */
-	public Boolean hasLNAVModeEngaged() {
-		if (!mcp_fcu_status) return null;
-		return lnav_mode_engaged;
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tTargetStateAndStatusMsg{" +
-				"sil_suppl=" + sil_suppl +
-				", selected_altitude_type=" + selected_altitude_type +
-				", selected_altitude=" + selected_altitude +
-				", barometric_pressure_setting=" + barometric_pressure_setting +
-				", selectected_heading_status=" + selected_heading_status +
-				", selectected_heading_sign=" + selected_heading_sign +
-				", selected_heading=" + selected_heading +
-				", nac_p=" + nac_p +
-				", nic_baro=" + nic_baro +
-				", sil=" + sil +
-				", mcp_fcu_status=" + mcp_fcu_status +
-				", autopilot_engaged=" + autopilot_engaged +
-				", vnav_mode_engaged=" + vnav_mode_engaged +
-				", altitude_hold_mode=" + altitude_hold_mode +
-				", approach_mode=" + approach_mode +
-				", has_operational_tcas=" + has_operational_tcas +
-				", lnav_mode_engaged=" + lnav_mode_engaged +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "TargetStateAndStatusV2Msg{" + super.toString() +
+                ", silSupplement=" + silSupplement +
+                ", selectedAltitudeType=" + selectedAltitudeType +
+                ", selectedAltitude=" + selectedAltitude +
+                ", barometricPressureSetting=" + barometricPressureSetting +
+                ", selectedHeadingStatus=" + selectedHeadingStatus +
+                ", selectedHeadingSign=" + selectedHeadingSign +
+                ", selectedHeading=" + selectedHeading +
+                ", nacP=" + nacP +
+                ", nicBaro=" + nicBaro +
+                ", sil=" + sil +
+                ", mcpFcuStatus=" + mcpFcuStatus +
+                ", autopilotEngaged=" + autopilotEngaged +
+                ", vnavModeEngaged=" + vnavModeEngaged +
+                ", altitudeHoldMode=" + altitudeHoldMode +
+                ", approachMode=" + approachMode +
+                ", operationalTcas=" + operationalTcas +
+                ", lnavModeEngaged=" + lnavModeEngaged +
+                '}';
+    }
 }
