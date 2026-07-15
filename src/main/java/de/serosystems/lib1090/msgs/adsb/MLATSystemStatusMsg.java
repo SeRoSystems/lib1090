@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -28,61 +29,64 @@ import java.util.Arrays;
 
 /**
  * Decoder for Surface System Status messages (2.2.3.2.7.4)
+ *
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -705712843743656139L;
+    private static final long serialVersionUID = -705712843743656139L;
 
-	byte[] system_status;
+    private byte[] systemStatus;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected MLATSystemStatusMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected MLATSystemStatusMsg() {
+    }
 
-	/**
-	 * @param raw_message the MLAT system status message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public MLATSystemStatusMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage the MLAT system status message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public MLATSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message the MLAT system status message as byte array
-	 * @throws BadFormatException if message has the wrong typecode
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public MLATSystemStatusMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage the MLAT system status message as byte array
+     * @throws BadFormatException     if message has the wrong typecode
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public MLATSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this identification msg
-	 * @throws BadFormatException if message has the wrong typecode
-	 */
-	public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.SURFACE_SYSTEM_STATUS);
+    /**
+     * @param squitter extended squitter which contains this identification msg
+     * @throws BadFormatException if message has the wrong typecode
+     */
+    public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
+        setType(subtype.SURFACE_SYSTEM_STATUS);
 
-		if (getFormatTypeCode() != 24) {
-			throw new BadFormatException("MLAT system status messages must have typecode of 24.");
-		}
+        if (getFormatTypeCode() != 24)
+            throw new BadFormatException("MLAT system status messages must have typecode of 24.");
 
-		byte[] msg = getMessage();
+        byte[] msg = getMessage();
+        BitReader b = BitReader.forBigEndian(msg);
 
-		int subtype = msg[0]&0x7;
-		if (subtype != 1) {
-			throw new BadFormatException("Surface system status messages have subtype 1.");
-		}
+        int messageSubtype = b.readByte(6, 8);
+        if (messageSubtype != 1)
+            throw new BadFormatException("Surface system status messages have subtype 1.");
 
-		system_status = Arrays.copyOfRange(msg, 1, msg.length);
-	}
+        systemStatus = Arrays.copyOfRange(msg, 1, msg.length);
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tMLATSystemStatusMsg{" +
-				"system_status=" + Tools.toHexString(system_status) +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "MLATSystemStatusMsg{" + super.toString() +
+                ", systemStatus=" + Tools.toHexString(systemStatus) +
+                '}';
+    }
 }
