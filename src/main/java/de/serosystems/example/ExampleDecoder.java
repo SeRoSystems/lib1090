@@ -196,10 +196,12 @@ public class ExampleDecoder {
 					System.out.println("          Vertical rate: "+
 							(airspeed.hasVerticalRate() ? airspeed.getVerticalRate()+" ft/min" : "unknown"));
 				break;
-			case ADSB_IDENTIFICATION:
+			case ADSB_IDENTIFICATION_V0:
+			case ADSB_IDENTIFICATION_V1:
+			case ADSB_IDENTIFICATION_V2:
 				IdentificationMsg ident = (IdentificationMsg) msg;
-				System.out.println("["+icao24+"]: Callsign: "+new String(ident.getIdentity()));
-				System.out.println("          Category: "+ident.getCategoryDescription());
+				System.out.println("["+icao24+"]: Callsign: "+new String(ident.getIdentification()));
+				System.out.println("          Category: "+ident.getEmitterCategory());
 				break;
 			case ADSB_STATUS_V0:
 				OperationalStatusV0Msg opstat0 = (OperationalStatusV0Msg) msg;
