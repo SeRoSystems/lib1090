@@ -163,7 +163,7 @@ public class ExampleDecoder {
 				}
 
 				break;
-			case ADSB_EMERGENCY:
+			case ADSB_EMERGENCY_V0V1:
 			case ADSB_EMERGENCY_V2:
 				EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
 				System.out.println("["+icao24+"]: "+status.getEmergencyStateText());

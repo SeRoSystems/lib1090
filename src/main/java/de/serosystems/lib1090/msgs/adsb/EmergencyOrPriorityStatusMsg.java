@@ -18,102 +18,42 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.Identity;
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-
-import java.io.Serializable;
-
 /**
- * Decoder for ADS-B emergency and priority status messages
- * @author Matthias Schäfer (schaefer@sero-systems.de)
+ * Common API for ADS-B emergency and priority status messages across supported versions.
  */
-public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable {
+public interface EmergencyOrPriorityStatusMsg {
 
-	private static final long serialVersionUID = 7380235047641841128L;
+    /**
+     * @return the subtype code of the aircraft status report (should always be 1)
+     */
+    byte getSubtype();
 
-	private byte msgsubtype;
-	private byte emergency_state;
+    /**
+     * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
+     */
+    byte getEmergencyStateCode();
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected EmergencyOrPriorityStatusMsg() { }
-
-	/**
-	 * @param raw_message raw ADS-B aircraft status message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public EmergencyOrPriorityStatusMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
-
-	/**
-	 * @param raw_message raw ADS-B aircraft status message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public EmergencyOrPriorityStatusMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
-
-	/**
-	 * @param squitter extended squitter which contains this emergency or priority status msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.ADSB_EMERGENCY);
-
-		if (this.getFormatTypeCode() != 28) {
-			throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
-		}
-
-		byte[] msg = this.getMessage();
-
-		msgsubtype = (byte) (msg[0]&0x7);
-		if (msgsubtype != 1) {
-			throw new BadFormatException("Emergency and priority status reports have subtype 1.");
-		}
-
-		emergency_state = (byte) ((msg[1]&0xFF)>>>5);
-	}
-
-	/**
-	 * @return the subtype code of the aircraft status report (should always be 1)
-	 */
-	public byte getSubtype() {
-		return msgsubtype;
-	}
-
-	/**
-	 * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
-	 */
-	public byte getEmergencyStateCode() {
-		return emergency_state;
-	}
-
-	/**
-	 * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
-	 */
-	public String getEmergencyStateText() {
-		switch (emergency_state) {
-		case 0: return "no emergency";
-		case 1: return "general emergency";
-		case 2: return "lifeguard/medical";
-		case 3: return "minimum fuel";
-		case 4: return "no communications";
-		case 5: return "unlawful interference";
-		case 6: return "downed aircraft";
-		default: return "unknown";
-		}
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tEmergencyOrPriorityStatusMsg{" +
-				"msgsubtype=" + msgsubtype +
-				", emergency_state=" + emergency_state +
-				'}';
-	}
+    /**
+     * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
+     */
+    default String getEmergencyStateText() {
+        switch (getEmergencyStateCode()) {
+            case 0:
+                return "no emergency";
+            case 1:
+                return "general emergency";
+            case 2:
+                return "lifeguard/medical";
+            case 3:
+                return "minimum fuel";
+            case 4:
+                return "no communications";
+            case 5:
+                return "unlawful interference";
+            case 6:
+                return "downed aircraft";
+            default:
+                return "unknown";
+        }
+    }
 }
