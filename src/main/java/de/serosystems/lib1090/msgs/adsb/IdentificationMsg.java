@@ -19,91 +19,62 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.Identification;
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
-import java.io.Serializable;
-import java.util.Arrays;
+public interface IdentificationMsg {
 
-/**
- * Decoder for ADS-B identification messages
- * @author Matthias Schäfer (schaefer@sero-systems.de)
- */
-public class IdentificationMsg extends ExtendedSquitter implements Serializable {
+    /**
+     * The four sets of emitter categories, as distinguished by the message's format type code.
+     */
+    enum CategorySet {
+        A, B, C, D
+    }
 
-	private static final long serialVersionUID = 3475444849066416732L;
+    /**
+     * @return the message's format type code.
+     */
+    byte getFormatTypeCode();
 
-	private byte emitter_category;
-	private byte[] identity;
+    /**
+     * @return the emitter's category (numerical)
+     */
+    byte getEmitterCategoryEncoded();
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected IdentificationMsg() { }
+    /**
+     * @return the call sign as 8 characters array
+     */
+    default char[] getIdentification() {
+        return Identification.mapChar(getIdentificationDigits());
+    }
 
-	/**
-	 * @param raw_message the identification message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public IdentificationMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @return the identification as an array of 8 encoded (6-bit) digits, in order
+     */
+    default byte[] getIdentificationDigits() {
+        return Identification.identificationDigits(getIdentificationEncoded());
+    }
 
-	/**
-	 * @param raw_message the identification message as byte array
-	 * @throws BadFormatException if message has the wrong typecode
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public IdentificationMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @return the raw 48-bit identification field (bits 9-56 of the message), as encoded
+     */
+    long getIdentificationEncoded();
 
-	/**
-	 * @param squitter extended squitter which contains this identification msg
-	 * @throws BadFormatException if message has the wrong typecode
-	 */
-	public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.ADSB_IDENTIFICATION);
+    /**
+     * @return the description of the emitter's category according to
+     * the ADS-B message format specification
+     */
+    String getEmitterCategory();
 
-		if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4) {
-			throw new BadFormatException("Identification messages must have typecode of 1-4.");
-		}
-
-		byte[] msg = this.getMessage();
-		emitter_category = (byte) (msg[0] & 0x7);
-
-		// extract identity
-		identity = Identification.decodeAircraftIdentification(msg);
-	}
-
-	/**
-	 * @return the emitter's category (numerical)
-	 */
-	public byte getEmitterCategory() {
-		return emitter_category;
-	}
-
-	/**
-	 * @return the call sign as 8 characters array
-	 */
-	public char[] getIdentity() {
-		return Identification.mapChar(identity);
-	}
-
-	/**
-	 * @return the decription of the emitter's category according to
-	 *         the ADS-B message format specification
-	 */
-	public String getCategoryDescription() {
-		return Identification.categoryDescription(getFormatTypeCode(), emitter_category);
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tIdentificationMsg{" +
-				"emitter_category=" + emitter_category +
-				", identity=" + Arrays.toString(identity) +
-				'}';
-	}
+    /**
+     * @return the emitter category set this message's emitter category belongs to, as determined
+     * by the format type code
+     */
+    default CategorySet getCategorySet() {
+        switch (getFormatTypeCode()) {
+            case 4: return CategorySet.A;
+            case 3: return CategorySet.B;
+            case 2: return CategorySet.C;
+            case 1: return CategorySet.D;
+            default: throw new IllegalStateException("Unexpected format type code: " + getFormatTypeCode());
+        }
+    }
 }

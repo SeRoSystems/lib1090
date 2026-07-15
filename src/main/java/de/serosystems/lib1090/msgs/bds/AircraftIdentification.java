@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 
 import java.io.Serializable;
@@ -55,7 +56,7 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
         setBds(BDSRegister.bdsCode.AIRCRAFT_IDENTIFICATION);
 
         this.bdsCode = extractBdsCode(message);
-        this.aircraftIdentification = Identification.decodeAircraftIdentification(message);
+        this.aircraftIdentification = Identification.identificationDigits(BitReader.forBigEndian(message).readLong(9, 56));
 
     }
 

@@ -334,8 +334,18 @@ public class StatefulModeSDecoder {
 		// what kind of extended squitter?
 		byte ftc = es1090.getFormatTypeCode();
 
-		if (ftc >= 1 && ftc <= 4) // identification message
-			return new IdentificationMsg(es1090);
+		if (ftc >= 1 && ftc <= 4) {
+			// identification message
+			switch (dd.adsbVersion) {
+				case 0:
+					return new IdentificationV0Msg(es1090);
+				case 1:
+					return new IdentificationV1Msg(es1090);
+				case 2:
+				default:
+					return new IdentificationV2Msg(es1090);
+			}
+		}
 
 		if (ftc >= 5 && ftc <= 8) {
 			// surface position message

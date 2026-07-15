@@ -120,7 +120,8 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
 	 *         the ADS-B message format specification
 	 */
 	public String getCategoryDescription () {
-		return categoryDescription(getFormatTypeCode(), emitter_category);
+		// TIS-B messages carry no ADS-B version information
+		return categoryDescription(getFormatTypeCode(), emitter_category, 0);
 	}
 
 	@Override
