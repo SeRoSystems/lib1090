@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -26,112 +27,101 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-B operational status message as specified in DO-260 (ADS-B version 0).
- *
- * @author Markus Fuchs (fuchs@opensky-network.org)
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg {
 
-	private static final long serialVersionUID = -8925123066831152922L;
+    private static final long serialVersionUID = -8925123066831152922L;
 
-	private byte enroute_capabilities;
+    private byte enrouteCapabilities;
 
-	/**
-	 * protected no-arg constructor e.g. for serialization with Kryo
-	 **/
-	protected OperationalStatusV0Msg() {
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected OperationalStatusV0Msg() {
+    }
 
-	/**
-	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message as byte array
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version or enroute capabilities
-	 *                                are invalid
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
-		super(squitter);
-		setType(subtype.ADSB_STATUS_V0);
+    /**
+     * @param squitter extended squitter which contains this message
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or enroute capabilities
+     *                                are invalid
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+        super(squitter);
+        setType(subtype.ADSB_STATUS_V0);
 
-		if (getFormatTypeCode() != 31) {
-			throw new BadFormatException("Operational status messages must have typecode 31.");
-		}
+        if (getFormatTypeCode() != 31)
+            throw new BadFormatException("Operational status messages must have typecode 31.");
 
-		byte[] msg = this.getMessage();
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-		if ((msg[5] >>> 5) != 0)
-			throw new BadFormatException("Not a DO-260/version 0 status message.");
+        if (b.readByte(41, 43) != 0)
+            throw new BadFormatException("Not a DO-260/version 0 status message.");
 
-		byte subtype_code = (byte) (msg[0] & 0x7);
-		if (subtype_code > 0) // all others are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
+        byte subtypeCode = b.readByte(6, 8);
+        if (subtypeCode > 0) // all others are reserved
+            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
 
-		enroute_capabilities = msg[1];
-		if ((enroute_capabilities & 0xC0) != 0)
-			throw new BadFormatException("Unknown enroute capabilities code!");
-		// All other capability fields are "TBD" in standard
-	}
+        enrouteCapabilities = b.readByte(9, 16);
+        if (b.readByte(9, 10) != 0)
+            throw new BadFormatException("Unknown enroute capabilities code!");
+        // All other capability fields are "TBD" in standard
+    }
 
-	/**
-	 * DO-260 2.2.3.2.7.3.3.1
-	 *
-	 * @return true if TCAS is operational or unknown, false if TCAS is not operational.
-	 */
-	public boolean hasOperationalTCAS() {
-		return (enroute_capabilities & 0x20) == 0;
-	}
+    /**
+     * DO-260 2.2.3.2.7.3.3.1
+     *
+     * @return true if TCAS is operational or unknown, false if TCAS is not operational.
+     */
+    public boolean hasOperationalTCAS() {
+        return (enrouteCapabilities & 0x20) == 0;
+    }
 
-	/**
-	 * DO-260 2.2.3.2.7.3.3.1
-	 *
-	 * @return true if CDTI is operational or unknown, false if CDTI is not operational.
-	 */
-	public boolean hasOperationalCDTI() {
-		return (enroute_capabilities & 0x10) != 0;
-	}
+    /**
+     * DO-260 2.2.3.2.7.3.3.1
+     *
+     * @return true if CDTI is operational or unknown, false if CDTI is not operational.
+     */
+    public boolean hasOperationalCDTI() {
+        return (enrouteCapabilities & 0x10) != 0;
+    }
 
-	/**
-	 * @return whether 1090ES IN is available
-	 * @see #hasOperationalCDTI() alias: the field has been renamed in V1
-	 */
-	@Override
-	public boolean has1090ESIn() {
-		return hasOperationalCDTI();
-	}
+    /**
+     * @return whether 1090ES IN is available
+     * @see #hasOperationalCDTI() alias: the field has been renamed in V1
+     */
+    @Override
+    public boolean has1090ESIn() {
+        return hasOperationalCDTI();
+    }
 
-	/**
-	 * the version number of the formats and protocols in use on the aircraft installation.<br>
-	 * 0: Conformant to DO-260/ED-102 and DO-242<br>
-	 * 1: Conformant to DO-260A and DO-242A<br>
-	 * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
-	 * 3-7: reserved
-	 *
-	 * @return always 0
-	 */
-	public byte getVersion() {
-		return 0;
-	}
+    @Override
+    public byte getVersion() {
+        return 0;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tOperationalStatusV0Msg{" +
-				"enroute_capabilities=" + enroute_capabilities +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "OperationalStatusV0Msg{" + super.toString() +
+                ", enrouteCapabilities=" + enrouteCapabilities +
+                '}';
+    }
 }
