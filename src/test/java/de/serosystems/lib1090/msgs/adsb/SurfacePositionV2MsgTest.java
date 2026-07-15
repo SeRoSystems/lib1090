@@ -23,6 +23,8 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SurfacePositionV2MsgTest {
@@ -49,7 +51,7 @@ class SurfacePositionV2MsgTest {
 
 	@Test
 	void testDecodeSurfacePosition() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, null);
+		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
 		assertEquals(2, sPos.getSIL());
 		assertTrue(sPos.hasGroundSpeed());
@@ -65,32 +67,30 @@ class SurfacePositionV2MsgTest {
 
 	@Test
 	void testGetNIC() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, null);
+		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(8, sPos.getNIC());
+		assertEquals(8, sPos.getNIC(false, false));
 	}
 
 	@Test
 	void testGetNICWithSupplementA() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, null);
-		sPos.setNICSupplementA(true);
+		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(9, sPos.getNIC());
+		assertEquals(9, sPos.getNIC(true, false));
 	}
 
 	@Test
 	void testGetHorizontalContainmentRadiusLimit() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, null);
+		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(185.2, sPos.getHorizontalContainmentRadiusLimit());
+		assertEquals(185.2, sPos.getHorizontalContainmentRadiusLimit(false, false));
 	}
 
 	@Test
 	void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, null);
-		sPos.setNICSupplementA(true);
+		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(75, sPos.getHorizontalContainmentRadiusLimit());
+		assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
 	}
 
 }

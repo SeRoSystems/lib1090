@@ -18,129 +18,208 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
-/**
- * @author Markus Fuchs (fuchs@opensky-network.org)
- */
-public class SurfacePositionV2Msg extends SurfacePositionV1Msg implements Serializable {
+public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg {
 
-	private static final long serialVersionUID = -4899716425365685001L;
+    private static final long serialVersionUID = -4899716425365685001L;
 
-	private boolean nic_suppl_c;
+    private boolean horizontalPositionAvailable;
+    private byte movement;
+    private boolean headingStatus;
+    private byte groundTrack;
+    private boolean timeFlag;
+    private CPREncodedPosition position;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected SurfacePositionV2Msg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected SurfacePositionV2Msg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-B surface position message as hex string
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public SurfacePositionV2Msg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw ADS-B surface position message as hex string
+     * @param timestamp  timestamp for this position message
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public SurfacePositionV2Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param raw_message raw ADS-B surface position message as byte array
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public SurfacePositionV2Msg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw ADS-B surface position message as byte array
+     * @param timestamp  timestamp for this position message
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public SurfacePositionV2Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this surface position msg
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public SurfacePositionV2Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
-		super(squitter, timestamp);
-		setType(subtype.ADSB_SURFACE_POSITION_V2);
-	}
+    /**
+     * @param squitter  extended squitter which contains this surface position msg
+     * @param timestamp timestamp for this position message
+     * @throws BadFormatException if message has wrong format
+     */
+    public SurfacePositionV2Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+        super(squitter);
+        setType(subtype.ADSB_SURFACE_POSITION_V2);
 
-	/**
-	 * @return NIC supplement that was set before
-	 */
-	public boolean hasNICSupplementC() {
-		return nic_suppl_c;
-	}
+        byte formatTypeCode = getFormatTypeCode();
+        SurfacePosition.validateSurfacePositionFormat(formatTypeCode);
 
-	/**
-	 * @param nic_suppl Navigation Integrity Category (NIC) supplement C from operational status message.
-	 *        It's from the surface capability class (CC) subfield of Operational Status Messages
-	 */
-	public void setNICSupplementC(boolean nic_suppl) {
-		this.nic_suppl_c = nic_suppl;
-	}
+        horizontalPositionAvailable = formatTypeCode != 0;
+        BitReader br = BitReader.forBigEndian(getMessage());
+        movement = br.readByte(6, 12);
+        headingStatus = br.readByte(13, 13) == 1;
+        groundTrack = br.readByte(14, 20);
+        timeFlag = br.readByte(21, 21) == 1;
+        position = SurfacePosition.extractCPREncodedPosition(br, movement, Objects.requireNonNull(timestamp, "timestamp"));
+    }
 
-	/**
-	 * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-	 * (NACp) see {@link AirborneOperationalStatusV2Msg}. Values according to DO-260B Table 2-14.
-	 *
-	 * The horizontal containment radius is also known as "horizontal protection level".
-	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-	 *         If aircraft uses ADS-B version 1+, set NIC supplement A from Operational Status Message
-	 *         for better precision. For version 2 set NIC supplement C from Surface Operational Status
-	 *         Message for even better precision.
-	 */
-	@Override
-	public double getHorizontalContainmentRadiusLimit() {
-		switch (getFormatTypeCode()) {
-			case 0: return -1;
-			case 5: return 7.5;
-			case 6: return 25;
-			case 7:
-				return hasNICSupplementA() ? 75 : 185.2;
-			case 8:
-				if (hasNICSupplementC() && hasNICSupplementA())
-					return 370.4;
-				else if (hasNICSupplementC())
-					return 1111.2;
-				else if (hasNICSupplementA())
-					return 555.6;
-				return -1;
-			default: return -1;
-		}
-	}
+    /**
+     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 2.
+     */
+    public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA, boolean nicSupplementC) {
+        return SurfacePosition.decodeHCR(getFormatTypeCode(), nicSupplementA, nicSupplementC);
+    }
 
-	/**
-	 * Values according to DO-260B Table 2-14
-	 *
-	 * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-B version 1+, set
-	 * NIC supplement A from Operational Status Message for better precision. For version 2 set NIC supplement C
-	 * from Surface Operational Status Message for even better precision.
-	 */
-	@Override
-	public byte getNIC() {
-		switch (getFormatTypeCode()) {
-			case 0: return 0;
-			case 5: return 11;
-			case 6: return 10;
-			case 7:
-				return (byte) (hasNICSupplementA() ? 9 : 8);
-			case 8:
-				if (hasNICSupplementC() && hasNICSupplementA())
-					return 7;
-				else if (hasNICSupplementC() || hasNICSupplementA())
-					return 6;
-				return 0;
-			default: return 0;
-		}
-	}
+    @Override
+    public double getHorizontalContainmentRadiusLimit() {
+        return getHorizontalContainmentRadiusLimit(false, false);
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tSurfacePositionV2Msg{" +
-				"nic_suppl_c=" + nic_suppl_c +
-				'}';
-	}
+    /**
+     * Navigation integrity category for ADS-B version 2.
+     */
+    public byte getNIC(boolean nicSupplementA, boolean nicSupplementC) {
+        return SurfacePosition.decodeNIC(getFormatTypeCode(), nicSupplementA, nicSupplementC);
+    }
+
+    @Override
+    public byte getNIC() {
+        return getNIC(false, false);
+    }
+
+    @Override
+    public byte getNACp() {
+        return SurfacePosition.decodeNIC(getFormatTypeCode());
+    }
+
+    @Override
+    public double getPositionUncertainty() {
+        return SurfacePosition.decodeEPU(getFormatTypeCode());
+    }
+
+    @Override
+    public byte getMovementEncoded() {
+        return movement;
+    }
+
+    @Override
+    public byte getHeadingEncoded() {
+        return groundTrack;
+    }
+
+    @Override
+    public boolean hasValidHeading() {
+        return headingStatus;
+    }
+
+    @Override
+    public boolean hasTimeFlag() {
+        return timeFlag;
+    }
+
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
+
+    @Override
+    public boolean hasValidPosition() {
+        return horizontalPositionAvailable;
+    }
+
+    @Override
+    public String toString() {
+        return "SurfacePositionV2Msg{" + super.toString() +
+                ", horizontalPositionAvailable=" + horizontalPositionAvailable +
+                ", movement=" + movement +
+                ", headingStatus=" + headingStatus +
+                ", groundTrack=" + groundTrack +
+                ", timeFlag=" + timeFlag +
+                ", position=" + position +
+                '}';
+    }
+
+    /**
+     * Variant of {@link SurfacePositionV2Msg} that stores the NIC supplement A and C bits, e.g., as
+     * obtained from the corresponding operational status message, so that {@link #getNIC()} and
+     * {@link #getHorizontalContainmentRadiusLimit()} can take them into account.
+     */
+    public static class WithNICSupplements extends SurfacePositionV2Msg {
+
+        private static final long serialVersionUID = 3971548290816254773L;
+
+        private final boolean nicSupplementA;
+        private final boolean nicSupplementC;
+
+        /**
+         * @param rawMessage     raw ADS-B surface position message as hex string
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplementC NIC supplement C bit for this aircraft
+         * @throws BadFormatException     if message has wrong format
+         * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+         */
+        public WithNICSupplements(String rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementC) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementC);
+        }
+
+        /**
+         * @param rawMessage     raw ADS-B surface position message as byte array
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplementC NIC supplement C bit for this aircraft
+         * @throws BadFormatException     if message has wrong format
+         * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+         */
+        public WithNICSupplements(byte[] rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementC) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementC);
+        }
+
+        /**
+         * @param squitter       extended squitter which contains this surface position msg
+         * @param timestamp      timestamp for this position message
+         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplementC NIC supplement C bit for this aircraft
+         * @throws BadFormatException if message has wrong format
+         */
+        public WithNICSupplements(ExtendedSquitter squitter, Instant timestamp, boolean nicSupplementA, boolean nicSupplementC) throws BadFormatException {
+            super(squitter, timestamp);
+            this.nicSupplementA = nicSupplementA;
+            this.nicSupplementC = nicSupplementC;
+        }
+
+        @Override
+        public double getHorizontalContainmentRadiusLimit() {
+            return getHorizontalContainmentRadiusLimit(nicSupplementA, nicSupplementC);
+        }
+
+        @Override
+        public byte getNIC() {
+            return getNIC(nicSupplementA, nicSupplementC);
+        }
+    }
 }

@@ -127,45 +127,38 @@ public class ExampleDecoder {
 			case ADSB_SURFACE_POSITION_V0:
 			case ADSB_SURFACE_POSITION_V1:
 			case ADSB_SURFACE_POSITION_V2:
-				SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
+				SurfacePositionMsg surfacePosition = (SurfacePositionMsg) msg;
 				System.out.print("["+icao24+"]: ");
 
-				Position sPos0 = decoder.extractPosition(sp0.getAddress(), sp0, receiver);
+				Position sPos0 = decoder.extractPosition(msg.getAddress(), surfacePosition, receiver);
 				// decode the position if possible; prior position needed
 				if (sPos0 == null)
 					System.out.println("Cannot decode position yet or no reference available (yet).");
 				else
 					System.out.println("Now at position (" + sPos0.getLatitude() + "," + sPos0.getLongitude() + ")");
 
-				System.out.println("          Horizontal containment radius limit/protection level is " +
-						sp0.getHorizontalContainmentRadiusLimit() + "m");
-				if (sp0.hasValidHeading())
-					System.out.println("          Heading: " + sp0.getHeading() + "°");
+				if (surfacePosition.hasValidHeading())
+					System.out.println("          Heading: " + surfacePosition.getHeading() + "°");
 				System.out.println("          Airplane is on the ground.");
 
-				if (sp0.hasGroundSpeed()) {
-					System.out.println("          Ground speed: " + sp0.getGroundSpeed() + "kt");
-					System.out.println("          Ground speed resolution: " + sp0.getGroundSpeedResolution() + "kt");
+				if (surfacePosition.hasGroundSpeed()) {
+					System.out.println("          Ground speed: " + surfacePosition.getGroundSpeed() + "kt");
+					System.out.println("          Ground speed resolution: " + surfacePosition.getGroundSpeedResolution() + "kt");
 				}
+
+				System.out.println("          Horizontal containment radius limit/protection level is " +
+						surfacePosition.getHorizontalContainmentRadiusLimit() + "m");
+				System.out.println("          Navigation Integrity Category: " + surfacePosition.getNIC());
 
 				// we want to inspect fields for ADS-B of different versions
 				switch(msg.getType()) {
 					case ADSB_SURFACE_POSITION_V0:
+						SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
 						// NACp and SIL for newer ADS-B versions contained in operational status message
 						// Use the following only with version 0 as the others are more accurate
 						System.out.println("          Navigation Accuracy Category for position (NACp): " + sp0.getNACp());
 						System.out.println("          Position Uncertainty (based on NACp): " + sp0.getPositionUncertainty() + "m");
 						System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSIL());
-						break;
-					case ADSB_SURFACE_POSITION_V1:
-						SurfacePositionV1Msg sp1 = (SurfacePositionV1Msg) msg;
-						System.out.println("          NIC supplement A set: "+sp1.hasNICSupplementA());
-						break;
-					case ADSB_SURFACE_POSITION_V2:
-						SurfacePositionV2Msg sp2 = (SurfacePositionV2Msg) msg;
-						// NIC supplement C contained in operational status messages is set by the decoder if present
-						System.out.println("          NIC supplement A set: "+sp2.hasNICSupplementA());
-						System.out.println("          NIC supplement C set: "+sp2.hasNICSupplementC());
 						break;
 				}
 

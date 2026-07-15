@@ -341,17 +341,12 @@ public class StatefulModeSDecoder {
 			// surface position message
 			switch (dd.adsbVersion) {
 				case 0:
-					return new SurfacePositionV0Msg(es1090, timestamp);
+					return new SurfacePositionV0Msg(es1090, Instant.ofEpochMilli(timestamp));
 				case 1:
-					SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090, timestamp);
-					s1.setNICSupplementA(dd.nicSupplA);
-					return s1;
+					return new SurfacePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
 				case 2:
 				default:
-					SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090, timestamp);
-					s2.setNICSupplementA(dd.nicSupplA);
-					s2.setNICSupplementC(dd.nicSupplC);
-					return s2;
+					return new SurfacePositionV2Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplC);
 			}
 		}
 
