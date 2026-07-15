@@ -48,7 +48,7 @@ class AirspeedHeadingMsgTest {
 	@Test
 	public void testNACvRawAndAccuracyBound() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertEquals(0, msg.getNACv());
+		assertEquals(0, msg.getNACvEncoded());
 		assertEquals(-1.0f, msg.getAccuracyBound());
 	}
 
@@ -61,20 +61,20 @@ class AirspeedHeadingMsgTest {
 	@Test
 	public void testVerticalRate() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertTrue(msg.hasVerticalRateInfo());
+		assertTrue(msg.hasVerticalRate());
 		assertEquals(-2304, msg.getVerticalRate().intValue());
 	}
 
 	@Test
 	public void testGeoMinusBaroUnavailable() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertFalse(msg.hasGeoMinusBaroInfo(), "geo-minus-baro should not be available when raw field is 0");
+		assertFalse(msg.hasDiffBaroAlt(), "geo-minus-baro should not be available when raw field is 0");
 	}
 
 	@Test
 	public void testGeoMinusBaroReturnsNullWhenUnavailable() throws Exception {
 		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertNull(msg.getGeoMinusBaro(), "getGeoMinusBaro() should return null when unavailable");
+		assertNull(msg.getDiffBaroAlt(), "getDiffBaroAlt() should return null when unavailable");
 	}
 
 	@Test
