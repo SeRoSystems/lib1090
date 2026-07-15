@@ -102,7 +102,7 @@ public class ExampleDecoder {
 					System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
 				}
 
-				Integer geoMinusBaro = decoder.getGeoMinusBaro(msg);
+				Integer geoMinusBaro = decoder.getDiffBaroAlt(msg);
 				if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
 					System.out.println("          Height (geom.): " + ap.getAltitude() + geoMinusBaro + " ft");
 				}
@@ -190,9 +190,9 @@ public class ExampleDecoder {
 							(airspeed.hasHeadingStatusFlag() ? airspeed.getHeading()+"°" : "unknown"));
 				}
 
-				if (airspeed.hasVerticalRateInfo())
+				if (airspeed.hasVerticalRate())
 					System.out.println("          Vertical rate: "+
-							(airspeed.hasVerticalRateInfo() ? airspeed.getVerticalRate()+" ft/min" : "unknown"));
+							(airspeed.hasVerticalRate() ? airspeed.getVerticalRate()+" ft/min" : "unknown"));
 				break;
 			case ADSB_IDENTIFICATION:
 				IdentificationMsg ident = (IdentificationMsg) msg;
@@ -276,9 +276,9 @@ public class ExampleDecoder {
 				break;
 			case ADSB_VELOCITY:
 				VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
-				System.out.println("["+icao24+"]: Ground Speed: "+(veloc.hasVelocityInfo() ? veloc.getGroundSpeed() : "unknown")+" kt");
-				System.out.println("          True Track: "+(veloc.hasVelocityInfo() ? veloc.getTrueTrackAngle() : "unknown")+" °");
-				System.out.println("          Vertical rate: "+(veloc.hasVerticalRateInfo() ? veloc.getVerticalRate() : "unknown")+" ft/min");
+				System.out.println("["+icao24+"]: Ground Speed: "+(veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown")+" kt");
+				System.out.println("          True Track: "+(veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown")+" °");
+				System.out.println("          Vertical rate: "+(veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown")+" ft/min");
 
 				// the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
 				if (decoder.getAdsbVersion(veloc) == 1)

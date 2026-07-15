@@ -369,12 +369,12 @@ public class StatefulModeSDecoder {
 			if (subtype == 1 || subtype == 2) { // velocity over ground
 				VelocityOverGroundMsg velocity =
 						new VelocityOverGroundMsg(es1090);
-				if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
+				if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
 				return velocity;
 			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
 				AirspeedHeadingMsg airspeed =
 						new AirspeedHeadingMsg(es1090);
-				if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
+				if (airspeed.hasDiffBaroAlt()) dd.geoMinusBaro = airspeed.getDiffBaroAlt();
 				return airspeed;
 			}
 		}
@@ -540,7 +540,7 @@ public class StatefulModeSDecoder {
 	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return the difference between geometric and barometric altitude in feet or null if not present
 	 */
-	public <T extends ModeSDownlinkMsg> Integer getGeoMinusBaro(T reply) {
+	public <T extends ModeSDownlinkMsg> Integer getDiffBaroAlt(T reply) {
 		if (reply == null) return null;
 		DecoderData dd = getDecoderData(reply.getAddress());
 		return dd.geoMinusBaro;

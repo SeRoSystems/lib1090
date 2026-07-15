@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -26,216 +27,246 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-B velocity messages
+ *
  * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
-	private static final long serialVersionUID = 1774082354457574555L;
+    private static final long serialVersionUID = 1774082354457574555L;
 
-	private byte msg_subtype;
-	private boolean intent_change;
-	private boolean ifr_capability;
-	private byte navigation_accuracy_category;
-	private boolean direction_west; // 0 = east, 1 = west
-	private short east_west_velocity; // in kn
-	private boolean velocity_info_available;
-	private boolean direction_south; // 0 = north, 1 = south
-	private short north_south_velocity; // in kn
-	private boolean vertical_source; // 0 = geometric, 1 = barometric
-	private boolean vertical_rate_down; // 0 = up, 1 = down
-	private short vertical_rate; // in ft/min
-	private boolean vertical_rate_info_available;
-	private int geo_minus_baro; // in ft
-	private boolean geo_minus_baro_available;
+    private byte messageSubtype;
+    private boolean intentChange;
+    private boolean ifrCapability;
+    private byte navigationAccuracyCategoryEncoded;
+    private boolean velocityToEastNegative; // 0 = positive (east), 1 = negative (west)
+    private short velocityToEastEncoded; // raw encoded velocity-to-east field
+    private boolean velocityToNorthNegative; // 0 = positive (north), 1 = negative (south)
+    private short velocityToNorthEncoded; // raw encoded velocity-to-north field
+    private boolean verticalSource; // 0 = geometric, 1 = barometric
+    private boolean verticalRateDown; // 0 = up, 1 = down
+    private short verticalRateEncoded; // raw encoded vertical rate field
+    private boolean diffBaroAltNegative;
+    private short diffBaroAltEncoded; // raw encoded geometric minus barometric altitude difference field
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected VelocityOverGroundMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected VelocityOverGroundMsg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-B velocity-over-ground message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public VelocityOverGroundMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-B velocity-over-ground message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public VelocityOverGroundMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw ADS-B velocity-over-ground message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public VelocityOverGroundMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-B velocity-over-ground message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public VelocityOverGroundMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this velocity over ground msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.ADSB_VELOCITY);
+    /**
+     * @param squitter extended squitter which contains this velocity over ground msg
+     * @throws BadFormatException if message has wrong format
+     */
+    public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
+        setType(subtype.ADSB_VELOCITY);
 
-		if (this.getFormatTypeCode() != 19) {
-			throw new BadFormatException("Velocity messages must have typecode 19.");
-		}
+        if (this.getFormatTypeCode() != 19) {
+            throw new BadFormatException("Velocity messages must have typecode 19.");
+        }
 
-		byte[] msg = this.getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-		msg_subtype = (byte) (msg[0]&0x7);
-		if (msg_subtype != 1 && msg_subtype != 2) {
-			throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-		}
+        messageSubtype = br.readByte(6, 8);
+        if (messageSubtype != 1 && messageSubtype != 2) {
+            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
+        }
 
-		intent_change = (msg[1]&0x80)>0;
-		ifr_capability = (msg[1]&0x40)>0;
-		navigation_accuracy_category = (byte) ((msg[1]>>>3)&0x7);
+        intentChange = br.readByte(9, 9) == 1;
+        ifrCapability = br.readByte(10, 10) == 1;
+        navigationAccuracyCategoryEncoded = br.readByte(11, 13);
 
-		// check this later
-		velocity_info_available = true;
-		vertical_rate_info_available = true;
-		geo_minus_baro_available = true;
+        velocityToEastNegative = br.readByte(14, 14) == 1;
+        velocityToEastEncoded = br.readShort(15, 24);
 
-		direction_west = (msg[1]&0x4)>0;
-		east_west_velocity = (short) (((msg[1]&0x3)<<8 | msg[2]&0xFF)-1);
-		if (east_west_velocity == -1) velocity_info_available = false;
-		if (msg_subtype == 2) east_west_velocity<<=2;
+        velocityToNorthNegative = br.readByte(25, 25) == 1;
+        velocityToNorthEncoded = br.readShort(26, 35);
 
-		direction_south = (msg[3]&0x80)>0;
-		north_south_velocity = (short) (((msg[3]&0x7F)<<3 | (msg[4]>>>5)&0x07)-1);
-		if (north_south_velocity == -1) velocity_info_available = false;
-		if (msg_subtype == 2) north_south_velocity<<=2;
+        verticalSource = br.readByte(36, 36) == 1;
+        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalRateEncoded = br.readShort(38, 46);
 
-		vertical_source = (msg[4]&0x10)>0;
-		vertical_rate_down = (msg[4]&0x08)>0;
-		int raw_vr = ((msg[4]&0x07)<<6 | (msg[5]>>>2)&0x3F);
-		if (raw_vr == 0) {
-			vertical_rate_info_available = false;
-		} else {
-			vertical_rate = (short) ((raw_vr-1)<<6);
-		}
+        diffBaroAltNegative = br.readByte(49, 49) == 1;
+        diffBaroAltEncoded = br.readByte(50, 56);
+    }
 
-		geo_minus_baro = msg[6]&0x7F;
-		if (geo_minus_baro == 0) geo_minus_baro_available = false;
-		else geo_minus_baro = (geo_minus_baro-1)*25;
-		if ((msg[6]&0x80)>0) geo_minus_baro *= -1;
-	}
+    /**
+     * @return whether velocity is available
+     */
+    public boolean hasVelocity() {
+        return velocityToEastEncoded != 0 && velocityToNorthEncoded != 0;
+    }
 
-	/**
-	 * @return whether velocity info is available
-	 */
-	public boolean hasVelocityInfo() {
-		return velocity_info_available;
-	}
+    @Override
+    public boolean hasVerticalRate() {
+        return verticalRateEncoded != 0;
+    }
 
-	@Override
-	public boolean hasVerticalRateInfo() {
-		return vertical_rate_info_available;
-	}
+    @Override
+    public boolean hasDiffBaroAlt() {
+        return diffBaroAltEncoded != 0;
+    }
 
-	@Override
-	public boolean hasGeoMinusBaroInfo() {
-		return geo_minus_baro_available;
-	}
+    @Override
+    public boolean isSupersonic() {
+        return messageSubtype == 2;
+    }
 
-	/**
-	 * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
-	 */
-	public boolean isSupersonic() {
-		return msg_subtype == 2;
-	}
+    @Override
+    public boolean hasChangeIntent() {
+        return intentChange;
+    }
 
-	@Override
-	public boolean hasChangeIntent() {
-		return intent_change;
-	}
+    @Override
+    public boolean hasIFRCapability() {
+        return ifrCapability;
+    }
 
-	@Override
-	public boolean hasIFRCapability() {
-		return ifr_capability;
-	}
+    @Override
+    public byte getNACvEncoded() {
+        return navigationAccuracyCategoryEncoded;
+    }
 
-	@Override
-	public byte getNACv() {
-		return navigation_accuracy_category;
-	}
+    /**
+     * @return velocity from west to east in knots or null if information is not available
+     */
+    public Integer getWestToEastVelocity() {
+        if (!hasVelocity()) return null;
+        int velocityToEast = (velocityToEastEncoded - 1) * (isSupersonic() ? 4 : 1);
+        return velocityToEastNegative ? -velocityToEast : velocityToEast;
+    }
 
-	/**
-	 * @return velocity from east to south in knots or null if information is not available
-	 */
-	public Integer getEastToWestVelocity() {
-		if (!velocity_info_available) return null;
-		return (direction_west ? east_west_velocity : -east_west_velocity);
-	}
+    /**
+     * @return velocity from south to north in knots or null if information is not available
+     */
+    public Integer getSouthToNorthVelocity() {
+        if (!hasVelocity()) return null;
+        int velocityToNorth = (velocityToNorthEncoded - 1) * (isSupersonic() ? 4 : 1);
+        return velocityToNorthNegative ? -velocityToNorth : velocityToNorth;
+    }
 
-	/**
-	 * @return velocity from north to south in knots or null if information is not available
-	 */
-	public Integer getNorthToSouthVelocity() {
-		if (!velocity_info_available) return null;
-		return (direction_south ? north_south_velocity : -north_south_velocity);
-	}
+    @Override
+    public boolean isBarometricVerticalSpeed() {
+        return verticalSource;
+    }
 
-	@Override
-	public boolean isBarometricVerticalSpeed() {
-		return vertical_source;
-	}
+    @Override
+    public Integer getVerticalRate() {
+        if (!hasVerticalRate()) return null;
+        int verticalRate = (verticalRateEncoded - 1) * 64;
+        return verticalRateDown ? -verticalRate : verticalRate;
+    }
 
-	@Override
-	public Integer getVerticalRate() {
-		if (!vertical_rate_info_available) return null;
-		return (vertical_rate_down ? -vertical_rate : vertical_rate);
-	}
+    @Override
+    public Integer getDiffBaroAlt() {
+        if (!hasDiffBaroAlt()) return null;
+        int diffBaroAlt = (diffBaroAltEncoded - 1) * 25;
+        return diffBaroAltNegative ? -diffBaroAlt : diffBaroAlt;
+    }
 
-	@Override
-	public Integer getGeoMinusBaro() {
-		if (!geo_minus_baro_available) return null;
-		return geo_minus_baro;
-	}
+    public boolean isVelocityToEastNegative() {
+        return velocityToEastNegative;
+    }
 
-	/**
-	 * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
-	 * The latter can also be checked with {@link #hasVelocityInfo()}.
-	 */
-	public Double getTrueTrackAngle() {
-		if (!velocity_info_available) return null;
-		double angle = Math.toDegrees(Math.atan2(
-				-this.getEastToWestVelocity(),
-				-this.getNorthToSouthVelocity()));
+    public boolean isVelocityToNorthNegative() {
+        return velocityToNorthNegative;
+    }
 
-		// if negative => clockwise
-		if (angle < 0) return 360+angle;
-		else return angle;
-	}
+    @Override
+    public boolean isVerticalRateDown() {
+        return verticalRateDown;
+    }
 
-	/**
-	 * @return speed over ground in knots or null if information is not available. The latter can also be checked
-	 * with {@link #hasVelocityInfo()}.
-	 */
-	public Double getGroundSpeed() {
-		if (!velocity_info_available) return null;
-		return Math.hypot(north_south_velocity, east_west_velocity);
-	}
+    @Override
+    public boolean isDiffBaroAltNegative() {
+        return diffBaroAltNegative;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tVelocityOverGroundMsg{" +
-				"msg_subtype=" + msg_subtype +
-				", intent_change=" + intent_change +
-				", ifr_capability=" + ifr_capability +
-				", navigation_accuracy_category=" + navigation_accuracy_category +
-				", direction_west=" + direction_west +
-				", east_west_velocity=" + east_west_velocity +
-				", velocity_info_available=" + velocity_info_available +
-				", direction_south=" + direction_south +
-				", north_south_velocity=" + north_south_velocity +
-				", vertical_source=" + vertical_source +
-				", vertical_rate_down=" + vertical_rate_down +
-				", vertical_rate=" + vertical_rate +
-				", vertical_rate_info_available=" + vertical_rate_info_available +
-				", geo_minus_baro=" + geo_minus_baro +
-				", geo_minus_baro_available=" + geo_minus_baro_available +
-				'}';
-	}
+    /**
+     * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
+     * The latter can also be checked with {@link #hasVelocity()}.
+     */
+    public Double getTrueTrackAngle() {
+        if (!hasVelocity()) return null;
+        Integer westToEastVelocity = getWestToEastVelocity();
+        Integer southToNorthVelocity = getSouthToNorthVelocity();
+        double angle = Math.toDegrees(Math.atan2(
+                westToEastVelocity,
+                southToNorthVelocity));
+
+        // if negative => clockwise
+        if (angle < 0) return 360 + angle;
+        else return angle;
+    }
+
+    /**
+     * @return speed over ground in knots or null if information is not available. The latter can also be checked
+     * with {@link #hasVelocity()}.
+     */
+    public Double getGroundSpeed() {
+        if (!hasVelocity()) return null;
+        return Math.hypot(getSouthToNorthVelocity(), getWestToEastVelocity());
+    }
+
+    /**
+     * @return the raw encoded message subtype
+     */
+    public short getWestToEastVelocityEncoded() {
+        return velocityToEastEncoded;
+    }
+
+    /**
+     * @return the raw encoded velocity from south to north field
+     */
+    public short getSouthToNorthVelocityEncoded() {
+        return velocityToNorthEncoded;
+    }
+
+    @Override
+    public short getVerticalRateEncoded() {
+        return verticalRateEncoded;
+    }
+
+    @Override
+    public short getDiffBaroAltEncoded() {
+        return diffBaroAltEncoded;
+    }
+
+    @Override
+    public String toString() {
+        return "VelocityOverGroundMsg{" + super.toString() +
+                ", messageSubtype=" + messageSubtype +
+                ", intentChange=" + intentChange +
+                ", ifrCapability=" + ifrCapability +
+                ", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
+                ", velocityToEastNegative=" + velocityToEastNegative +
+                ", velocityToEastEncoded=" + velocityToEastEncoded +
+                ", velocityToNorthNegative=" + velocityToNorthNegative +
+                ", velocityToNorthEncoded=" + velocityToNorthEncoded +
+                ", verticalSource=" + verticalSource +
+                ", verticalRateDown=" + verticalRateDown +
+                ", verticalRateEncoded=" + verticalRateEncoded +
+                ", diffBaroAltNegative=" + diffBaroAltNegative +
+                ", diffBaroAltEncoded=" + diffBaroAltEncoded +
+                '}';
+    }
 }
