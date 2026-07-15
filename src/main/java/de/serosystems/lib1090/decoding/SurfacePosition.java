@@ -18,17 +18,46 @@
 
 package de.serosystems.lib1090.decoding;
 
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV2Msg;
 
-/**
- * @author Markus Fuchs (fuchs@sero-systems.de)
- */
+import java.time.Instant;
+import java.util.Objects;
+
 public final class SurfacePosition {
 
-
 	private SurfacePosition() {}
+
+	/**
+	 * Validate whether the given format type code denotes a surface position message.
+	 *
+	 * @throws BadFormatException if the format type code is not a surface position type
+	 */
+	public static void validateSurfacePositionFormat(byte formatTypeCode) throws BadFormatException {
+		if (!(formatTypeCode == 0 || (formatTypeCode >= 5 && formatTypeCode <= 8))) {
+			throw new BadFormatException("This is not a position message! Wrong format type code (" + formatTypeCode + ").");
+		}
+	}
+
+	/**
+	 * Extract the CPR-encoded surface position from the message payload.
+	 *
+	 * @param br bit reader positioned over the 7-byte extended squitter payload
+	 * @param movement encoded movement field
+	 * @param timestamp timestamp for the position message
+	 * @return the encoded surface position
+	 */
+	public static CPREncodedPosition extractCPREncodedPosition(BitReader br, byte movement, Instant timestamp) {
+		Objects.requireNonNull(timestamp, "timestamp");
+		boolean cprFormat = br.readByte(22, 22) == 1;
+		int cprEncodedLat = br.readInt(23, 39);
+		int cprEncodedLon = br.readInt(40, 56);
+		boolean highGroundSpeed = movement == 0 || movement > 49;
+		return CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon, timestamp.toEpochMilli());
+	}
 
 	/**
 	 * @return speed resolution (accuracy) in knots or null if ground speed is not available.
@@ -161,6 +190,44 @@ public final class SurfacePosition {
 			case 7: return nicSupplA ? 75 : 185.2;
 			case 8: return 185.2;
 			// case 0: return -1;
+			default: return -1;
+		}
+	}
+
+	/**
+	 * According to DO-260B Table 2-14.
+	 */
+	public static byte decodeNIC(byte formatTypeCode, boolean nicSupplementA, boolean nicSupplementC) {
+		switch (formatTypeCode) {
+			case 5: return 11;
+			case 6: return 10;
+			case 7: return (byte) (nicSupplementA ? 9 : 8);
+			case 8:
+				if (nicSupplementC && nicSupplementA)
+					return 7;
+				else if (nicSupplementC || nicSupplementA)
+					return 6;
+				return 0;
+			default: return 0;
+		}
+	}
+
+	/**
+	 * Horizontal containment radius limit according to DO-260B Table 2-14.
+	 */
+	public static double decodeHCR(byte formatTypeCode, boolean nicSupplementA, boolean nicSupplementC) {
+		switch (formatTypeCode) {
+			case 5: return 7.5;
+			case 6: return 25;
+			case 7: return nicSupplementA ? 75 : 185.2;
+			case 8:
+				if (nicSupplementC && nicSupplementA)
+					return 370.4;
+				else if (nicSupplementC)
+					return 1111.2;
+				else if (nicSupplementA)
+					return 555.6;
+				return -1;
 			default: return -1;
 		}
 	}
