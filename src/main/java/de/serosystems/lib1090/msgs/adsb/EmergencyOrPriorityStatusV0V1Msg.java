@@ -26,21 +26,20 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B emergency and priority status messages (ADS-B version 2)
+ * Decoder for ADS-B emergency and priority status messages
  */
-public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg {
+public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg {
 
-    private static final long serialVersionUID = 596314337728216721L;
+    private static final long serialVersionUID = 7380235047641841128L;
 
     private static final byte SUBTYPE = 1;
 
     private byte emergencyState;
-    private short modeACode;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected EmergencyOrPriorityStatusV2Msg() {
+    protected EmergencyOrPriorityStatusV0V1Msg() {
     }
 
     /**
@@ -48,7 +47,7 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public EmergencyOrPriorityStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV0V1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -57,7 +56,7 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public EmergencyOrPriorityStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV0V1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -65,9 +64,9 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @param squitter extended squitter which contains this emergency or priority status msg
      * @throws BadFormatException if message has wrong format
      */
-    public EmergencyOrPriorityStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public EmergencyOrPriorityStatusV0V1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_EMERGENCY_V2);
+        setType(subtype.ADSB_EMERGENCY_V0V1);
 
         if (this.getFormatTypeCode() != 28)
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
@@ -78,7 +77,6 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
             throw new BadFormatException("Emergency and priority status reports have subtype 1.");
 
         emergencyState = b.readByte(9, 11);
-        modeACode = b.readShort(12, 24);
     }
 
     @Override
@@ -91,19 +89,10 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
         return emergencyState;
     }
 
-    /**
-     * @return the four-digit Mode A (4096) code (only ADS-B version 2)
-     */
-    @Override
-    public short getModeACode() {
-        return modeACode;
-    }
-
     @Override
     public String toString() {
-        return "EmergencyOrPriorityStatusV2Msg{" + super.toString() +
+        return "EmergencyOrPriorityStatusV0V1Msg{" + super.toString() +
                 ", emergencyState=" + emergencyState +
-                ", modeACode=" + modeACode +
                 '}';
     }
 }
