@@ -18,8 +18,9 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.adsb.TCASResolutionAdvisoryMsg;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -98,24 +99,24 @@ public class ACASActiveResolutionAdvisoryReportTest {
     @Test
     public void threatIdentityData() throws BadFormatException {
 
-        ThreatIdentityData threatIdentityData0 = TCASResolutionAdvisoryMsg.extractThreatIdentityData((short) 0, msg);
+        ThreatIdentityData threatIdentityData0 = TCASResolutionAdvisory.extractThreatIdentityData((short) 0, BitReader.forBigEndian(msg));
         assertNull(threatIdentityData0);
 
-        ThreatIdentityData threatIdentityData1 = TCASResolutionAdvisoryMsg.extractThreatIdentityData((short) 1, msg);
+        ThreatIdentityData threatIdentityData1 = TCASResolutionAdvisory.extractThreatIdentityData((short) 1, BitReader.forBigEndian(msg));
         assertNotNull(threatIdentityData1);
         assertEquals(0L, threatIdentityData1.getIcao24().longValue());
         assertNull(threatIdentityData1.getAltitudeCode());
         assertNull(threatIdentityData1.getEncodedRange());
         assertNull(threatIdentityData1.getEncodedBearing());
 
-        ThreatIdentityData threatIdentityData2 = TCASResolutionAdvisoryMsg.extractThreatIdentityData((short) 2, msg);
+        ThreatIdentityData threatIdentityData2 = TCASResolutionAdvisory.extractThreatIdentityData((short) 2, BitReader.forBigEndian(msg));
         assertNotNull(threatIdentityData2);
         assertNull(threatIdentityData2.getIcao24());
         assertEquals(0, threatIdentityData2.getAltitudeCode().shortValue());
         assertEquals(0, threatIdentityData2.getEncodedRange().shortValue());
         assertEquals(0, threatIdentityData2.getEncodedBearing().shortValue());
 
-        ThreatIdentityData threatIdentityData3 = TCASResolutionAdvisoryMsg.extractThreatIdentityData((short) 3, msg);
+        ThreatIdentityData threatIdentityData3 = TCASResolutionAdvisory.extractThreatIdentityData((short) 3, BitReader.forBigEndian(msg));
         assertNull(threatIdentityData3);
 
     }

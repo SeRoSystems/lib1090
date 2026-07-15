@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
@@ -28,286 +30,210 @@ import java.io.Serializable;
 /**
  * Decoder for 1090ES TCAS Resolution Advisory Messages.<br>
  * Note: This format only exists in ADS-B versions &gt;= 2
- *
+ * <p>
  * See DO-260B 2.2.3.2.7.8.2
- *
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = 789568444700434753L;
+    private static final long serialVersionUID = 789568444700434753L;
 
-	private byte msg_subtype;
-	private short activeRa;
-	private byte racRecord;
-	private boolean raTerminated;
-	private boolean multiThreatEncounter;
-	private byte threatType;
-	private int threatIdentity;
-	private ThreatIdentityData threatIdentityData;
+    private static final byte SUBTYPE = 2;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected TCASResolutionAdvisoryMsg() { }
+    private short activeRa;
+    private byte racRecord;
+    private boolean raTerminated;
+    private boolean multiThreatEncounter;
+    private byte threatType;
+    private int threatIdentity;
+    private ThreatIdentityData threatIdentityData;
 
-	/**
-	 * @param raw_message raw ADS-B aircraft status message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public TCASResolutionAdvisoryMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected TCASResolutionAdvisoryMsg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-B aircraft status message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public TCASResolutionAdvisoryMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-B aircraft status message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public TCASResolutionAdvisoryMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this TCAS resolution advisory msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public TCASResolutionAdvisoryMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.ADSB_TCAS);
+    /**
+     * @param rawMessage raw ADS-B aircraft status message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public TCASResolutionAdvisoryMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-		if (this.getFormatTypeCode() != 28)
-			throw new BadFormatException("TCAS RA reports must have typecode 28.");
+    /**
+     * @param squitter extended squitter which contains this TCAS resolution advisory msg
+     * @throws BadFormatException if message has wrong format
+     */
+    public TCASResolutionAdvisoryMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
+        setType(subtype.ADSB_TCAS);
 
-		byte[] msg = this.getMessage();
+        if (getFormatTypeCode() != 28)
+            throw new BadFormatException("TCAS RA reports must have typecode 28.");
 
-		msg_subtype = (byte) (msg[0]&0x7);
-		if (msg_subtype != 2)
-			throw new BadFormatException("TCAS RA reports have subtype 2.");
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-		activeRa = decodeActiveRa(msg);
-		racRecord = decodeRacRecord(msg);
-		raTerminated = decodeRaTerminated(msg);
-		multiThreatEncounter = decodeMultiThreatEncounter(msg);
-		threatType = decodeThreatType(msg);
-		threatIdentity = decodeThreatIdentity(msg);
+        if (b.readByte(6, 8) != SUBTYPE)
+            throw new BadFormatException("TCAS RA reports have subtype 2.");
 
-		threatIdentityData = TCASResolutionAdvisoryMsg.extractThreatIdentityData(threatType, msg);
+        activeRa = TCASResolutionAdvisory.decodeActiveRa(b);
+        racRecord = TCASResolutionAdvisory.decodeRacRecord(b);
+        raTerminated = TCASResolutionAdvisory.decodeRaTerminated(b);
+        multiThreatEncounter = TCASResolutionAdvisory.decodeMultiThreatEncounter(b);
+        threatType = TCASResolutionAdvisory.decodeThreatType(b);
+        threatIdentity = TCASResolutionAdvisory.decodeThreatIdentity(b);
 
-	}
+        threatIdentityData = TCASResolutionAdvisory.extractThreatIdentityData(threatType, b);
 
-	/**
-	 * Although TCAS 7 is mandated in European and US airspaces, we could still see aircraft using TCAS 6.
-	 * In this case, the active RA needs to be interpreted differently and the threat identity is not present.
-	 *
-	 * @return whether the message should be assumed to originate from a TSO-C119A compatible system
-	 * 		   (version 6.04 Enhanced).
-	 */
-	public boolean isTCAS6() {
-		// bits 59-88 == 0
-		return threatIdentity == 0
-				&& threatType == 0
-				&& !multiThreatEncounter
-				&& !raTerminated;
-	}
+    }
 
-	/**
-	 * @return the subtype code of the aircraft status report (should always be 2)
-	 */
-	public byte getSubtype() {
-		return msg_subtype;
-	}
+    /**
+     * Although TCAS 7 is mandated in European and US airspaces, we could still see aircraft using TCAS 6.
+     * In this case, the active RA needs to be interpreted differently and the threat identity is not present.
+     *
+     * @return whether the message should be assumed to originate from a TSO-C119A compatible system
+     * (version 6.04 Enhanced).
+     */
+    public boolean isTCAS6() {
+        // bits 59-88 == 0
+        return threatIdentity == 0
+                && threatType == 0
+                && !multiThreatEncounter
+                && !raTerminated;
+    }
 
-	/**
-	 * @return 14 bits which indicate the characteristics of the resolution advisory
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.1)
-	 *         For TCAS 6 to be interpreted according to ED-143 V1 2.2.3.9.3.2.3.1.2
-	 */
-	public short getActiveRA() {
-		return activeRa;
-	}
+    /**
+     * @return the subtype code of the aircraft status report (should always be 2)
+     */
+    public byte getSubtype() {
+        return SUBTYPE;
+    }
 
-	/**
-	 * @return 4 bits which indicate all currently active RACs
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.2)
-	 */
-	public byte getRACRecord() {
-		return racRecord;
-	}
+    /**
+     * The active RA field must be interpreted according to ED-143 V1 2.2.3.9.3.2.3.1.2 for TCAS 6.
+     *
+     * @return 14 bits which indicate the characteristics of the resolution advisory
+     * (Annex 10 V4, 4.3.8.4.2.2.1.1)
+     */
+    public short getActiveRA() {
+        return activeRa;
+    }
 
-	/**
-	 * @return whether RA previously generated by ACAS has ceased being generated
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.3); not present for TCAS 6 systems
-	 */
-	public Boolean hasRATerminated() {
-		if (isTCAS6()) return null;
-		return raTerminated;
-	}
+    /**
+     * @return 4 bits which indicate all currently active RACs (Annex 10 V4, 4.3.8.4.2.2.1.2)
+     */
+    public byte getRACRecord() {
+        return racRecord;
+    }
 
-	/**
-	 * @return whether two or more simultaneous threats are currently being processed
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.4); not present for TCAS 6 systems
-	 */
-	public Boolean hasMultiThreatEncounter() {
-		if (isTCAS6()) return null;
-		return multiThreatEncounter;
-	}
+    /**
+     * @return whether RA previously generated by ACAS has ceased being generated
+     * (Annex 10 V4, 4.3.8.4.2.2.1.3); not present for TCAS 6 systems
+     */
+    public Boolean hasRATerminated() {
+        if (isTCAS6()) return null;
+        return raTerminated;
+    }
 
-	/**
-	 * @return the threat type indicator:
-	 *            0) no identity data in TID
-	 *            1) TID contains Mode S transponder address
-	 *            2) TID contains altitude, range, bearing
-	 *            3) not assigned
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.5);
-	 *         not present for TCAS 6 systems
-	 */
-	public Byte getThreatType() {
-		if (isTCAS6()) return null;
-		return threatType;
-	}
+    /**
+     * @return whether two or more simultaneous threats are currently being processed
+     * (Annex 10 V4, 4.3.8.4.2.2.1.4); not present for TCAS 6 systems
+     */
+    public Boolean hasMultiThreatEncounter() {
+        if (isTCAS6()) return null;
+        return multiThreatEncounter;
+    }
 
-	/**
-	 * @return the threat's identity. Check getThreatType() before.
-	 *         (Annex 10 V4, 4.3.8.4.2.2.1.6); not present for TCAS 6 systems
-	 */
-	public Integer getThreatIdentity() {
-		if (isTCAS6()) return null;
-		return threatIdentity;
-	}
+    /**
+     * Threat type indicator according to Annex 10 V4, 4.3.8.4.2.2.1.5.
+     * <ul>
+     *     <li>0: no identity data in TID</li>
+     *     <li>1: TID contains Mode S transponder address</li>
+     *     <li>2: TID contains altitude, range, bearing</li>
+     *     <li>3: not assigned</li>
+     * </ul>
+     *
+     * @return the threat type indicator; not present for TCAS 6 systems
+     */
+    public Byte getThreatType() {
+        if (isTCAS6()) return null;
+        return threatType;
+    }
 
-	/**
-	 * A convenient representation of the bit array provided by {@link #getActiveRA()}.
-	 *
-	 * Further interpretation of the bits are subject to the caller which needs to handle differences between
-	 * TCAS 6 and 7 systems (see {@link #isTCAS6()}.
-	 *
-	 * A value set to true indicates that the condition is active.
-	 *
-	 * @return the currently active resolution advisories (if any) generated by own ACAS unit against one or more threat
-	 * aircraft.
-	 */
-	public boolean[] getActiveResolutionAdvisories() {
-		return TCASResolutionAdvisoryMsg.extractActiveResolutionAdvisories(getMessage());
-	}
+    /**
+     * @return the threat's identity. Check getThreatType() before.
+     * (Annex 10 V4, 4.3.8.4.2.2.1.6); not present for TCAS 6 systems
+     */
+    public Integer getThreatIdentity() {
+        if (isTCAS6()) return null;
+        return threatIdentity;
+    }
 
-	/**
-	 * A convenient representation of the bit array provided by {@link #getRACRecord()}.
-	 *
-	 * The active RA complement bits have the following meaning:
-	 * <ul>
-	 *     <li>index 0: Do not pass below</li>
-	 *     <li>index 1: Do not pass above</li>
-	 *     <li>index 2: Do not turn left</li>
-	 *     <li>index 3: Do not turn right</li>
-	 * </ul>
-	 * The value set to true indicates that the condition is active.
-	 *
-	 * @return the currently active resolution advisory complements (if any) received from other ACAS aircraft equipped
-	 * with on-board resolution capability.
-	 */
-	public boolean[] getResolutionAdvisoriesComplementsRecord() {
-		return TCASResolutionAdvisoryMsg.extractResolutionAdvisoriesComplementsRecord(getMessage());
-	}
+    /**
+     * A convenient representation of the bit array provided by {@link #getActiveRA()}.
+     * <p>
+     * Further interpretation of the bits are subject to the caller which needs to handle differences between
+     * TCAS 6 and 7 systems (see {@link #isTCAS6()}.
+     * <p>
+     * A value set to true indicates that the condition is active.
+     *
+     * @return the currently active resolution advisories (if any) generated by own ACAS unit against one or more threat
+     * aircraft.
+     */
+    public boolean[] getActiveResolutionAdvisories() {
+        return TCASResolutionAdvisory.extractActiveResolutionAdvisories(BitReader.forBigEndian(getMessage()));
+    }
 
-	/**
-	 * @return the ICAO 24-bit aircraft address of the threat or the altitude, range, and bearing if the threat is not
-	 * Mode S equipped; not present for TCAS 6 systems
-	 */
-	public ThreatIdentityData getThreatIdentityData() {
-		if (isTCAS6()) return null;
+    /**
+     * A convenient representation of the bit array provided by {@link #getRACRecord()}.
+     * <p>
+     * The active RA complement bits have the following meaning:
+     * <ul>
+     *     <li>index 0: Do not pass below</li>
+     *     <li>index 1: Do not pass above</li>
+     *     <li>index 2: Do not turn left</li>
+     *     <li>index 3: Do not turn right</li>
+     * </ul>
+     * The value set to true indicates that the condition is active.
+     *
+     * @return the currently active resolution advisory complements (if any) received from other ACAS aircraft equipped
+     * with on-board resolution capability.
+     */
+    public boolean[] getResolutionAdvisoriesComplementsRecord() {
+        return TCASResolutionAdvisory.extractResolutionAdvisoriesComplementsRecord(BitReader.forBigEndian(getMessage()));
+    }
 
-		return threatIdentityData;
-	}
+    /**
+     * @return the ICAO 24-bit aircraft address of the threat or the altitude, range, and bearing if the threat is not
+     * Mode S equipped; not present for TCAS 6 systems
+     */
+    public ThreatIdentityData getThreatIdentityData() {
+        if (isTCAS6()) return null;
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tTCASResolutionAdvisoryMsg{" +
-				"msg_subtype=" + msg_subtype +
-				", active_ra=" + activeRa +
-				", racs_record=" + racRecord +
-				", ra_terminated=" + raTerminated +
-				", multi_threat_encounter=" + multiThreatEncounter +
-				", threat_type=" + threatType +
-				", threat_identity=" + threatIdentity +
-				'}';
-	}
+        return threatIdentityData;
+    }
 
-	public static int decodeThreatIdentity(byte[] msg) {
-		return (((msg[3]&0x3) << 24) | ((msg[4]&0xFF) << 16) | ((msg[5]&0xFF) << 8) | (msg[6]&0xFF)) & 0x3FFFFFF;
-	}
+    @Override
+    public String toString() {
+        return "TCASResolutionAdvisoryMsg{" + super.toString() +
+                ", activeRa=" + activeRa +
+                ", racRecord=" + racRecord +
+                ", raTerminated=" + raTerminated +
+                ", multiThreatEncounter=" + multiThreatEncounter +
+                ", threatType=" + threatType +
+                ", threatIdentity=" + threatIdentity +
+                '}';
+    }
 
-	public static byte decodeThreatType(byte[] msg) {
-		return (byte) ((msg[3] >>> 2) & 0x3);
-	}
-
-	public static boolean decodeMultiThreatEncounter(byte[] msg) {
-		return (msg[3]&0x10) > 0;
-	}
-
-	public static boolean decodeRaTerminated(byte[] msg) {
-		return (msg[3]&0x20) > 0;
-	}
-
-	public static byte decodeRacRecord(byte[] msg) {
-		return (byte) ((((msg[2]&0x3) << 2) | (msg[3] >>> 6)&0x3) & 0xF);
-	}
-
-	public static short decodeActiveRa(byte[] msg) {
-		return (short) (((msg[2] >>> 2)&0x3f | ((msg[1]&0xFF) << 6)) & 0x3FFF);
-	}
-
-	public static boolean[] extractActiveResolutionAdvisories(byte[] message) {
-
-		return new boolean[]{
-				((message[1] >>> 7) & 0x01) == 1,
-				((message[1] >>> 6) & 0x01) == 1,
-				((message[1] >>> 5) & 0x01) == 1,
-				((message[1] >>> 4) & 0x01) == 1,
-				((message[1] >>> 3) & 0x01) == 1,
-				((message[1] >>> 2) & 0x01) == 1,
-				((message[1] >>> 1) & 0x01) == 1,
-				(message[1] & 0x01) == 1,
-				((message[2] >>> 7) & 0x01) == 1,
-				((message[2] >>> 6) & 0x01) == 1,
-				((message[2] >>> 5) & 0x01) == 1,
-				((message[2] >>> 4) & 0x01) == 1,
-				((message[2] >>> 3) & 0x01) == 1,
-				((message[2] >>> 2) & 0x01) == 1
-		};
-	}
-
-	public static boolean[] extractResolutionAdvisoriesComplementsRecord(byte[] message) {
-
-		boolean doNotPassBelow = ((message[2] >>> 1) & 0x01) == 1;
-		boolean doNotPassAbove = (message[2] & 0x01) == 1;
-		boolean doNotTurnLef = ((message[3] >>> 7) & 0x01) == 1;
-		boolean doNotTurnRight = ((message[3] >>> 6) & 0x01) == 1;
-
-		return new boolean[]{doNotPassBelow, doNotPassAbove, doNotTurnLef, doNotTurnRight};
-
-	}
-
-	public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, byte[] message) throws BadFormatException {
-
-		ThreatIdentityData threatIdentityData = null;
-
-		switch (threatTypeIndicator) {
-
-			case 1 :
-				int icao = (((message[3] & 0x03) << 22) | ((message[4] & 0xFF) << 14) | ((message[5] & 0xFF) << 6) | ((message[6] >>> 2) & 0x3F)) & 0xFFFFFF;
-				threatIdentityData = new ThreatIdentityData(icao);
-				break;
-
-			case 2 :
-				short altitudeCode = (short) ((((message[3] & 0x03) << 11) | ((message[4] & 0xFF) << 3) | ((message[5] >>> 5) & 0x07)) & 0x1FFF);
-				short threatIdentityDataRange = (short) ((((message[5] & 0x1F) << 2) | ((message[6] >>> 6) & 0x03)) & 0x7F);
-				short threatIdentityDataBearing = (short) (message[6] & 0x3F);
-				threatIdentityData = new ThreatIdentityData(altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
-				break;
-
-		}
-
-		return threatIdentityData;
-
-	}
 }
