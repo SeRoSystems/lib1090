@@ -18,12 +18,11 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.adsb.TCASResolutionAdvisoryMsg;
-
 import java.io.Serializable;
 
-import static de.serosystems.lib1090.msgs.adsb.TCASResolutionAdvisoryMsg.*;
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 
 /**
  * Decoder for ACAS active resolution advisory report (BDS 3,0)
@@ -56,14 +55,15 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
 
         this.bdsCode = extractBdsCode(msg);
 
-        activeRa = decodeActiveRa(msg);
-        racRecord = decodeRacRecord(msg);
-        raTerminated = decodeRaTerminated(msg);
-        multiThreatEncounter = decodeMultiThreatEncounter(msg);
-        threatType = decodeThreatType(msg);
-        threatIdentity = decodeThreatIdentity(msg);
+        BitReader reader = BitReader.forBigEndian(msg);
+        activeRa = TCASResolutionAdvisory.decodeActiveRa(reader);
+        racRecord = TCASResolutionAdvisory.decodeRacRecord(reader);
+        raTerminated = TCASResolutionAdvisory.decodeRaTerminated(reader);
+        multiThreatEncounter = TCASResolutionAdvisory.decodeMultiThreatEncounter(reader);
+        threatType = TCASResolutionAdvisory.decodeThreatType(reader);
+        threatIdentity = TCASResolutionAdvisory.decodeThreatIdentity(reader);
 
-        threatIdentityData = TCASResolutionAdvisoryMsg.extractThreatIdentityData(threatType, msg);
+        threatIdentityData = TCASResolutionAdvisory.extractThreatIdentityData(threatType, reader);
     }
 
     /**
@@ -151,7 +151,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
      * aircraft.
      */
     public boolean[] getActiveResolutionAdvisories() {
-        return TCASResolutionAdvisoryMsg.extractActiveResolutionAdvisories(getMessage());
+        return TCASResolutionAdvisory.extractActiveResolutionAdvisories(BitReader.forBigEndian(getMessage()));
     }
 
     /**
@@ -170,7 +170,7 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
      * with on-board resolution capability.
      */
     public boolean[] getResolutionAdvisoriesComplementsRecord() {
-        return TCASResolutionAdvisoryMsg.extractResolutionAdvisoriesComplementsRecord(getMessage());
+        return TCASResolutionAdvisory.extractResolutionAdvisoriesComplementsRecord(BitReader.forBigEndian(getMessage()));
     }
 
     /**
