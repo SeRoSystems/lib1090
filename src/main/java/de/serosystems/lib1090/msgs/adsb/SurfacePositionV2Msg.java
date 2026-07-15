@@ -23,13 +23,14 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg {
+public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime {
 
     private static final long serialVersionUID = -4899716425365685001L;
 

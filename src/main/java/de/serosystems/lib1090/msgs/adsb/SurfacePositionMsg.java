@@ -20,9 +20,9 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.SurfacePosition;
-import de.serosystems.lib1090.msgs.PositionMsgWithTime;
+import de.serosystems.lib1090.msgs.PositionMsg;
 
-public interface SurfacePositionMsg extends PositionMsgWithTime {
+public interface SurfacePositionMsg extends PositionMsg {
 
     /**
      * @return the message's format type code.
