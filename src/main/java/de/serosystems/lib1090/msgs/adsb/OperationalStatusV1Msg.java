@@ -18,59 +18,64 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.OperationalStatus;
-
 /**
  * Common API for ADS-B operational status version 1 messages.
  */
 public interface OperationalStatusV1Msg extends OperationalStatusMsg {
 
-	/**
-	 * @return the subtype code, 0 for airborne operational status messages and 1 for surface operational status messages
-	 */
-	byte getSubtypeCode();
+    /**
+     * @return the subtype code, 0 for airborne operational status messages and 1 for surface operational status messages
+     */
+    byte getSubtypeCode();
 
-	/**
-	 * @return the NIC supplement A to the format type code of position messages
-	 */
-	boolean hasNICSupplementA();
+    /**
+     * @return the NIC supplement A to the format type code of position messages
+     */
+    boolean hasNICSupplementA();
 
-	/**
-	 * @return the navigation accuracy for position messages; rather use getPositionUncertainty
-	 */
-	byte getNACp();
+    /**
+     * @return the navigation accuracy for position messages; rather use getPositionUncertainty
+     */
+    byte getNACpEncoded();
 
-	/**
-	 * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value.
-	 *
-	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-	 */
-	default double getPositionUncertainty() {
-		return OperationalStatus.nacPtoEPU(getNACp());
-	}
+    /**
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value.
+     *
+     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
+     */
+    double getPositionUncertainty();
 
-	/**
-	 * @return the source integrity level (SIL)
-	 */
-	byte getSIL();
+    /**
+     * Source integrity level encoding.
+     * <ul>
+     *     <li>0: unknown or &gt; 1e-3</li>
+     *     <li>1: &lt;= 1e-3</li>
+     *     <li>2: &lt;= 1e-5</li>
+     *     <li>3: &lt;= 1e-7</li>
+     * </ul>
+     *
+     * @return the source integrity level (SIL) which indicates the probability of exceeding
+     * the NIC containment radius (see table A-15 in RCTA DO-260B)
+     */
+    byte getSILEncoded();
 
-	/**
-	 * @return whether TCAS Resolution Advisory (RA) is active
-	 */
-	boolean hasTCASResolutionAdvisory();
+    /**
+     * @return whether TCAS Resolution Advisory (RA) is active
+     */
+    boolean hasTCASResolutionAdvisory();
 
-	/**
-	 * @return whether the IDENT switch is active
-	 */
-	boolean hasActiveIDENTSwitch();
+    /**
+     * @return whether the IDENT switch is active
+     */
+    boolean hasActiveIDENTSwitch();
 
-	/**
-	 * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
-	 */
-	boolean hasReceivingATCServices();
+    /**
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
+     */
+    boolean hasReceivingATCServices();
 
-	/**
-	 * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
-	 */
-	boolean getHorizontalReferenceDirection();
+    /**
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     */
+    boolean getHorizontalReferenceDirection();
 }

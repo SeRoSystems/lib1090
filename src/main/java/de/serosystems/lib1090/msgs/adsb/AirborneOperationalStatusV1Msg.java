@@ -19,7 +19,6 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.OperationalStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -29,255 +28,186 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B operational status message as specified in DO-260A (ADS-B version 1) with
  * subtype 0 (airborne)
- *
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
-public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, OperationalStatusV1Msg {
+public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, OperationalStatusV1Msg {
 
-	private static final long serialVersionUID = -4371842571556132611L;
-	private static final byte SUBTYPE_CODE = 0;
+    private static final long serialVersionUID = -4371842571556132611L;
 
-	protected int capability_class_code; // actually 16 bit unsigned
-	protected int operational_mode_code; // actually 16 bit unsigned
-	protected byte version;
-	private boolean nic_suppl; // may be passed to position messages
-	private byte nac_pos; // navigational accuracy category - position
-	private byte sil; // surveillance integrity level
-	protected byte baq;
-	private boolean nic_baro;
-	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
+    private int capabilityClassCode; // actually 16 bit unsigned
+    private int operationalModeCode; // actually 16 bit unsigned
+    private boolean nicSupplement; // may be passed to position messages
+    private byte nacP; // navigational accuracy category - position
+    private byte sil; // surveillance integrity level
+    private byte baq;
+    private boolean nicBaro;
+    private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
 
-	/**
-	 * protected no-arg constructor e.g. for serialization with Kryo
-	 **/
-	protected AirborneOperationalStatusV1Msg() {
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected AirborneOperationalStatusV1Msg() {
+    }
 
-	/**
-	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV1Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV1Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message as byte array
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
-	 *                                operational status message or the capability class code or operational mode
-	 *                                code is invalid.
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
-		super(squitter);
-		setType(subtype.ADSB_AIRBORN_STATUS_V1);
+    /**
+     * @param squitter extended squitter which contains this message
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
+     *                                operational status message or the capability class code or operational mode
+     *                                code is invalid.
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+        super(squitter);
+        setType(subtype.ADSB_AIRBORN_STATUS_V1);
 
-		if (getFormatTypeCode() != 31) {
-			throw new BadFormatException("Operational status messages must have typecode 31.");
-		}
+        if (getFormatTypeCode() != 31)
+            throw new BadFormatException("Operational status messages must have typecode 31.");
 
-		byte[] msg = this.getMessage();
+        BitReader b = BitReader.forBigEndian(this.getMessage());
 
-		BitReader b = BitReader.forBigEndian(msg);
+        byte subtypeCode = b.readByte(6, 8);
+        if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
+            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
+        } else if (subtypeCode != SUBTYPE_CODE) {
+            throw new BadFormatException("Not an airborne operational status message");
+        }
 
-		byte subtypeCode = b.readByte(6, 8);
-		if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
-		} else if (subtypeCode != SUBTYPE_CODE) {
-			throw new BadFormatException("Not an airborne operational status message");
-		}
+        capabilityClassCode = b.readInt(9, 24);
+        operationalModeCode = b.readInt(25, 40);
 
-		capability_class_code = b.readInt(9, 24);
-		operational_mode_code = b.readInt(25, 40);
-		version = b.readByte(41, 43);
+        int version = b.readByte(41, 43);
+        if (version != 1)
+            throw new BadFormatException("Unsupported operational status version " + version);
 
-		if (version < 1)
-			throw new BadFormatException("Unsupported operational status version " + version);
+        if ((capabilityClassCode & 0xC000) != 0)
+            throw new BadFormatException("Unknown capability class code!");
+        if ((operationalModeCode & 0xC000) != 0)
+            throw new BadFormatException("Unknown operational mode code!");
 
-		if ((capability_class_code & 0xC000) != 0)
-			throw new BadFormatException("Unknown capability class code!");
-		if ((operational_mode_code & 0xC000) != 0)
-			throw new BadFormatException("Unknown operational mode code!");
+        nicSupplement = b.readByte(44, 44) == 1;
+        nacP = b.readByte(45, 48);
+        baq = b.readByte(49, 50);
+        sil = b.readByte(51, 52);
+        nicBaro = b.readByte(53, 53) == 1;
 
-		nic_suppl = b.readByte(44, 44) == 1;
-		nac_pos = b.readByte(45, 48);
-		baq = b.readByte(49, 50);
-		sil = b.readByte(51, 52);
-		nic_baro = b.readByte(53, 53) == 1;
+        hrd = b.readByte(54, 54) == 1;
+    }
 
-		hrd = b.readByte(54, 54) == 1;
-	}
+    @Override
+    public byte getSubtypeCode() {
+        return SUBTYPE_CODE;
+    }
 
-	/**
-	 * @return the subtype code, 0 for airborne operational status messages
-	 */
-	@Override
-	public byte getSubtypeCode() {
-		return SUBTYPE_CODE;
-	}
+    @Override
+    public boolean hasOperationalTCAS() {
+        return (capabilityClassCode & 0x2000) == 0;
+    }
 
-	/**
-	 * @return true if TCAS is operational or unknown, false if TCAS is not operational.
-	 */
-	public boolean hasOperationalTCAS() {
-		return (capability_class_code & 0x2000) == 0;
-	}
+    @Override
+    public boolean has1090ESIn() {
+        return (capabilityClassCode & 0x1000) != 0;
+    }
 
-	/**
-	 * @return whether 1090ES IN / CDTI is available
-	 */
-	public boolean has1090ESIn() {
-		return (capability_class_code & 0x1000) != 0;
-	}
+    @Override
+    public boolean hasAirReferencedVelocity() {
+        return (capabilityClassCode & 0x0200) != 0;
+    }
 
-	/**
-	 * @return whether aircraft has capability of sending messages to support Air-Referenced
-	 * Velocity Reports
-	 */
-	public boolean hasAirReferencedVelocity() {
-		return (capability_class_code & 0x0200) != 0;
-	}
+    @Override
+    public boolean hasTargetStateReport() {
+        return (capabilityClassCode & 0x100) != 0;
+    }
 
-	/**
-	 * @return whether aircraft has capability of sending messages to support Target
-	 * State Reports
-	 */
-	public boolean hasTargetStateReport() {
-		return (capability_class_code & 0x100) != 0;
-	}
+    @Override
+    public byte getTargetChangeReportCapabilityEncoded() {
+        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
+    }
 
-	/**
-	 * @return whether target change reports are supported
-	 * @see #getTargetChangeReportCapability() returns true if this getter returns 1 or 2
-	 */
-	public boolean supportsTargetChangeReport() {
-		byte target_change_report_capability = getTargetChangeReportCapability();
-		return target_change_report_capability == 1 || target_change_report_capability == 2;
-	}
+    @Override
+    public boolean hasTCASResolutionAdvisory() {
+        return (operationalModeCode & 0x2000) != 0;
+    }
 
-	/**
-	 * Get target change report capability.
-	 * <ul>
-	 *     <li>0: Not supported</li>
-	 *     <li>1: Supports TC+0 only</li>
-	 *     <li>2: Supports multiple TCs</li>
-	 *     <li>3: Reserved</li>
-	 * </ul>
-	 * @return target change report capability
-	 */
-	public byte getTargetChangeReportCapability() {
-        return (byte) ((capability_class_code & 0xC0) >>> 6);
-	}
+    @Override
+    public boolean hasActiveIDENTSwitch() {
+        return (operationalModeCode & 0x1000) != 0;
+    }
 
-	/**
-	 * @return whether TCAS Resolution Advisory (RA) is active
-	 */
-	public boolean hasTCASResolutionAdvisory() {
-		return (operational_mode_code & 0x2000) != 0;
-	}
+    @Override
+    public boolean hasReceivingATCServices() {
+        return (operationalModeCode & 0x800) != 0;
+    }
 
-	/**
-	 * @return whether the IDENT switch is active
-	 */
-	public boolean hasActiveIDENTSwitch() {
-		return (operational_mode_code & 0x1000) != 0;
-	}
+    @Override
+    public byte getVersion() {
+        return 1;
+    }
 
-	/**
-	 * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
-	 */
-	public boolean hasReceivingATCServices() {
-		return (operational_mode_code & 0x800) != 0;
-	}
+    @Override
+    public boolean hasNICSupplementA() {
+        return nicSupplement;
+    }
 
-	/**
-	 * @return the version number of the formats and protocols in use on the aircraft installation.<br>
-	 * 0: Conformant to DO-260/ED-102 and DO-242<br>
-	 * 1: Conformant to DO-260A and DO-242A<br>
-	 * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
-	 * 3-7: reserved
-	 */
-	public byte getVersion() {
-		return version;
-	}
+    @Override
+    public byte getNACpEncoded() {
+        return nacP;
+    }
 
-	/**
-	 * @return the NIC supplement A to the format type code of position messages
-	 */
-	public boolean hasNICSupplementA() {
-		return nic_suppl;
-	}
+    @Override
+    public double getPositionUncertainty() {
+        return AirborneOperationalStatusMsg.super.getPositionUncertainty();
+    }
 
-	/**
-	 * @return the navigation accuracy for position messages; rather use getPositionUncertainty
-	 */
-	public byte getNACp() {
-		return nac_pos;
-	}
+    @Override
+    public byte getSILEncoded() {
+        return sil;
+    }
 
-	/**
-	 * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, see table A-13 in RCTA DO-260B
-	 *
-	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-	 */
-	public double getPositionUncertainty() {
-		return OperationalStatus.nacPtoEPU(nac_pos);
-	}
+    /**
+     * @return the barometric altitude quality BAQ bit.
+     */
+    public byte getBAQ() {
+        return baq;
+    }
 
-	/**
-	 * @return the source integrity level (SIL) which indicates the probability of exceeding
-	 * the NIC containment radius (see table A-15 in RCTA DO-260B)
-	 */
-	public byte getSIL() {
-		return sil;
-	}
+    @Override
+    public boolean getBarometricAltitudeIntegrityCode() {
+        return nicBaro;
+    }
 
-	/**
-	 * @return the barometric altitude quality BAQ bit.
-	 */
-	public byte getBAQ() {
-		return baq;
-	}
+    @Override
+    public boolean getHorizontalReferenceDirection() {
+        return hrd;
+    }
 
-	/**
-	 * @return the barometric altitude integrity code which indicates whether
-	 * barometric pressure altitude has been cross-checked against other
-	 * sources of pressure altitude. If false, altitude data has not been
-	 * cross-checked.
-	 */
-	public boolean getBarometricAltitudeIntegrityCode() {
-		return nic_baro;
-	}
-
-	/**
-	 * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
-	 */
-	public boolean getHorizontalReferenceDirection() {
-		return hrd;
-	}
-
-	@Override
-	public String toString() {
-		return "AirborneOperationalStatusV1Msg{" +
-				", capability_class_code=" + capability_class_code +
-				", operational_mode_code=" + operational_mode_code +
-				", version=" + version +
-				", nic_suppl=" + nic_suppl +
-				", nac_pos=" + nac_pos +
-				", sil=" + sil +
-				", baq=" + baq +
-				", nic_baro=" + nic_baro +
-				", hrd=" + hrd +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "AirborneOperationalStatusV1Msg{" + super.toString() +
+                ", capabilityClassCode=" + capabilityClassCode +
+                ", operationalModeCode=" + operationalModeCode +
+                ", nicSupplement=" + nicSupplement +
+                ", nacPos=" + nacP +
+                ", sil=" + sil +
+                ", baq=" + baq +
+                ", nicBaro=" + nicBaro +
+                ", hrd=" + hrd +
+                '}';
+    }
 }

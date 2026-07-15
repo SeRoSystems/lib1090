@@ -209,27 +209,27 @@ public class ExampleDecoder {
 				break;
 			case ADSB_AIRBORN_STATUS_V1:
 			case ADSB_AIRBORN_STATUS_V2:
-				AirborneOperationalStatusV1Msg opstatA1 = (AirborneOperationalStatusV1Msg) msg;
-				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA1.getVersion());
-				System.out.println("          Barometric altitude cross-checked: "+opstatA1.getBarometricAltitudeIntegrityCode());
+				AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
+				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA.getVersion());
+				System.out.println("          Barometric altitude cross-checked: "+opstatA.getBarometricAltitudeIntegrityCode());
 
-				if (opstatA1.getHorizontalReferenceDirection())
+				if (opstatA.getHorizontalReferenceDirection())
 					System.out.println("          Horizontal reference: true north");
 				else
 					System.out.println("          Horizontal reference: true north");
-				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA1.getNACp());
-				System.out.println("          Position Uncertainty (based on NACp): " + opstatA1.getPositionUncertainty());
-				System.out.println("          Has NIC supplement A: " + opstatA1.hasNICSupplementA());
-				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA1.getSIL());
-				System.out.println("          Has 1090 ES In: " + opstatA1.has1090ESIn());
-				System.out.println("          IDENT switch active: " + opstatA1.hasActiveIDENTSwitch());
-				System.out.println("          Has operational TCAS: " + opstatA1.hasOperationalTCAS());
-				System.out.println("          Has TCAS resolution advisory: " + opstatA1.hasTCASResolutionAdvisory());
-				System.out.println("          Supports air-referenced velocity reports: " + opstatA1.hasAirReferencedVelocity());
+				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
+				System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
+				System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
+				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
+				System.out.println("          Has 1090 ES In: " + opstatA.has1090ESIn());
+				System.out.println("          IDENT switch active: " + opstatA.hasActiveIDENTSwitch());
+				System.out.println("          Has operational TCAS: " + opstatA.hasOperationalTCAS());
+				System.out.println("          Has TCAS resolution advisory: " + opstatA.hasTCASResolutionAdvisory());
+				System.out.println("          Supports air-referenced velocity reports: " + opstatA.hasAirReferencedVelocity());
 
 				if (msg instanceof AirborneOperationalStatusV2Msg) {
 					System.out.println("          Gemoetric vertical accuracy: "+((AirborneOperationalStatusV2Msg) msg).getGeometricVerticalAccuracy()+"m");
-					System.out.println("          System design assurance: " + ((AirborneOperationalStatusV2Msg) msg).getSystemDesignAssurance());
+					System.out.println("          System design assurance: " + ((AirborneOperationalStatusV2Msg) msg).getSDAEncoded());
 					System.out.println("          Has UAT in: " + ((AirborneOperationalStatusV2Msg) msg).hasUATIn());
 					System.out.println("          Has SIL supplement: " + ((AirborneOperationalStatusV2Msg) msg).hasSILSupplement());
 					System.out.println("          Uses single antenna: " + ((AirborneOperationalStatusV2Msg) msg).hasSingleAntenna());
@@ -238,29 +238,29 @@ public class ExampleDecoder {
 				break;
 			case ADSB_SURFACE_STATUS_V1:
 			case ADSB_SURFACE_STATUS_V2:
-				SurfaceOperationalStatusV1Msg opstatS1 = (SurfaceOperationalStatusV1Msg) msg;
+				SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
 
-				System.out.println("["+icao24+"]: Using ADS-B version "+opstatS1.getVersion());
+				System.out.println("["+icao24+"]: Using ADS-B version "+opstatS.getVersion());
 
-				if (opstatS1.getHorizontalReferenceDirection())
+				if (opstatS.getHorizontalReferenceDirection())
 					System.out.println("          Horizontal reference: true north");
 				else
 					System.out.println("          Horizontal reference: true north");
-				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS1.getNACp());
-				System.out.println("          Position Uncertainty (based on NACp): " + opstatS1.getPositionUncertainty());
-				System.out.println("          Has NIC supplement A: " + opstatS1.hasNICSupplementA());
-				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS1.getSIL());
-				System.out.println("          Has 1090 ES In: " + opstatS1.has1090ESIn());
-				System.out.println("          IDENT switch active: " + opstatS1.hasActiveIDENTSwitch());
-				System.out.println("          Has TCAS resolution advisory: " + opstatS1.hasTCASResolutionAdvisory());
-				System.out.println("          Airplane length: " + opstatS1.getAirplaneLength() + "m");
-				System.out.println("          Airplane width: " + opstatS1.getAirplaneWidth() + "m");
-				System.out.println("          Low (<70W) TX power: " + opstatS1.hasLowTxPower());
-				System.out.println("          Has track heading info: " + opstatS1.hasTrackHeadingInfo());
+				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
+				System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getPositionUncertainty());
+				System.out.println("          Has NIC supplement A: " + opstatS.hasNICSupplementA());
+				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS.getSILEncoded());
+				System.out.println("          Has 1090 ES In: " + opstatS.has1090ESIn());
+				System.out.println("          IDENT switch active: " + opstatS.hasActiveIDENTSwitch());
+				System.out.println("          Has TCAS resolution advisory: " + opstatS.hasTCASResolutionAdvisory());
+				System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
+				System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
+				System.out.println("          Low (<70W) TX power: " + opstatS.hasLowTxPower());
+				System.out.println("          Has track heading info: " + opstatS.hasTrackHeadingInfo());
 
 				if (msg instanceof SurfaceOperationalStatusV2Msg) {
 					System.out.println("          Has NIC supplement C: " + ((SurfaceOperationalStatusV2Msg) msg).getNICSupplementC());
-					System.out.println("          System design assurance: " + ((SurfaceOperationalStatusV2Msg) msg).getSystemDesignAssurance());
+					System.out.println("          System design assurance: " + ((SurfaceOperationalStatusV2Msg) msg).getSDAEncoded());
 					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + ((SurfaceOperationalStatusV2Msg) msg).getNACv());
 					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
 					System.out.println("          Has UAT in: " + ((SurfaceOperationalStatusV2Msg) msg).hasUATIn());

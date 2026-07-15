@@ -18,140 +18,232 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.SingleAntennaMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
 /**
- * @author Markus Fuchs (fuchs@opensky-network.org)
+ * Decoder for ADS-B operational status message as specified in DO-260B (ADS-B version 2) with
+ * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1Msg implements Serializable, OperationalStatusV2Msg, SingleAntennaMsg {
+public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, OperationalStatusV2Msg {
 
-	private static final long serialVersionUID = -2032348919695227545L;
+    private static final long serialVersionUID = -2032348919695227545L;
 
-	private byte geometric_vertical_accuracy; // bit 49 and 50
-	private boolean sil_supplement;
+    private int capabilityClassCode; // actually 16 bit unsigned
+    private int operationalModeCode; // actually 16 bit unsigned
+    private byte version;
+    private boolean nicSupplement; // may be passed to position messages
+    private byte nacP; // navigational accuracy category - position
+    private byte sil; // surveillance integrity level
+    private boolean nicBaro;
+    private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
+    private byte gva; // bit 49 and 50
+    private boolean silSupplement;
 
-	/**
-	 * protected no-arg constructor e.g. for serialization with Kryo
-	 **/
-	protected AirborneOperationalStatusV2Msg() {
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected AirborneOperationalStatusV2Msg() {
+    }
 
-	/**
-	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV2Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV2Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message as byte array
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
-		super(squitter);
-		setType(subtype.ADSB_AIRBORN_STATUS_V2);
+    /**
+     * @param squitter extended squitter which contains this message
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
+     *                                operational status message or the capability class code or operational mode
+     *                                code is invalid.
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+        super(squitter);
+        setType(subtype.ADSB_AIRBORN_STATUS_V2);
 
-		byte[] msg = this.getMessage();
+        if (getFormatTypeCode() != 31)
+            throw new BadFormatException("Operational status messages must have typecode 31.");
 
-		if (version < 2)
-			throw new BadFormatException("Unsupported operational status version " + version);
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-		geometric_vertical_accuracy = baq;
-		// Bit 55
-		sil_supplement = ((msg[6] & 0x2) != 0);
-	}
+        byte subtypeCode = b.readByte(6, 8);
+        if (subtypeCode > 1) // currently only 0 and 1 specified, 2-7 are reserved
+            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
+        else if (subtypeCode != SUBTYPE_CODE)
+            throw new BadFormatException("Not an airborne operational status message");
 
-	/**
-	 * @return whether operational TCAS is available
-	 */
-	public boolean hasOperationalTCAS() {
-		return (capability_class_code & 0x2000) != 0;
-	}
+        capabilityClassCode = b.readInt(9, 24);
+        operationalModeCode = b.readInt(25, 40);
 
-	/**
-	 * @return whether aircraft has an UAT receiver
-	 */
-	@Override
-	public boolean hasUATIn() {
-		return (capability_class_code & 0x20) != 0;
-	}
+        version = b.readByte(41, 43);
+        if (version < 2)
+            throw new BadFormatException("Unsupported operational status version " + version);
 
-	/**
-	 * @return whether aircraft uses a single antenna or two
-	 */
-	@Override
-	public boolean hasSingleAntenna() {
-		return (operational_mode_code & 0x400) != 0;
-	}
+        if ((capabilityClassCode & 0xC000) != 0)
+            throw new BadFormatException("Unknown capability class code!");
 
-	/**
-	 * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
-	 */
-	public byte getGVA() {
-		return geometric_vertical_accuracy;
-	}
+        if ((operationalModeCode & 0xC000) != 0)
+            throw new BadFormatException("Unknown operational mode code!");
 
-	/**
-	 * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
-	 */
-	public int getGeometricVerticalAccuracy() {
-		if (geometric_vertical_accuracy == 1)
-			return 150;
-		else if (geometric_vertical_accuracy == 2)
-			return 45;
-		else return -1;
-	}
+        nicSupplement = b.readByte(44, 44) == 1;
+        nacP = b.readByte(45, 48);
+        gva = b.readByte(49, 50);
+        sil = b.readByte(51, 52);
+        nicBaro = b.readByte(53, 53) == 1;
+        hrd = b.readByte(54, 54) == 1;
 
-	/**
-	 * For interpretation see Table 2-65 in DO-260B
-	 *
-	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
-	 */
-	@Override
-	public byte getSystemDesignAssurance() {
-		return (byte) ((operational_mode_code & 0x300) >>> 8);
-	}
+        silSupplement = b.readByte(55, 55) == 1;
+    }
 
-	/**
-	 * DO-260B 2.2.3.2.7.2.14
-	 *
-	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-	 * it's based on "per hour".
-	 */
-	@Override
-	public boolean hasSILSupplement() {
-		return sil_supplement;
-	}
+    @Override
+    public byte getSubtypeCode() {
+        return AirborneOperationalStatusMsg.super.getSubtypeCode();
+    }
 
-	public byte getBAQ() {
-		throw new UnsupportedOperationException("BAQ not present in version 2");
-	}
+    @Override
+    public boolean hasOperationalTCAS() {
+        return (capabilityClassCode & 0x2000) != 0;
+    }
 
-	@Override
-	public String toString() {
-		return "AirborneOperationalStatusV2Msg{" +
-				"geometric_vertical_accuracy=" + geometric_vertical_accuracy +
-				", sil_supplement=" + sil_supplement +
-				", capability_class_code=" + capability_class_code +
-				", operational_mode_code=" + operational_mode_code +
-				", baq=" + baq +
-				'}';
-	}
+    @Override
+    public boolean has1090ESIn() {
+        return (capabilityClassCode & 0x1000) != 0;
+    }
+
+    @Override
+    public boolean hasAirReferencedVelocity() {
+        return (capabilityClassCode & 0x0200) != 0;
+    }
+
+    @Override
+    public boolean hasTargetStateReport() {
+        return (capabilityClassCode & 0x100) != 0;
+    }
+
+    @Override
+    public byte getTargetChangeReportCapabilityEncoded() {
+        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
+    }
+
+    @Override
+    public boolean hasTCASResolutionAdvisory() {
+        return (operationalModeCode & 0x2000) != 0;
+    }
+
+    @Override
+    public boolean hasActiveIDENTSwitch() {
+        return (operationalModeCode & 0x1000) != 0;
+    }
+
+    @Override
+    public boolean hasReceivingATCServices() {
+        return (operationalModeCode & 0x800) != 0;
+    }
+
+    @Override
+    public byte getVersion() {
+        return version;
+    }
+
+    @Override
+    public boolean hasNICSupplementA() {
+        return nicSupplement;
+    }
+
+    @Override
+    public byte getNACpEncoded() {
+        return nacP;
+    }
+
+    @Override
+    public double getPositionUncertainty() {
+        return AirborneOperationalStatusMsg.super.getPositionUncertainty();
+    }
+
+    @Override
+    public byte getSILEncoded() {
+        return sil;
+    }
+
+    @Override
+    public boolean getBarometricAltitudeIntegrityCode() {
+        return nicBaro;
+    }
+
+    @Override
+    public boolean getHorizontalReferenceDirection() {
+        return hrd;
+    }
+
+    @Override
+    public boolean hasUATIn() {
+        return (capabilityClassCode & 0x20) != 0;
+    }
+
+    @Override
+    public boolean hasSingleAntenna() {
+        return (operationalModeCode & 0x400) != 0;
+    }
+
+    /**
+     * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
+     */
+    public byte getGVAEncoded() {
+        return gva;
+    }
+
+    /**
+     * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
+     */
+    public int getGeometricVerticalAccuracy() {
+        if (gva == 1)
+            return 150;
+        else if (gva == 2)
+            return 45;
+        else return -1;
+    }
+
+    @Override
+    public byte getSDAEncoded() {
+        return (byte) ((operationalModeCode & 0x300) >>> 8);
+    }
+
+    @Override
+    public boolean hasSILSupplement() {
+        return silSupplement;
+    }
+
+    @Override
+    public String toString() {
+        return "AirborneOperationalStatusV2Msg{" + super.toString() +
+                ", capabilityClassCode=" + capabilityClassCode +
+                ", operationalModeCode=" + operationalModeCode +
+                ", version=" + version +
+                ", nicSupplement=" + nicSupplement +
+                ", nacPos=" + nacP +
+                ", sil=" + sil +
+                ", nicBaro=" + nicBaro +
+                ", hrd=" + hrd +
+                ", geometricVerticalAccuracy=" + gva +
+                ", silSupplement=" + silSupplement +
+                '}';
+    }
 }

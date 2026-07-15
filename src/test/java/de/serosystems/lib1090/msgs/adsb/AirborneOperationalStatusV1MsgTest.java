@@ -49,7 +49,7 @@ class AirborneOperationalStatusV1MsgTest {
 		assertTrue(status instanceof OperationalStatusV1Msg);
 		assertEquals(0, status.getSubtypeCode());
 		assertEquals(1, status.getVersion());
-		assertEquals(9, status.getNACp());
+		assertEquals(9, status.getNACpEncoded());
 	}
 
 	@Test

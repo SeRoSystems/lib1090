@@ -1,0 +1,121 @@
+/*
+ *  This file is part of lib1090.
+ *  Copyright (C) 2026 SeRo Systems GmbH
+ *
+ *  lib1090 is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  lib1090 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package de.serosystems.lib1090.msgs.adsb;
+
+import de.serosystems.lib1090.decoding.OperationalStatus;
+
+/**
+ * Common API for ADS-B airborne operational status messages.
+ */
+public interface AirborneOperationalStatusMsg extends OperationalStatusMsg {
+
+    byte SUBTYPE_CODE = 0;
+
+    /**
+     * @return the subtype code, 0 for airborne operational status messages
+     */
+    default byte getSubtypeCode() {
+        return SUBTYPE_CODE;
+    }
+
+    /**
+     * @return true if TCAS is operational or unknown, false if TCAS is not operational.
+     */
+    boolean hasOperationalTCAS();
+
+    /**
+     * @return whether aircraft has capability of sending messages to support Air-Referenced Velocity Reports
+     */
+    boolean hasAirReferencedVelocity();
+
+    /**
+     * @return whether aircraft has capability of sending messages to support Target State Reports
+     */
+    boolean hasTargetStateReport();
+
+    /**
+     * @return whether target change reports are supported
+     */
+    default boolean supportsTargetChangeReport() {
+        byte targetChangeReportCapability = getTargetChangeReportCapabilityEncoded();
+        return targetChangeReportCapability == 1 || targetChangeReportCapability == 2;
+    }
+
+    /**
+     * Get target change report capability.
+     * <ul>
+     *     <li>0: Not supported</li>
+     *     <li>1: Supports TC+0 only</li>
+     *     <li>2: Supports multiple TCs</li>
+     *     <li>3: Reserved</li>
+     * </ul>
+     *
+     * @return target change report capability
+     */
+    byte getTargetChangeReportCapabilityEncoded();
+
+    /**
+     * @return whether TCAS Resolution Advisory (RA) is active
+     */
+    boolean hasTCASResolutionAdvisory();
+
+    /**
+     * @return whether the IDENT switch is active
+     */
+    boolean hasActiveIDENTSwitch();
+
+    /**
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
+     */
+    boolean hasReceivingATCServices();
+
+    /**
+     * @return the NIC supplement A to the format type code of position messages
+     */
+    boolean hasNICSupplementA();
+
+    /**
+     * @return the navigation accuracy for position messages; rather use getPositionUncertainty
+     */
+    byte getNACpEncoded();
+
+    /**
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value.
+     *
+     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
+     */
+    default double getPositionUncertainty() {
+        return OperationalStatus.nacPtoEPU(getNACpEncoded());
+    }
+
+    /**
+     * @return the source integrity level (SIL)
+     */
+    byte getSILEncoded();
+
+    /**
+     * @return the barometric altitude integrity code which indicates whether barometric altitude was cross-checked
+     */
+    boolean getBarometricAltitudeIntegrityCode();
+
+    /**
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     */
+    boolean getHorizontalReferenceDirection();
+}

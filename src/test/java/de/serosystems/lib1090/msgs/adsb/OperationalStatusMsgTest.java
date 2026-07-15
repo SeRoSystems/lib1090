@@ -73,10 +73,10 @@ public class OperationalStatusMsgTest {
 		assertEquals(2, opstat.getVersion());
 		assertFalse(opstat.has1090ESIn());
 		assertFalse(opstat.hasNICSupplementA());
-		assertEquals(9, opstat.getNACp());
+		assertEquals(9, opstat.getNACpEncoded());
 
-		assertEquals(2, opstat.getGVA());
-		assertEquals(3, opstat.getSIL());
+		assertEquals(2, opstat.getGVAEncoded());
+		assertEquals(3, opstat.getSILEncoded());
 		assertTrue(opstat.getBarometricAltitudeIntegrityCode());
 		assertFalse(opstat.getHorizontalReferenceDirection());
 	}
@@ -91,7 +91,7 @@ public class OperationalStatusMsgTest {
 		assertFalse(opstat.has1090ESIn());
 		assertFalse(opstat.hasUATIn());
 		assertFalse(opstat.hasSingleAntenna());
-		assertEquals(0, opstat.getSystemDesignAssurance());
+		assertEquals(0, opstat.getSDAEncoded());
 		assertFalse(opstat.hasSILSupplement());
 	}
 
