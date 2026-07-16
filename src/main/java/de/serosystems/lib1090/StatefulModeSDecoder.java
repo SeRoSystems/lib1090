@@ -322,10 +322,12 @@ public class StatefulModeSDecoder {
 		// interpret ME field as standard ADS-B
 		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
-		// only (assumed or confirmed) version 0 is decoded as such; version 2 and any
-		// higher (not yet defined) version is decoded as version 2, since, per
-		// DO-260B, §2.2.7.1, newer versions are expected to be backwards compatible
-		// with version 2
+		// only (assumed or confirmed) version 0 is decoded as such; version 3 and any
+		// higher (not yet defined) version is decoded as version 3, since, per
+		// DO-260C, §2.2.7.1, newer versions are expected to be backwards compatible
+		// with version 3
+		// NOTE: this is preliminary, as it currently only applies to surface position messages.
+		//       other messages fall back to version 2 as of DO-260B, §2.2.7.1.
 
 		// we need stateful decoding, because ADS-B version > 0 can only be assumed
 		// if matching version info in operational status has been found.
@@ -348,15 +350,16 @@ public class StatefulModeSDecoder {
 		}
 
 		if (ftc >= 5 && ftc <= 8) {
-			// surface position message
 			switch (dd.adsbVersion) {
 				case 0:
 					return new SurfacePositionV0Msg(es1090, Instant.ofEpochMilli(timestamp));
 				case 1:
 					return new SurfacePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
 				case 2:
-				default:
 					return new SurfacePositionV2Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplC);
+				case 3:
+				default:
+					return new SurfacePositionV3Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplC);
 			}
 		}
 
