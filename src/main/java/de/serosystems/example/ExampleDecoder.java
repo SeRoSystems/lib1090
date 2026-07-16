@@ -127,6 +127,7 @@ public class ExampleDecoder {
 			case ADSB_SURFACE_POSITION_V0:
 			case ADSB_SURFACE_POSITION_V1:
 			case ADSB_SURFACE_POSITION_V2:
+			case ADSB_SURFACE_POSITION_V3:
 				SurfacePositionMsg surfacePosition = (SurfacePositionMsg) msg;
 				System.out.print("["+icao24+"]: ");
 
