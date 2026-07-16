@@ -147,6 +147,11 @@ public class StatefulModeSDecoder {
 		// interpret ME field as ADS-R
 		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
+		// only (assumed or confirmed) version 0 is decoded as such; version 2 and any
+		// higher (not yet defined) version is decoded as version 2, since, per
+		// DO-260B, §2.2.7.1, newer versions are expected to be backwards compatible
+		// with version 2
+
 		// we need stateful decoding, because ADS-R version > 0 can only be assumed
 		// if matching version info in operational status has been found.
 		DecoderData dd = getDecoderData(modes.getAddress());
@@ -160,39 +165,39 @@ public class StatefulModeSDecoder {
 		if (ftc >= 5 && ftc <= 8) {
 			// surface position message
 			switch (dd.adsbVersion) {
+				case 0:
+					return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV0Msg(es1090, timestamp);
 				case 1:
 					de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg s1 =
 							new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg(es1090, timestamp);
 					s1.setNICSupplementA(dd.nicSupplA);
 					return s1;
 				case 2:
+				default:
 					de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg s2 =
 							new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg(es1090, timestamp);
 					s2.setNICSupplementA(dd.nicSupplA);
 					s2.setNICSupplementC(dd.nicSupplC);
 					return s2;
-				default:
-					// implicit by version 0
-					return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV0Msg(es1090, timestamp);
 			}
 		}
 
 		if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
 			// airborne position message
 			switch (dd.adsbVersion) {
+				case 0:
+					return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV0Msg(es1090, timestamp);
 				case 1:
 					de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg a1 =
 							new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg(es1090, timestamp);
 					a1.setNICSupplementA(dd.nicSupplA);
 					return a1;
 				case 2:
+				default:
 					de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg a2 =
 							new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg(es1090, timestamp);
 					a2.setNICSupplementA(dd.nicSupplA);
 					return a2;
-				default:
-					// implicit by version 0
-					return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV0Msg(es1090, timestamp);
 			}
 		}
 
@@ -245,13 +250,12 @@ public class StatefulModeSDecoder {
 						dd.nicSupplA = s1.hasNICSupplementA();
 						return s1;
 					case 2:
+					default:
 						// TODO: store NIC supplement B as well
 						de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
 								new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						return s2;
-					default:
-						throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
 				}
 			} else if (subtype == 1) {
 				// surface
@@ -265,13 +269,12 @@ public class StatefulModeSDecoder {
 						dd.nicSupplC = s1.getNICSupplementC();
 						return s1;
 					case 2:
+					default:
 						de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg s2 =
 								new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						dd.nicSupplC = s2.getNICSupplementC();
 						return s2;
-					default:
-						throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
 				}
 			}
 		}
@@ -283,8 +286,6 @@ public class StatefulModeSDecoder {
 		// interpret ME field as standard ADS-B
 		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
-		// we need stateful decoding, because ADS-B version > 0 can only be assumed
-		// if matching version info in operational status has been found.
 		DecoderData dd = getDecoderData(modes.getAddress());
 
 		// what kind of extended squitter?
@@ -320,6 +321,11 @@ public class StatefulModeSDecoder {
 		// interpret ME field as standard ADS-B
 		ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
+		// only (assumed or confirmed) version 0 is decoded as such; version 2 and any
+		// higher (not yet defined) version is decoded as version 2, since, per
+		// DO-260B, §2.2.7.1, newer versions are expected to be backwards compatible
+		// with version 2
+
 		// we need stateful decoding, because ADS-B version > 0 can only be assumed
 		// if matching version info in operational status has been found.
 		DecoderData dd = getDecoderData(modes.getAddress());
@@ -333,35 +339,35 @@ public class StatefulModeSDecoder {
 		if (ftc >= 5 && ftc <= 8) {
 			// surface position message
 			switch (dd.adsbVersion) {
+				case 0:
+					return new SurfacePositionV0Msg(es1090, timestamp);
 				case 1:
 					SurfacePositionV1Msg s1 = new SurfacePositionV1Msg(es1090, timestamp);
 					s1.setNICSupplementA(dd.nicSupplA);
 					return s1;
 				case 2:
+				default:
 					SurfacePositionV2Msg s2 = new SurfacePositionV2Msg(es1090, timestamp);
 					s2.setNICSupplementA(dd.nicSupplA);
 					s2.setNICSupplementC(dd.nicSupplC);
 					return s2;
-				default:
-					// implicit by version 0
-					return new SurfacePositionV0Msg(es1090, timestamp);
 			}
 		}
 
 		if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
 			// airborne position message
 			switch (dd.adsbVersion) {
+				case 0:
+					return new AirbornePositionV0Msg(es1090, timestamp);
 				case 1:
 					AirbornePositionV1Msg a1 = new AirbornePositionV1Msg(es1090, timestamp);
 					a1.setNICSupplementA(dd.nicSupplA);
 					return a1;
 				case 2:
+				default:
 					AirbornePositionV2Msg a2 = new AirbornePositionV2Msg(es1090, timestamp);
 					a2.setNICSupplementA(dd.nicSupplA);
 					return a2;
-				default:
-					// implicit by version 0
-					return new AirbornePositionV0Msg(es1090, timestamp);
 			}
 		}
 
@@ -406,7 +412,7 @@ public class StatefulModeSDecoder {
 			int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
 			if (subtype == 0 && dd.adsbVersion == 1) {
 				return new TargetStateAndStatusV1Msg(es1090);
-			} else if (subtype == 1 && dd.adsbVersion == 2) {
+			} else if (subtype == 1 && dd.adsbVersion >= 2) {
 				return new TargetStateAndStatusV2Msg(es1090);
 			}
 		}
@@ -425,11 +431,10 @@ public class StatefulModeSDecoder {
 						dd.nicSupplA = s1.hasNICSupplementA();
 						return s1;
 					case 2:
+					default:
 						AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						return s2;
-					default:
-						throw new BadFormatException("Airborne operational status has invalid version: " + dd.adsbVersion);
 				}
 			} else if (subtype == 1) {
 				// surface
@@ -441,12 +446,11 @@ public class StatefulModeSDecoder {
 						dd.nicSupplA = s1.hasNICSupplementA();
 						return s1;
 					case 2:
+					default:
 						SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						dd.nicSupplC = s2.getNICSupplementC();
 						return s2;
-					default:
-						throw new BadFormatException("Surface operational status has invalid version: " + dd.adsbVersion);
 				}
 			}
 		}
