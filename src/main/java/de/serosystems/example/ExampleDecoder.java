@@ -84,6 +84,7 @@ public class ExampleDecoder {
 			case ADSB_AIRBORN_POSITION_V0:
 			case ADSB_AIRBORN_POSITION_V1:
 			case ADSB_AIRBORN_POSITION_V2:
+			case ADSB_AIRBORN_POSITION_V3:
 				AirbornePositionMsg ap = (AirbornePositionMsg) msg;
 				System.out.print("["+icao24+"]: ");
 
@@ -121,6 +122,10 @@ public class ExampleDecoder {
 					case ADSB_AIRBORN_POSITION_V2:
 						AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
 						System.out.println("          NIC supplement B set: " + ap2.hasNICSupplementB());
+						break;
+					case ADSB_AIRBORN_POSITION_V3:
+						AirbornePositionV3Msg ap3 = (AirbornePositionV3Msg) msg;
+						System.out.println("          NIC supplement B set: " + ap3.hasNICSupplementB());
 						break;
 				}
 				break;

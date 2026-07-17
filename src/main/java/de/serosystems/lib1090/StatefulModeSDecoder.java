@@ -326,8 +326,8 @@ public class StatefulModeSDecoder {
 		// higher (not yet defined) version is decoded as version 3, since, per
 		// DO-260C, §2.2.7.1, newer versions are expected to be backwards compatible
 		// with version 3
-		// NOTE: this is preliminary, as it currently only applies to surface position messages.
-		//       other messages fall back to version 2 as of DO-260B, §2.2.7.1.
+		// NOTE: this is preliminary, as it currently only applies to surface and airborne
+		//       position messages. other messages fall back to version 2 as of DO-260B, §2.2.7.1.
 
 		// we need stateful decoding, because ADS-B version > 0 can only be assumed
 		// if matching version info in operational status has been found.
@@ -371,8 +371,10 @@ public class StatefulModeSDecoder {
 				case 1:
 					return new AirbornePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
 				case 2:
-				default:
 					return new AirbornePositionV2Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
+				case 3:
+				default:
+					return new AirbornePositionV3Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplD);
 			}
 		}
 
@@ -646,6 +648,7 @@ public class StatefulModeSDecoder {
 		byte adsbVersion;
 		boolean nicSupplA;
 		boolean nicSupplC;
+		byte nicSupplD;
 		Integer geoMinusBaro;
 		long lastUsed;
 		PositionDecoder posDec;
