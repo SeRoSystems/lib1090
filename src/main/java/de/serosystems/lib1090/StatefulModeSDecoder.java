@@ -348,6 +348,7 @@ public class StatefulModeSDecoder {
 					return new IdentificationV2Msg(es1090);
 				case 3:
 				default:
+					if (ftc == 1) break; // format type code 1 is not defined for identification in version 3
 					return new IdentificationV3Msg(es1090);
 			}
 		}
