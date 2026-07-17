@@ -78,8 +78,8 @@ public final class Identification {
         if (version < 0 || version > 7)
             throw new IllegalArgumentException("Unsupported ADS-B version: " + version);
 
-        // versions above 2 are decoded like version 2, per DO-260B, §2.2.7.1
-        int effectiveVersion = Math.min(version, 2);
+        // versions above 3 are decoded like version 3, per DO-260C, §2.2.7.1
+        int effectiveVersion = Math.min(version, 3);
 
         // category descriptions according
         // to the ADS-B specification
@@ -126,6 +126,24 @@ public final class Identification {
             if (emitterCategory == 3)
                 return "Fixed Ground or Tethered Obstruction";
             if (emitterCategory >= 4 && emitterCategory <= 7) return "Reserved";
+        }
+
+        if (effectiveVersion == 3) {
+            if (typeCode == 4) {
+                // version 3 exceptions to the version 2 table for category set A
+                switch (emitterCategory) {
+                    case 1: return "MTOW < 15500 lbs";
+                    case 2: return "15500 <= MTOW < 75000 lbs";
+                    case 3: return "75000 <= MTOW < 300000 lbs";
+                    case 4:
+                    case 6:
+                        return "Reserved";
+                    case 5: return "MTOW >= 300000 lbs";
+                }
+            } else if (typeCode == 3 && (emitterCategory == 3 || emitterCategory == 6 || emitterCategory == 7)) {
+                // version 3 exceptions to the version 2 table for category set B
+                return "Reserved";
+            }
         }
 
         return categories[4 - typeCode][emitterCategory];

@@ -205,6 +205,7 @@ public class ExampleDecoder {
 			case ADSB_IDENTIFICATION_V0:
 			case ADSB_IDENTIFICATION_V1:
 			case ADSB_IDENTIFICATION_V2:
+			case ADSB_IDENTIFICATION_V3:
 				IdentificationMsg ident = (IdentificationMsg) msg;
 				System.out.println("["+icao24+"]: Callsign: "+new String(ident.getIdentification()));
 				System.out.println("          Category: "+ident.getEmitterCategory());
