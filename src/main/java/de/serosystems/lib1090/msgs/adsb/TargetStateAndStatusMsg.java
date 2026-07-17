@@ -55,7 +55,7 @@ public interface TargetStateAndStatusMsg {
 	  * is referring to true north or magnetic north.
 	  * If information is not available, assume magnetic north as the de-facto standard.
 	  *
-	  * @return the selected heading in decimal degrees ([0, 360]) clockwise, or {@code null} if unavailable
+	  * @return the selected heading in decimal degrees ([0, 360)) clockwise, or {@code null} if unavailable
 	 */
 	Float getSelectedHeading();
 

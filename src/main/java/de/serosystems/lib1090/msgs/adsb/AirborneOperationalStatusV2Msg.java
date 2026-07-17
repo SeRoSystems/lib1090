@@ -108,12 +108,21 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	}
 
 	/**
-	 * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
+	 * Geometric Vertical Accuracy (GVA), DO-260B Table 2-71 (§2.2.3.2.7.2.8):
+	 * encoding 0 = "Unknown or &gt; 150 m", 1 = "&le; 150 m", 2 = "&lt; 45 m", 3 = "Reserved".
+	 * Per the Table 2-71 Note, ADS-B Version 2 receivers treat encoding 3 (which future
+	 * versions &gt; 2 define as &lt; 45 m) as &lt; 45 m rather than as fully unknown.
+	 * The raw encoding is available via {@link #getGVA()}.
+	 *
+	 * @return the geometric vertical accuracy in meters, or -1 for "unknown or above 150m" (encoding 0)
 	 */
 	public int getGeometricVerticalAccuracy() {
 		if (geometric_vertical_accuracy == 1)
 			return 150;
 		else if (geometric_vertical_accuracy == 2)
+			return 45;
+		else if (geometric_vertical_accuracy == 3)
+			// Reserved in DO-260B; per Table 2-71 Note, V2 receivers treat it as < 45 m.
 			return 45;
 		else return -1;
 	}

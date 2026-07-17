@@ -105,6 +105,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 		case 4: return "no communications";
 		case 5: return "unlawful interference";
 		case 6: return "downed aircraft";
+		case 7: return "reserved";
 		default: return "unknown";
 		}
 	}

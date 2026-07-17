@@ -58,7 +58,7 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
 	}
 
 	/**
-	 * @param squitter extended squitter which contains this identification msg
+	 * @param squitter extended squitter which contains this MLAT/Surface System Status msg
 	 * @throws BadFormatException if message has the wrong typecode
 	 */
 	public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {

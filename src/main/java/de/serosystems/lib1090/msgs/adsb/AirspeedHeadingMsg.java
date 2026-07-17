@@ -43,7 +43,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	private boolean airspeed_available;
 	private boolean vertical_source; // 0 = geometric, 1 = barometric
 	private boolean vertical_rate_down; // 0 = up, 1 = down
-	private short vertical_rate; // in ft/s
+	private short vertical_rate; // in ft/min
 	private boolean vertical_rate_info_available;
 	private int geo_minus_baro; // in ft
 	private boolean geo_minus_baro_available;
@@ -214,7 +214,9 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	}
 
 	/**
-	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
+	 * @return heading in decimal degrees ([0, 360)). 0° = magnetic north for ADS-B version 0/1; for version 2 the
+	 *         reference direction (true or magnetic) is signalled externally by the Horizontal Reference Direction
+	 *         (HRD) bit in the Operational Status message. Returns null if no information is available.
 	 * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
 	 */
 	public Double getHeading() {

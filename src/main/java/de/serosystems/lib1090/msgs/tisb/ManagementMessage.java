@@ -25,7 +25,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
+ * Decoder for TIS-B/ADS-R Management Message (DO-260B, 2.2.17.3.3; CF=4).
  * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable {
@@ -67,7 +67,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
 
 		// Table 2-13
 		if (getFirstField() != 4)
-			throw new BadFormatException("TIS-B management messages must have CF value 6.");
+			throw new BadFormatException("TIS-B management messages must have CF value 4.");
 
 		// not specified further
 	}

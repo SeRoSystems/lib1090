@@ -107,7 +107,7 @@ public final class Identification {
 				"Reserved",
 				"Reserved"
 		},{
-				"Reserved",
+				"No ADS-B Emitter Category Information",
 				"Reserved",
 				"Reserved",
 				"Reserved",

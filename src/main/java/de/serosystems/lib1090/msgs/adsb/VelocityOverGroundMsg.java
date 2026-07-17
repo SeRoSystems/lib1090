@@ -162,7 +162,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	}
 
 	/**
-	 * @return velocity from east to south in knots or null if information is not available
+	 * @return velocity from east to west in knots or null if information is not available
 	 */
 	public Integer getEastToWestVelocity() {
 		if (!velocity_info_available) return null;

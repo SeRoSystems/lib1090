@@ -97,7 +97,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
 		msg_subtype = (byte) (msg[0]&0x7);
 		if (msg_subtype != 3 && msg_subtype != 4) {
-			throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
+			throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
 		}
 
 		imf = (msg[1]&0x80)>0;

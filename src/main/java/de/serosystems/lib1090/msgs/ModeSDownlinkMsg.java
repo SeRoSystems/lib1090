@@ -290,9 +290,9 @@ public class ModeSDownlinkMsg implements Serializable {
 
 		// DF 24 is a special case
 		if (downlink_format > 23) {
-			// verify that the third most significant bit is 1
+			// verify that the third most significant bit is 0 (DF=24 is 11000)
 			if ((downlink_format & 0b00000100) != 0) {
-				throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 1");
+				throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 0");
 			}
 
 			downlink_format = 24;
