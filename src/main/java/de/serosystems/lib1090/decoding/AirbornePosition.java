@@ -100,6 +100,36 @@ public final class AirbornePosition {
 	}
 
 	/**
+	 * NIC for ADS-B version 3 format type codes 20-22, based on NIC supplement D. For FTC=21, only
+	 * D=0 is currently defined by the spec; since NIC=7 is already the worst (lowest) integrity
+	 * guaranteed for this format type code, any D value is decoded as NIC=7.
+	 *
+	 * @return Navigation integrity category. A NIC of 0 means "unknown".
+	 */
+	public static byte decodeNIC(byte formatTypeCode, byte nicSupplementD) {
+		switch (formatTypeCode) {
+			case 20:
+				switch (nicSupplementD) {
+					case 3: return 11;
+					case 2: return 10;
+					case 1: return 9;
+					default: return 8;
+				}
+			case 21:
+				// only D=0 is defined for FTC=21, but NIC=7 is already the worst value for this FTC
+				return 7;
+			case 22:
+				switch (nicSupplementD) {
+					case 3: return 6;
+					case 2: return 5;
+					case 1: return 4;
+					default: return 0;
+				}
+			default: return 0;
+		}
+	}
+
+	/**
 	 * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
 	 * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to DO-260B Table N-11.
 	 *
@@ -145,6 +175,35 @@ public final class AirbornePosition {
 			case 16:
 				return nicSupplB && nicSupplA ? 7408 : 14816;
 			case 17: return 37040;
+			default: return -1;
+		}
+	}
+
+	/**
+	 * HCR for ADS-B version 3 format type codes 20-22, based on NIC supplement D. For FTC=21, only
+	 * D=0 is currently defined by the spec; since 370.4m is already the worst (highest) containment
+	 * radius guaranteed for this format type code, any D value is decoded as 370.4m.
+	 *
+	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown" or &gt;=3704m.
+	 */
+	public static double decodeHCR(byte formatTypeCode, byte nicSupplementD) {
+		switch (formatTypeCode) {
+			case 20:
+				switch (nicSupplementD) {
+					case 3: return 7.5;
+					case 2: return 25;
+					case 1: return 75;
+					default: return 185.2;
+				}
+			case 21:
+				return 370.4;
+			case 22:
+				switch (nicSupplementD) {
+					case 3: return 1111.2;
+					case 2: return 1852;
+					case 1: return 3704;
+					default: return -1;
+				}
 			default: return -1;
 		}
 	}
