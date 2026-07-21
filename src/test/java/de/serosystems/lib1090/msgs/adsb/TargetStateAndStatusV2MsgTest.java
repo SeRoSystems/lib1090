@@ -225,15 +225,7 @@ public class TargetStateAndStatusV2MsgTest {
 
 	@Test
 	public void testInvalidReservedBits_shouldThrowBadFormatException() {
-		try {
-			final TargetStateAndStatusV2Msg tss = new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(INVALID_TSS));
-			fail();
-		} catch (BadFormatException e) {
-			// NOP
-		} catch (UnspecifiedFormatError unspecifiedFormatError) {
-			fail();
-		}
-
+		assertThrows(BadFormatException.class, () -> new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(INVALID_TSS)));
 	}
 
 }
