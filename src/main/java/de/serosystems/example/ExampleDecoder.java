@@ -175,7 +175,9 @@ public class ExampleDecoder {
 				ModeACodeV1Msg modeACode = (ModeACodeV1Msg) msg;
 				System.out.println("["+icao24+"]: Mode A code is "+modeACode.getIdentity());
 				break;
-			case ADSB_AIRSPEED:
+			case ADSB_AIRSPEED_V0:
+			case ADSB_AIRSPEED_V1:
+			case ADSB_AIRSPEED_V2:
 				AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;
 				System.out.println("["+icao24+"]: Airspeed: "+
 						(airspeed.hasAirspeedInfo() ? airspeed.getAirspeed()+" kt" : "unknown"));
@@ -274,15 +276,17 @@ public class ExampleDecoder {
 				if (tcas.getThreatType() == 1) // it's a icao24 address
 					System.out.println("          Threat identity is 0x"+String.format("%06x", tcas.getThreatIdentity()));
 				break;
-			case ADSB_VELOCITY:
+			case ADSB_VELOCITY_V0:
+			case ADSB_VELOCITY_V1:
+			case ADSB_VELOCITY_V2:
 				VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
 				System.out.println("["+icao24+"]: Ground Speed: "+(veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown")+" kt");
 				System.out.println("          True Track: "+(veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown")+" °");
 				System.out.println("          Vertical rate: "+(veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown")+" ft/min");
 
 				// the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
-				if (decoder.getAdsbVersion(veloc) == 1)
-					System.out.println("          Has IFR capability: " + veloc.hasIFRCapability());
+				if (decoder.getAdsbVersion(msg) == 1)
+					System.out.println("          Has IFR capability: " + ((IFRCapabilityMsg) veloc).hasIFRCapability());
 
 				break;
 			case ADSB_TARGET_STATE_AND_STATUS_V1:

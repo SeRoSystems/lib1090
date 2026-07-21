@@ -367,15 +367,37 @@ public class StatefulModeSDecoder {
 			int subtype = es1090.getMessage()[0] & 0x7;
 
 			if (subtype == 1 || subtype == 2) { // velocity over ground
-				VelocityOverGroundMsg velocity =
-						new VelocityOverGroundMsg(es1090);
-				if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
-				return velocity;
+				switch (dd.adsbVersion) {
+					case 0:
+						VelocityOverGroundV0Msg v0 = new VelocityOverGroundV0Msg(es1090);
+						if (v0.hasDiffBaroAlt()) dd.geoMinusBaro = v0.getDiffBaroAlt();
+						return v0;
+					case 1:
+						VelocityOverGroundV1Msg v1 = new VelocityOverGroundV1Msg(es1090);
+						if (v1.hasDiffBaroAlt()) dd.geoMinusBaro = v1.getDiffBaroAlt();
+						return v1;
+					case 2:
+					default:
+						VelocityOverGroundV2Msg v2 = new VelocityOverGroundV2Msg(es1090);
+						if (v2.hasDiffBaroAlt()) dd.geoMinusBaro = v2.getDiffBaroAlt();
+						return v2;
+				}
 			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
-				AirspeedHeadingMsg airspeed =
-						new AirspeedHeadingMsg(es1090);
-				if (airspeed.hasDiffBaroAlt()) dd.geoMinusBaro = airspeed.getDiffBaroAlt();
-				return airspeed;
+				switch (dd.adsbVersion) {
+					case 0:
+						AirspeedHeadingV0Msg a0 = new AirspeedHeadingV0Msg(es1090);
+						if (a0.hasDiffBaroAlt()) dd.geoMinusBaro = a0.getDiffBaroAlt();
+						return a0;
+					case 1:
+						AirspeedHeadingV1Msg a1 = new AirspeedHeadingV1Msg(es1090);
+						if (a1.hasDiffBaroAlt()) dd.geoMinusBaro = a1.getDiffBaroAlt();
+						return a1;
+					case 2:
+					default:
+						AirspeedHeadingV2Msg a2 = new AirspeedHeadingV2Msg(es1090);
+						if (a2.hasDiffBaroAlt()) dd.geoMinusBaro = a2.getDiffBaroAlt();
+						return a2;
+				}
 			}
 		}
 

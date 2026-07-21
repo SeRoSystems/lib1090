@@ -18,36 +18,10 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.AirborneVelocity;
-
 /**
  * Common API for ADS-B airborne velocity messages across message subtypes.
  */
 public interface AirborneVelocityMsg {
-
-    /**
-     * @return true if the aircraft indicates an intent to change altitude or a similar flight status change
-     */
-    boolean hasChangeIntent();
-
-    /**
-     * Note: only defined for ADS-B version 0 and 1.
-     *
-     * @return true if the aircraft reports IFR capability
-     */
-    boolean hasIFRCapability();
-
-    /**
-     * @return the raw encoded Navigation Accuracy Category for velocity
-     */
-    byte getNACvEncoded();
-
-    /**
-     * @return the interpreted 95% horizontal velocity accuracy in m/s, or -1 if unknown or greater than 10m/s
-     */
-    default float getAccuracyBound() {
-        return AirborneVelocity.decodeAccuracyBound(getNACvEncoded());
-    }
 
     /**
      * @return true if the reported velocity uses the supersonic resolution
@@ -77,7 +51,11 @@ public interface AirborneVelocityMsg {
     /**
      * @return the vertical rate in feet/min, or {@code null} if unavailable
      */
-    Integer getVerticalRate();
+    default Integer getVerticalRate() {
+        if (!hasVerticalRate()) return null;
+        int verticalRate = (getVerticalRateEncoded() - 1) * 64;
+        return isVerticalRateDown() ? -verticalRate : verticalRate;
+    }
 
     /**
      * @return whether the Difference from Barometric Altitude is available
@@ -97,5 +75,9 @@ public interface AirborneVelocityMsg {
     /**
      * @return the Difference from Barometric Altitude, i.e. geometric minus barometric altitude difference in feet, or {@code null} if unavailable
      */
-    Integer getDiffBaroAlt();
+    default Integer getDiffBaroAlt() {
+        if (!hasDiffBaroAlt()) return null;
+        int diffBaroAlt = (getDiffBaroAltEncoded() - 1) * 25;
+        return isDiffBaroAltNegative() ? -diffBaroAlt : diffBaroAlt;
+    }
 }
