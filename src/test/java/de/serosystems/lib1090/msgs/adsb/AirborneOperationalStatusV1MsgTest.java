@@ -24,7 +24,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AirborneOperationalStatusV1MsgTest {
+class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTest {
+
+	// ME = F8 00 02 00 49 29 00 (subtype 0/airborne, version 1, nacP=9)
+	private static final String BASE_MESSAGE = "8D000000F8000200492900000000";
+
+	@Override
+	protected byte[] baseMessage() {
+		return Tools.hexStringToByteArray(BASE_MESSAGE);
+	}
+
+	@Override
+	protected AirborneOperationalStatusV1Msg create(byte[] msg) throws Exception {
+		return new AirborneOperationalStatusV1Msg(msg);
+	}
 
 	@Test
 	public void testCapabilityCodeWithHighByteBits() throws Exception {
@@ -43,9 +56,7 @@ class AirborneOperationalStatusV1MsgTest {
 
 	@Test
 	public void testValidVersion1Message() throws Exception {
-		// ME = F8 00 02 00 49 29 00
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8000200492900000000");
-		AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
+		AirborneOperationalStatusV1Msg status = create(baseMessage());
 		assertTrue(status instanceof OperationalStatusV1Msg);
 		assertEquals(0, status.getSubtypeCode());
 		assertEquals(1, status.getVersion());
@@ -54,9 +65,16 @@ class AirborneOperationalStatusV1MsgTest {
 
 	@Test
 	public void testRejectVersion0Message() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8000200492900000000");
+		byte[] msg = baseMessage();
 		msg[9] = 0x09;
 
 		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
+	}
+
+	@Test
+	void testHasOperationalTCAS() throws Exception {
+		// In version 1, the bit means "TCAS NOT operational" -- unset (or unknown) means operational.
+		assertTrue(create(baseMessage()).hasOperationalTCAS());
+		assertFalse(withCapabilityClassCode(0x2000).hasOperationalTCAS());
 	}
 }

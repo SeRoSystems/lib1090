@@ -23,7 +23,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.ModeACodeV1Msg;
 import de.serosystems.lib1090.msgs.adsb.ModeACodeV1MsgTest;
-import de.serosystems.lib1090.msgs.adsb.OperationalStatusMsgTest;
+import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2MsgTest;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusV1MsgTest;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusV2Msg;
@@ -59,7 +59,7 @@ public class StatefulModeSDecoderTest {
 	@Test
 	public void tssV2ME11Set_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
 		// tell decoder that the aircraft uses ADS-B v2
-		decoder.decode(OperationalStatusMsgTest.A_OPSTAT_V2, 0L);
+		decoder.decode(AirborneOperationalStatusV2MsgTest.A_OPSTAT_V2, 0L);
 
 		// decode message with ME bit 11 set
 		final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, 0L);
