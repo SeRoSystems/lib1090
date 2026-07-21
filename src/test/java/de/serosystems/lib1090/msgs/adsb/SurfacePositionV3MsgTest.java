@@ -18,78 +18,30 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.Position;
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SurfacePositionV3MsgTest {
+class SurfacePositionV3MsgTest extends SurfacePositionMsgTest {
 
-	// A surface position report observed in the wild, decomposed by single bits
-	public static final String SURF_POS =
-			"8c" +
-
-			// ICAO 24 bit address
-			"3c4dc6" +
-
-			//             00111 => type code 7
-			//           0000001 => Movement
-			//                 1 => Heading/Ground Track Status
-			//           1000000 => Heading/Ground Track
-			//                 0 => Time
-			//                 1 => CPR format
-			// 11001100110001101 => CPR lat
-			// 10000001010011110 => CPT lon
-			"381c07331b029e" +
-
-			// parity bits (valid, not tested here)
-			"b308de";
-
-	@Test
-	void testDecodeSurfacePosition() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
-
-		assertEquals(2, sPos.getSIL());
-		assertTrue(sPos.hasGroundSpeed());
-		assertEquals(0, sPos.getGroundSpeed());
-		assertEquals(0.125, sPos.getGroundSpeedResolution());
-		assertTrue(sPos.hasValidHeading());
-		assertEquals(64*360D/128D, sPos.getHeading());
-		assertTrue(sPos.hasValidPosition());
-		assertEquals(0, sPos.getAltitude());
-		assertEquals(Position.AltitudeType.ABOVE_GROUND_LEVEL, sPos.getAltitudeType());
+	@Override
+	protected SurfacePositionMsg create(String hex) throws Exception {
+		return new SurfacePositionV3Msg(hex, Instant.EPOCH);
 	}
 
 	@Test
-	void testGetNIC() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
-
-		assertEquals(8, sPos.getNIC(false, false));
-	}
-
-	@Test
-	void testGetNICWithSupplementA() throws BadFormatException, UnspecifiedFormatError {
+	void testGetNICWithSupplementA() throws Exception {
 		final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
 
 		assertEquals(9, sPos.getNIC(true, false));
 	}
 
 	@Test
-	void testGetHorizontalContainmentRadiusLimit() throws BadFormatException, UnspecifiedFormatError {
-		final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
-
-		assertEquals(185.2, sPos.getHorizontalContainmentRadiusLimit(false, false));
-	}
-
-	@Test
-	void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws BadFormatException, UnspecifiedFormatError {
+	void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws Exception {
 		final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
 
 		assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
 	}
-
 }
