@@ -24,31 +24,17 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SurfacePositionV2MsgTest extends SurfacePositionMsgTest {
+class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
 
 	@Override
 	protected SurfacePositionMsg create(String hex) throws Exception {
-		return new SurfacePositionV2Msg(hex, Instant.EPOCH);
+		return new SurfacePositionV0Msg(hex, Instant.EPOCH);
 	}
 
 	@Test
 	void testHasTimeFlag() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
+		final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
 
 		assertFalse(sPos.hasTimeFlag());
-	}
-
-	@Test
-	void testGetNICWithSupplementA() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
-
-		assertEquals(9, sPos.getNIC(true, false));
-	}
-
-	@Test
-	void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
-
-		assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
 	}
 }
