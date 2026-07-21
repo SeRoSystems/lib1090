@@ -18,80 +18,76 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AirspeedHeadingMsgTest {
+abstract class AirspeedHeadingMsgTest {
+
+	protected abstract AirspeedHeadingMsg create(String hex) throws Exception;
 
 	@Test
 	public void testHeadingPrecision() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.hasHeadingStatusFlag());
 		assertEquals(243.984375, msg.getHeading(), 0.001);
 	}
 
 	@Test
 	public void testAirspeed() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.hasAirspeedInfo());
 		assertEquals(375, msg.getAirspeed().intValue());
 	}
 
 	@Test
 	public void testTrueAirspeed() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.isTrueAirspeed());
 	}
 
 	@Test
-	public void testNACvRawAndAccuracyBound() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertEquals(0, msg.getNACvEncoded());
-		assertEquals(-1.0f, msg.getAccuracyBound());
-	}
-
-	@Test
 	public void testImplementsAirborneVelocityMessage() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertInstanceOf(AirborneVelocityMsg.class, msg);
 	}
 
 	@Test
 	public void testVerticalRate() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertTrue(msg.hasVerticalRate());
 		assertEquals(-2304, msg.getVerticalRate().intValue());
 	}
 
 	@Test
 	public void testGeoMinusBaroUnavailable() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertFalse(msg.hasDiffBaroAlt(), "geo-minus-baro should not be available when raw field is 0");
 	}
 
 	@Test
 	public void testGeoMinusBaroReturnsNullWhenUnavailable() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertNull(msg.getDiffBaroAlt(), "getDiffBaroAlt() should return null when unavailable");
 	}
 
 	@Test
 	public void testIcaoExtraction() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
-		assertEquals("a05f21", msg.getAddress().getHexAddress());
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
+		assertInstanceOf(ExtendedSquitter.class, msg);
+		assertEquals("a05f21", ((ExtendedSquitter) msg).getAddress().getHexAddress());
 	}
 
 	@Test
 	public void testSubtype3NotSupersonic() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg("8DA05F219B06B6AF189400CBC33F");
+		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
 		assertFalse(msg.isSupersonic());
 	}
 
 	@Test
 	public void testNoHeadingAvailable() throws Exception {
-		AirspeedHeadingMsg msg = new AirspeedHeadingMsg(Tools.hexStringToByteArray("8d4400cd9b0000b4f87000e71a10"));
+		AirspeedHeadingMsg msg = create("8d4400cd9b0000b4f87000e71a10");
 		assertFalse(msg.hasHeadingStatusFlag());
 		assertNull(msg.getHeading());
 	}

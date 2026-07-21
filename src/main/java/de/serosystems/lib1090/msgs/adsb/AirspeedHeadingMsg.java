@@ -18,238 +18,57 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-
-import java.io.Serializable;
-
 /**
- * Decoder for ADS-B airspeed and heading messages
- * @author Matthias Schäfer (schaefer@sero-systems.de)
+ * Common API for ADS-B airspeed and heading messages across message versions.
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
+public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
 
-	private static final long serialVersionUID = 6901092011249128775L;
+    /**
+     * This must be checked before retrieving heading information.
+     *
+     * @return the flag indicates whether heading information is available or not
+     */
+    boolean hasHeadingStatusFlag();
 
-	private byte messageSubtype;
-	private boolean intentChange;
-	private boolean ifrCapability;
-	private byte navigationAccuracyCategoryEncoded;
-	private boolean headingStatusBit;
-	private short headingEncoded;
-	private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
-	private short airspeedEncoded; // raw encoded airspeed field
-	private boolean verticalSource; // 0 = geometric, 1 = barometric
-	private boolean verticalRateDown; // 0 = up, 1 = down
-	private short verticalRateEncoded; // raw encoded vertical rate field
-	private boolean diffBaroAltNegative;
-	private short diffBaroAltEncoded; // raw encoded geometric minus barometric altitude difference field
+    /**
+     * Must be checked before accessing airspeed!
+     *
+     * @return whether airspeed info is available
+     */
+    boolean hasAirspeedInfo();
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirspeedHeadingMsg() { }
+    /**
+     * @return airspeed in knots or null if information is not available. The latter can also be checked using
+     * {@link #hasAirspeedInfo()}.
+     */
+    default Integer getAirspeed() {
+        if (!hasAirspeedInfo()) return null;
+        int scale = isSupersonic() ? 4 : 1;
+        return (getAirspeedEncoded() - 1) * scale;
+    }
 
-	/**
-	 * @param rawMessage raw ADS-B airspeed and heading message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(rawMessage));
-	}
+    /**
+     * @return the raw encoded airspeed field
+     */
+    short getAirspeedEncoded();
 
-	/**
-	 * @param rawMessage raw ADS-B airspeed and heading message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(rawMessage));
-	}
+    /**
+     * @return raw heading field value (10 bit). Check {@link #hasHeadingStatusFlag()} to determine whether this value
+     *         is valid.
+     */
+    short getHeadingEncoded();
 
-	/**
-	 * @param squitter extended squitter containing the airspeed and heading msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-		setType(subtype.ADSB_AIRSPEED);
+    /**
+     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
+     * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
+     */
+    default Double getHeading() {
+        if (!hasHeadingStatusFlag()) return null;
+        return getHeadingEncoded() * 360. / 1024.;
+    }
 
-		if (this.getFormatTypeCode() != 19) {
-			throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
-		}
-
-		BitReader br = BitReader.forBigEndian(getMessage());
-
-		messageSubtype = br.readByte(6, 8);
-		if (messageSubtype != 3 && messageSubtype != 4)
-			throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
-
-		intentChange = br.readByte(9, 9) == 1;
-		ifrCapability = br.readByte(10, 10) == 1;
-		navigationAccuracyCategoryEncoded = br.readByte(11, 13);
-
-		headingStatusBit = br.readByte(14, 14) == 1;
-		headingEncoded = br.readShort(15, 24);
-
-		trueAirspeed = br.readByte(25, 25) == 1;
-		airspeedEncoded = br.readShort(26, 35);
-
-		verticalSource = br.readByte(36, 36) == 1;
-		verticalRateDown = br.readByte(37, 37) == 1;
-		verticalRateEncoded = br.readShort(38, 46);
-
-		diffBaroAltNegative = br.readByte(49, 49) == 1;
-		diffBaroAltEncoded = br.readByte(50, 56);
-	}
-
-	/**
-	 * This must be checked before retrieving heading information.
-	 *
-	 * @return the flag indicates whether heading information is available or not
-	 */
-	public boolean hasHeadingStatusFlag() {
-		return headingStatusBit;
-	}
-
-	/**
-	 * Must be checked before accessing airspeed!
-	 *
-	 * @return whether airspeed info is available
-	 */
-	public boolean hasAirspeedInfo() {
-		return airspeedEncoded != 0;
-	}
-
-	@Override
-	public boolean hasVerticalRate() {
-		return verticalRateEncoded != 0;
-	}
-
-	@Override
-	public boolean hasDiffBaroAlt() {
-		return diffBaroAltEncoded != 0;
-	}
-
-	@Override
-	public boolean isSupersonic() {
-		return messageSubtype == 4;
-	}
-
-	@Override
-	public boolean hasChangeIntent() {
-		return intentChange;
-	}
-
-	@Override
-	public boolean hasIFRCapability() {
-		return ifrCapability;
-	}
-
-	@Override
-	public byte getNACvEncoded() {
-		return navigationAccuracyCategoryEncoded;
-	}
-
-	/**
-	 * @return airspeed in knots or null if information is not available. The latter can also be checked using
-	 * {@link #hasAirspeedInfo()}.
-	 */
-	public Integer getAirspeed() {
-		if (!hasAirspeedInfo()) return null;
-		int scale = isSupersonic() ? 4 : 1;
-		return (airspeedEncoded - 1) * scale;
-	}
-
-	/**
-	 * @return the raw encoded airspeed field
-	 */
-	public short getAirspeedEncoded() {
-		return airspeedEncoded;
-	}
-
-	@Override
-	public boolean isBarometricVerticalSpeed() {
-		return verticalSource;
-	}
-
-	@Override
-	public Integer getVerticalRate() {
-		if (!hasVerticalRate()) return null;
-		int verticalRate = (verticalRateEncoded - 1) * 64;
-		return verticalRateDown ? -verticalRate : verticalRate;
-	}
-
-	public boolean isVerticalRateDown() {
-		return verticalRateDown;
-	}
-
-	@Override
-	public short getVerticalRateEncoded() {
-		return verticalRateEncoded;
-	}
-
-	@Override
-	public Integer getDiffBaroAlt() {
-		if (!hasDiffBaroAlt()) return null;
-		int diffBaroAlt = (diffBaroAltEncoded - 1) * 25;
-		return diffBaroAltNegative ? -diffBaroAlt : diffBaroAlt;
-	}
-
-	@Override
-	public boolean isDiffBaroAltNegative() {
-		return diffBaroAltNegative;
-	}
-
-	@Override
-	public short getDiffBaroAltEncoded() {
-		return diffBaroAltEncoded;
-	}
-
-	/**
-	 * @return raw heading field value (10 bit). Check {@link #hasHeadingStatusFlag()} to determine whether this value
-	 *         is valid.
-	 */
-	public short getHeadingEncoded() {
-		return headingEncoded;
-	}
-
-	/**
-	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
-	 * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
-	 */
-	public Double getHeading() {
-		if (!headingStatusBit) return null;
-		return headingEncoded * 360. / 1024.;
-	}
-
-	/**
-	 * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
-	 */
-	public boolean isTrueAirspeed() {
-		return trueAirspeed;
-	}
-
-	/**
-	 * @return the raw encoded message subtype
-	 */
-	@Override
-	public String toString() {
-		return "AirspeedHeadingMsg{" + super.toString() +
-				", messageSubtype=" + messageSubtype +
-				", intentChange=" + intentChange +
-				", ifrCapability=" + ifrCapability +
-				", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
-				", headingStatusBit=" + headingStatusBit +
-				", headingEncoded=" + headingEncoded +
-				", trueAirspeed=" + trueAirspeed +
-				", airspeedEncoded=" + airspeedEncoded +
-				", verticalSource=" + verticalSource +
-				", verticalRateDown=" + verticalRateDown +
-				", verticalRateEncoded=" + verticalRateEncoded +
-				", diffBaroAltNegative=" + diffBaroAltNegative +
-				", diffBaroAltEncoded=" + diffBaroAltEncoded +
-				'}';
-	}
+    /**
+     * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
+     */
+    boolean isTrueAirspeed();
 }
