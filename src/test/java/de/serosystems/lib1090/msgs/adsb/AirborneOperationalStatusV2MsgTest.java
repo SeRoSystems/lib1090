@@ -20,17 +20,12 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.SingleAntennaMsg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-/**
- * @author Markus Fuchs (fuchs@opensky-network.org)
- */
-public class OperationalStatusMsgTest {
+public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatusMsgTest {
 
 	// Airborne operational status message observed in the wild
 	public static final String A_OPSTAT_V2 = "8d" +
@@ -57,11 +52,21 @@ public class OperationalStatusMsgTest {
 			// parity (correct, not test here)
 			"209514";
 
-	// Surface operational status message with ADS-B version 2
-	public static final String S_OPSTAT_V2 = "8D000000F9000000004000000000";
+	// ME = F8 00 02 00 49 49 00 (subtype 0/airborne, version 2, nacP=9)
+	private static final String BASE_MESSAGE = "8D000000F8000200494900000000";
+
+	@Override
+	protected byte[] baseMessage() {
+		return Tools.hexStringToByteArray(BASE_MESSAGE);
+	}
+
+	@Override
+	protected AirborneOperationalStatusV2Msg create(byte[] msg) throws Exception {
+		return new AirborneOperationalStatusV2Msg(msg);
+	}
 
 	@Test
-	public void testDecodeAirborneOpstat() throws UnspecifiedFormatError, BadFormatException {
+	public void testDecodeAirborneOpstat() throws Exception {
 		final AirborneOperationalStatusV2Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
 		assertTrue(opstat instanceof OperationalStatusV2Msg);
 		assertTrue(opstat instanceof SingleAntennaMsg);
@@ -82,21 +87,7 @@ public class OperationalStatusMsgTest {
 	}
 
 	@Test
-	public void testDecodeSurfaceOpstat() throws UnspecifiedFormatError, BadFormatException {
-		final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
-		assertTrue(opstat instanceof OperationalStatusV2Msg);
-		assertTrue(opstat instanceof SingleAntennaMsg);
-
-		assertEquals(2, opstat.getVersion());
-		assertFalse(opstat.has1090ESIn());
-		assertFalse(opstat.hasUATIn());
-		assertFalse(opstat.hasSingleAntenna());
-		assertEquals(0, opstat.getSDAEncoded());
-		assertFalse(opstat.hasSILSupplement());
-	}
-
-	@Test
-	public void testRejectAirborneVersion1AsV2() throws Exception {
+	public void testRejectVersion1AsV2() throws Exception {
 		byte[] msg = Tools.hexStringToByteArray(A_OPSTAT_V2);
 		msg[9] = 0x29;
 
@@ -104,10 +95,9 @@ public class OperationalStatusMsgTest {
 	}
 
 	@Test
-	public void testRejectSurfaceVersion1AsV2() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray(S_OPSTAT_V2);
-		msg[9] = 0x20;
-
-		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
+	void testHasOperationalTCAS() throws Exception {
+		// In version 2, the bit means "TCAS operational" directly -- the opposite polarity of version 1.
+		assertFalse(create(baseMessage()).hasOperationalTCAS());
+		assertTrue(withCapabilityClassCode(0x2000).hasOperationalTCAS());
 	}
 }
