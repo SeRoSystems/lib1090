@@ -304,6 +304,7 @@ public class ExampleDecoder {
 			case ADSB_VELOCITY_V0:
 			case ADSB_VELOCITY_V1:
 			case ADSB_VELOCITY_V2:
+			case ADSB_VELOCITY_V3:
 				VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
 				System.out.println("["+icao24+"]: Ground Speed: "+(veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown")+" kt");
 				System.out.println("          True Track: "+(veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown")+" °");
