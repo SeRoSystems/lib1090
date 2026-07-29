@@ -73,11 +73,41 @@ public interface AirborneVelocityMsg {
     boolean isDiffBaroAltNegative();
 
     /**
+     * Check saturation of Difference from Barometric Altitude.
+     * Note that the saturation value depends on the ADS-B version.
+     * This is only applicable if {@link #hasDiffBaroAlt()} is true.
+     *
+     * @return whether the Difference from Barometric Altitude is saturated
+     */
+    default boolean isDiffBaroAltSaturated() {
+        if (!hasDiffBaroAlt()) return false;
+        return getDiffBaroAltEncoded() != 0x7f;
+    }
+
+    /**
+     * Get difference from barometric altitude.
+     * This will give the upper boundary of each interval.
+     * If you are rather interested in midpoints, use {@link #getDiffBaroAltMidpoint()}.
+     * If {@link #isDiffBaroAltSaturated()} is true, use {@link #getDiffBaroAltMidpoint()} as lower boundary for the actual value.
+     *
      * @return the Difference from Barometric Altitude, i.e. geometric minus barometric altitude difference in feet, or {@code null} if unavailable
      */
-    default Integer getDiffBaroAlt() {
+    default Double getDiffBaroAlt() {
         if (!hasDiffBaroAlt()) return null;
-        int diffBaroAlt = (getDiffBaroAltEncoded() - 1) * 25;
+        double diffBaroAlt = (getDiffBaroAltEncoded() - 1) * 25.;
+        return isDiffBaroAltNegative() ? -diffBaroAlt : diffBaroAlt;
+    }
+
+    /**
+     * Get difference from barometric altitude.
+     * This will give the midpoint of each interval.
+     * It is also the lower boundary of the actual value if {@link #isDiffBaroAltSaturated()} is true.
+     *
+     * @return the Difference from Barometric Altitude, i.e. geometric minus barometric altitude difference in feet, or {@code null} if unavailable
+     */
+    default Double getDiffBaroAltMidpoint() {
+        if (!hasDiffBaroAlt()) return null;
+        double diffBaroAlt = (getDiffBaroAltEncoded() - 1.5) * 25.;
         return isDiffBaroAltNegative() ? -diffBaroAlt : diffBaroAlt;
     }
 }

@@ -103,7 +103,7 @@ public class ExampleDecoder {
 					System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
 				}
 
-				Integer geoMinusBaro = decoder.getDiffBaroAlt(msg);
+				Double geoMinusBaro = decoder.getDiffBaroAlt(msg);
 				if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
 					System.out.println("          Height (geom.): " + ap.getAltitude() + geoMinusBaro + " ft");
 				}
