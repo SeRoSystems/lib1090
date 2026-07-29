@@ -208,12 +208,12 @@ public class StatefulModeSDecoder {
 			if (subtype == 1 || subtype == 2) { // velocity over ground
 				de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg velocity =
 						new de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg(es1090);
-				if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = velocity.getGeoMinusBaro();
+				if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = (double) velocity.getGeoMinusBaro();
 				return velocity;
 			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
 				de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg airspeed =
 						new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg(es1090);
-				if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = airspeed.getGeoMinusBaro();
+				if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = (double) airspeed.getGeoMinusBaro();
 				return airspeed;
 			}
 		}
@@ -302,13 +302,13 @@ public class StatefulModeSDecoder {
 				de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
 						new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
 				if (vog.hasGeoMinusBaroInfo())
-					dd.geoMinusBaro = vog.getGeoMinusBaro();
+					dd.geoMinusBaro = (double) vog.getGeoMinusBaro();
 				return vog;
 			} else if (subtype == 3 || subtype == 4) {
 				de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
 						new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
 				if (ash.hasGeoMinusBaroInfo())
-					dd.geoMinusBaro = ash.getGeoMinusBaro();
+					dd.geoMinusBaro = (double) ash.getGeoMinusBaro();
 				return ash;
 			}
 		} else if (ftc >= 1 && ftc <= 4) {
@@ -386,21 +386,21 @@ public class StatefulModeSDecoder {
 			int subtype = es1090.getMessage()[0] & 0x7;
 
 			if (subtype == 1 || subtype == 2) { // velocity over ground
+				AirborneVelocityMsg velocity;
 				switch (dd.adsbVersion) {
 					case 0:
-						VelocityOverGroundV0Msg v0 = new VelocityOverGroundV0Msg(es1090);
-						if (v0.hasDiffBaroAlt()) dd.geoMinusBaro = v0.getDiffBaroAlt();
-						return v0;
+						velocity = new VelocityOverGroundV0Msg(es1090);
+						break;
 					case 1:
-						VelocityOverGroundV1Msg v1 = new VelocityOverGroundV1Msg(es1090);
-						if (v1.hasDiffBaroAlt()) dd.geoMinusBaro = v1.getDiffBaroAlt();
-						return v1;
+						velocity = new VelocityOverGroundV1Msg(es1090);
+						break;
 					case 2:
 					default:
-						VelocityOverGroundV2Msg v2 = new VelocityOverGroundV2Msg(es1090);
-						if (v2.hasDiffBaroAlt()) dd.geoMinusBaro = v2.getDiffBaroAlt();
-						return v2;
+						velocity = new VelocityOverGroundV2Msg(es1090);
+						break;
 				}
+				if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
+				return (ExtendedSquitter) velocity;
 			} else if (subtype == 3 || subtype == 4) {  // airspeed & heading
 				switch (dd.adsbVersion) {
 					case 0:
@@ -585,7 +585,7 @@ public class StatefulModeSDecoder {
 	 * @param <T>   {@link ModeSDownlinkMsg} or one of its sub classes
 	 * @return the difference between geometric and barometric altitude in feet or null if not present
 	 */
-	public <T extends ModeSDownlinkMsg> Integer getDiffBaroAlt(T reply) {
+	public <T extends ModeSDownlinkMsg> Double getDiffBaroAlt(T reply) {
 		if (reply == null) return null;
 		DecoderData dd = getDecoderData(reply.getAddress());
 		return dd.geoMinusBaro;
@@ -653,7 +653,7 @@ public class StatefulModeSDecoder {
 		boolean nicSupplA;
 		boolean nicSupplC;
 		byte nicSupplD;
-		Integer geoMinusBaro;
+		Double geoMinusBaro;
 		long lastUsed;
 		PositionDecoder posDec;
 
