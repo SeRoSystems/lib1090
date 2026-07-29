@@ -395,8 +395,11 @@ public class StatefulModeSDecoder {
 						velocity = new VelocityOverGroundV1Msg(es1090);
 						break;
 					case 2:
-					default:
 						velocity = new VelocityOverGroundV2Msg(es1090);
+						break;
+					case 3:
+					default:
+						velocity = new AirborneVelocityV3Msg(es1090);
 						break;
 				}
 				if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
@@ -412,10 +415,12 @@ public class StatefulModeSDecoder {
 						if (a1.hasDiffBaroAlt()) dd.geoMinusBaro = a1.getDiffBaroAlt();
 						return a1;
 					case 2:
-					default:
 						AirspeedHeadingV2Msg a2 = new AirspeedHeadingV2Msg(es1090);
 						if (a2.hasDiffBaroAlt()) dd.geoMinusBaro = a2.getDiffBaroAlt();
 						return a2;
+					case 3:
+					default:
+						break; // subtypes 3/4 are not defined for ADS-B version 3 and up
 				}
 			}
 		}
