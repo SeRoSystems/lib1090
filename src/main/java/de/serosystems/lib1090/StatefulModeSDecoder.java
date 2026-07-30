@@ -49,30 +49,55 @@ public class StatefulModeSDecoder {
 	private long latestTimestamp;
 
 	/**
-	 * Create an instance of the stateful decoder with the default position decoding logic. Note that
-	 * the default logic uses quite strict reasonableness tests. If your data comes from a heterogenous
-	 * receiver network with fluctuating timestamps, you might want to use {@link #StatefulModeSDecoder(boolean)}.
+	 * Create an instance of the stateful decoder with the default position decoding logic.
+	 * Same as {@code new StatefulModeSDecoder.Builder().build()}.
 	 */
 	public StatefulModeSDecoder() {
-		this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
+		this(new Builder());
+	}
+
+	private StatefulModeSDecoder(Builder builder) {
+		this.positionDecoderSupplier = builder.positionDecoderSupplier;
 	}
 
 	/**
-	 * Constructor that allows for disabling the speed reasonableness test. See also {@link #StatefulModeSDecoder()}.
-	 *
-	 * @param disableSpeedTest set to true if your data comes from a heterogeneous network with varying timestamp stability
+	 * Builder for {@link StatefulModeSDecoder}.
 	 */
-	public StatefulModeSDecoder(boolean disableSpeedTest) {
-		this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder(disableSpeedTest);
-	}
+	public static class Builder {
 
-	/**
-	 * Create an instance of the stateful decoder with custom position decoding logic.
-	 *
-	 * @param positionDecoderSupplier a custom {@link PositionDecoderSupplier}
-	 */
-	public StatefulModeSDecoder(PositionDecoderSupplier positionDecoderSupplier) {
-		this.positionDecoderSupplier = positionDecoderSupplier;
+		private PositionDecoderSupplier positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
+
+		/**
+		 * Sets a custom position decoding logic. Note that the default logic uses quite strict
+		 * reasonableness tests. If your data comes from a heterogeneous receiver network with
+		 * fluctuating timestamps, you might want to use {@link #positionDecoderSupplierDefault(boolean)}
+		 * with speed tests disabled.
+		 *
+		 * @param positionDecoderSupplier a custom {@link PositionDecoderSupplier}
+		 * @return this builder
+		 */
+		public Builder positionDecoderSupplier(PositionDecoderSupplier positionDecoderSupplier) {
+			this.positionDecoderSupplier = positionDecoderSupplier;
+			return this;
+		}
+
+		/**
+		 * Sets the default position decoder supplier, but can disable the speed test.
+		 *
+		 * @param disableSpeedTest disable speed test
+		 * @return this builder
+		 */
+		public Builder positionDecoderSupplierDefault(boolean disableSpeedTest) {
+			this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder(disableSpeedTest);
+			return this;
+		}
+
+		/**
+		 * @return a new {@link StatefulModeSDecoder} instance configured by this builder
+		 */
+		public StatefulModeSDecoder build() {
+			return new StatefulModeSDecoder(this);
+		}
 	}
 
 	/**
