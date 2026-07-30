@@ -27,44 +27,11 @@ public final class Identification {
     }
 
     /**
-     * Maps ADS-B encoded to readable characters
-     *
-     * @param digit encoded digit
-     * @return readable character
-     */
-    public static char mapChar(byte digit) {
-        if (digit > 0 && digit < 27) return (char) ('A' + digit - 1);
-        else if (digit > 47 && digit < 58) return (char) ('0' + digit - 48);
-        else return ' ';
-    }
-
-    /**
-     * Maps ADS-B encoded to readable characters
-     *
-     * @param digits array of encoded digits
-     * @return array of decoded characters
-     */
-    public static char[] mapChar(byte[] digits) {
-        char[] result = new char[digits.length];
-
-        for (int i = 0; i < digits.length; i++)
-            result[i] = mapChar(digits[i]);
-
-        return result;
-    }
-
-    /**
      * @param identificationEncoded the raw 48-bit identification field
      * @return the 8 encoded (6-bit) identification digits, in order
      */
     public static byte[] identificationDigits(long identificationEncoded) {
-        byte[] digits = new byte[8];
-
-        // the 8 characters are consecutive 6-bit values, most significant first
-        for (int i = 0; i < digits.length; i++)
-            digits[i] = (byte) ((identificationEncoded >>> (42 - 6 * i)) & 0x3F);
-
-        return digits;
+        return InternationalAlphabet5.toDigits(identificationEncoded, 8);
     }
 
     /**

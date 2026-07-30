@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
+import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ public class AircraftIdentificationTest {
     public void aircraftIdentification() {
 
         byte[] identityByteArray = Identification.identificationDigits(BitReader.forBigEndian(msg).readLong(9, 56));
-        char[] identityCharArray = Identification.mapChar(identityByteArray);
+        char[] identityCharArray = InternationalAlphabet5.mapChar(identityByteArray);
 
         assertEquals("KLM1017 ", String.valueOf(identityCharArray));
 
