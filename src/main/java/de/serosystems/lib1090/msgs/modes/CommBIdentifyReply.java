@@ -71,7 +71,6 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
 	 */
 	public CommBIdentifyReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.COMM_B_IDENTIFY_REPLY);
 
 		if (getDownlinkFormat() != 21) {
 			throw new BadFormatException("Message is not a comm-b identify reply!");
@@ -228,5 +227,10 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
 				", identity=" + identity +
 				", message=" + Tools.toHexString(message) +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.COMM_B_IDENTIFY_REPLY;
 	}
 }

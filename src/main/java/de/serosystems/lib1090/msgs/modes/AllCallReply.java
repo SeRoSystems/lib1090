@@ -67,7 +67,6 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 	 */
 	public AllCallReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.ALL_CALL_REPLY);
 
 		if (getDownlinkFormat() != 11) {
 			throw new BadFormatException("Message is not an all-call reply!");
@@ -178,4 +177,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 				'}';
 	}
 
+
+	@Override
+	public subtype getType() {
+		return subtype.ALL_CALL_REPLY;
+	}
 }

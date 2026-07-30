@@ -128,7 +128,6 @@ public class ModeSDownlinkMsg implements Serializable {
 		ADSR_SURFACE_STATUS_V2,
 		ADSR_TARGET_STATE_AND_STATUS,
 	}
-	private subtype type;
 
 	private QualifiedAddress address;
 
@@ -413,7 +412,6 @@ public class ModeSDownlinkMsg implements Serializable {
 		}
 
 		address = new QualifiedAddress(addr, type);
-		setType(subtype.MODES_REPLY);
 	}
 
 	/**
@@ -466,7 +464,6 @@ public class ModeSDownlinkMsg implements Serializable {
 		first_field = reply.first_field;
 		payload = Arrays.copyOf(reply.payload, reply.payload.length);
 		parity = reply.parity;
-		type = reply.type;
 		noCRC = reply.noCRC;
 		address = new QualifiedAddress(reply.address);
 	}
@@ -475,14 +472,7 @@ public class ModeSDownlinkMsg implements Serializable {
 	 * @return the subtype
 	 */
 	public subtype getType() {
-		return type;
-	}
-
-	/**
-	 * @param subtype the subtype to set
-	 */
-	protected void setType(subtype subtype) {
-		this.type = subtype;
+		return subtype.MODES_REPLY;
 	}
 
 	/**
@@ -636,7 +626,7 @@ public class ModeSDownlinkMsg implements Serializable {
 				", first_field=" + first_field +
 				", payload=" + Tools.toHexString(payload) +
 				", noCRC=" + noCRC +
-				", type=" + type +
+				", type=" + getType() +
 				", address=" + address.toString() +
 				'}';
 	}

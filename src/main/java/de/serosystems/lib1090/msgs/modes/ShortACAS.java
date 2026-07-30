@@ -69,7 +69,6 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 	 */
 	public ShortACAS(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.SHORT_ACAS);
 
 		if (getDownlinkFormat() != 0) {
 			throw new BadFormatException("Message is not a short ACAS (air-air) message!");
@@ -224,5 +223,10 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 				", reply_information=" + reply_information +
 				", altitude_code=" + altitude_code +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.SHORT_ACAS;
 	}
 }

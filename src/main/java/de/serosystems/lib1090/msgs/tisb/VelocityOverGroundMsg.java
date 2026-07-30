@@ -79,7 +79,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 */
 	public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.TISB_VELOCITY);
 
 		if (getDownlinkFormat() != 18)
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -268,5 +267,10 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 				", nacv=" + nacv +
 				", sil=" + sil +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_VELOCITY;
 	}
 }

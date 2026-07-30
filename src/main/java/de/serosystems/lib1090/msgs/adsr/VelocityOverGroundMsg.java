@@ -75,7 +75,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 	 */
 	public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSR_VELOCITY);
 
 		if (this.getFormatTypeCode() != 19) {
 			throw new BadFormatException("Velocity messages must have typecode 19.");
@@ -242,5 +241,10 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 				", geo_minus_baro=" + geo_minus_baro +
 				", geo_minus_baro_available=" + geo_minus_baro_available +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_VELOCITY;
 	}
 }

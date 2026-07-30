@@ -78,7 +78,6 @@ public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Seriali
      */
     public VelocityOverGroundV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_VELOCITY_V1);
 
         if (this.getFormatTypeCode() != 19)
             throw new BadFormatException("Velocity messages must have typecode 19.");
@@ -189,5 +188,10 @@ public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Seriali
                 ", diffBaroAltNegative=" + diffBaroAltNegative +
                 ", diffBaroAltEncoded=" + diffBaroAltEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_VELOCITY_V1;
     }
 }

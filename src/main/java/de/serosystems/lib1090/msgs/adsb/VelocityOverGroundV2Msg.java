@@ -77,7 +77,6 @@ public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Seriali
      */
     public VelocityOverGroundV2Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_VELOCITY_V2);
 
         if (this.getFormatTypeCode() != 19)
             throw new BadFormatException("Velocity messages must have typecode 19.");
@@ -181,5 +180,10 @@ public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Seriali
                 ", diffBaroAltNegative=" + diffBaroAltNegative +
                 ", diffBaroAltEncoded=" + diffBaroAltEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_VELOCITY_V2;
     }
 }

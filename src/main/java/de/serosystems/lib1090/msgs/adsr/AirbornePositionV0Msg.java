@@ -78,7 +78,6 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 	public AirbornePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
 
-		setType(subtype.ADSR_AIRBORN_POSITION_V0);
 
 		if (!(getFormatTypeCode() == 0 ||
 				(getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
@@ -253,5 +252,10 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
 				", time_flag=" + time_flag +
 				", position=" + position +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_AIRBORN_POSITION_V0;
 	}
 }

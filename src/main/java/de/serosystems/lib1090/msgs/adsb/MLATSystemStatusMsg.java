@@ -68,7 +68,6 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
      */
     public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.SURFACE_SYSTEM_STATUS);
 
         if (getFormatTypeCode() != 24)
             throw new BadFormatException("MLAT system status messages must have typecode of 24.");
@@ -88,5 +87,10 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
         return "MLATSystemStatusMsg{" + super.toString() +
                 ", systemStatus=" + Tools.toHexString(systemStatus) +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.SURFACE_SYSTEM_STATUS;
     }
 }

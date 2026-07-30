@@ -66,7 +66,6 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
      */
     public EmergencyOrPriorityStatusV0V1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_EMERGENCY_V0V1);
 
         if (this.getFormatTypeCode() != 28)
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
@@ -94,5 +93,10 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
         return "EmergencyOrPriorityStatusV0V1Msg{" + super.toString() +
                 ", emergencyState=" + emergencyState +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_EMERGENCY_V0V1;
     }
 }

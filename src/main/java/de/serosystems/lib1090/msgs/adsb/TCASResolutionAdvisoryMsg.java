@@ -77,7 +77,6 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
      */
     public TCASResolutionAdvisoryMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_TCAS);
 
         if (getFormatTypeCode() != 28)
             throw new BadFormatException("TCAS RA reports must have typecode 28.");
@@ -236,4 +235,9 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
                 '}';
     }
 
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_TCAS;
+    }
 }

@@ -77,7 +77,6 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 	 */
 	public CoarsePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
-		setType(subtype.TISB_COARSE_POSITION);
 
 		if (getDownlinkFormat() != 18) {
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -213,5 +212,10 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 				", ground_speed=" + getMinGroundSpeed()+"-"+getMaxGroundSpeed() +
 				", position=" + position +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_COARSE_POSITION;
 	}
 }

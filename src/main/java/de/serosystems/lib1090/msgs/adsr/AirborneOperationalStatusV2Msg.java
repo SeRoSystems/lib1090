@@ -62,7 +62,6 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 	 */
 	public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSR_AIRBORN_STATUS_V2);
 
 		byte[] msg = this.getMessage();
 
@@ -86,5 +85,10 @@ public class AirborneOperationalStatusV2Msg extends AirborneOperationalStatusV1M
 		return super.toString() + "\n\tAirborneOperationalStatusV2Msg{" +
 				"sil_supplement=" + sil_supplement +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_AIRBORN_STATUS_V2;
 	}
 }

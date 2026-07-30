@@ -82,7 +82,6 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 	 */
 	public SurfacePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSR_SURFACE_POSITION_V0);
 
 		if (!(getFormatTypeCode() == 0 ||
 				(getFormatTypeCode() >= 5 && getFormatTypeCode() <= 8)))
@@ -251,5 +250,10 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 				", imf=" + imf +
 				", position=" + position +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_SURFACE_POSITION_V0;
 	}
 }

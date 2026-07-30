@@ -74,7 +74,6 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
      */
     public AirbornePositionV2Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_AIRBORN_POSITION_V2);
 
         byte formatTypeCode = getFormatTypeCode();
         AirbornePosition.validateAirbornePositionFormat(formatTypeCode);
@@ -223,5 +222,10 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
         public byte getNIC() {
             return getNIC(nicSupplementA);
         }
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_AIRBORN_POSITION_V2;
     }
 }
