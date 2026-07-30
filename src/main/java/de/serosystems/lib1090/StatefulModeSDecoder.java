@@ -43,13 +43,14 @@ import java.time.Instant;
 public class StatefulModeSDecoder {
 
 	private final PositionDecoderSupplier positionDecoderSupplier;
+	private final boolean decodeDf19Adsb;
 	// mapping from icao24 to Decoder, note that we cannot use byte[] as key!
 	private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
 	private int afterLastCleanup;
 	private long latestTimestamp;
 
 	/**
-	 * Create an instance of the stateful decoder with the default position decoding logic.
+	 * Create an instance of the stateful decoder with default parameters.
 	 * Same as {@code new StatefulModeSDecoder.Builder().build()}.
 	 */
 	public StatefulModeSDecoder() {
@@ -58,6 +59,7 @@ public class StatefulModeSDecoder {
 
 	private StatefulModeSDecoder(Builder builder) {
 		this.positionDecoderSupplier = builder.positionDecoderSupplier;
+		this.decodeDf19Adsb = builder.decodeDf19Adsb;
 	}
 
 	/**
@@ -66,6 +68,7 @@ public class StatefulModeSDecoder {
 	public static class Builder {
 
 		private PositionDecoderSupplier positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
+		private boolean decodeDf19Adsb = false;
 
 		/**
 		 * Sets a custom position decoding logic. Note that the default logic uses quite strict
@@ -89,6 +92,22 @@ public class StatefulModeSDecoder {
 		 */
 		public Builder positionDecoderSupplierDefault(boolean disableSpeedTest) {
 			this.positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder(disableSpeedTest);
+			return this;
+		}
+
+		/**
+		 * Enables decoding of downlink format 19 with application field 0 as ADS-B.
+		 * <p>
+		 * Per DO-260C, this combination shall no longer be used for ADS-B, since we cannot be
+		 * sure that it actually contains an ADS-B message. Note that even under DO-260B, processing
+		 * of this message was also only optional.
+		 * Defaults to false; enable only if you rely on this legacy behavior.
+		 *
+		 * @param decodeDf19Adsb whether to decode DF=19/AF=0 as ADS-B
+		 * @return this builder
+		 */
+		public Builder decodeDf19Adsb(boolean decodeDf19Adsb) {
+			this.decodeDf19Adsb = decodeDf19Adsb;
 			return this;
 		}
 
@@ -130,10 +149,12 @@ public class StatefulModeSDecoder {
 			case 17:
 			case 18:
 			case 19:
-				// check whether this is an ADS-B message (see Figure 2-2, RTCA DO-260B)
+				// check whether this is an ADS-B message (see Figure 2-2, RTCA DO-260C)
+				// note: per DO-260C/DO-181D, DF=19/AF=0 shall no longer be assumed to be ADS-B,
+				// so it is only decoded as such if explicitly enabled (see Builder#decodeDf19Adsb)
 				if (modes.getDownlinkFormat() == 17 ||
 						modes.getDownlinkFormat() == 18 && modes.getFirstField() < 2 ||
-						modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0) {
+						modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0 && decodeDf19Adsb) {
 
 					return decodeADSB(modes, timestamp);
 
