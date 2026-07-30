@@ -462,7 +462,7 @@ public class ModeSDownlinkMsg implements Serializable {
 	public ModeSDownlinkMsg(ModeSDownlinkMsg reply) {
 		downlink_format = reply.downlink_format;
 		first_field = reply.first_field;
-		payload = Arrays.copyOf(reply.payload, reply.payload.length);
+		payload = reply.payload;
 		parity = reply.parity;
 		noCRC = reply.noCRC;
 		address = reply.address;
