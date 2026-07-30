@@ -373,6 +373,22 @@ public class ExampleDecoder {
 				}
 
 				break;
+			case ADSB_HVA_POSITION:
+				HVAPositionMsg hvaPos = (HVAPositionMsg) msg;
+				System.out.println("["+icao24+"]: HVA Position reported");
+				System.out.println("          Geometric altitude (HAE): " + (hvaPos.hasHVAGeometricAltitude() ? hvaPos.getHVAGeometricAltitude() : "unknown") + " ft");
+				System.out.println("          Latitude: " + hvaPos.getHVALatitude() + "°");
+				System.out.println("          Longitude: " + hvaPos.getHVALongitude() + "°");
+				break;
+			case ADSB_HVA_VELOCITY:
+				HVAVelocityMsg hvaVel = (HVAVelocityMsg) msg;
+				System.out.println("["+icao24+"]: HVA Velocity reported");
+				System.out.println("          East/West velocity: " + (hvaVel.hasHVAEastWestVelocity() ? hvaVel.getHVAEastWestVelocity() : "unknown") + " kt");
+				System.out.println("          North/South velocity: " + (hvaVel.hasHVANorthSouthVelocity() ? hvaVel.getHVANorthSouthVelocity() : "unknown") + " kt");
+				System.out.println("          Vertical rate: " + (hvaVel.hasHVAVerticalRate() ? hvaVel.getHVAVerticalRate() : "unknown") + " ft/min");
+				if (hvaVel.hasPIC())
+					System.out.println("          Radius of Containment: < " + hvaVel.getRadiusOfContainment() + " m");
+				break;
 			case EXTENDED_SQUITTER:
 				System.out.println("["+icao24+"]: Unknown extended squitter with type code "+((ExtendedSquitter)msg).getFormatTypeCode()+"!");
 				break;
