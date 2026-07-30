@@ -465,7 +465,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		payload = Arrays.copyOf(reply.payload, reply.payload.length);
 		parity = reply.parity;
 		noCRC = reply.noCRC;
-		address = new QualifiedAddress(reply.address);
+		address = reply.address;
 	}
 
 	/**
