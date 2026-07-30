@@ -58,18 +58,13 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 
 	/**
 	 * @param reply Mode S reply containing this military extended squitter
-	 * @throws BadFormatException if message is not a military extended squitter or 
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+	 * @throws BadFormatException if message is not a military extended squitter
 	 */
-	public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException, UnspecifiedFormatError {
+	public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
 
 		if (getDownlinkFormat() != 19)
 			throw new BadFormatException("Message is not a military extended squitter!");
-
-		if (getFirstField() != 0)
-			throw new UnspecifiedFormatError("Military extended squitters are only specified for AF=0.");
 	}
 
 	/**
