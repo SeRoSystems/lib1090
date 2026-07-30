@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import static de.serosystems.lib1090.decoding.Identification.categoryDescription;
-import static de.serosystems.lib1090.decoding.Identification.mapChar;
+import static de.serosystems.lib1090.decoding.InternationalAlphabet5.mapChar;
 
 /**
  * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).

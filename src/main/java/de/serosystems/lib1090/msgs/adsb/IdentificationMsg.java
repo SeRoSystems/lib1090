@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.Identification;
+import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 
 public interface IdentificationMsg {
 
@@ -43,7 +44,7 @@ public interface IdentificationMsg {
      * @return the call sign as 8 characters array
      */
     default char[] getIdentification() {
-        return Identification.mapChar(getIdentificationDigits());
+        return InternationalAlphabet5.mapChar(getIdentificationDigits());
     }
 
     /**
