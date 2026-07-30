@@ -445,6 +445,16 @@ public class StatefulModeSDecoder {
 				return new HVAVelocityMsg(es1090);
 		}
 
+		if (ftc == 26 && dd.adsbVersion >= 3) { // Wx AIREP message, check subtype
+			int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
+			if (subtype == 0)
+				return new WxAIREPAircraftStateMsg(es1090);
+			else if (subtype == 1)
+				return new WxAIREPWeatherStateMsg(es1090);
+			else if (subtype == 2)
+				return new WxAIREPAlternateWeatherStateMsg(es1090);
+		}
+
 		if (ftc == 28) { // aircraft status message, check subtype
 			int subtype = es1090.getMessage()[0] & 0x7;
 

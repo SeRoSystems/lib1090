@@ -389,6 +389,38 @@ public class ExampleDecoder {
 				if (hvaVel.hasPIC())
 					System.out.println("          Radius of Containment: < " + hvaVel.getRadiusOfContainment() + " m");
 				break;
+			case ADSB_WX_AIREP_AIRCRAFT_STATE:
+				WxAIREPAircraftStateMsg wxState = (WxAIREPAircraftStateMsg) msg;
+				System.out.println("["+icao24+"]: Wx AIREP Aircraft State reported");
+				System.out.println("          Aircraft configuration: " + wxState.getAircraftConfigurationEncoded());
+				System.out.println("          Aircraft type: " + (wxState.hasAircraftType() ? String.valueOf(wxState.getAircraftType()) : "unknown"));
+				System.out.println("          Gross weight: " + (wxState.hasGrossWeight() ? ">= " + wxState.getGrossWeight() : "unknown") + " lbs");
+				System.out.println("          Wingspan: " + (wxState.hasWingspan() ? ">= " + wxState.getWingspan() : "unknown") + " ft");
+				break;
+			case ADSB_WX_AIREP_WEATHER_STATE:
+				WxAIREPWeatherStateMsg wxWeather = (WxAIREPWeatherStateMsg) msg;
+				System.out.println("["+icao24+"]: Wx AIREP Weather State reported");
+				System.out.println("          Icing status: " + wxWeather.getIcingStatusEncoded());
+				System.out.println("          Wind quality indicator: " + wxWeather.getWindQualityIndicatorEncoded());
+				System.out.println("          Wind speed: " + (wxWeather.hasWindSpeed() ? ">= " + wxWeather.getWindSpeed() : "unknown") + " kt");
+				System.out.println("          Wind direction: " + (wxWeather.hasWindDirection() ? ">= " + wxWeather.getWindDirection() : "unknown") + "°");
+				System.out.println("          Air temperature (" + (wxWeather.getAirTemperatureType() ? "static" : "total") + "): " +
+						(wxWeather.hasAirTemperature() ? ">= " + wxWeather.getAirTemperature() : "unknown") + "°C");
+				System.out.println("          Airspeed (" + (wxWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
+						(wxWeather.hasAirspeed() ? ">= " + wxWeather.getAirspeed() : "unknown") + " kt");
+				break;
+			case ADSB_WX_AIREP_ALTERNATE_WEATHER_STATE:
+				WxAIREPAlternateWeatherStateMsg wxAltWeather = (WxAIREPAlternateWeatherStateMsg) msg;
+				System.out.println("["+icao24+"]: Wx AIREP Alternate Weather State reported");
+				System.out.println("          Icing status: " + wxAltWeather.getIcingStatusEncoded());
+				System.out.println("          Roll angle: " + (wxAltWeather.hasRollAngle() ? wxAltWeather.getRollAngle() : "unknown") + "°");
+				System.out.println("          Heading (" + (wxAltWeather.getHeadingType() ? "magnetic" : "true") + "): " +
+						(wxAltWeather.hasHeading() ? ">= " + wxAltWeather.getHeading() : "unknown") + "°");
+				System.out.println("          Air temperature (" + (wxAltWeather.getAirTemperatureType() ? "static" : "total") + "): " +
+						(wxAltWeather.hasAirTemperature() ? ">= " + wxAltWeather.getAirTemperature() : "unknown") + "°C");
+				System.out.println("          Airspeed (" + (wxAltWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
+						(wxAltWeather.hasAirspeed() ? ">= " + wxAltWeather.getAirspeed() : "unknown") + " kt");
+				break;
 			case EXTENDED_SQUITTER:
 				System.out.println("["+icao24+"]: Unknown extended squitter with type code "+((ExtendedSquitter)msg).getFormatTypeCode()+"!");
 				break;
