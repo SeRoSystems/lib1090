@@ -302,6 +302,11 @@ public class ExampleDecoder {
 				if (tcas.getThreatType() == 1) // it's a icao24 address
 					System.out.println("          Threat identity is 0x"+String.format("%06x", tcas.getThreatIdentity()));
 				break;
+			case ADSB_CAS_OPERATIONAL_COORDINATION:
+				CASOperationalCoordinationMsg cas = (CASOperationalCoordinationMsg) msg;
+				System.out.println("["+icao24+"]: CAS Operational Coordination, multiple threat: "+cas.isMultipleThreatBit());
+				System.out.println("          Threat identity is 0x"+String.format("%06x", cas.getThreatIdentityAircraftAddress()));
+				break;
 			case ADSB_VELOCITY_V0:
 			case ADSB_VELOCITY_V1:
 			case ADSB_VELOCITY_V2:
