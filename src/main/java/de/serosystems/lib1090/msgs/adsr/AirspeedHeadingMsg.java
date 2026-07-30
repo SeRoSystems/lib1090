@@ -75,7 +75,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 */
 	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSR_AIRSPEED);
 
 		if (this.getFormatTypeCode() != 19) {
 			throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
@@ -234,5 +233,10 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 				", geo_minus_baro=" + geo_minus_baro +
 				", geo_minus_baro_available=" + geo_minus_baro_available +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_AIRSPEED;
 	}
 }

@@ -62,7 +62,6 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
 	 */
 	public ModeACodeV1Msg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.ADSB_MODE_A_CODE_V1);
 
 		if (this.getFormatTypeCode() != 23)
             throw new BadFormatException("Mode A code messages must have typecode 23.");
@@ -96,5 +95,10 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
 				", messageSubtype=" + messageSubtype +
 				", modeACode=" + modeACode +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSB_MODE_A_CODE_V1;
 	}
 }

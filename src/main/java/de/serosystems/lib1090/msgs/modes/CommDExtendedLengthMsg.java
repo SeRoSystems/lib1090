@@ -68,7 +68,6 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
 	 */
 	public CommDExtendedLengthMsg(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.COMM_D_ELM);
 
 		if (getDownlinkFormat() != 24) {
 			throw new BadFormatException("Message is not an extended length message!");
@@ -108,5 +107,10 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
 				", ack=" + ack +
 				", seqno=" + seqno +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.COMM_D_ELM;
 	}
 }

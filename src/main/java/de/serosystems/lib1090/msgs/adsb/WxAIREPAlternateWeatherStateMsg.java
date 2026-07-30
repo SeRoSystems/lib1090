@@ -72,7 +72,6 @@ public class WxAIREPAlternateWeatherStateMsg extends ExtendedSquitter implements
      */
     public WxAIREPAlternateWeatherStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_WX_AIREP_ALTERNATE_WEATHER_STATE);
 
         if (getFormatTypeCode() != 26)
             throw new BadFormatException("Wx AIREP messages must have typecode 26.");
@@ -194,5 +193,10 @@ public class WxAIREPAlternateWeatherStateMsg extends ExtendedSquitter implements
                 ", airspeedType=" + airspeedType +
                 ", airspeedEncoded=" + airspeedEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_WX_AIREP_ALTERNATE_WEATHER_STATE;
     }
 }

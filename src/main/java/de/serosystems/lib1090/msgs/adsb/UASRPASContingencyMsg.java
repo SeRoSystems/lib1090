@@ -70,7 +70,6 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
      */
     public UASRPASContingencyMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_UAS_RPAS_CONTINGENCY);
 
         if (getFormatTypeCode() != 28)
             throw new BadFormatException("UAS/RPAS contingency reports must have typecode 28.");
@@ -170,5 +169,10 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
                 ", tcpLatitudeEncoded=" + tcpLatitudeEncoded +
                 ", tcpLongitudeEncoded=" + tcpLongitudeEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_UAS_RPAS_CONTINGENCY;
     }
 }

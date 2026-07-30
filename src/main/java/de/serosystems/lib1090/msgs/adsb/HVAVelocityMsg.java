@@ -72,7 +72,6 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
      */
     public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_HVA_VELOCITY);
 
         if (getFormatTypeCode() != 25)
             throw new BadFormatException("HVA messages must have typecode 25.");
@@ -272,5 +271,10 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
                 ", verticalRateSignBit=" + verticalRateSignBit +
                 ", hvaVerticalRateEncoded=" + hvaVerticalRateEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_HVA_VELOCITY;
     }
 }

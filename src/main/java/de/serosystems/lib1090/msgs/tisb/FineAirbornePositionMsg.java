@@ -84,7 +84,6 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 	public FineAirbornePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
 
-		setType(subtype.TISB_FINE_AIRBORNE_POSITION);
 
 		if (getDownlinkFormat() != 18) {
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -254,5 +253,10 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 				", encoded_altitude=" + encoded_altitude +
 				", position=" + position +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_FINE_AIRBORNE_POSITION;
 	}
 }

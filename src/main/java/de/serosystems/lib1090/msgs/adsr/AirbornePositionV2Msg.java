@@ -64,7 +64,6 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	 */
 	public AirbornePositionV2Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter, timestamp);
-		setType(subtype.ADSR_AIRBORN_POSITION_V2);
 	}
 
 	/**
@@ -119,5 +118,10 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 	@Override
 	public String toString() {
 		return super.toString() + "\n\tAirbornePositionV2Msg{}";
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_AIRBORN_POSITION_V2;
 	}
 }

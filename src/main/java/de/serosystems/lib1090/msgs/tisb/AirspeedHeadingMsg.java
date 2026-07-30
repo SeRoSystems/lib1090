@@ -81,7 +81,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 	 */
 	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.TISB_VELOCITY);
 
 		if (getDownlinkFormat() != 18)
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -251,5 +250,10 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 				", sil=" + sil +
 				", magnetic_heading=" + magnetic_heading +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_VELOCITY;
 	}
 }

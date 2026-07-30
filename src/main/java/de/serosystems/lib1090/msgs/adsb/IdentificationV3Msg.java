@@ -66,7 +66,6 @@ public class IdentificationV3Msg extends ExtendedSquitter implements Serializabl
      */
     public IdentificationV3Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_IDENTIFICATION_V3);
 
         // type code 1 is no longer defined for identification messages in version 3
         if (getFormatTypeCode() < 2 || getFormatTypeCode() > 4)
@@ -99,5 +98,10 @@ public class IdentificationV3Msg extends ExtendedSquitter implements Serializabl
                 ", emitterCategory=" + emitterCategory +
                 ", identificationEncoded=" + identificationEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_IDENTIFICATION_V3;
     }
 }

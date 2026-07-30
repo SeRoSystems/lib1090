@@ -81,7 +81,6 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 	 */
 	public TargetStateAndStatusMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSR_TARGET_STATE_AND_STATUS);
 
 		if (getFormatTypeCode() != 29) {
 			throw new BadFormatException("Target state and status messages must have typecode 29.");
@@ -367,5 +366,10 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 				", has_operational_tcas=" + has_operational_tcas +
 				", lnav_mode_engaged=" + lnav_mode_engaged +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_TARGET_STATE_AND_STATUS;
 	}
 }

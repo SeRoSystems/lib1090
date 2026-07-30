@@ -64,7 +64,6 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 	 */
 	public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException, UnspecifiedFormatError {
 		super(reply);
-		setType(subtype.MILITARY_EXTENDED_SQUITTER);
 
 		if (getDownlinkFormat() != 19)
 			throw new BadFormatException("Message is not a military extended squitter!");
@@ -80,5 +79,10 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
 	 */
 	public MilitaryExtendedSquitter(MilitaryExtendedSquitter squitter) {
 		super(squitter);
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.MILITARY_EXTENDED_SQUITTER;
 	}
 }

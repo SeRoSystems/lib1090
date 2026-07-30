@@ -81,7 +81,6 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 	 */
 	public FineSurfacePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter);
-		setType(subtype.TISB_FINE_SURFACE_POSITION);
 
 		if (getDownlinkFormat() != 18) {
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -254,5 +253,10 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 				", imf=" + imf +
 				", position=" + position +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_FINE_SURFACE_POSITION;
 	}
 }

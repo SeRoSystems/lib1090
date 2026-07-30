@@ -64,7 +64,6 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 	 */
 	public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSR_STATUS_V0);
 
 		if (getFormatTypeCode() != 31) {
 			throw new BadFormatException("Operational status messages must have typecode 31.");
@@ -127,5 +126,10 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 				"enroute_capabilities=" + enroute_capabilities +
 				", imf=" + imf +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_STATUS_V0;
 	}
 }

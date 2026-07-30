@@ -71,7 +71,6 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
 	 */
 	public CommBAltitudeReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.COMM_B_ALTITUDE_REPLY);
 
 		if (getDownlinkFormat() != 20) {
 			throw new BadFormatException("Message is not an altitude reply!");
@@ -227,5 +226,10 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
 				", altitude_code=" + altitude_code +
 				", message=" + Arrays.toString(message) +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.COMM_B_ALTITUDE_REPLY;
 	}
 }

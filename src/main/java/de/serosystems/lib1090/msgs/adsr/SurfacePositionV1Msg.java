@@ -68,7 +68,6 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 	 */
 	public SurfacePositionV1Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
 		super(squitter, timestamp);
-		setType(subtype.ADSR_SURFACE_POSITION_V1);
 	}
 
 	/**
@@ -116,5 +115,10 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 		return super.toString() + "\n\tSurfacePositionV1Msg{" +
 				"nic_suppl_a=" + nic_suppl_a +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_SURFACE_POSITION_V1;
 	}
 }

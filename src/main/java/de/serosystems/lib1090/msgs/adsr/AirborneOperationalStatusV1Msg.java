@@ -77,7 +77,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 	 */
 	public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSR_AIRBORN_STATUS_V1);
 
 		if (getFormatTypeCode() != 31) {
 			throw new BadFormatException("Operational status messages must have typecode 31.");
@@ -288,5 +287,10 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 				", hrd=" + hrd +
 				", imf=" + imf +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_AIRBORN_STATUS_V1;
 	}
 }

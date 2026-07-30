@@ -77,7 +77,6 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
      */
     public SurfaceOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_SURFACE_STATUS_V3);
 
         if (getFormatTypeCode() != 31) {
             throw new BadFormatException("Operational status messages must have typecode 31.");
@@ -271,5 +270,10 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_SURFACE_STATUS_V3;
     }
 }

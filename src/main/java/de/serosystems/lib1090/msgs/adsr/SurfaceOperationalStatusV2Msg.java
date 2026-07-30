@@ -62,7 +62,6 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	 */
 	public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
 		super(squitter);
-		setType(subtype.ADSR_SURFACE_STATUS_V2);
 
 		byte[] msg = this.getMessage();
 
@@ -86,5 +85,10 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 		return super.toString() + "\n\tSurfaceOperationalStatusV2Msg{" +
 				"sil_supplement=" + sil_supplement +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.ADSR_SURFACE_STATUS_V2;
 	}
 }

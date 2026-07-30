@@ -69,7 +69,6 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 	 */
 	public IdentifyReply(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.IDENTIFY_REPLY);
 
 		if (getDownlinkFormat() != 5) {
 			throw new BadFormatException("Message is not an identify reply!");
@@ -216,4 +215,9 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
 				'}';
 	}
 
+
+	@Override
+	public subtype getType() {
+		return subtype.IDENTIFY_REPLY;
+	}
 }

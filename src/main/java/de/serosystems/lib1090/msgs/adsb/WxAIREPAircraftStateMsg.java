@@ -69,7 +69,6 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
      */
     public WxAIREPAircraftStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_WX_AIREP_AIRCRAFT_STATE);
 
         if (getFormatTypeCode() != 26)
             throw new BadFormatException("Wx AIREP messages must have typecode 26.");
@@ -193,5 +192,10 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
                 ", grossWeightEncoded=" + grossWeightEncoded +
                 ", wingspanEncoded=" + wingspanEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_WX_AIREP_AIRCRAFT_STATE;
     }
 }

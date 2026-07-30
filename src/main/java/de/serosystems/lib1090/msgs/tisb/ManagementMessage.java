@@ -59,7 +59,6 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
 	 */
 	public ManagementMessage(ExtendedSquitter squitter) throws BadFormatException {
 		super(squitter);
-		setType(subtype.TISB_IDENTIFICATION);
 
 		if (getDownlinkFormat() != 18) {
 			throw new BadFormatException("TIS-B messages must have downlink format 18.");
@@ -75,5 +74,10 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
 	@Override
 	public String toString() {
 		return super.toString() + "\n\tManagementMessage{}";
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.TISB_IDENTIFICATION;
 	}
 }

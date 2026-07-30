@@ -73,7 +73,6 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
      */
     public CASOperationalCoordinationMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_CAS_OPERATIONAL_COORDINATION);
 
         if (getFormatTypeCode() != 28)
             throw new BadFormatException("CAS operational coordination reports must have typecode 28.");
@@ -168,5 +167,10 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
                 ", verticalSenseBitsEncoded=" + verticalSenseBitsEncoded +
                 ", threatIdentityAircraftAddress=" + threatIdentityAircraftAddress +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_CAS_OPERATIONAL_COORDINATION;
     }
 }

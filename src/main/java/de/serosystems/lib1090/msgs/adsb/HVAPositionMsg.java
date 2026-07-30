@@ -67,7 +67,6 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
      */
     public HVAPositionMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_HVA_POSITION);
 
         if (getFormatTypeCode() != 25)
             throw new BadFormatException("HVA messages must have typecode 25.");
@@ -182,5 +181,10 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
                 ", hvaLatitudeEncoded=" + hvaLatitudeEncoded +
                 ", hvaLongitudeEncoded=" + hvaLongitudeEncoded +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_HVA_POSITION;
     }
 }

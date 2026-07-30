@@ -67,7 +67,6 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      */
     public EmergencyOrPriorityStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
-        setType(subtype.ADSB_EMERGENCY_V2);
 
         if (this.getFormatTypeCode() != 28)
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
@@ -105,5 +104,10 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
                 ", emergencyState=" + emergencyState +
                 ", modeACode=" + modeACode +
                 '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSB_EMERGENCY_V2;
     }
 }

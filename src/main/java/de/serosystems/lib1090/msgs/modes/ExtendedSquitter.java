@@ -66,7 +66,6 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
 	 */
 	public ExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
 		super(reply);
-		setType(subtype.EXTENDED_SQUITTER);
 
 		if (getDownlinkFormat() < 17 || getDownlinkFormat() > 19 ||
 				getDownlinkFormat() == 18 && (getFirstField() == 4 || getFirstField() == 7) ||
@@ -114,5 +113,10 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
 				"message=" + Tools.toHexString(message) +
 				", format_type_code=" + format_type_code +
 				'}';
+	}
+
+	@Override
+	public subtype getType() {
+		return subtype.EXTENDED_SQUITTER;
 	}
 }
