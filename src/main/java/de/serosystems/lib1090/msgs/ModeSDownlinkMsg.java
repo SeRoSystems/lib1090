@@ -75,6 +75,7 @@ public class ModeSDownlinkMsg implements Serializable {
 		ADSB_MODE_A_CODE_V1,
 		ADSB_EMERGENCY_V0V1,
 		ADSB_EMERGENCY_V2,
+		ADSB_EMERGENCY_V3,
 		ADSB_TCAS,
 		ADSB_VELOCITY_V0,
 		ADSB_VELOCITY_V1,
