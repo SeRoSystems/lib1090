@@ -326,9 +326,6 @@ public class StatefulModeSDecoder {
 		// higher (not yet defined) version is decoded as version 3, since, per
 		// DO-260C, §2.2.7.1, newer versions are expected to be backwards compatible
 		// with version 3
-		// NOTE: this is preliminary, as it currently only applies to surface position, airborne
-		//       position, and identification messages. other messages fall back to version 2 as
-		//       of DO-260B, §2.2.7.1.
 
 		// we need stateful decoding, because ADS-B version > 0 can only be assumed
 		// if matching version info in operational status has been found.
