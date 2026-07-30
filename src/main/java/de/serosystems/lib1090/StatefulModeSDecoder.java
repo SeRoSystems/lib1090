@@ -470,6 +470,8 @@ public class StatefulModeSDecoder {
 				return new TCASResolutionAdvisoryMsg(es1090);
 			if (subtype == 3 && dd.adsbVersion >= 3)
 				return new CASOperationalCoordinationMsg(es1090);
+			if (subtype == 4 && dd.adsbVersion >= 3)
+				return new UASRPASContingencyMsg(es1090);
 		}
 
 		if (ftc == 29) {

@@ -307,6 +307,11 @@ public class ExampleDecoder {
 				System.out.println("["+icao24+"]: CAS Operational Coordination, multiple threat: "+cas.isMultipleThreatBit());
 				System.out.println("          Threat identity is 0x"+String.format("%06x", cas.getThreatIdentityAircraftAddress()));
 				break;
+			case ADSB_UAS_RPAS_CONTINGENCY:
+				UASRPASContingencyMsg uas = (UASRPASContingencyMsg) msg;
+				System.out.println("["+icao24+"]: UAS/RPAS Contingency, TCP altitude is "+uas.getTcpAltitude()+"ft");
+				System.out.println("          TCP position is "+uas.getTcpLatitude()+", "+uas.getTcpLongitude());
+				break;
 			case ADSB_VELOCITY_V0:
 			case ADSB_VELOCITY_V1:
 			case ADSB_VELOCITY_V2:
