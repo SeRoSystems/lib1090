@@ -31,6 +31,8 @@ import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
 import static de.serosystems.lib1090.decoding.SurfacePosition.*;
 
@@ -56,30 +58,30 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 
     /**
      * @param rawMessage raw ADS-R surface position message as hex string
-     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public SurfacePositionV0Msg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public SurfacePositionV0Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param rawMessage raw ADS-R surface position message as byte array
-     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public SurfacePositionV0Msg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public SurfacePositionV0Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param squitter  extended squitter which contains this surface position msg
-     * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public SurfacePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+    public SurfacePositionV0Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         if (!(getFormatTypeCode() == 0 ||
@@ -101,7 +103,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 
         boolean highGroundSpeed = movement == 0 || movement > 49;
         position = CPREncodedPosition.ofSurface(17, cpr_format, highGroundSpeed, cpr_encoded_lat, cpr_encoded_lon,
-                timestamp == null ? System.currentTimeMillis() : timestamp);
+                Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**

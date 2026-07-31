@@ -25,6 +25,8 @@ import de.serosystems.lib1090.msgs.adsb.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StatefulModeSDecoderTest {
@@ -39,7 +41,7 @@ public class StatefulModeSDecoderTest {
     @Test
     public void tssV0Me11Set_shouldNotDecode() throws UnspecifiedFormatError, BadFormatException {
         // decoder assumes ADS-B v0 and should not decode TSS
-        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, 0L);
+        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
         assertEquals(ModeSDownlinkMsg.subtype.EXTENDED_SQUITTER, reply.getType());
         assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
@@ -49,10 +51,10 @@ public class StatefulModeSDecoderTest {
     @Test
     public void tssV2ME11Set_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
         // tell decoder that the aircraft uses ADS-B v2
-        decoder.decode(AirborneOperationalStatusV2MsgTest.A_OPSTAT_V2, 0L);
+        decoder.decode(AirborneOperationalStatusV2MsgTest.A_OPSTAT_V2, Instant.EPOCH);
 
         // decode message with ME bit 11 set
-        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, 0L);
+        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
         assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V2, reply.getType());
 
@@ -65,9 +67,9 @@ public class StatefulModeSDecoderTest {
 
     @Test
     public void tssV1_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
-        decoder.decode(TargetStateAndStatusV1MsgTest.A_OPSTAT_V1, 0L);
+        decoder.decode(TargetStateAndStatusV1MsgTest.A_OPSTAT_V1, Instant.EPOCH);
 
-        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV1MsgTest.TSS_V1, 0L);
+        final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV1MsgTest.TSS_V1, Instant.EPOCH);
 
         assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
 
@@ -80,9 +82,9 @@ public class StatefulModeSDecoderTest {
 
     @Test
     public void modeACodeV1_shouldDecode() throws UnspecifiedFormatError, BadFormatException {
-        decoder.decode(TargetStateAndStatusV1MsgTest.A_OPSTAT_V1, 0L);
+        decoder.decode(TargetStateAndStatusV1MsgTest.A_OPSTAT_V1, Instant.EPOCH);
 
-        final ModeSDownlinkMsg reply = decoder.decode(ModeACodeV1MsgTest.MODE_A_CODE_V1, 0L);
+        final ModeSDownlinkMsg reply = decoder.decode(ModeACodeV1MsgTest.MODE_A_CODE_V1, Instant.EPOCH);
 
         assertEquals(ModeSDownlinkMsg.subtype.ADSB_MODE_A_CODE_V1, reply.getType());
         assertInstanceOf(ModeACodeV1Msg.class, reply);

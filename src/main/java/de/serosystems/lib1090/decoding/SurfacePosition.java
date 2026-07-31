@@ -57,7 +57,7 @@ public final class SurfacePosition {
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
         boolean highGroundSpeed = movement == 0 || movement > 49;
-        return CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon, timestamp.toEpochMilli());
+        return CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon, timestamp);
     }
 
     /**

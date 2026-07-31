@@ -21,6 +21,9 @@ package de.serosystems.lib1090;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GlobalPositionDecodingTest {
@@ -37,8 +40,8 @@ public class GlobalPositionDecodingTest {
      * @param expect  expected decoded position
      */
     private static void testAirborneTiming(boolean surface, int latEven, int lonEven, int latOdd, int lonOdd, Position ref, Position expect) {
-        CPREncodedPosition cprEven = surface ? CPREncodedPosition.ofSurface(17, false, false, latEven, lonEven, 0L) : CPREncodedPosition.ofAirborne(17, false, latEven, lonEven, 0L);
-        CPREncodedPosition cprOdd = surface ? CPREncodedPosition.ofSurface(17, true, false, latOdd, lonOdd, 0L) : CPREncodedPosition.ofAirborne(17, true, latOdd, lonOdd, 0L);
+        CPREncodedPosition cprEven = surface ? CPREncodedPosition.ofSurface(17, false, false, latEven, lonEven, Instant.EPOCH) : CPREncodedPosition.ofAirborne(17, false, latEven, lonEven, Instant.EPOCH);
+        CPREncodedPosition cprOdd = surface ? CPREncodedPosition.ofSurface(17, true, false, latOdd, lonOdd, Instant.EPOCH) : CPREncodedPosition.ofAirborne(17, true, latOdd, lonOdd, Instant.EPOCH);
 
         Position even = cprEven.decodeGlobal(cprOdd, ref);
         Position odd = cprOdd.decodeGlobal(cprEven, ref);
@@ -131,37 +134,37 @@ public class GlobalPositionDecodingTest {
     @Test
     void testSanityChecks() {
         // Test same format (both even)
-        CPREncodedPosition cprEven1 = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
-        CPREncodedPosition cprEven2 = CPREncodedPosition.ofAirborne(17, false, 0x04706, 0x04D58, 0L);
+        CPREncodedPosition cprEven1 = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cprEven2 = CPREncodedPosition.ofAirborne(17, false, 0x04706, 0x04D58, Instant.EPOCH);
         assertNull(cprEven1.decodeGlobal(cprEven2, null));
 
         // Test same format (both odd)
-        CPREncodedPosition cprOdd1 = CPREncodedPosition.ofAirborne(17, true, 0x06AF1, 0x09C16, 0L);
-        CPREncodedPosition cprOdd2 = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, 0L);
+        CPREncodedPosition cprOdd1 = CPREncodedPosition.ofAirborne(17, true, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cprOdd2 = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, Instant.EPOCH);
         assertNull(cprOdd1.decodeGlobal(cprOdd2, null));
 
         // Test mixing airborne and surface positions
-        CPREncodedPosition cprAirborne = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
-        CPREncodedPosition cprSurface = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, 0L);
+        CPREncodedPosition cprAirborne = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cprSurface = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, Instant.EPOCH);
         assertNull(cprAirborne.decodeGlobal(cprSurface, null));
         assertNull(cprSurface.decodeGlobal(cprAirborne, null));
 
         // Test surface position without reference position
-        CPREncodedPosition cprSurfaceEven = CPREncodedPosition.ofSurface(17, false, false, 0x1ABC2, 0x07058, 0L);
-        CPREncodedPosition cprSurfaceOdd = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, 0L);
+        CPREncodedPosition cprSurfaceEven = CPREncodedPosition.ofSurface(17, false, false, 0x1ABC2, 0x07058, Instant.EPOCH);
+        CPREncodedPosition cprSurfaceOdd = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, Instant.EPOCH);
         assertNull(cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
     }
 
     @Test
     void testAirborneTimingGap() {
-        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, 0L);
-        CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, 0L);
+        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, Instant.EPOCH);
 
-        assertEquals(10_000L, cprEven.maxGap(cprOdd));
-        assertEquals(10_000L, cprOdd.maxGap(cprEven));
+        assertEquals(Duration.ofMillis(10_000L), cprEven.maxGap(cprOdd));
+        assertEquals(Duration.ofMillis(10_000L), cprOdd.maxGap(cprEven));
     }
 
-    private static void testAirborneTiming(long t1, long t2, boolean expectSuccess) {
+    private static void testAirborneTiming(Instant t1, Instant t2, boolean expectSuccess) {
         CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, t1);
         CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, t2);
 
@@ -179,16 +182,16 @@ public class GlobalPositionDecodingTest {
 
     @Test
     void testAirborneTimingChecks() {
-        testAirborneTiming(0L, 0L, true);
-        testAirborneTiming(0L, 10_000L, true);
-        testAirborneTiming(0, 10_001L, false);
-        testAirborneTiming(10_000L, 0L, true);
-        testAirborneTiming(10_001L, 0L, false);
+        testAirborneTiming(Instant.EPOCH, Instant.EPOCH, true);
+        testAirborneTiming(Instant.EPOCH, Instant.EPOCH.plusMillis(10_000), true);
+        testAirborneTiming(Instant.EPOCH, Instant.EPOCH.plusMillis(10_001), false);
+        testAirborneTiming(Instant.EPOCH.plusMillis(10_000), Instant.EPOCH, true);
+        testAirborneTiming(Instant.EPOCH.plusMillis(10_001), Instant.EPOCH, false);
     }
 
-    private static void testSurfaceTimingGap(boolean hs1, boolean hs2, int expect) {
-        CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, 0L);
-        CPREncodedPosition cprOdd = CPREncodedPosition.ofSurface(17, true, hs2, 0x11C19, 0x13560, 0L);
+    private static void testSurfaceTimingGap(boolean hs1, boolean hs2, Duration expect) {
+        CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, Instant.EPOCH);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofSurface(17, true, hs2, 0x11C19, 0x13560, Instant.EPOCH);
 
         assertEquals(expect, cprEven.maxGap(cprOdd));
         assertEquals(expect, cprOdd.maxGap(cprEven));
@@ -196,13 +199,13 @@ public class GlobalPositionDecodingTest {
 
     @Test
     void testSurfaceTimingGap() {
-        testSurfaceTimingGap(false, false, 50_000);
-        testSurfaceTimingGap(false, true, 25_000);
-        testSurfaceTimingGap(true, false, 25_000);
-        testSurfaceTimingGap(true, true, 25_000);
+        testSurfaceTimingGap(false, false, Duration.ofMillis(50_000));
+        testSurfaceTimingGap(false, true, Duration.ofMillis(25_000));
+        testSurfaceTimingGap(true, false, Duration.ofMillis(25_000));
+        testSurfaceTimingGap(true, true, Duration.ofMillis(25_000));
     }
 
-    private static void testSurfaceTiming(long t1, boolean hs1, long t2, boolean hs2, boolean expectSuccess) {
+    private static void testSurfaceTiming(Instant t1, boolean hs1, Instant t2, boolean hs2, boolean expectSuccess) {
         Position ref = new Position(30., 80., 0.);
 
         CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, t1);
@@ -222,15 +225,15 @@ public class GlobalPositionDecodingTest {
 
     @Test
     void testSurfaceTimingChecks() {
-        testSurfaceTiming(0L, false, 0L, false, true);
-        testSurfaceTiming(50_001L, false, 0L, false, false);
+        testSurfaceTiming(Instant.EPOCH, false, Instant.EPOCH, false, true);
+        testSurfaceTiming(Instant.EPOCH.plusMillis(50_001), false, Instant.EPOCH, false, false);
 
-        testSurfaceTiming(0L, true, 0L, false, true);
-        testSurfaceTiming(0L, true, 25_000L, false, true);
-        testSurfaceTiming(0L, true, 25_001L, false, false);
-        testSurfaceTiming(0L, false, 25_001L, true, false);
-        testSurfaceTiming(25_0001L, false, 0L, true, false);
-        testSurfaceTiming(25_0001L, true, 0L, false, false);
+        testSurfaceTiming(Instant.EPOCH, true, Instant.EPOCH, false, true);
+        testSurfaceTiming(Instant.EPOCH, true, Instant.EPOCH.plusMillis(25_000), false, true);
+        testSurfaceTiming(Instant.EPOCH, true, Instant.EPOCH.plusMillis(25_001), false, false);
+        testSurfaceTiming(Instant.EPOCH, false, Instant.EPOCH.plusMillis(25_001), true, false);
+        testSurfaceTiming(Instant.EPOCH.plusMillis(25_0001), false, Instant.EPOCH, true, false);
+        testSurfaceTiming(Instant.EPOCH.plusMillis(25_0001), true, Instant.EPOCH, false, false);
     }
 
 }

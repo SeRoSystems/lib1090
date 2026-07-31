@@ -27,6 +27,7 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
 
+import java.time.Instant;
 import java.util.Scanner;
 
 /**
@@ -54,11 +55,11 @@ public class ExampleDecoder {
 
     /**
      *
-     * @param timestamp in milliseconds since epoch
+     * @param timestamp time of applicability (or reception) of the message
      * @param raw       Mode S messages as hex string
      * @param receiver  the location of the receiver for sanity checks on decoded positions (optional)
      */
-    public void decodeMsg(long timestamp, String raw, Position receiver) {
+    public void decodeMsg(Instant timestamp, String raw, Position receiver) {
         ModeSDownlinkMsg msg;
         try {
             msg = decoder.decode(raw, timestamp);
@@ -506,15 +507,15 @@ public class ExampleDecoder {
                 // time,serial,lat,lon,msg
                 rec.setLatitude(Double.parseDouble(values[2]));
                 rec.setLongitude(Double.parseDouble(values[3]));
-                dec.decodeMsg((long) Double.parseDouble(values[0]) * 1000, values[4], rec);
+                dec.decodeMsg(Instant.ofEpochMilli((long) (Double.parseDouble(values[0]) * 1000)), values[4], rec);
             } else if (values.length == 4) {
                 // time,lat,lon,msg
                 rec.setLatitude(Double.parseDouble(values[1]));
                 rec.setLongitude(Double.parseDouble(values[2]));
-                dec.decodeMsg((long) Double.parseDouble(values[0]) * 1000, values[3], rec);
+                dec.decodeMsg(Instant.ofEpochMilli((long) (Double.parseDouble(values[0]) * 1000)), values[3], rec);
             } else if (values.length == 2) {
                 // time,msg
-                dec.decodeMsg((long) Double.parseDouble(values[0]) * 1000, values[1], null);
+                dec.decodeMsg(Instant.ofEpochMilli((long) (Double.parseDouble(values[0]) * 1000)), values[1], null);
             }
         }
         sc.close();

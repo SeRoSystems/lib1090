@@ -32,6 +32,7 @@ import de.serosystems.lib1090.msgs.tisb.FineAirbornePositionMsg;
 import de.serosystems.lib1090.msgs.tisb.FineSurfacePositionMsg;
 import de.serosystems.lib1090.msgs.tisb.ManagementMessage;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,11 +43,13 @@ import java.util.Objects;
  */
 @SuppressWarnings("unused")
 public class StatefulModeSDecoder {
+    private static final Duration DECODER_TIMEOUT = Duration.ofMillis(3600_000L);
+
     private final PositionDecoderSupplier positionDecoderSupplier;
     private final boolean decodeDf19Adsb;
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
     private int afterLastCleanup;
-    private long latestTimestamp;
+    private Instant latestTimestamp;
 
     /**
      * Create an instance of the stateful decoder with default parameters.
@@ -67,12 +70,14 @@ public class StatefulModeSDecoder {
      * actual type afterward.
      *
      * @param modes     the incompletely decoded Mode S message
-     * @param timestamp time of applicability (or reception) of the message in milliseconds
+     * @param timestamp time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError if format is not specified
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        Objects.requireNonNull(timestamp, "timestamp");
+
         if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
 
         latestTimestamp = timestamp;
@@ -124,7 +129,7 @@ public class StatefulModeSDecoder {
         }
     }
 
-    private ExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    private ExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as ADS-R
         ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
@@ -263,7 +268,7 @@ public class StatefulModeSDecoder {
         return es1090;
     }
 
-    private ExtendedSquitter decodeTISB(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException {
+    private ExtendedSquitter decodeTISB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
         // interpret ME field as standard ADS-B
         ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
@@ -298,7 +303,7 @@ public class StatefulModeSDecoder {
         return es1090;
     }
 
-    private ExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    private ExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as standard ADS-B
         ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
@@ -333,14 +338,14 @@ public class StatefulModeSDecoder {
         if (ftc >= 5 && ftc <= 8) {
             switch (dd.adsbVersion) {
                 case 0:
-                    return new SurfacePositionV0Msg(es1090, Instant.ofEpochMilli(timestamp));
+                    return new SurfacePositionV0Msg(es1090, timestamp);
                 case 1:
-                    return new SurfacePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
+                    return new SurfacePositionV1Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
                 case 2:
-                    return new SurfacePositionV2Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplC);
+                    return new SurfacePositionV2Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
                 case 3:
                 default:
-                    return new SurfacePositionV3Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplC);
+                    return new SurfacePositionV3Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
             }
         }
 
@@ -348,14 +353,14 @@ public class StatefulModeSDecoder {
             // airborne position message
             switch (dd.adsbVersion) {
                 case 0:
-                    return new AirbornePositionV0Msg(es1090, Instant.ofEpochMilli(timestamp));
+                    return new AirbornePositionV0Msg(es1090, timestamp);
                 case 1:
-                    return new AirbornePositionV1Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
+                    return new AirbornePositionV1Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
                 case 2:
-                    return new AirbornePositionV2Msg.WithNICSupplementA(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA);
+                    return new AirbornePositionV2Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
                 case 3:
                 default:
-                    return new AirbornePositionV3Msg.WithNICSupplements(es1090, Instant.ofEpochMilli(timestamp), dd.nicSupplA, dd.nicSupplD);
+                    return new AirbornePositionV3Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplD);
             }
         }
 
@@ -513,47 +518,47 @@ public class StatefulModeSDecoder {
 
     /**
      * @param rawMessage the Mode S message as byte array
-     * @param timestamp  time of applicability (or reception) of the message in milliseconds
+     * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError if format is not specified
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(byte[] rawMessage, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         return decode(new ModeSDownlinkMsg(rawMessage), timestamp);
     }
 
     /**
      * @param rawMessage the Mode S message as byte array
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
-     * @param timestamp  time of applicability (or reception) of the message in milliseconds
+     * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError if format is not specified
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(byte[] rawMessage, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(byte[] rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         return decode(new ModeSDownlinkMsg(rawMessage, noCRC), timestamp);
     }
 
     /**
      * @param rawMessage the Mode S message in hex representation
-     * @param timestamp  time of applicability (or reception) of the message in milliseconds
+     * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError if format is not specified
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(String rawMessage, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         return decode(new ModeSDownlinkMsg(rawMessage), timestamp);
     }
 
     /**
      * @param rawMessage the Mode S message in hex representation
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
-     * @param timestamp  time of applicability (or reception) of the message in milliseconds
+     * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError if format is not specified
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(String rawMessage, boolean noCRC, long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(String rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         return decode(new ModeSDownlinkMsg(rawMessage, noCRC), timestamp);
     }
 
@@ -612,7 +617,7 @@ public class StatefulModeSDecoder {
      * every 1 Mio messages if more than 30000 targets are tracked.
      */
     public void clearDecoders() {
-        decoderData.values().removeIf(dd -> latestTimestamp - dd.lastUsed > 3600_000L);
+        decoderData.values().removeIf(dd -> Duration.between(dd.lastUsed, latestTimestamp).compareTo(DECODER_TIMEOUT) > 0);
     }
 
     private DecoderData getDecoderData(QualifiedAddress address) {
@@ -642,12 +647,12 @@ public class StatefulModeSDecoder {
         boolean nicSupplC;
         byte nicSupplD;
         Double geoMinusBaro;
-        long lastUsed;
+        Instant lastUsed;
         PositionDecoder posDec;
 
         DecoderData(PositionDecoder posDec) {
             adsbVersion = 0;
-            lastUsed = System.currentTimeMillis();
+            lastUsed = Instant.now();
             this.posDec = posDec;
         }
     }

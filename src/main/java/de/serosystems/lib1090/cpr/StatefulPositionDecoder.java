@@ -20,7 +20,8 @@ package de.serosystems.lib1090.cpr;
 
 import de.serosystems.lib1090.Position;
 
-import static java.lang.Math.abs;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Stateful decoder for positions. Use this one to decode positions.
@@ -29,7 +30,7 @@ public class StatefulPositionDecoder implements PositionDecoder {
     private CPREncodedPosition last_even_airborne;
     private CPREncodedPosition last_odd_airborne;
     private Position last_pos; // lat lon
-    private Long last_time; // in ms
+    private Instant last_time;
     private int num_reasonable; // number of successive reasonable msgs
     private boolean disableSpeedTest = false;
 
@@ -85,7 +86,7 @@ public class StatefulPositionDecoder implements PositionDecoder {
 
         // check if it's realistic that the target covered this distance (faster than 1000 knots?)
         if (!disableSpeedTest && last_pos != null && last_time != null) {
-            double td = abs((cpr.getTimestamp() - last_time) / 1_000.);
+            double td = Duration.between(last_time, cpr.getTimestamp()).abs().toMillis() / 1_000.;
             double groundSpeed = newPos.haversine(last_pos) / td; // in meters per second
 
             if (groundSpeed > 514.4) {
