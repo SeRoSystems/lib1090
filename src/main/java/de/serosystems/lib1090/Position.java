@@ -149,15 +149,21 @@ public class Position implements Serializable {
      * @param other position to which we calculate the distance
      * @return distance between this and other position in meters
      */
-    public Double haversine(Position other) {
+    public double haversine(Position other) {
+        Objects.requireNonNull(other, "other");
+
         double lon0r = toRadians(this.longitude);
         double lat0r = toRadians(this.latitude);
         double lon1r = toRadians(other.longitude);
         double lat1r = toRadians(other.latitude);
-        double a = pow(sin((lat1r - lat0r) / 2.0), 2);
-        double b = cos(lat0r) * cos(lat1r) * pow(sin((lon1r - lon0r) / 2.0), 2);
+        double sinLat = sin((lat1r - lat0r) / 2.0);
+        double sinLon = sin((lon1r - lon0r) / 2.0);
+        double a = sinLat * sinLat;
+        double b = cos(lat0r) * cos(lat1r) * sinLon * sinLon;
+        double h = a + b;
 
-        return 6371000.0 * 2 * asin(sqrt(a + b));
+        // atan2-based form is numerically more stable than 2*asin(sqrt(h)), especially near antipodal points
+        return 6371000.0 * 2 * atan2(sqrt(h), sqrt(1 - h));
     }
 
     /**
