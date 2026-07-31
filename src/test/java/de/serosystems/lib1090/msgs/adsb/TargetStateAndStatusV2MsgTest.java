@@ -151,9 +151,9 @@ public class TargetStateAndStatusV2MsgTest {
         assertFalse(tss.hasSelectedHeading());
         assertNull(tss.getSelectedHeading());
 
-        assertEquals(9, tss.getNACpEncoded());
+        assertEquals(9, tss.getNACp());
         assertTrue(tss.getBarometricAltitudeIntegrityCode());
-        assertEquals(3, tss.getSILEncoded());
+        assertEquals(3, tss.getSIL());
         assertTrue(tss.hasMode());
         assertTrue(tss.hasAutopilotEngaged());
         assertTrue(tss.hasVNAVModeEngaged());
@@ -180,9 +180,9 @@ public class TargetStateAndStatusV2MsgTest {
         assertTrue(tss.hasSelectedHeading());
         assertEquals(32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
-        assertEquals(9, tss.getNACpEncoded());
+        assertEquals(9, tss.getNACp());
         assertTrue(tss.getBarometricAltitudeIntegrityCode());
-        assertEquals(3, tss.getSILEncoded());
+        assertEquals(3, tss.getSIL());
         assertTrue(tss.hasMode());
         assertTrue(tss.hasAutopilotEngaged());
         assertTrue(tss.hasVNAVModeEngaged());
@@ -209,9 +209,9 @@ public class TargetStateAndStatusV2MsgTest {
         assertTrue(tss.hasSelectedHeading());
         assertEquals(180 + 32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
-        assertEquals(9, tss.getNACpEncoded());
+        assertEquals(9, tss.getNACp());
         assertTrue(tss.getBarometricAltitudeIntegrityCode());
-        assertEquals(3, tss.getSILEncoded());
+        assertEquals(3, tss.getSIL());
         assertTrue(tss.hasMode());
         assertTrue(tss.hasAutopilotEngaged());
         assertTrue(tss.hasVNAVModeEngaged());

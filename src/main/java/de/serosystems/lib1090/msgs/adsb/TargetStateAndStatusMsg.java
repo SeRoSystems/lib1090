@@ -71,7 +71,7 @@ public interface TargetStateAndStatusMsg {
     /**
      * @return the navigation accuracy category for position
      */
-    byte getNACpEncoded();
+    byte getNACp();
 
     /**
      * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, see table A-13 in RCTA DO-260B
@@ -79,7 +79,7 @@ public interface TargetStateAndStatusMsg {
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
     default double getPositionUncertainty() {
-        return OperationalStatus.nacPtoEPU(getNACpEncoded());
+        return OperationalStatus.nacPtoEPU(getNACp());
     }
 
     /**
@@ -90,7 +90,7 @@ public interface TargetStateAndStatusMsg {
     /**
      * @return the surveillance/source integrity level
      */
-    byte getSILEncoded();
+    byte getSIL();
 
     /**
      * @return true if TCAS is operational, false otherwise
