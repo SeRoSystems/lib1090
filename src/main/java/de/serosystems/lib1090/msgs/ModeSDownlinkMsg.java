@@ -30,7 +30,7 @@ import java.util.Arrays;
  */
 public class ModeSDownlinkMsg implements Serializable {
 
-    private static final long serialVersionUID = 4429516110651295544L;
+    private static final long serialVersionUID = 4487016880104756846L;
 
     private byte downlink_format; // 0-24
     private byte first_field; // the 3 bits after downlink format

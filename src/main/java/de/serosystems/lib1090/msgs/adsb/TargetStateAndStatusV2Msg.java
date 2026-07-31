@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg {
 
-    private static final long serialVersionUID = 7485953168219273935L;
+    private static final long serialVersionUID = 8402350306532746670L;
 
     private boolean silSupplement;
     private boolean selectedAltitudeType;

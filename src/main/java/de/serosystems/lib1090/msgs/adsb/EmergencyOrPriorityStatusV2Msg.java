@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg {
 
-    private static final long serialVersionUID = 596314337728216721L;
+    private static final long serialVersionUID = 3560754083142828235L;
 
     private static final byte SUBTYPE = 1;
 

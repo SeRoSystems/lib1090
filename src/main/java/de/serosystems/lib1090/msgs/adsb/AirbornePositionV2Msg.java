@@ -31,7 +31,7 @@ import java.util.Objects;
 
 public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg {
 
-    private static final long serialVersionUID = 6818077074609060141L;
+    private static final long serialVersionUID = 36071700323202935L;
 
     private boolean horizontalPositionAvailable;
     private boolean altitudeAvailable;
@@ -176,9 +176,9 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
      */
     public static class WithNICSupplementA extends AirbornePositionV2Msg {
 
-        private static final long serialVersionUID = -1023456391807826494L;
+        private static final long serialVersionUID = 36071700323202935L;
 
-        private final boolean nicSupplementA;
+        private boolean nicSupplementA;
 
         /**
          * @param rawMessage     raw ADS-B airborne position message as hex string
@@ -211,6 +211,12 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
         public WithNICSupplementA(ExtendedSquitter squitter, Instant timestamp, boolean nicSupplementA) throws BadFormatException {
             super(squitter, timestamp);
             this.nicSupplementA = nicSupplementA;
+        }
+
+        /**
+         * protected no-arg constructor e.g. for serialization with Kryo
+         **/
+        protected WithNICSupplementA() {
         }
 
         @Override

@@ -31,7 +31,7 @@ import java.io.Serializable;
  */
 public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg {
 
-    private static final long serialVersionUID = -2032348919695227545L;
+    private static final long serialVersionUID = 939103146345326372L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned

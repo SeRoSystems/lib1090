@@ -33,7 +33,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, SingleAntennaMsg {
 
-    private static final long serialVersionUID = 5661463389938495220L;
+    private static final long serialVersionUID = 8440428954946862126L;
 
     private boolean horizontalPositionAvailable;
     private boolean altitudeAvailable;

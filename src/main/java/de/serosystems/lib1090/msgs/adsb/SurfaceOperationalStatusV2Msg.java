@@ -31,7 +31,7 @@ import java.io.Serializable;
  */
 public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg {
 
-    private static final long serialVersionUID = 5774750859726557576L;
+    private static final long serialVersionUID = 353104982635210544L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned

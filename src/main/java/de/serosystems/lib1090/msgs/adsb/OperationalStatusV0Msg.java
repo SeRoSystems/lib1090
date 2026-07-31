@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg {
 
-    private static final long serialVersionUID = -8925123066831152922L;
+    private static final long serialVersionUID = 4280693148589377648L;
 
     private byte enrouteCapabilities;
 
