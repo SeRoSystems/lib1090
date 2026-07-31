@@ -27,9 +27,6 @@ import java.io.Serializable;
 public class HeadingAndSpeed extends BDSRegister implements Serializable {
     private static final long serialVersionUID = -4234774022351033835L;
 
-    // Fields
-    // ------
-
     // Magnetic Heading
     private boolean magneticHeadingStatus;
     private boolean magneticHeadingSign;
@@ -49,18 +46,16 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     private boolean inertialVerticalRateSign;
     private short inertialVerticalRateValue;
 
-    // Constructors
-    // ------------
-
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected HeadingAndSpeed() { }
-
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected HeadingAndSpeed() {
+    }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public HeadingAndSpeed(byte[] message) {
-
         super(message);
         setBds(BDSRegister.bdsCode.HEADING_AND_SPEED_REPORT);
 
@@ -77,11 +72,7 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
         this.inertialVerticalRateStatus = extractInertialVerticalRateStatus(message);
         this.inertialVerticalRateSign = extractInertialVerticalRateSign(message);
         this.inertialVerticalRateValue = extractInertialVerticalRateValue(message);
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return the magnetic heading.
@@ -122,9 +113,6 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     public Integer getInertialVerticalRate() {
         return computeInertialVerticalRate(inertialVerticalRateStatus, inertialVerticalRateSign, inertialVerticalRateValue);
     }
-
-    // static methods
-    // ---------------------
 
     static boolean extractMagneticHeadingStatus(byte[] message) {
         return ((message[0] >>> 7) & 0x01) == 1;
@@ -198,9 +186,6 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     static Integer computeInertialVerticalRate(boolean status, boolean sign, short value) {
         return status ? (sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32) : null;
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

@@ -22,25 +22,23 @@ import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OperationalStatusV0MsgTest {
 
-	@Test
-	public void testValidEnrouteCapabilities() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8300000000000000000");
-		OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
-		assertTrue(status instanceof OperationalStatusMsg);
-		assertFalse(status.hasOperationalTCAS());
-		assertTrue(status.hasOperationalCDTI());
-		assertTrue(status.has1090ESIn());
-	}
+    @Test
+    public void testValidEnrouteCapabilities() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray("8D000000F8300000000000000000");
+        OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
+        assertInstanceOf(OperationalStatusMsg.class, status);
+        assertFalse(status.hasOperationalTCAS());
+        assertTrue(status.hasOperationalCDTI());
+        assertTrue(status.has1090ESIn());
+    }
 
-	@Test
-	public void testInvalidEnrouteCapabilitiesHighBits() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8800000000000000000");
-		assertThrows(BadFormatException.class, () -> new OperationalStatusV0Msg(msg));
-	}
+    @Test
+    public void testInvalidEnrouteCapabilitiesHighBits() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray("8D000000F8800000000000000000");
+        assertThrows(BadFormatException.class, () -> new OperationalStatusV0Msg(msg));
+    }
 }

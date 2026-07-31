@@ -29,23 +29,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
 
-	@Override
-	protected AirbornePositionMsg create(String hex) throws Exception {
-		return new AirbornePositionV1Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
-	}
+    @Override
+    protected AirbornePositionMsg create(String hex) throws Exception {
+        return new AirbornePositionV1Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
+    }
 
-	@Test
-	void v1UsesExplicitNicSupplement() throws Exception {
-		AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
-				new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
+    @Test
+    void v1UsesExplicitNicSupplement() throws Exception {
+        AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
+                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-		assertEquals(9, msg.getNIC(true));
-		assertEquals(8, msg.getNIC(false));
-		assertEquals(75.0, msg.getHorizontalContainmentRadiusLimit(true));
-		assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
-		assertTrue(msg instanceof SingleAntennaMsg);
-		assertFalse(msg.hasSingleAntenna());
-		assertTrue(msg.toString().contains("AirbornePositionV1Msg{"));
-		assertTrue(msg.toString().contains("singleAntennaFlag="));
-	}
+        assertEquals(9, msg.getNIC(true));
+        assertEquals(8, msg.getNIC(false));
+        assertEquals(75.0, msg.getHorizontalContainmentRadiusLimit(true));
+        assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
+        assertInstanceOf(SingleAntennaMsg.class, msg);
+        assertFalse(msg.hasSingleAntenna());
+        assertTrue(msg.toString().contains("AirbornePositionV1Msg{"));
+        assertTrue(msg.toString().contains("singleAntennaFlag="));
+    }
 }

@@ -33,229 +33,231 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-R airborne position messages version 0 and 1.
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsgWithTime {
 
-	private static final long serialVersionUID = 1178987247553752100L;
+    private static final long serialVersionUID = 1178987247553752100L;
 
-	private boolean horizontal_position_available;
-	private boolean altitude_available;
-	private byte surveillance_status;
-	private boolean imf;
-	private short altitude_encoded;
-	private boolean time_flag;
-	private CPREncodedPosition position;
+    private boolean horizontal_position_available;
+    private boolean altitude_available;
+    private byte surveillance_status;
+    private boolean imf;
+    private short altitude_encoded;
+    private boolean time_flag;
+    private CPREncodedPosition position;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirbornePositionV0Msg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected AirbornePositionV0Msg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-R airborne position message as hex string
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirbornePositionV0Msg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw ADS-R airborne position message as hex string
+     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public AirbornePositionV0Msg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param raw_message raw ADS-R airborne position message as byte array
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirbornePositionV0Msg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw ADS-R airborne position message as byte array
+     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public AirbornePositionV0Msg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param squitter extended squitter containing the airborne position msg
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public AirbornePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter  extended squitter containing the airborne position msg
+     * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException if message has wrong format
+     */
+    public AirbornePositionV0Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+        super(squitter);
 
+        if (!(getFormatTypeCode() == 0 ||
+                (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
+                (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
+            throw new BadFormatException("This is not a position message! Wrong format type code (" + getFormatTypeCode() + ").");
 
-		if (!(getFormatTypeCode() == 0 ||
-				(getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
-				(getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
-			throw new BadFormatException("This is not a position message! Wrong format type code ("+getFormatTypeCode()+").");
+        byte[] msg = getMessage();
 
-		byte[] msg = getMessage();
+        horizontal_position_available = getFormatTypeCode() != 0;
 
-		horizontal_position_available = getFormatTypeCode() != 0;
+        surveillance_status = (byte) ((msg[0] >>> 1) & 0x3);
+        imf = (msg[0] & 0x1) == 1;
 
-		surveillance_status = (byte) ((msg[0]>>>1)&0x3);
-		imf = (msg[0]&0x1) == 1;
+        altitude_encoded = (short) (((msg[1] << 4) | ((msg[2] >>> 4) & 0xF)) & 0xFFF);
+        altitude_available = altitude_encoded != 0;
 
-		altitude_encoded = (short) (((msg[1]<<4)|((msg[2]>>>4)&0xF))&0xFFF);
-		altitude_available = altitude_encoded != 0;
+        time_flag = ((msg[2] >>> 3) & 0x1) == 1;
 
-		time_flag = ((msg[2]>>>3)&0x1) == 1;
+        boolean cpr_format = ((msg[2] >>> 2) & 0x1) == 1;
+        int cpr_encoded_lat = (((msg[2] & 0x3) << 15) | ((msg[3] & 0xFF) << 7) | ((msg[4] >>> 1) & 0x7F)) & 0x1FFFF;
+        int cpr_encoded_lon = (((msg[4] & 0x1) << 16) | ((msg[5] & 0xFF) << 8) | (msg[6] & 0xFF)) & 0x1FFFF;
+        position = CPREncodedPosition.ofAirborne(17, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
+                timestamp == null ? System.currentTimeMillis() : timestamp);
+    }
 
-		boolean cpr_format = ((msg[2]>>>2)&0x1) == 1;
-		int cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
-		int cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
-		position = CPREncodedPosition.ofAirborne(17, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
-				timestamp == null ? System.currentTimeMillis() : timestamp);
-	}
+    /**
+     * The position error, i.e., 95% accuracy for the horizontal position. Values according to DO-260B Table N-4.
+     * <p>
+     * The horizontal containment radius is also known as "horizontal protection level".
+     *
+     * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
+     */
+    public double getHorizontalContainmentRadiusLimit() {
+        return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
+    }
 
-	/**
-	 * The position error, i.e., 95% accuracy for the horizontal position. Values according to DO-260B Table N-4.
-	 *
-	 *  The horizontal containment radius is also known as "horizontal protection level".
-	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-	 */
-	public double getHorizontalContainmentRadiusLimit() {
-		return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
-	}
+    /**
+     * Navigation accuracy category according to DO-260B Table N-7. In ADS-R version 1+ this information is contained
+     * in the operational status message. For version 0 it is derived from the format type code.
+     * <p>
+     * For a value in meters, use {@link #getPositionUncertainty()}.
+     *
+     * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
+     * {@link AirborneOperationalStatusV1Msg}.
+     */
+    public byte getNACp() {
+        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
+    }
 
-	/**
-	 * Navigation accuracy category according to DO-260B Table N-7. In ADS-R version 1+ this information is contained
-	 * in the operational status message. For version 0 it is derived from the format type code.
-	 *
-	 * For a value in meters, use {@link #getPositionUncertainty()}.
-	 *
-	 * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
-	 * {@link AirborneOperationalStatusV1Msg}.
-	 */
-	public byte getNACp() {
-		return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
-	}
+    /**
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see table N-7 in RCTA DO-260B.
+     * <p>
+     * The concept of NACp has been introduced in ADS-R version 1. For version 0 transmitters, a mapping exists which
+     * is reflected by this method.
+     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
+     * {@link AirborneOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-R
+     * version 1 and 2.
+     *
+     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
+     */
+    public double getPositionUncertainty() {
+        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    }
 
-	/**
-	 * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see table N-7 in RCTA DO-260B.
-	 *
-	 * The concept of NACp has been introduced in ADS-R version 1. For version 0 transmitters, a mapping exists which
-	 * is reflected by this method.
-	 * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-	 * {@link AirborneOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-R
-	 * version 1 and 2.
-	 *
-	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-	 */
-	public double getPositionUncertainty() {
-		return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
-	}
+    /**
+     * @return Navigation integrity category. A NIC of 0 means "unknown".
+     */
+    public byte getNIC() {
+        return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
+    }
 
-	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unknown".
-	 */
-	public byte getNIC() {
-		return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
-	}
+    /**
+     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
+     * <p>
+     * The concept of SIL has been introduced in ADS-R version 1. For version 0 transmitters, a mapping exists which
+     * is reflected by this method.
+     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
+     * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-R
+     * version 1 and 2.
+     *
+     * @return the source integrity level (SIL) which indicates the probability of exceeding
+     * the NIC containment radius.
+     */
+    public byte getSIL() {
+        return AirbornePosition.typeCodeToSIL(getFormatTypeCode());
+    }
 
-	/**
-	 * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-	 *
-	 * The concept of SIL has been introduced in ADS-R version 1. For version 0 transmitters, a mapping exists which
-	 * is reflected by this method.
-	 * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-	 * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-R
-	 * version 1 and 2.
-	 *
-	 * @return the source integrity level (SIL) which indicates the probability of exceeding
-	 *         the NIC containment radius.
-	 */
-	public byte getSIL() {
-		return AirbornePosition.typeCodeToSIL(getFormatTypeCode());
-	}
+    /**
+     * @return the surveillance status
+     * @see #getSurveillanceStatusDescription()
+     */
+    public byte getSurveillanceStatus() {
+        return surveillance_status;
+    }
 
-	/**
-	 * @see #getSurveillanceStatusDescription()
-	 * @return the surveillance status
-	 */
-	public byte getSurveillanceStatus() {
-		return surveillance_status;
-	}
+    /**
+     * This is a function of the surveillance status field in the position
+     * message.
+     *
+     * @return surveillance status description as defines in DO-260B
+     */
+    public String getSurveillanceStatusDescription() {
+        String[] desc = {
+                "No condition information",
+                "Permanent alert (emergency condition)",
+                "Temporary alert (change in Mode A identity code other than emergency condition)",
+                "SPI condition"
+        };
 
-	/**
-	 * This is a function of the surveillance status field in the position
-	 * message.
-	 *
-	 * @return surveillance status description as defines in DO-260B
-	 */
-	public String getSurveillanceStatusDescription() {
-		String[] desc = {
-				"No condition information",
-				"Permanent alert (emergency condition)",
-				"Temporary alert (change in Mode A identity code other than emergency condition)",
-				"SPI condition"
-		};
+        return desc[surveillance_status];
+    }
 
-		return desc[surveillance_status];
-	}
+    @Override
+    public boolean hasTimeFlag() {
+        return time_flag;
+    }
 
-	@Override
-	public boolean hasTimeFlag() {
-		return time_flag;
-	}
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
 
-	@Override
-	public CPREncodedPosition getCPREncodedPosition() {
-		return position;
-	}
+    @Override
+    public boolean hasValidPosition() {
+        return horizontal_position_available;
+    }
 
-	@Override
-	public boolean hasValidPosition() {
-		return horizontal_position_available;
-	}
+    @Override
+    public boolean hasValidAltitude() {
+        return altitude_available;
+    }
 
-	@Override
-	public boolean hasValidAltitude() {
-		return altitude_available;
-	}
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
 
-	/**
-	 * @return the ICAO Mode A Flag (for address type determination)
-	 */
-	public boolean getIMF () {
-		return imf;
-	}
+    @Override
+    public Integer getAltitude() {
+        if (!altitude_available) return null;
+        return Altitude.decode12BitAltitude(altitude_encoded);
+    }
 
-	@Override
-	public Integer getAltitude() {
-		if (!altitude_available) return null;
-		return Altitude.decode12BitAltitude(altitude_encoded);
-	}
+    @Override
+    public Position.AltitudeType getAltitudeType() {
+        if (getFormatTypeCode() == 0 || (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18))
+            return Position.AltitudeType.BAROMETRIC_ALTITUDE;
+        else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
+            return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
+        else return Position.AltitudeType.UNKNOWN;
+    }
 
-	@Override
-	public Position.AltitudeType getAltitudeType () {
-		if (getFormatTypeCode() == 0 || (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18))
-			return Position.AltitudeType.BAROMETRIC_ALTITUDE;
-		else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
-			return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
-		else return Position.AltitudeType.UNKNOWN;
-	}
+    /**
+     * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+     *
+     * @return value of the Q bit or null if message does not contain a valid altitude
+     */
+    public Boolean hasQBit() {
+        if (!altitude_available) return null;
+        return Altitude.decode12BitQBit(altitude_encoded);
+    }
 
-	/**
-	 * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
-	 * @return value of the Q bit or null if message does not contain a valid altitude
-	 */
-	public Boolean hasQBit() {
-		if (!altitude_available) return null;
-		return Altitude.decode12BitQBit(altitude_encoded);
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tAirbornePositionV0Msg{" +
+                "horizontal_position_available=" + horizontal_position_available +
+                ", altitude_available=" + altitude_available +
+                ", surveillance_status=" + surveillance_status +
+                ", imf=" + imf +
+                ", altitude_encoded=" + altitude_encoded +
+                ", time_flag=" + time_flag +
+                ", position=" + position +
+                '}';
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tAirbornePositionV0Msg{" +
-				"horizontal_position_available=" + horizontal_position_available +
-				", altitude_available=" + altitude_available +
-				", surveillance_status=" + surveillance_status +
-				", imf=" + imf +
-				", altitude_encoded=" + altitude_encoded +
-				", time_flag=" + time_flag +
-				", position=" + position +
-				'}';
-	}
-
-	@Override
-	public subtype getType() {
-		return subtype.ADSR_AIRBORN_POSITION_V0;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.ADSR_AIRBORN_POSITION_V0;
+    }
 }

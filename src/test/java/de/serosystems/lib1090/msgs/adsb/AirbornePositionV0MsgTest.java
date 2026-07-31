@@ -28,17 +28,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AirbornePositionV0MsgTest extends AirbornePositionMsgTest {
 
-	@Override
-	protected AirbornePositionMsg create(String hex) throws Exception {
-		return new AirbornePositionV0Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
-	}
+    @Override
+    protected AirbornePositionMsg create(String hex) throws Exception {
+        return new AirbornePositionV0Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
+    }
 
-	@Test
-	public void testSingleAntennaFlagIsExposed() throws Exception {
-		AirbornePositionV0Msg msg = new AirbornePositionV0Msg(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357"), Instant.EPOCH);
+    @Test
+    public void testSingleAntennaFlagIsExposed() throws Exception {
+        AirbornePositionV0Msg msg = new AirbornePositionV0Msg(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357"), Instant.EPOCH);
 
-		assertTrue(msg instanceof SingleAntennaMsg);
-		assertFalse(msg.hasSingleAntenna());
-		assertTrue(msg.toString().contains("singleAntennaFlag="));
-	}
+        assertInstanceOf(SingleAntennaMsg.class, msg);
+        assertFalse(msg.hasSingleAntenna());
+        assertTrue(msg.toString().contains("singleAntennaFlag="));
+    }
 }

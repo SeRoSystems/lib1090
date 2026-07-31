@@ -32,71 +32,71 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 abstract class SurfaceOperationalStatusMsgTest {
 
-	protected abstract byte[] baseMessage();
+    protected abstract byte[] baseMessage();
 
-	protected abstract SurfaceOperationalStatusMsg create(byte[] msg) throws Exception;
+    protected abstract SurfaceOperationalStatusMsg create(byte[] msg) throws Exception;
 
-	protected SurfaceOperationalStatusMsg withCapabilityClassCode(int capabilityClassCode) throws Exception {
-		byte[] msg = baseMessage();
-		msg[5] = (byte) (capabilityClassCode >>> 4);
-		msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
-		return create(msg);
-	}
+    protected SurfaceOperationalStatusMsg withCapabilityClassCode(int capabilityClassCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[5] = (byte) (capabilityClassCode >>> 4);
+        msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
+        return create(msg);
+    }
 
-	protected SurfaceOperationalStatusMsg withOperationalModeCode(int operationalModeCode) throws Exception {
-		byte[] msg = baseMessage();
-		msg[7] = (byte) (operationalModeCode >>> 8);
-		msg[8] = (byte) operationalModeCode;
-		return create(msg);
-	}
+    protected SurfaceOperationalStatusMsg withOperationalModeCode(int operationalModeCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[7] = (byte) (operationalModeCode >>> 8);
+        msg[8] = (byte) operationalModeCode;
+        return create(msg);
+    }
 
-	@Test
-	void testSubtypeCode() throws Exception {
-		assertEquals(1, create(baseMessage()).getSubtypeCode());
-	}
+    @Test
+    void testSubtypeCode() throws Exception {
+        assertEquals(1, create(baseMessage()).getSubtypeCode());
+    }
 
-	@Test
-	void testCapabilityClassCodeFlags() throws Exception {
-		SurfaceOperationalStatusMsg esIn = withCapabilityClassCode(0x100);
-		assertTrue(esIn.has1090ESIn());
-		assertFalse(esIn.hasLowTxPower());
+    @Test
+    void testCapabilityClassCodeFlags() throws Exception {
+        SurfaceOperationalStatusMsg esIn = withCapabilityClassCode(0x100);
+        assertTrue(esIn.has1090ESIn());
+        assertFalse(esIn.hasLowTxPower());
 
-		SurfaceOperationalStatusMsg lowTxPower = withCapabilityClassCode(0x20);
-		assertFalse(lowTxPower.has1090ESIn());
-		assertTrue(lowTxPower.hasLowTxPower());
-	}
+        SurfaceOperationalStatusMsg lowTxPower = withCapabilityClassCode(0x20);
+        assertFalse(lowTxPower.has1090ESIn());
+        assertTrue(lowTxPower.hasLowTxPower());
+    }
 
-	@Test
-	void testCapabilityClassCodeReservedBits() throws Exception {
-		assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x800));
-		assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x400));
+    @Test
+    void testCapabilityClassCodeReservedBits() throws Exception {
+        assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x800));
+        assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x400));
 
-		withCapabilityClassCode(0x200);
-	}
+        withCapabilityClassCode(0x200);
+    }
 
-	@Test
-	void testOperationalModeCodeFlags() throws Exception {
-		SurfaceOperationalStatusMsg tcasResolutionAdvisory = withOperationalModeCode(0x2000);
-		assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
-		assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
-		assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
+    @Test
+    void testOperationalModeCodeFlags() throws Exception {
+        SurfaceOperationalStatusMsg tcasResolutionAdvisory = withOperationalModeCode(0x2000);
+        assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
+        assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
+        assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
 
-		SurfaceOperationalStatusMsg activeIdentSwitch = withOperationalModeCode(0x1000);
-		assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
-		assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
-		assertFalse(activeIdentSwitch.hasReceivingATCServices());
+        SurfaceOperationalStatusMsg activeIdentSwitch = withOperationalModeCode(0x1000);
+        assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
+        assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
+        assertFalse(activeIdentSwitch.hasReceivingATCServices());
 
-		SurfaceOperationalStatusMsg receivingAtcServices = withOperationalModeCode(0x0800);
-		assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
-		assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
-		assertTrue(receivingAtcServices.hasReceivingATCServices());
-	}
+        SurfaceOperationalStatusMsg receivingAtcServices = withOperationalModeCode(0x0800);
+        assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
+        assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
+        assertTrue(receivingAtcServices.hasReceivingATCServices());
+    }
 
-	@Test
-	void testOperationalModeCodeReservedBits() throws Exception {
-		assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x8000));
-		assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x4000));
+    @Test
+    void testOperationalModeCodeReservedBits() throws Exception {
+        assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x8000));
+        assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x4000));
 
-		withOperationalModeCode(0x2000);
-	}
+        withOperationalModeCode(0x2000);
+    }
 }

@@ -27,9 +27,6 @@ import java.io.Serializable;
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 2607206512004324831L;
 
-    // Fields
-    // ------
-
     // BDS Code
     private short bdsCode;
     // Register 1116 Continuation Flag
@@ -79,19 +76,16 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     // Register 1116 Change Flag / Data Link Capability (continuation) Change Indicator
     private boolean changeFlag;
 
-    // Constructors
-    // ------------
-
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected DataLinkCapabilityReport() { }
+    protected DataLinkCapabilityReport() {
+    }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public DataLinkCapabilityReport(byte[] message) {
-
         super(message);
         setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
 
@@ -119,11 +113,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
         this.enhancedSurveillanceCapability = extractEnhancedSurveillanceCapability(message);
         this.activeTransponderSideIndicator = extractActiveTransponderSideIndicator(message);
         this.changeFlag = extractChangeFlag(message);
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return whether the subsequent register shall be extracted
@@ -354,10 +344,6 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
         return changeFlag;
     }
 
-    // static methods
-    // ---------------------
-
-
     static boolean extractContinuationFlag(byte[] message) {
         return ((message[1] >>> 7) & 0x1) == 1;
     }
@@ -423,7 +409,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     static short extractTcasVersionNumber(byte[] message) {
-        return (short) ( ((message[4]<<1) & 0x02) | ((message[4]>>>1) & 0x01) );
+        return (short) (((message[4] << 1) & 0x02) | ((message[4] >>> 1) & 0x01));
     }
 
     static boolean extractBasicDataFlashCapability(byte[] message) {
@@ -449,9 +435,6 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     static boolean extractChangeFlag(byte[] message) {
         return ((message[6] >>> 5) & 0x01) == 1;
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

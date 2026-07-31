@@ -23,10 +23,10 @@ package de.serosystems.lib1090.msgs;
  */
 public interface SingleAntennaMsg {
 
-	/**
-	 * Whether the transmitting system uses a single antenna.
-	 *
-	 * @return true if the transmitting system uses a single antenna
-	 */
-	boolean hasSingleAntenna();
+    /**
+     * Whether the transmitting system uses a single antenna.
+     *
+     * @return true if the transmitting system uses a single antenna
+     */
+    boolean hasSingleAntenna();
 }

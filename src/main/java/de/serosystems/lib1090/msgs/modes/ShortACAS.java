@@ -27,206 +27,216 @@ import java.io.Serializable;
 
 /**
  * Decoder for Mode S short air-air ACAS replies (DF 0)
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = -8867923868755627826L;
+    private static final long serialVersionUID = -8867923868755627826L;
 
-	private boolean airborne;
-	private boolean cross_link_capability;
-	private byte sensitivity_level;
-	private byte reply_information;
-	private short altitude_code;
+    private boolean airborne;
+    private boolean cross_link_capability;
+    private byte sensitivity_level;
+    private byte reply_information;
+    private short altitude_code;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected ShortACAS() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected ShortACAS() {
+    }
 
-	/**
-	 * @param raw_message raw short air-air acas reply as hex string
-	 * @throws BadFormatException if message is not altitude reply or 
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public ShortACAS(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw short air-air acas reply as hex string
+     * @throws BadFormatException     if message is not altitude reply or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public ShortACAS(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw short air-air acas reply as byte array
-	 * @throws BadFormatException if message is not altitude reply or
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public ShortACAS(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw short air-air acas reply as byte array
+     * @throws BadFormatException     if message is not altitude reply or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public ShortACAS(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param reply Mode S reply containing this short air-air acas reply
-	 * @throws BadFormatException if message is not short air-air acas reply or 
-	 * contains wrong values.
-	 */
-	public ShortACAS(ModeSDownlinkMsg reply) throws BadFormatException {
-		super(reply);
+    /**
+     * @param reply Mode S reply containing this short air-air acas reply
+     * @throws BadFormatException if message is not short air-air acas reply or
+     *                            contains wrong values.
+     */
+    public ShortACAS(ModeSDownlinkMsg reply) throws BadFormatException {
+        super(reply);
 
-		if (getDownlinkFormat() != 0) {
-			throw new BadFormatException("Message is not a short ACAS (air-air) message!");
-		}
+        if (getDownlinkFormat() != 0) {
+            throw new BadFormatException("Message is not a short ACAS (air-air) message!");
+        }
 
-		byte[] payload = getPayload();
-		airborne = (getFirstField()&0x4)==0;
-		cross_link_capability = (getFirstField()&0x2)!=0;
-		sensitivity_level = (byte) ((payload[0]>>>5)&0x7);
-		reply_information = (byte) ((payload[0]&0x7)<<1 | (payload[1]>>>7)&0x1);
-		altitude_code = (short) ((payload[1]<<8 | payload[2]&0xFF)&0x1FFF);
-	}
+        byte[] payload = getPayload();
+        airborne = (getFirstField() & 0x4) == 0;
+        cross_link_capability = (getFirstField() & 0x2) != 0;
+        sensitivity_level = (byte) ((payload[0] >>> 5) & 0x7);
+        reply_information = (byte) ((payload[0] & 0x7) << 1 | (payload[1] >>> 7) & 0x1);
+        altitude_code = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
+    }
 
+    /**
+     * @return true if aircraft is airborne, false if it is on the ground
+     */
+    public boolean isAirborne() {
+        return airborne;
+    }
 
-	/**
-	 * @return true if aircraft is airborne, false if it is on the ground
-	 */
-	public boolean isAirborne() {
-		return airborne;
-	}
+    /**
+     * Note: cross-link cabability is the ability to support decoding the contents
+     * of the DS field in an interrogation with UF equals
+     * 0 and respond with the contents of the specified GICB register in the
+     * corresponding reply with DF equals 16.
+     *
+     * @return true if aircraft has the cross-link capability
+     *
+     */
+    public boolean hasCrossLinkCapability() {
+        return cross_link_capability;
+    }
 
-	/**
-	 * Note: cross-link cabability is the ability to support decoding the contents
-	 * of the DS field in an interrogation with UF equals
-	 * 0 and respond with the contents of the specified GICB register in the
-	 * corresponding reply with DF equals 16.
-	 * @return true if aircraft has the cross-link capability
-	 * 
+    /**
+     * @return the sensitivity level at which ACAS is currently operating
+     */
+    public byte getSensitivityLevel() {
+        return sensitivity_level;
+    }
 
-	 */
-	public boolean hasCrossLinkCapability() {
-		return cross_link_capability;
-	}
+    /**
+     * This field is used to report the aircraft's maximum cruising
+     * true airspeed capability and TCAS capabilities. Capabilities are:<br>
+     * <ul>
+     *     <li>code 2: On-board TCAS with resolution capability inhibited</li>
+     *     <li>code 3: On-board TCAS with vertical-only resolution capability</li>
+     *     <li>code 4: On-board TCAS with vertical and horizontal resolution capability</li>
+     * </ul>
+     *
+     * @return the air-to-air reply information according to 3.1.2.8.2.2
+     * @see #getMaximumAirspeed()
+     * @see #hasOperatingACAS()
+     * @see #hasHorizontalResolutionCapability()
+     * @see #hasVerticalResolutionCapability()
+     */
+    public byte getReplyInformation() {
+        return reply_information;
+    }
 
-	/**
-	 * @return the sensitivity level at which ACAS is currently operating
-	 */
-	public byte getSensitivityLevel() {
-		return sensitivity_level;
-	}
+    /**
+     * @return whether a/c has operating ACARS (derived from reply information)
+     * @see #getReplyInformation()
+     */
+    public boolean hasOperatingACAS() {
+        return getReplyInformation() != 0;
+    }
 
-	/**
-	 * This field is used to report the aircraft's maximum cruising 
-	 * true airspeed capability and TCAS capabilities. Capabilities are:<br>
-	 *     <ul>
-	 *         <li>code 2: On-board TCAS with resolution capability inhibited</li>
-	 *         <li>code 3: On-board TCAS with vertical-only resolution capability</li>
-	 *         <li>code 4: On-board TCAS with vertical and horizontal resolution capability</li>
-	 *     </ul>
-	 * @return the air-to-air reply information according to 3.1.2.8.2.2
-	 * @see #getMaximumAirspeed()
-	 * @see #hasOperatingACAS()
-	 * @see #hasHorizontalResolutionCapability()
-	 * @see #hasVerticalResolutionCapability()
-	 */
-	public byte getReplyInformation() {
-		return reply_information;
-	}
+    /**
+     * @return the maximum airspeed in kn as specified in ICAO Annex 10V4 3.1.2.8.2.2<br>
+     * null if unknown<br>Integer.MAX_VALUE if unbound
+     */
+    public Integer getMaximumAirspeed() {
+        return decodeMaximumAirspeed(getReplyInformation());
+    }
 
-	/**
-	 * @return whether a/c has operating ACARS (derived from reply information)
-	 * @see #getReplyInformation()
-	 */
-	public boolean hasOperatingACAS() {
-		return getReplyInformation() != 0;
-	}
+    static Integer decodeMaximumAirspeed(byte reply_information) {
+        switch (reply_information) {
+            case 9:
+                return 75;
+            case 10:
+                return 150;
+            case 11:
+                return 300;
+            case 12:
+                return 600;
+            case 13:
+                return 1200;
+            case 14:
+                return Integer.MAX_VALUE;
+            default:
+                return null;
+        }
+    }
 
-	/**
-	 * @return the maximum airspeed in kn as specified in ICAO Annex 10V4 3.1.2.8.2.2<br>
-	 * null if unknown<br>Integer.MAX_VALUE if unbound
-	 */
-	public Integer getMaximumAirspeed() {
-		return decodeMaximumAirspeed(getReplyInformation());
-	}
+    /**
+     * @return true if vertical resolution capability announced; false if explicitly not available; null if information
+     * not provided in this reply
+     *
+     */
+    public Boolean hasVerticalResolutionCapability() {
+        switch (reply_information) {
+            case 0:
+            case 1:
+                return false;
+            case 3:
+            case 4:
+                return true;
+            default:
+                return null;
+        }
+    }
 
-	static Integer decodeMaximumAirspeed(byte reply_information) {
-		switch (reply_information) {
-		case 9: return 75;
-		case 10: return 150;
-		case 11: return 300;
-		case 12: return 600;
-		case 13: return 1200;
-		case 14: return Integer.MAX_VALUE;
-		default: return null;
-		}
-	}
+    /**
+     * @return true if horizontal resolution capability announced; false if explicitly not available; null if
+     * information not provided in this reply
+     *
+     */
+    public Boolean hasHorizontalResolutionCapability() {
+        switch (reply_information) {
+            case 0:
+            case 1:
+            case 3:
+                return false;
+            case 4:
+                return true;
+            default:
+                return null;
+        }
+    }
 
-	/**
-	 * @return true if vertical resolution capability announced; false if explicitly not available; null if information
-	 * not provided in this reply
-	 *
-	 */
-	public Boolean hasVerticalResolutionCapability () {
-		switch (reply_information) {
-			case 0:
-			case 1:
-				return false;
-			case 3:
-			case 4:
-				return true;
-			default:
-				return null;
-		}
-	}
+    /**
+     * @return The 13 bits altitude code (see ICAO Annex 10 V4)
+     */
+    public short getAltitudeCode() {
+        return altitude_code;
+    }
 
-	/**
-	 * @return true if horizontal resolution capability announced; false if explicitly not available; null if
-	 * information not provided in this reply
-	 *
-	 */
-	public Boolean hasHorizontalResolutionCapability () {
-		switch (reply_information) {
-			case 0:
-			case 1:
-			case 3:
-				return false;
-			case 4:
-				return true;
-			default:
-				return null;
-		}
-	}
+    /**
+     * @return the decoded altitude in feet or null if not available
+     */
+    public Integer getAltitude() {
+        return Altitude.decode13BitAltitude(altitude_code);
+    }
 
-	/**
-	 * @return The 13 bits altitude code (see ICAO Annex 10 V4)
-	 */
-	public short getAltitudeCode() {
-		return altitude_code;
-	}
+    /**
+     * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
+     *
+     * @return value of the Q bit, null if altitude is not available or M bit is set
+     */
+    public Boolean hasQBit() {
+        return Altitude.decode13BitQBit(altitude_code);
+    }
 
-	/**
-	 * @return the decoded altitude in feet or null if not available
-	 */
-	public Integer getAltitude() {
-		return Altitude.decode13BitAltitude(altitude_code);
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tShortACAS{" +
+                "airborne=" + airborne +
+                ", cross_link_capability=" + cross_link_capability +
+                ", sensitivity_level=" + sensitivity_level +
+                ", reply_information=" + reply_information +
+                ", altitude_code=" + altitude_code +
+                '}';
+    }
 
-	/**
-	 * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
-	 * @return value of the Q bit, null if altitude is not available or M bit is set
-	 */
-	public Boolean hasQBit() {
-		return Altitude.decode13BitQBit(altitude_code);
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tShortACAS{" +
-				"airborne=" + airborne +
-				", cross_link_capability=" + cross_link_capability +
-				", sensitivity_level=" + sensitivity_level +
-				", reply_information=" + reply_information +
-				", altitude_code=" + altitude_code +
-				'}';
-	}
-
-	@Override
-	public subtype getType() {
-		return subtype.SHORT_ACAS;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.SHORT_ACAS;
+    }
 }

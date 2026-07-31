@@ -118,21 +118,36 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
      */
     public Double getRadiusOfContainment() {
         switch (positionIntegrityCategory) {
-            case 1: return 37040.;
-            case 2: return 18520.;
-            case 3: return 14816.;
-            case 4: return 7408.;
-            case 5: return 3704.;
-            case 6: return 1852.;
-            case 7: return 1111.2;
-            case 8: return 926.;
-            case 9: return 555.6;
-            case 10: return 370.4;
-            case 11: return 185.2;
-            case 12: return 75.;
-            case 13: return 25.;
-            case 14: return 7.5;
-            default: return null; // 0: unknown, 15: reserved
+            case 1:
+                return 37040.;
+            case 2:
+                return 18520.;
+            case 3:
+                return 14816.;
+            case 4:
+                return 7408.;
+            case 5:
+                return 3704.;
+            case 6:
+                return 1852.;
+            case 7:
+                return 1111.2;
+            case 8:
+                return 926.;
+            case 9:
+                return 555.6;
+            case 10:
+                return 370.4;
+            case 11:
+                return 185.2;
+            case 12:
+                return 75.;
+            case 13:
+                return 25.;
+            case 14:
+                return 7.5;
+            default:
+                return null; // 0: unknown, 15: reserved
         }
     }
 

@@ -24,14 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AirspeedHeadingV0MsgTest extends AirspeedHeadingMsgTest {
 
-	@Override
-	protected AirspeedHeadingMsg create(String hex) throws Exception {
-		return new AirspeedHeadingV0Msg(hex);
-	}
+    @Override
+    protected AirspeedHeadingMsg create(String hex) throws Exception {
+        return new AirspeedHeadingV0Msg(hex);
+    }
 
-	@Test
-	public void testNUCrRaw() throws Exception {
-		AirspeedHeadingV0Msg msg = new AirspeedHeadingV0Msg("8DA05F219B06B6AF189400CBC33F");
-		assertEquals(0, msg.getNUCrEncoded());
-	}
+    @Test
+    public void testNUCrRaw() throws Exception {
+        AirspeedHeadingV0Msg msg = new AirspeedHeadingV0Msg("8DA05F219B06B6AF189400CBC33F");
+        assertEquals(0, msg.getNUCrEncoded());
+    }
 }

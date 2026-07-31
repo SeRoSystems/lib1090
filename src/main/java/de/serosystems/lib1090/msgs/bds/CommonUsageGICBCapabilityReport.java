@@ -29,32 +29,24 @@ import java.util.Map;
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 2537138385702205527L;
 
-    // Fields
-    // ------
-
     // Common Usage GICB Capability Report
     private Map<String, Boolean> commonUsageGICBCapabilityReport;
 
-    // Constructors
-    // ------------
-
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected CommonUsageGICBCapabilityReport() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected CommonUsageGICBCapabilityReport() {
+    }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public CommonUsageGICBCapabilityReport(byte[] message) {
-
         super(message);
         setBds(bdsCode.COMMON_USAGE_GICB_CAPABILITY_REPORT);
 
         this.commonUsageGICBCapabilityReport = extractCommonGICBCapabilityReport(message);
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return common usage GICB services currently supported
@@ -62,9 +54,6 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
     public Map<String, Boolean> getCommonUsageGICBCapabilityReport() {
         return commonUsageGICBCapabilityReport;
     }
-
-    // static methods
-    // ---------------------
 
     static Map<String, Boolean> extractCommonGICBCapabilityReport(byte[] message) {
 
@@ -128,9 +117,6 @@ public class CommonUsageGICBCapabilityReport extends BDSRegister implements Seri
         return map;
 
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

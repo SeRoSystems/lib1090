@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VelocityOverGroundV2MsgTest extends VelocityOverGroundMsgTest {
 
-	@Override
-	protected VelocityOverGroundMsg create(String hex) throws Exception {
-		return new VelocityOverGroundV2Msg(hex);
-	}
+    @Override
+    protected VelocityOverGroundMsg create(String hex) throws Exception {
+        return new VelocityOverGroundV2Msg(hex);
+    }
 
-	@Test
-	public void testNACvRawAndAccuracyBound_485020() throws Exception {
-		VelocityOverGroundV2Msg msg = new VelocityOverGroundV2Msg("8D485020994409940838175B284F");
-		assertEquals(0, msg.getNACvEncoded());
-		assertEquals(-1.0f, msg.getAccuracyBound());
-	}
+    @Test
+    public void testNACvRawAndAccuracyBound_485020() throws Exception {
+        VelocityOverGroundV2Msg msg = new VelocityOverGroundV2Msg("8D485020994409940838175B284F");
+        assertEquals(0, msg.getNACvEncoded());
+        assertEquals(-1.0f, msg.getAccuracyBound());
+    }
 }

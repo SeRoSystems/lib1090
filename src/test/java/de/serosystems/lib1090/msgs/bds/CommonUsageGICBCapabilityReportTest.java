@@ -32,17 +32,14 @@ public class CommonUsageGICBCapabilityReportTest {
 
     @BeforeAll
     public static void setup() {
-
         msg = new byte[]{
                 (byte) 0b11111010, (byte) 0b10000001, (byte) 0b11000001, (byte) 0b00000000, (byte) 0b00000000,
                 (byte) 0b00000000, (byte) 0b00000000
         };
-
     }
 
     @Test
     public void commonGICBCapabilityReport() {
-
         Map<String, Boolean> map = CommonUsageGICBCapabilityReport.extractCommonGICBCapabilityReport(msg);
 
         assertTrue(map.get("BDS05"));
@@ -75,7 +72,6 @@ public class CommonUsageGICBCapabilityReportTest {
         assertFalse(map.get("BDSE1"));
         assertFalse(map.get("BDSE2"));
         assertFalse(map.get("BDSF1"));
-
     }
 
 }

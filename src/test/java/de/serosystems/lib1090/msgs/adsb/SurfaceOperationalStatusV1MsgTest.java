@@ -26,44 +26,44 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SurfaceOperationalStatusV1MsgTest extends SurfaceOperationalStatusMsgTest {
 
-	private static final String BASE_MESSAGE = "8D000000F9000000002000000000";
+    private static final String BASE_MESSAGE = "8D000000F9000000002000000000";
 
-	@Override
-	protected byte[] baseMessage() {
-		return Tools.hexStringToByteArray(BASE_MESSAGE);
-	}
+    @Override
+    protected byte[] baseMessage() {
+        return Tools.hexStringToByteArray(BASE_MESSAGE);
+    }
 
-	@Override
-	protected SurfaceOperationalStatusV1Msg create(byte[] msg) throws Exception {
-		return new SurfaceOperationalStatusV1Msg(msg);
-	}
+    @Override
+    protected SurfaceOperationalStatusV1Msg create(byte[] msg) throws Exception {
+        return new SurfaceOperationalStatusV1Msg(msg);
+    }
 
-	@Test
-	public void testValidVersion1Message() throws Exception {
-		SurfaceOperationalStatusV1Msg status = create(baseMessage());
-		assertEquals(1, status.getSubtypeCode());
-		assertEquals(1, status.getVersion());
-	}
+    @Test
+    public void testValidVersion1Message() throws Exception {
+        SurfaceOperationalStatusV1Msg status = create(baseMessage());
+        assertEquals(1, status.getSubtypeCode());
+        assertEquals(1, status.getVersion());
+    }
 
-	@Test
-	public void testRejectVersion0Message() throws Exception {
-		byte[] msg = baseMessage();
-		msg[9] = 0x00;
+    @Test
+    public void testRejectVersion0Message() throws Exception {
+        byte[] msg = baseMessage();
+        msg[9] = 0x00;
 
-		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
-	}
+        assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
+    }
 
-	@Test
-	public void testOperationalModeCodeWithHighByte() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F9000080002000000000");
-		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
-	}
+    @Test
+    public void testOperationalModeCodeWithHighByte() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray("8D000000F9000080002000000000");
+        assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
+    }
 
-	@Test
-	void testHasPositionOffsetApplied() throws Exception {
-		SurfaceOperationalStatusMsg positionOffsetApplied = withCapabilityClassCode(0x200);
-		assertTrue(positionOffsetApplied.hasPositionOffsetApplied());
-		assertFalse(positionOffsetApplied.has1090ESIn());
-		assertFalse(positionOffsetApplied.hasLowTxPower());
-	}
+    @Test
+    void testHasPositionOffsetApplied() throws Exception {
+        SurfaceOperationalStatusMsg positionOffsetApplied = withCapabilityClassCode(0x200);
+        assertTrue(positionOffsetApplied.hasPositionOffsetApplied());
+        assertFalse(positionOffsetApplied.has1090ESIn());
+        assertFalse(positionOffsetApplied.hasLowTxPower());
+    }
 }

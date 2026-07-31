@@ -27,103 +27,103 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest {
 
-	// Surface operational status message with ADS-B version 2
-	public static final String S_OPSTAT_V2 = "8D000000F9000000004000000000";
+    // Surface operational status message with ADS-B version 2
+    public static final String S_OPSTAT_V2 = "8D000000F9000000004000000000";
 
-	@Override
-	protected byte[] baseMessage() {
-		return Tools.hexStringToByteArray(S_OPSTAT_V2);
-	}
+    @Override
+    protected byte[] baseMessage() {
+        return Tools.hexStringToByteArray(S_OPSTAT_V2);
+    }
 
-	@Override
-	protected SurfaceOperationalStatusV2Msg create(byte[] msg) throws Exception {
-		return new SurfaceOperationalStatusV2Msg(msg);
-	}
+    @Override
+    protected SurfaceOperationalStatusV2Msg create(byte[] msg) throws Exception {
+        return new SurfaceOperationalStatusV2Msg(msg);
+    }
 
-	@Test
-	public void testDecodeSurfaceOpstat() throws Exception {
-		final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
-		assertTrue(opstat instanceof OperationalStatusV2Msg);
-		assertTrue(opstat instanceof SingleAntennaMsg);
+    @Test
+    public void testDecodeSurfaceOpstat() throws Exception {
+        final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
+        assertInstanceOf(OperationalStatusV2Msg.class, opstat);
+        assertInstanceOf(SingleAntennaMsg.class, opstat);
 
-		assertEquals(2, opstat.getVersion());
-		assertFalse(opstat.has1090ESIn());
-		assertFalse(opstat.hasUATIn());
-		assertFalse(opstat.hasSingleAntenna());
-		assertEquals(0, opstat.getSDAEncoded());
-		assertFalse(opstat.hasSILSupplement());
-	}
+        assertEquals(2, opstat.getVersion());
+        assertFalse(opstat.has1090ESIn());
+        assertFalse(opstat.hasUATIn());
+        assertFalse(opstat.hasSingleAntenna());
+        assertEquals(0, opstat.getSDAEncoded());
+        assertFalse(opstat.hasSILSupplement());
+    }
 
-	@Test
-	public void testRejectVersion1AsV2() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray(S_OPSTAT_V2);
-		msg[9] = 0x20;
+    @Test
+    public void testRejectVersion1AsV2() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray(S_OPSTAT_V2);
+        msg[9] = 0x20;
 
-		assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
-	}
+        assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
+    }
 
-	@Test
-	public void testCapabilityClassCodeVersion2Fields() throws Exception {
-		SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
-		assertTrue(uatIn.hasUATIn());
-		assertEquals(0, uatIn.getNACv());
-		assertFalse(uatIn.getNICSupplementC());
+    @Test
+    public void testCapabilityClassCodeVersion2Fields() throws Exception {
+        SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
+        assertTrue(uatIn.hasUATIn());
+        assertEquals(0, uatIn.getNACv());
+        assertFalse(uatIn.getNICSupplementC());
 
-		SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
-		assertFalse(nacv.hasUATIn());
-		assertEquals(5, nacv.getNACv());
-		assertFalse(nacv.getNICSupplementC());
+        SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
+        assertFalse(nacv.hasUATIn());
+        assertEquals(5, nacv.getNACv());
+        assertFalse(nacv.getNICSupplementC());
 
-		SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
-		assertFalse(nicSupplementC.hasUATIn());
-		assertEquals(0, nicSupplementC.getNACv());
-		assertTrue(nicSupplementC.getNICSupplementC());
-	}
+        SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
+        assertFalse(nicSupplementC.hasUATIn());
+        assertEquals(0, nicSupplementC.getNACv());
+        assertTrue(nicSupplementC.getNICSupplementC());
+    }
 
-	@Test
-	public void testOperationalModeCodeVersion2Fields() throws Exception {
-		SurfaceOperationalStatusV2Msg singleAntenna = statusWithOperationalModeCode(0x0400);
-		assertTrue(singleAntenna.hasSingleAntenna());
-		assertEquals(0, singleAntenna.getSDAEncoded());
-		assertEquals(0, singleAntenna.getGPSAntennaOffsetEncoded());
+    @Test
+    public void testOperationalModeCodeVersion2Fields() throws Exception {
+        SurfaceOperationalStatusV2Msg singleAntenna = statusWithOperationalModeCode(0x0400);
+        assertTrue(singleAntenna.hasSingleAntenna());
+        assertEquals(0, singleAntenna.getSDAEncoded());
+        assertEquals(0, singleAntenna.getGPSAntennaOffsetEncoded());
 
-		SurfaceOperationalStatusV2Msg systemDesignAssurance = statusWithOperationalModeCode(0x0300);
-		assertFalse(systemDesignAssurance.hasSingleAntenna());
-		assertEquals(3, systemDesignAssurance.getSDAEncoded());
-		assertEquals(0, systemDesignAssurance.getGPSAntennaOffsetEncoded());
+        SurfaceOperationalStatusV2Msg systemDesignAssurance = statusWithOperationalModeCode(0x0300);
+        assertFalse(systemDesignAssurance.hasSingleAntenna());
+        assertEquals(3, systemDesignAssurance.getSDAEncoded());
+        assertEquals(0, systemDesignAssurance.getGPSAntennaOffsetEncoded());
 
-		SurfaceOperationalStatusV2Msg gpsAntennaOffset = statusWithOperationalModeCode(0x005A);
-		assertFalse(gpsAntennaOffset.hasSingleAntenna());
-		assertEquals(0, gpsAntennaOffset.getSDAEncoded());
-		assertEquals(0x5A, gpsAntennaOffset.getGPSAntennaOffsetEncoded());
-	}
+        SurfaceOperationalStatusV2Msg gpsAntennaOffset = statusWithOperationalModeCode(0x005A);
+        assertFalse(gpsAntennaOffset.hasSingleAntenna());
+        assertEquals(0, gpsAntennaOffset.getSDAEncoded());
+        assertEquals(0x5A, gpsAntennaOffset.getGPSAntennaOffsetEncoded());
+    }
 
-	@Test
-	void testHasPositionOffsetApplied() throws Exception {
-		assertTrue(statusWithOperationalModeCode(0x0001).hasPositionOffsetApplied());
-		assertFalse(statusWithOperationalModeCode(0x0002).hasPositionOffsetApplied());
-	}
+    @Test
+    void testHasPositionOffsetApplied() throws Exception {
+        assertTrue(statusWithOperationalModeCode(0x0001).hasPositionOffsetApplied());
+        assertFalse(statusWithOperationalModeCode(0x0002).hasPositionOffsetApplied());
+    }
 
-	@Test
-	public void testSILSupplement() throws Exception {
-		assertFalse(create(baseMessage()).hasSILSupplement());
+    @Test
+    public void testSILSupplement() throws Exception {
+        assertFalse(create(baseMessage()).hasSILSupplement());
 
-		byte[] msg = baseMessage();
-		msg[10] |= 0x02;
-		assertTrue(new SurfaceOperationalStatusV2Msg(msg).hasSILSupplement());
-	}
+        byte[] msg = baseMessage();
+        msg[10] |= 0x02;
+        assertTrue(new SurfaceOperationalStatusV2Msg(msg).hasSILSupplement());
+    }
 
-	private SurfaceOperationalStatusV2Msg statusWithCapabilityClassCode(int capabilityClassCode) throws Exception {
-		byte[] msg = baseMessage();
-		msg[5] = (byte) (capabilityClassCode >>> 4);
-		msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
-		return new SurfaceOperationalStatusV2Msg(msg);
-	}
+    private SurfaceOperationalStatusV2Msg statusWithCapabilityClassCode(int capabilityClassCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[5] = (byte) (capabilityClassCode >>> 4);
+        msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
+        return new SurfaceOperationalStatusV2Msg(msg);
+    }
 
-	private SurfaceOperationalStatusV2Msg statusWithOperationalModeCode(int operationalModeCode) throws Exception {
-		byte[] msg = baseMessage();
-		msg[7] = (byte) (operationalModeCode >>> 8);
-		msg[8] = (byte) operationalModeCode;
-		return new SurfaceOperationalStatusV2Msg(msg);
-	}
+    private SurfaceOperationalStatusV2Msg statusWithOperationalModeCode(int operationalModeCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[7] = (byte) (operationalModeCode >>> 8);
+        msg[8] = (byte) operationalModeCode;
+        return new SurfaceOperationalStatusV2Msg(msg);
+    }
 }

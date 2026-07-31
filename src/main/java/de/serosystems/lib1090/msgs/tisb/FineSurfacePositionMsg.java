@@ -32,231 +32,230 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 
-import static de.serosystems.lib1090.decoding.SurfacePosition.groundSpeed;
-import static de.serosystems.lib1090.decoding.SurfacePosition.groundSpeedResolution;
-import static de.serosystems.lib1090.decoding.SurfacePosition.decodeEPU;
-import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
+import static de.serosystems.lib1090.decoding.SurfacePosition.*;
 
 /**
  * Decoder for TIS-B fine surface position (DO-260B, 2.2.17.3.2).
- * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
 
-	private static final long serialVersionUID = 8325609209771059717L;
+    private static final long serialVersionUID = 8325609209771059717L;
 
-	private byte movement;
-	private boolean heading_status; // is heading valid?
-	private byte ground_track;
-	private boolean imf;
-	private CPREncodedPosition position;
+    private byte movement;
+    private boolean heading_status; // is heading valid?
+    private byte ground_track;
+    private boolean imf;
+    private CPREncodedPosition position;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected FineSurfacePositionMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected FineSurfacePositionMsg() {
+    }
 
-	/**
-	 * @param raw_message raw TIS-B fine surface position message as hex string
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public FineSurfacePositionMsg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw TIS-B fine surface position message as hex string
+     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public FineSurfacePositionMsg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param raw_message raw TIS-B fine surface position message as byte array
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public FineSurfacePositionMsg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw TIS-B fine surface position message as byte array
+     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public FineSurfacePositionMsg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param squitter extended squitter containing the surface position msg in high resolution
-	 * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public FineSurfacePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter  extended squitter containing the surface position msg in high resolution
+     * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @throws BadFormatException if message has wrong format
+     */
+    public FineSurfacePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+        super(squitter);
 
-		if (getDownlinkFormat() != 18) {
-			throw new BadFormatException("TIS-B messages must have downlink format 18.");
-		}
+        if (getDownlinkFormat() != 18) {
+            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+        }
 
-		if (getFormatTypeCode() < 5 || getFormatTypeCode() > 8)
-			throw new BadFormatException("Invalid format type code ("+getFormatTypeCode()+") for surface positions.");
+        if (getFormatTypeCode() < 5 || getFormatTypeCode() > 8)
+            throw new BadFormatException("Invalid format type code (" + getFormatTypeCode() + ") for surface positions.");
 
-		// Table 2-13
-		if (getFirstField() != 2 && getFirstField() != 5)
-			throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+        // Table 2-13
+        if (getFirstField() != 2 && getFirstField() != 5)
+            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-		byte[] msg = getMessage();
+        byte[] msg = getMessage();
 
-		movement = (byte) ((((msg[0]&0x7)<<4) | ((msg[1]&0xF0)>>>4))&0x7F);
-		heading_status = (msg[1]&0x8) != 0;
-		ground_track = (byte) ((((msg[1]&0x7)<<4) | ((msg[2]&0xF0)>>>4))&0x7F);
+        movement = (byte) ((((msg[0] & 0x7) << 4) | ((msg[1] & 0xF0) >>> 4)) & 0x7F);
+        heading_status = (msg[1] & 0x8) != 0;
+        ground_track = (byte) ((((msg[1] & 0x7) << 4) | ((msg[2] & 0xF0) >>> 4)) & 0x7F);
 
-		imf = ((msg[2]>>>3)&0x1) == 1;
-		boolean cpr_format = ((msg[2]>>>2)&0x1) == 1;
-		int cpr_encoded_lat = (((msg[2]&0x3)<<15) | ((msg[3]&0xFF)<<7) | ((msg[4]>>>1)&0x7F)) & 0x1FFFF;
-		int cpr_encoded_lon = (((msg[4]&0x1)<<16) | ((msg[5]&0xFF)<<8) | (msg[6]&0xFF)) & 0x1FFFF;
+        imf = ((msg[2] >>> 3) & 0x1) == 1;
+        boolean cpr_format = ((msg[2] >>> 2) & 0x1) == 1;
+        int cpr_encoded_lat = (((msg[2] & 0x3) << 15) | ((msg[3] & 0xFF) << 7) | ((msg[4] >>> 1) & 0x7F)) & 0x1FFFF;
+        int cpr_encoded_lon = (((msg[4] & 0x1) << 16) | ((msg[5] & 0xFF) << 8) | (msg[6] & 0xFF)) & 0x1FFFF;
 
-		boolean highGroundSpeed = movement == 0 || movement > 49;
-		position = CPREncodedPosition.ofSurface(17, cpr_format, highGroundSpeed, cpr_encoded_lat, cpr_encoded_lon,
-				timestamp == null ? System.currentTimeMillis() : timestamp);
-	}
+        boolean highGroundSpeed = movement == 0 || movement > 49;
+        position = CPREncodedPosition.ofSurface(17, cpr_format, highGroundSpeed, cpr_encoded_lat, cpr_encoded_lon,
+                timestamp == null ? System.currentTimeMillis() : timestamp);
+    }
 
-	/**
-	 * The position error, i.e., 95% accuracy for the horizontal position. Values according to DO-260B Table N-4.
-	 *
-	 *  The horizontal containment radius is also known as "horizontal protection level".
-	 *
-	 * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-	 */
-	public double getHorizontalContainmentRadiusLimit() {
-		return decodeHCR(getFormatTypeCode());
+    /**
+     * The position error, i.e., 95% accuracy for the horizontal position. Values according to DO-260B Table N-4.
+     * <p>
+     * The horizontal containment radius is also known as "horizontal protection level".
+     *
+     * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
+     */
+    public double getHorizontalContainmentRadiusLimit() {
+        return decodeHCR(getFormatTypeCode());
 
-	}
+    }
 
-	/**
-	 * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
-	 * in the operational status message. For version 0 it is derived from the format type code.
-	 *
-	 * For a value in meters, use {@link #getPositionUncertainty()}.
-	 *
-	 * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
-	 * {@link AirborneOperationalStatusV1Msg}.
-	 */
-	public byte getNACp() {
-		return this.getNIC();
-	}
+    /**
+     * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
+     * in the operational status message. For version 0 it is derived from the format type code.
+     * <p>
+     * For a value in meters, use {@link #getPositionUncertainty()}.
+     *
+     * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
+     * {@link AirborneOperationalStatusV1Msg}.
+     */
+    public byte getNACp() {
+        return this.getNIC();
+    }
 
-	/**
-	 * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see table N-7 in RCTA DO-260B.
-	 *
-	 * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-	 * is reflected by this method.
-	 * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
-	 * {@link SurfaceOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-B
-	 * version 1 and 2.
-	 *
-	 * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-	 */
-	public double getPositionUncertainty() {
-		return decodeEPU(getFormatTypeCode());
-	}
+    /**
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see table N-7 in RCTA DO-260B.
+     * <p>
+     * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
+     * is reflected by this method.
+     * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
+     * {@link SurfaceOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-B
+     * version 1 and 2.
+     *
+     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
+     */
+    public double getPositionUncertainty() {
+        return decodeEPU(getFormatTypeCode());
+    }
 
-	/**
-	 * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
-	 */
-	public byte getNIC() {
-		return SurfacePosition.decodeNIC(getFormatTypeCode());
-	}
+    /**
+     * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
+     */
+    public byte getNIC() {
+        return SurfacePosition.decodeNIC(getFormatTypeCode());
+    }
 
-	/**
-	 * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-	 *
-	 * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-	 * is reflected by this method.
-	 * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
-	 * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
-	 * version 1 and 2.
-	 *
-	 * @return the source integrity level (SIL) which indicates the probability of exceeding
-	 *         the NIC containment radius.
-	 */
-	public byte getSIL() {
-		return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
-	}
+    /**
+     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
+     * <p>
+     * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
+     * is reflected by this method.
+     * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
+     * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
+     * version 1 and 2.
+     *
+     * @return the source integrity level (SIL) which indicates the probability of exceeding
+     * the NIC containment radius.
+     */
+    public byte getSIL() {
+        return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
+    }
 
-	/**
-	 * @return whether ground speed information is available
-	 */
-	public boolean hasGroundSpeed() {
-		return movement >= 1 && movement <= 124;
-	}
+    /**
+     * @return whether ground speed information is available
+     */
+    public boolean hasGroundSpeed() {
+        return movement >= 1 && movement <= 124;
+    }
 
-	/**
-	 * @return speed in knots or null if ground speed is not available. The latter can also be checked with
-	 * {@link #hasGroundSpeed()}.
-	 */
-	public Double getGroundSpeed() {
-		return groundSpeed(movement);
-	}
+    /**
+     * @return speed in knots or null if ground speed is not available. The latter can also be checked with
+     * {@link #hasGroundSpeed()}.
+     */
+    public Double getGroundSpeed() {
+        return groundSpeed(movement);
+    }
 
-	/**
-	 * @return speed resolution (accuracy) in knots or null if ground speed is not available. The latter can also be
-	 * checked with {@link #hasGroundSpeed()}.
-	 */
-	public Double getGroundSpeedResolution() {
-		return groundSpeedResolution(movement);
-	}
+    /**
+     * @return speed resolution (accuracy) in knots or null if ground speed is not available. The latter can also be
+     * checked with {@link #hasGroundSpeed()}.
+     */
+    public Double getGroundSpeedResolution() {
+        return groundSpeedResolution(movement);
+    }
 
-	/**
-	 * @return whether valid heading information is available
-	 */
-	public boolean hasValidHeading() {
-		return heading_status;
-	}
+    /**
+     * @return whether valid heading information is available
+     */
+    public boolean hasValidHeading() {
+        return heading_status;
+    }
 
-	/**
-	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north. Returns null if heading is not available.
-	 * This can also be checked using {@link #hasValidHeading()}
-	 */
-	public Double getHeading() {
-		if (!heading_status) return null;
+    /**
+     * @return heading in decimal degrees ([0, 360]). 0° = geographic north. Returns null if heading is not available.
+     * This can also be checked using {@link #hasValidHeading()}
+     */
+    public Double getHeading() {
+        if (!heading_status) return null;
 
-		return ground_track*360D/128D;
-	}
+        return ground_track * 360D / 128D;
+    }
 
-	/**
-	 * @return the ICAO Mode A Flag (for address type determination)
-	 */
-	public boolean getIMF () {
-		return imf;
-	}
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
 
-	@Override
-	public CPREncodedPosition getCPREncodedPosition() {
-		return position;
-	}
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
 
-	@Override
-	public boolean hasValidPosition() {
-		return true;
-	}
+    @Override
+    public boolean hasValidPosition() {
+        return true;
+    }
 
-	@Override
-	public boolean hasValidAltitude() {
-		return true;
-	}
+    @Override
+    public boolean hasValidAltitude() {
+        return true;
+    }
 
-	@Override
-	public Integer getAltitude() {
-		return 0;
-	}
+    @Override
+    public Integer getAltitude() {
+        return 0;
+    }
 
-	@Override
-	public Position.AltitudeType getAltitudeType() {
-		return Position.AltitudeType.ABOVE_GROUND_LEVEL;
-	}
+    @Override
+    public Position.AltitudeType getAltitudeType() {
+        return Position.AltitudeType.ABOVE_GROUND_LEVEL;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tFineSurfacePositionMsg{" +
-				"movement=" + movement +
-				", heading_status=" + heading_status +
-				", ground_track=" + ground_track +
-				", imf=" + imf +
-				", position=" + position +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tFineSurfacePositionMsg{" +
+                "movement=" + movement +
+                ", heading_status=" + heading_status +
+                ", ground_track=" + ground_track +
+                ", imf=" + imf +
+                ", position=" + position +
+                '}';
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.TISB_FINE_SURFACE_POSITION;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.TISB_FINE_SURFACE_POSITION;
+    }
 }

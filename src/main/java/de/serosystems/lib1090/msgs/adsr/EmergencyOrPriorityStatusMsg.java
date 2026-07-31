@@ -26,134 +26,144 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-R emergency and priority status messages
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = 2611795026824285668L;
-	
-	private byte msgsubtype;
-	private byte emergency_state;
-	private short mode_a_code;
-	private boolean imf;
+    private static final long serialVersionUID = 2611795026824285668L;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected EmergencyOrPriorityStatusMsg() { }
+    private byte msgsubtype;
+    private byte emergency_state;
+    private short mode_a_code;
+    private boolean imf;
 
-	/**
-	 * @param raw_message raw ADS-R aircraft status message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public EmergencyOrPriorityStatusMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected EmergencyOrPriorityStatusMsg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-R aircraft status message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public EmergencyOrPriorityStatusMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-R aircraft status message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public EmergencyOrPriorityStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this emergency or priority status msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param rawMessage raw ADS-R aircraft status message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public EmergencyOrPriorityStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-		if (this.getFormatTypeCode() != 28) {
-			throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
-		}
+    /**
+     * @param squitter extended squitter which contains this emergency or priority status msg
+     * @throws BadFormatException if message has wrong format
+     */
+    public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
 
-		byte[] msg = this.getMessage();
+        if (this.getFormatTypeCode() != 28) {
+            throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
+        }
 
-		msgsubtype = (byte) (msg[0]&0x7);
-		if (msgsubtype != 1) {
-			throw new BadFormatException("Emergency and priority status reports have subtype 1.");
-		}
+        byte[] msg = this.getMessage();
 
-		emergency_state = (byte) ((msg[1]&0xFF)>>>5);
-		mode_a_code = (short) (((msg[1]&0x1F)<<8) | (msg[2] & 0xFF));
-		imf = (msg[6] & 0x1) != 0;
-	}
+        msgsubtype = (byte) (msg[0] & 0x7);
+        if (msgsubtype != 1) {
+            throw new BadFormatException("Emergency and priority status reports have subtype 1.");
+        }
 
-	/**
-	 * @return the subtype code of the aircraft status report (should always be 1)
-	 */
-	public byte getSubtype() {
-		return msgsubtype;
-	}
+        emergency_state = (byte) ((msg[1] & 0xFF) >>> 5);
+        mode_a_code = (short) (((msg[1] & 0x1F) << 8) | (msg[2] & 0xFF));
+        imf = (msg[6] & 0x1) != 0;
+    }
 
-	/**
-	 * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
-	 */
-	public byte getEmergencyStateCode() {
-		return emergency_state;
-	}
+    /**
+     * @return the subtype code of the aircraft status report (should always be 1)
+     */
+    public byte getSubtype() {
+        return msgsubtype;
+    }
 
-	/**
-	 * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
-	 */
-	public String getEmergencyStateText() {
-		switch (emergency_state) {
-		case 0: return "no emergency";
-		case 1: return "general emergency";
-		case 2: return "lifeguard/medical";
-		case 3: return "minimum fuel";
-		case 4: return "no communications";
-		case 5: return "unlawful interference";
-		case 6: return "downed aircraft";
-		default: return "unknown";
-		}
-	}
+    /**
+     * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
+     */
+    public byte getEmergencyStateCode() {
+        return emergency_state;
+    }
 
-	/**
-	 * @return the four-digit Mode A (4096) code (only ADS-R version 2)
-	 */
-	public byte[] getModeACode() {
-		// the sequence is C1, A1, C2, A2, C4, A4, ZERO, B1, D1, B2, D2, B4, D4
-		int C1 = (mode_a_code>>>12)&0x1;
-		int A1 = (mode_a_code>>>11)&0x1;
-		int C2 = (mode_a_code>>>10)&0x1;
-		int A2 = (mode_a_code>>>9)&0x1;
-		int C4 = (mode_a_code>>>8)&0x1;
-		int A4 = (mode_a_code>>>7)&0x1;
-		int B1 = (mode_a_code>>>5)&0x1;
-		int D1 = (mode_a_code>>>4)&0x1;
-		int B2 = (mode_a_code>>>3)&0x1;
-		int D2 = (mode_a_code>>>2)&0x1;
-		int B4 = (mode_a_code>>>1)&0x1;
-		int D4 = mode_a_code&0x1;
-		return new byte[] {
-				(byte) (A1+(A2<<1)+(A4<<2)),
-				(byte) (B1+(B2<<1)+(B4<<2)),
-				(byte) (C1+(C2<<1)+(C4<<2)),
-				(byte) (D1+(D2<<1)+(D4<<2))};
-	}
+    /**
+     * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
+     */
+    public String getEmergencyStateText() {
+        switch (emergency_state) {
+            case 0:
+                return "no emergency";
+            case 1:
+                return "general emergency";
+            case 2:
+                return "lifeguard/medical";
+            case 3:
+                return "minimum fuel";
+            case 4:
+                return "no communications";
+            case 5:
+                return "unlawful interference";
+            case 6:
+                return "downed aircraft";
+            default:
+                return "unknown";
+        }
+    }
 
-	/**
-	 * @return the ICAO Mode A Flag (for address type determination)
-	 */
-	public boolean getIMF () {
-		return imf;
-	}
+    /**
+     * @return the four-digit Mode A (4096) code (only ADS-R version 2)
+     */
+    public byte[] getModeACode() {
+        // the sequence is C1, A1, C2, A2, C4, A4, ZERO, B1, D1, B2, D2, B4, D4
+        int C1 = (mode_a_code >>> 12) & 0x1;
+        int A1 = (mode_a_code >>> 11) & 0x1;
+        int C2 = (mode_a_code >>> 10) & 0x1;
+        int A2 = (mode_a_code >>> 9) & 0x1;
+        int C4 = (mode_a_code >>> 8) & 0x1;
+        int A4 = (mode_a_code >>> 7) & 0x1;
+        int B1 = (mode_a_code >>> 5) & 0x1;
+        int D1 = (mode_a_code >>> 4) & 0x1;
+        int B2 = (mode_a_code >>> 3) & 0x1;
+        int D2 = (mode_a_code >>> 2) & 0x1;
+        int B4 = (mode_a_code >>> 1) & 0x1;
+        int D4 = mode_a_code & 0x1;
+        return new byte[]{
+                (byte) (A1 + (A2 << 1) + (A4 << 2)),
+                (byte) (B1 + (B2 << 1) + (B4 << 2)),
+                (byte) (C1 + (C2 << 1) + (C4 << 2)),
+                (byte) (D1 + (D2 << 1) + (D4 << 2))};
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tEmergencyOrPriorityStatusMsg{" +
-				"msgsubtype=" + msgsubtype +
-				", emergency_state=" + emergency_state +
-				", mode_a_code=" + mode_a_code +
-				", imf=" + imf +
-				'}';
-	}
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.ADSR_EMERGENCY;
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tEmergencyOrPriorityStatusMsg{" +
+                "msgsubtype=" + msgsubtype +
+                ", emergency_state=" + emergency_state +
+                ", mode_a_code=" + mode_a_code +
+                ", imf=" + imf +
+                '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.ADSR_EMERGENCY;
+    }
 }

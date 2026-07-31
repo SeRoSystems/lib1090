@@ -32,19 +32,14 @@ import java.util.Arrays;
 public class AircraftIdentification extends BDSRegister implements Serializable {
     private static final long serialVersionUID = -8005492828828163576L;
 
-
-    // Fields
-    // ------
-
     // BDS Code
     private short bdsCode;
     // aircraft Identification
     private byte[] aircraftIdentification;
 
-    // Constructors
-    // ------------
-
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
     protected AircraftIdentification() {
     }
 
@@ -52,17 +47,12 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public AircraftIdentification(byte[] message) {
-
         super(message);
         setBds(BDSRegister.bdsCode.AIRCRAFT_IDENTIFICATION);
 
         this.bdsCode = extractBdsCode(message);
         this.aircraftIdentification = Identification.identificationDigits(BitReader.forBigEndian(message).readLong(9, 56));
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return The call sign as 8 characters array
@@ -70,9 +60,6 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
     public char[] getAircraftIdentification() {
         return InternationalAlphabet5.mapChar(aircraftIdentification);
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

@@ -19,7 +19,8 @@
 package de.serosystems.lib1090.cpr;
 
 final class Util {
-    private Util() {}
+    private Util() {
+    }
 
     /**
      * Euclidean modulo operator.

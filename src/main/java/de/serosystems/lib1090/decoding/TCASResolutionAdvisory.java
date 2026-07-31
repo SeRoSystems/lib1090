@@ -26,74 +26,74 @@ import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
  */
 public class TCASResolutionAdvisory {
 
-	public static int decodeThreatIdentity(BitReader reader) {
-		return reader.readInt(31, 56);
-	}
+    public static int decodeThreatIdentity(BitReader reader) {
+        return reader.readInt(31, 56);
+    }
 
-	public static byte decodeThreatType(BitReader reader) {
-		return reader.readByte(29, 30);
-	}
+    public static byte decodeThreatType(BitReader reader) {
+        return reader.readByte(29, 30);
+    }
 
-	public static boolean decodeMultiThreatEncounter(BitReader reader) {
-		return reader.readByte(28, 28) == 1;
-	}
+    public static boolean decodeMultiThreatEncounter(BitReader reader) {
+        return reader.readByte(28, 28) == 1;
+    }
 
-	public static boolean decodeRaTerminated(BitReader reader) {
-		return reader.readByte(27, 27) == 1;
-	}
+    public static boolean decodeRaTerminated(BitReader reader) {
+        return reader.readByte(27, 27) == 1;
+    }
 
-	public static byte decodeRacRecord(BitReader reader) {
-		return reader.readByte(23, 26);
-	}
+    public static byte decodeRacRecord(BitReader reader) {
+        return reader.readByte(23, 26);
+    }
 
-	public static short decodeActiveRa(BitReader reader) {
-		return reader.readShort(9, 22);
-	}
+    public static short decodeActiveRa(BitReader reader) {
+        return reader.readShort(9, 22);
+    }
 
-	public static boolean[] extractActiveResolutionAdvisories(BitReader reader) {
-		return new boolean[]{
-				reader.readByte(9, 9) == 1,
-				reader.readByte(10, 10) == 1,
-				reader.readByte(11, 11) == 1,
-				reader.readByte(12, 12) == 1,
-				reader.readByte(13, 13) == 1,
-				reader.readByte(14, 14) == 1,
-				reader.readByte(15, 15) == 1,
-				reader.readByte(16, 16) == 1,
-				reader.readByte(17, 17) == 1,
-				reader.readByte(18, 18) == 1,
-				reader.readByte(19, 19) == 1,
-				reader.readByte(20, 20) == 1,
-				reader.readByte(21, 21) == 1,
-				reader.readByte(22, 22) == 1
-		};
-	}
+    public static boolean[] extractActiveResolutionAdvisories(BitReader reader) {
+        return new boolean[]{
+                reader.readByte(9, 9) == 1,
+                reader.readByte(10, 10) == 1,
+                reader.readByte(11, 11) == 1,
+                reader.readByte(12, 12) == 1,
+                reader.readByte(13, 13) == 1,
+                reader.readByte(14, 14) == 1,
+                reader.readByte(15, 15) == 1,
+                reader.readByte(16, 16) == 1,
+                reader.readByte(17, 17) == 1,
+                reader.readByte(18, 18) == 1,
+                reader.readByte(19, 19) == 1,
+                reader.readByte(20, 20) == 1,
+                reader.readByte(21, 21) == 1,
+                reader.readByte(22, 22) == 1
+        };
+    }
 
-	public static boolean[] extractResolutionAdvisoriesComplementsRecord(BitReader reader) {
-		boolean doNotPassBelow = reader.readByte(23, 23) == 1;
-		boolean doNotPassAbove = reader.readByte(24, 24) == 1;
-		boolean doNotTurnLef = reader.readByte(25, 25) == 1;
-		boolean doNotTurnRight = reader.readByte(26, 26) == 1;
+    public static boolean[] extractResolutionAdvisoriesComplementsRecord(BitReader reader) {
+        boolean doNotPassBelow = reader.readByte(23, 23) == 1;
+        boolean doNotPassAbove = reader.readByte(24, 24) == 1;
+        boolean doNotTurnLef = reader.readByte(25, 25) == 1;
+        boolean doNotTurnRight = reader.readByte(26, 26) == 1;
 
-		return new boolean[]{doNotPassBelow, doNotPassAbove, doNotTurnLef, doNotTurnRight};
-	}
+        return new boolean[]{doNotPassBelow, doNotPassAbove, doNotTurnLef, doNotTurnRight};
+    }
 
-	public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, BitReader reader) throws BadFormatException {
-		ThreatIdentityData threatIdentityData = null;
+    public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, BitReader reader) throws BadFormatException {
+        ThreatIdentityData threatIdentityData = null;
 
-		switch (threatTypeIndicator) {
-			case 1:
-				int icao = reader.readInt(31, 54);
-				threatIdentityData = new ThreatIdentityData(icao);
-				break;
-			case 2:
-				short altitudeCode = reader.readShort(31, 43);
-				short threatIdentityDataRange = reader.readShort(44, 50);
-				short threatIdentityDataBearing = reader.readShort(51, 56);
-				threatIdentityData = new ThreatIdentityData(altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
-				break;
-		}
+        switch (threatTypeIndicator) {
+            case 1:
+                int icao = reader.readInt(31, 54);
+                threatIdentityData = new ThreatIdentityData(icao);
+                break;
+            case 2:
+                short altitudeCode = reader.readShort(31, 43);
+                short threatIdentityDataRange = reader.readShort(44, 50);
+                short threatIdentityDataBearing = reader.readShort(51, 56);
+                threatIdentityData = new ThreatIdentityData(altitudeCode, threatIdentityDataRange, threatIdentityDataBearing);
+                break;
+        }
 
-		return threatIdentityData;
-	}
+        return threatIdentityData;
+    }
 }

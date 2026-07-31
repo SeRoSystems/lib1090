@@ -99,13 +99,17 @@ public final class Identification {
             if (typeCode == 4) {
                 // version 3 exceptions to the version 2 table for category set A
                 switch (emitterCategory) {
-                    case 1: return "MTOW < 15500 lbs";
-                    case 2: return "15500 <= MTOW < 75000 lbs";
-                    case 3: return "75000 <= MTOW < 300000 lbs";
+                    case 1:
+                        return "MTOW < 15500 lbs";
+                    case 2:
+                        return "15500 <= MTOW < 75000 lbs";
+                    case 3:
+                        return "75000 <= MTOW < 300000 lbs";
                     case 4:
                     case 6:
                         return "Reserved";
-                    case 5: return "MTOW >= 300000 lbs";
+                    case 5:
+                        return "MTOW >= 300000 lbs";
                 }
             } else if (typeCode == 3 && (emitterCategory == 3 || emitterCategory == 6 || emitterCategory == 7)) {
                 // version 3 exceptions to the version 2 table for category set B

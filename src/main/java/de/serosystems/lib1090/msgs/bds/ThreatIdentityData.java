@@ -36,13 +36,16 @@ public class ThreatIdentityData implements Serializable {
     private Short bearing;
     private boolean hasTransponderAddress;
 
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected ThreatIdentityData() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected ThreatIdentityData() {
+    }
 
     /**
      * Create a new instance where the threat is identified by a 24 bit transponder address.
      *
-     * @param icao24                        the ICAO 24-bit aircraft address
+     * @param icao24 the ICAO 24-bit aircraft address
      */
     public ThreatIdentityData(Integer icao24) {
         this.icao24 = icao24;
@@ -52,11 +55,11 @@ public class ThreatIdentityData implements Serializable {
     /**
      * Create a new instance where the target is identified by altitude, range and bearing.
      *
-     * @param altitudeCode    the barometric altitude
-     * @param range           the threat identity data range, i.e. the most recent threat range estimated
-     *                        by TCAS
-     * @param bearing         the threat identity data bearing, i.e. the most recent estimated bearing of
-     *                        the threat aircraft, relative to the TCAS aircraft heading.
+     * @param altitudeCode the barometric altitude
+     * @param range        the threat identity data range, i.e. the most recent threat range estimated
+     *                     by TCAS
+     * @param bearing      the threat identity data bearing, i.e. the most recent estimated bearing of
+     *                     the threat aircraft, relative to the TCAS aircraft heading.
      * @throws BadFormatException if range outside the interval [0, 127] or bearing &gt; 60
      */
     public ThreatIdentityData(Short altitudeCode, Short range, Short bearing) throws BadFormatException {
@@ -93,7 +96,7 @@ public class ThreatIdentityData implements Serializable {
 
     /**
      * Get the altitude code. See {@link #getAltitude()} for the value in feet.
-     *
+     * <p>
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
      *
@@ -135,10 +138,10 @@ public class ThreatIdentityData implements Serializable {
 
     /**
      * Get the decoded lower bound for the range in NM
-     *
+     * <p>
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
-     *
+     * <p>
      * See Annex 10 V4 4.3.8.4.2.2.1.6.2
      *
      * @return null if the target is identified by its 24 bit address or the range estimate is not available;
@@ -158,22 +161,22 @@ public class ThreatIdentityData implements Serializable {
 
     /**
      * Get the decoded lower bound for the bearing in degrees
-     *
+     * <p>
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
-     *
+     * <p>
      * See Annex 10 V4 4.3.8.4.2.2.1.6.3
      *
      * @return null if the target is identified by its 24 bit address or the bearing estimate is not available;
-     *         an array with two elements defining the estimated lower and upper bound for the bearing estimate in
-     *         degrees
+     * an array with two elements defining the estimated lower and upper bound for the bearing estimate in
+     * degrees
      */
     public Float[] getBearing() {
         if (bearing == 0) {
             return null;
         }
 
-        return new Float[] { 6F * (bearing - 1), 6F * bearing };
+        return new Float[]{6F * (bearing - 1), 6F * bearing};
     }
 
 }

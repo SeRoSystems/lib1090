@@ -94,7 +94,6 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
         threatIdentity = TCASResolutionAdvisory.decodeThreatIdentity(b);
 
         threatIdentityData = TCASResolutionAdvisory.extractThreatIdentityData(threatType, b);
-
     }
 
     /**
@@ -234,7 +233,6 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
                 ", threatIdentity=" + threatIdentity +
                 '}';
     }
-
 
     @Override
     public subtype getType() {
