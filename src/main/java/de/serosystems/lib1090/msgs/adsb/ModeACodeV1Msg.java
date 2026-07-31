@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, ModeACodeMsg {
 
-    private static final long serialVersionUID = -6444923523067947936L;
+    private static final long serialVersionUID = 5076521250730290369L;
 
     private byte messageSubtype;
     private short modeACode;

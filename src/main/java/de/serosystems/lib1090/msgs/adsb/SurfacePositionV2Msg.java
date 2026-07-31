@@ -32,7 +32,7 @@ import java.util.Objects;
 
 public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime {
 
-    private static final long serialVersionUID = -4899716425365685001L;
+    private static final long serialVersionUID = 5656362138678398539L;
 
     private boolean horizontalPositionAvailable;
     private byte movement;
@@ -170,10 +170,10 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
      */
     public static class WithNICSupplements extends SurfacePositionV2Msg {
 
-        private static final long serialVersionUID = 3971548290816254773L;
+        private static final long serialVersionUID = 5656362138678398539L;
 
-        private final boolean nicSupplementA;
-        private final boolean nicSupplementC;
+        private boolean nicSupplementA;
+        private boolean nicSupplementC;
 
         /**
          * @param rawMessage     raw ADS-B surface position message as hex string
@@ -210,6 +210,12 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
             super(squitter, timestamp);
             this.nicSupplementA = nicSupplementA;
             this.nicSupplementC = nicSupplementC;
+        }
+
+        /**
+         * protected no-arg constructor e.g. for serialization with Kryo
+         **/
+        protected WithNICSupplements() {
         }
 
         @Override

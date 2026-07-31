@@ -32,7 +32,7 @@ import java.util.Arrays;
  */
 public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable {
 
-    private static final long serialVersionUID = -705712843743656139L;
+    private static final long serialVersionUID = 4597102504845213202L;
 
     private byte[] systemStatus;
 
