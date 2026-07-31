@@ -20,6 +20,7 @@ package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.adsb.SurfacePositionMsg;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -61,9 +62,9 @@ public class SurfacePositionDecodingTest {
 
             ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
 
-            if (StatefulModeSDecoder.isPosition(msg)) {
+            if (msg instanceof PositionMsg) {
                 Position pos = decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);
-                if (StatefulModeSDecoder.isSurfacePosition(msg)) {
+                if (msg instanceof SurfacePositionMsg) {
                     assertTrue(pos.isReasonable());
                     assertEquals(Position.AltitudeType.ABOVE_GROUND_LEVEL, pos.getAltitudeType());
                     assertEquals(0., pos.getAltitude(), 0.);
