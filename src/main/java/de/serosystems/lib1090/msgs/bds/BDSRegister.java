@@ -51,10 +51,12 @@ public class BDSRegister {
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected BDSRegister() { }
+    protected BDSRegister() {
+    }
 
     /**
      * Copy constructor for subclasses
+     *
      * @param bdsRegister instance of bdsRegister to copy from
      */
     public BDSRegister(BDSRegister bdsRegister) {
@@ -76,7 +78,6 @@ public class BDSRegister {
     public bdsCode getBds() {
         return bds;
     }
-
 
     /**
      * @return the 7-byte comm-b message (BDS register)

@@ -22,33 +22,34 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SurfacePositionV2MsgTest extends SurfacePositionMsgTest {
 
-	@Override
-	protected SurfacePositionMsg create(String hex) throws Exception {
-		return new SurfacePositionV2Msg(hex, Instant.EPOCH);
-	}
+    @Override
+    protected SurfacePositionMsg create(String hex) throws Exception {
+        return new SurfacePositionV2Msg(hex, Instant.EPOCH);
+    }
 
-	@Test
-	void testHasTimeFlag() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
+    @Test
+    void testHasTimeFlag() throws Exception {
+        final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertFalse(sPos.hasTimeFlag());
-	}
+        assertFalse(sPos.hasTimeFlag());
+    }
 
-	@Test
-	void testGetNICWithSupplementA() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
+    @Test
+    void testGetNICWithSupplementA() throws Exception {
+        final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(9, sPos.getNIC(true, false));
-	}
+        assertEquals(9, sPos.getNIC(true, false));
+    }
 
-	@Test
-	void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws Exception {
-		final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
+    @Test
+    void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws Exception {
+        final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-		assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
-	}
+        assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
+    }
 }

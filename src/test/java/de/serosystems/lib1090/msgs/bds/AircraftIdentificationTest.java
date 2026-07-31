@@ -32,31 +32,24 @@ public class AircraftIdentificationTest {
 
     @BeforeAll
     public static void setup() {
-
         msg = new byte[]{
                 (byte) 0b00100000, (byte) 0b00101100, (byte) 0b11000011, (byte) 0b01110001, (byte) 0b11000011,
                 (byte) 0b00011101, (byte) 0b11100000
         };
-
     }
 
     @Test
     public void bdsCode() {
-
         short bds = AircraftIdentification.extractBdsCode(msg);
         assertEquals(20, bds);
-
     }
-
 
     @Test
     public void aircraftIdentification() {
-
         byte[] identityByteArray = Identification.identificationDigits(BitReader.forBigEndian(msg).readLong(9, 56));
         char[] identityCharArray = InternationalAlphabet5.mapChar(identityByteArray);
 
         assertEquals("KLM1017 ", String.valueOf(identityCharArray));
-
     }
 
 }

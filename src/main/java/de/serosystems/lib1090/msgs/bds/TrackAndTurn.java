@@ -27,9 +27,6 @@ import java.io.Serializable;
 public class TrackAndTurn extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 4009313088718180688L;
 
-    // Fields
-    // ------
-
     // Roll Angle
     private boolean rollAngleStatus;
     private boolean rollAngleSign;
@@ -49,17 +46,16 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     private boolean trueAirSpeedStatus;
     private short trueAirSpeedValue;
 
-    // Constructors
-    // ------------
-
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected TrackAndTurn() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected TrackAndTurn() {
+    }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public TrackAndTurn(byte[] message) {
-
         super(message);
         setBds(BDSRegister.bdsCode.TRACK_AND_TURN_REPORT);
 
@@ -76,11 +72,7 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
         this.trackAngleRateValue = extractTrackAngleRateValue(message);
         this.trueAirSpeedStatus = extractTrueAirSpeedStatus(message);
         this.trueAirSpeedValue = extractTrueAirSpeedValue(message);
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return the roll angle.
@@ -121,9 +113,6 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     public Integer getTrueAirspeed() {
         return computeTrueAirSpeed(trueAirSpeedStatus, trueAirSpeedValue);
     }
-
-    // static methods
-    // ---------------------
 
     static boolean extractRollAngleStatus(byte[] message) {
         return ((message[0] >>> 7) & 0x1) == 1;
@@ -178,11 +167,11 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     }
 
     static Float computeRollAngle(boolean rollAngleStatus, boolean rollAngleSign, short rollAngleValue) {
-        return rollAngleStatus ? rollAngleSign ? (float) ((-Math.pow(2,9) + rollAngleValue) * 45 / 256) : rollAngleValue * 45 / 256 : null;
+        return rollAngleStatus ? rollAngleSign ? (float) ((-Math.pow(2, 9) + rollAngleValue) * 45 / 256) : rollAngleValue * 45 / 256 : null;
     }
 
     static Float computeTrueTrackAngle(boolean trueTrackAngleStatus, boolean trueTrackAngleSign, short trueTrackAngleValue) {
-        return trueTrackAngleStatus ? trueTrackAngleSign ? (float) ((-Math.pow(2,10) + trueTrackAngleValue) * 90 / 512) : trueTrackAngleValue * 90 / 512 : null;
+        return trueTrackAngleStatus ? trueTrackAngleSign ? (float) ((-Math.pow(2, 10) + trueTrackAngleValue) * 90 / 512) : trueTrackAngleValue * 90 / 512 : null;
     }
 
     static Integer computeGroundSpeed(boolean groundSpeedStatus, short groundSpeedValue) {
@@ -190,15 +179,12 @@ public class TrackAndTurn extends BDSRegister implements Serializable {
     }
 
     static Float computeTrackAngleRate(boolean trackAngleRateStatus, boolean trackAngleRateSign, short trackAngleRateValue) {
-        return trackAngleRateStatus ? trackAngleRateSign ? (float) ((-Math.pow(2, 9) + trackAngleRateValue) * 8 / 256) : trackAngleRateValue * 8 / 256 :  null;
+        return trackAngleRateStatus ? trackAngleRateSign ? (float) ((-Math.pow(2, 9) + trackAngleRateValue) * 8 / 256) : trackAngleRateValue * 8 / 256 : null;
     }
 
     static Integer computeTrueAirSpeed(boolean trueAirspeedStatus, short trueAirspeedValue) {
         return trueAirspeedStatus ? trueAirspeedValue * 2 : null;
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

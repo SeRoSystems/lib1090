@@ -22,13 +22,11 @@ package de.serosystems.lib1090.exceptions;
  * Exception which is thrown when a raw message is passed to the wrong
  * decoder. E.g. when the format type code in the raw message does not
  * correspond to the message type.
- * 
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class UnspecifiedFormatError extends Exception {
-	private static final long serialVersionUID = 6482688479919911669L;
+    private static final long serialVersionUID = 6482688479919911669L;
 
-	public UnspecifiedFormatError(String reason) {
-		super(reason);
-	}
+    public UnspecifiedFormatError(String reason) {
+        super(reason);
+    }
 }

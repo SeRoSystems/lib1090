@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AirspeedHeadingV1MsgTest extends AirspeedHeadingMsgTest {
 
-	@Override
-	protected AirspeedHeadingMsg create(String hex) throws Exception {
-		return new AirspeedHeadingV1Msg(hex);
-	}
+    @Override
+    protected AirspeedHeadingMsg create(String hex) throws Exception {
+        return new AirspeedHeadingV1Msg(hex);
+    }
 
-	@Test
-	public void testNACvRawAndAccuracyBound() throws Exception {
-		AirspeedHeadingV1Msg msg = new AirspeedHeadingV1Msg("8DA05F219B06B6AF189400CBC33F");
-		assertEquals(0, msg.getNACvEncoded());
-		assertEquals(-1.0f, msg.getAccuracyBound());
-	}
+    @Test
+    public void testNACvRawAndAccuracyBound() throws Exception {
+        AirspeedHeadingV1Msg msg = new AirspeedHeadingV1Msg("8DA05F219B06B6AF189400CBC33F");
+        assertEquals(0, msg.getNACvEncoded());
+        assertEquals(-1.0f, msg.getAccuracyBound());
+    }
 }

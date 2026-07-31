@@ -27,9 +27,6 @@ import java.io.Serializable;
 public class SelectedVerticalIntention extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 4359765861426574750L;
 
-    // Fields
-    // ------
-
     // MCP/FCU Selected Altitude Status
     private boolean mcpFcuSelectedAltitudeStatus;
     // MCP/FCU Selected Altitude
@@ -55,17 +52,16 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     // Target alt source
     private short targetAltSourceValue;
 
-    // Constructors
-    // ------------
-
-    /** protected no-arg constructor e.g. for serialization with Kryo **/
-    protected SelectedVerticalIntention() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected SelectedVerticalIntention() {
+    }
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
     public SelectedVerticalIntention(byte[] message) {
-
         super(message);
         setBds(BDSRegister.bdsCode.SELECTED_VERTICAL_INTENTION);
 
@@ -81,11 +77,7 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
         this.approachValue = extractApproachValue(message);
         this.targetAltSourceStatus = extractTargetAltSourceStatus(message);
         this.targetAltSourceValue = extractTargetAltSourceValue(message);
-
     }
-
-    // Getters
-    // -------
 
     /**
      * @return the MCP/FCU selected altitude. The data shall be derived from the mode control panel/flight control unit
@@ -147,23 +139,20 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
         return computeTargetAltSource(targetAltSourceStatus, targetAltSourceValue);
     }
 
-    // static methods
-    // ---------------------
-
     static boolean extractMcpFcuSelectedAltitudeStatus(byte[] message) {
         return ((message[0] >>> 7) & 0x01) == 1;
     }
 
     static int extractMcpFcuSelectedAltitudeValue(byte[] message) {
-        return (((message[0]&0x7F)<<5) | ((message[1]>>>3)&0x1F)) & 0xFFF;
+        return (((message[0] & 0x7F) << 5) | ((message[1] >>> 3) & 0x1F)) & 0xFFF;
     }
 
     static boolean extractFmsSelectedAltitudeStatus(byte[] message) {
-        return ((message[1] >>> 2 ) & 0x01) == 1;
+        return ((message[1] >>> 2) & 0x01) == 1;
     }
 
     static int extractFmsSelectedAltitudeValue(byte[] message) {
-        return (((message[1]&0x03)<<10) | ((message[2] << 2) & 0x3FF) | ((message[3] >>> 6) & 0x03)) & 0xFFF;
+        return (((message[1] & 0x03) << 10) | ((message[2] << 2) & 0x3FF) | ((message[3] >>> 6) & 0x03)) & 0xFFF;
     }
 
     static boolean extractBarometricPressureSettingStatus(byte[] message) {
@@ -171,7 +160,7 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     }
 
     static float extractBarometricPressureSettingValue(byte[] message) {
-        return (((message[3]&0x1F)<<7) | ((message[4] >>> 1)&0x7F)) & 0xFFF;
+        return (((message[3] & 0x1F) << 7) | ((message[4] >>> 1) & 0x7F)) & 0xFFF;
     }
 
     static boolean extractOtherStatus(byte[] message) {
@@ -213,9 +202,6 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
     static Short computeTargetAltSource(boolean status, short value) {
         return status ? value : null;
     }
-
-    // Override
-    // --------
 
     @Override
     public String toString() {

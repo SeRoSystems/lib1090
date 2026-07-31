@@ -26,58 +26,60 @@ import java.io.Serializable;
 
 /**
  * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
- * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = 1526130029633174669L;
+    private static final long serialVersionUID = 1526130029633174669L;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected ManagementMessage() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected ManagementMessage() {
+    }
 
-	/**
-	 * @param raw_message raw TIS-B identification and category message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public ManagementMessage(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw TIS-B identification and category message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public ManagementMessage(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw TIS-B identity and category message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public ManagementMessage(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw TIS-B identity and category message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public ManagementMessage(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter containing the identity and category message
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public ManagementMessage(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter extended squitter containing the identity and category message
+     * @throws BadFormatException if message has wrong format
+     */
+    public ManagementMessage(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
 
-		if (getDownlinkFormat() != 18) {
-			throw new BadFormatException("TIS-B messages must have downlink format 18.");
-		}
+        if (getDownlinkFormat() != 18) {
+            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+        }
 
-		// Table 2-13
-		if (getFirstField() != 4)
-			throw new BadFormatException("TIS-B management messages must have CF value 6.");
+        // Table 2-13
+        if (getFirstField() != 4)
+            throw new BadFormatException("TIS-B management messages must have CF value 6.");
 
-		// not specified further
-	}
+        // not specified further
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tManagementMessage{}";
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tManagementMessage{}";
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.TISB_IDENTIFICATION;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.TISB_IDENTIFICATION;
+    }
 }

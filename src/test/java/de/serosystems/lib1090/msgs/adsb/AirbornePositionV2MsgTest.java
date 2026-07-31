@@ -25,24 +25,25 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AirbornePositionV2MsgTest extends AirbornePositionMsgTest {
 
-	@Override
-	protected AirbornePositionMsg create(String hex) throws Exception {
-		return new AirbornePositionV2Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
-	}
+    @Override
+    protected AirbornePositionMsg create(String hex) throws Exception {
+        return new AirbornePositionV2Msg(Tools.hexStringToByteArray(hex), Instant.EPOCH);
+    }
 
-	@Test
-	void v2RemainsIndependentFromV1() throws Exception {
-		AirbornePositionV2Msg msg = new AirbornePositionV2Msg(
-				new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
+    @Test
+    void v2RemainsIndependentFromV1() throws Exception {
+        AirbornePositionV2Msg msg = new AirbornePositionV2Msg(
+                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-		assertEquals(8, msg.getNIC(false));
-		assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
-		assertEquals(Position.AltitudeType.BAROMETRIC_ALTITUDE, msg.getAltitudeType());
-		assertTrue(msg.toString().contains("AirbornePositionV2Msg{"));
-		assertTrue(msg.toString().contains("nicSupplementB="));
-	}
+        assertEquals(8, msg.getNIC(false));
+        assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
+        assertEquals(Position.AltitudeType.BAROMETRIC_ALTITUDE, msg.getAltitudeType());
+        assertTrue(msg.toString().contains("AirbornePositionV2Msg{"));
+        assertTrue(msg.toString().contains("nicSupplementB="));
+    }
 }

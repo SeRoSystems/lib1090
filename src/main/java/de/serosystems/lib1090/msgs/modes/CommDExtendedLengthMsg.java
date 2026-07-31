@@ -27,90 +27,92 @@ import java.io.Serializable;
 
 /**
  * Decoder for Mode S surveillance Extended Length Messages (Comm-D ELM) (DF 24)
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 @SuppressWarnings("unused")
 public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializable {
 
-	private static final long serialVersionUID = 8539282448043078992L;
+    private static final long serialVersionUID = 8539282448043078992L;
 
-	private byte[] message;
-	private boolean ack;
-	private byte seqno;
+    private byte[] message;
+    private boolean ack;
+    private byte seqno;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected CommDExtendedLengthMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected CommDExtendedLengthMsg() {
+    }
 
-	/**
-	 * @param raw_message raw comm-d extended len msg as hex string
-	 * @throws BadFormatException if message is not extended len msg or
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public CommDExtendedLengthMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw comm-d extended len msg as hex string
+     * @throws BadFormatException     if message is not extended len msg or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public CommDExtendedLengthMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw comm-d extended len msg as byte array
-	 * @throws BadFormatException if message is not extended len msg or
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public CommDExtendedLengthMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw comm-d extended len msg as byte array
+     * @throws BadFormatException     if message is not extended len msg or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public CommDExtendedLengthMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param reply Mode S reply which contains this extended len msg
-	 * @throws BadFormatException if message is not extended len msg or 
-	 * contains wrong values.
-	 */
-	public CommDExtendedLengthMsg(ModeSDownlinkMsg reply) throws BadFormatException {
-		super(reply);
+    /**
+     * @param reply Mode S reply which contains this extended len msg
+     * @throws BadFormatException if message is not extended len msg or
+     *                            contains wrong values.
+     */
+    public CommDExtendedLengthMsg(ModeSDownlinkMsg reply) throws BadFormatException {
+        super(reply);
 
-		if (getDownlinkFormat() != 24) {
-			throw new BadFormatException("Message is not an extended length message!");
-		}
+        if (getDownlinkFormat() != 24) {
+            throw new BadFormatException("Message is not an extended length message!");
+        }
 
-		// extract Comm-D extended length message
-		message = getPayload();
-		ack = (getDownlinkFormat()&0x2)!=0;
-		seqno = (byte) ((getDownlinkFormat()&0x1)<<3|getFirstField());
-	}
+        // extract Comm-D extended length message
+        message = getPayload();
+        ack = (getDownlinkFormat() & 0x2) != 0;
+        seqno = (byte) ((getDownlinkFormat() & 0x1) << 3 | getFirstField());
+    }
 
-	/**
-	 * @return the 10-byte Comm-D extended length message
-	 */
-	public byte[] getMessage() {
-		return message;
-	}
+    /**
+     * @return the 10-byte Comm-D extended length message
+     */
+    public byte[] getMessage() {
+        return message;
+    }
 
-	/**
-	 * @return true if this is a uplink ELM acknowledgement
-	 */
-	public boolean isAck() {
-		return ack;
-	}
+    /**
+     * @return true if this is a uplink ELM acknowledgement
+     */
+    public boolean isAck() {
+        return ack;
+    }
 
-	/**
-	 * @return the number of the message segment returned by {@link #getMessage()}
-	 */
-	public byte getSequenceNumber() {
-		return seqno;
-	}
+    /**
+     * @return the number of the message segment returned by {@link #getMessage()}
+     */
+    public byte getSequenceNumber() {
+        return seqno;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tCommDExtendedLengthMsg{" +
-				"message=" + Tools.toHexString(message) +
-				", ack=" + ack +
-				", seqno=" + seqno +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tCommDExtendedLengthMsg{" +
+                "message=" + Tools.toHexString(message) +
+                ", ack=" + ack +
+                ", seqno=" + seqno +
+                '}';
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.COMM_D_ELM;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.COMM_D_ELM;
+    }
 }

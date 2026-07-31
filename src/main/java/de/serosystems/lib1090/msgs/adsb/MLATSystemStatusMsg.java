@@ -29,8 +29,6 @@ import java.util.Arrays;
 
 /**
  * Decoder for Surface System Status messages (2.2.3.2.7.4)
- *
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable {
 

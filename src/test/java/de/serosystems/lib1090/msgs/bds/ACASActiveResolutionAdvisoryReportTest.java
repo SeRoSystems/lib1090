@@ -33,15 +33,12 @@ public class ACASActiveResolutionAdvisoryReportTest {
 
     @BeforeAll
     public static void setup() throws BadFormatException {
-
         msg = new byte[]{
                 (byte) 0b00110000, (byte) 0b00000000, (byte) 0b00000011, (byte) 0b11111100, (byte) 0b00000000,
                 (byte) 0b00000000, (byte) 0b00000000
         };
 
         acasReport = new ACASActiveResolutionAdvisoryReport(msg);
-
-
     }
 
     @Test
@@ -51,7 +48,6 @@ public class ACASActiveResolutionAdvisoryReportTest {
 
     @Test
     public void activeResolutionAdvisories() {
-
         boolean[] activeResolutionAdvisories = acasReport.getActiveResolutionAdvisories();
         assertFalse(activeResolutionAdvisories[0]);
         assertFalse(activeResolutionAdvisories[1]);
@@ -67,18 +63,15 @@ public class ACASActiveResolutionAdvisoryReportTest {
         assertFalse(activeResolutionAdvisories[11]);
         assertFalse(activeResolutionAdvisories[12]);
         assertFalse(activeResolutionAdvisories[13]);
-
     }
 
     @Test
     public void resolutionAdvisoriesComponentsRecord() {
-
         boolean[] resolutionAdvisoriesComponentsRecord = acasReport.getResolutionAdvisoriesComplementsRecord();
         assertTrue(resolutionAdvisoriesComponentsRecord[0]);
         assertTrue(resolutionAdvisoriesComponentsRecord[1]);
         assertTrue(resolutionAdvisoriesComponentsRecord[2]);
         assertTrue(resolutionAdvisoriesComponentsRecord[3]);
-
     }
 
     @Test
@@ -98,7 +91,6 @@ public class ACASActiveResolutionAdvisoryReportTest {
 
     @Test
     public void threatIdentityData() throws BadFormatException {
-
         ThreatIdentityData threatIdentityData0 = TCASResolutionAdvisory.extractThreatIdentityData((short) 0, BitReader.forBigEndian(msg));
         assertNull(threatIdentityData0);
 
@@ -118,13 +110,12 @@ public class ACASActiveResolutionAdvisoryReportTest {
 
         ThreatIdentityData threatIdentityData3 = TCASResolutionAdvisory.extractThreatIdentityData((short) 3, BitReader.forBigEndian(msg));
         assertNull(threatIdentityData3);
-
     }
 
     @Test
     public void threatIdentityDataWithIcao() throws BadFormatException {
         // icao24 set here is 0xabcdef = 0b 10101011 11001101 11101111
-        byte[] msg = new byte[] {
+        byte[] msg = new byte[]{
                 0b00110000, 0b01000000, 0b01000000, 0b01110110, (byte) 0b10101111, 0b00110111, (byte) 0b10111100
         };
 
@@ -134,7 +125,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
         assertTrue(acasReport.hasMultiThreatEncounter());
 
         assertEquals(0b01000000010000, acasReport.getActiveRA());
-        assertArrayEquals(new boolean[] {
+        assertArrayEquals(new boolean[]{
                 false,
                 true,
                 false,
@@ -152,10 +143,9 @@ public class ACASActiveResolutionAdvisoryReportTest {
         }, acasReport.getActiveResolutionAdvisories());
 
         assertEquals(1, acasReport.getRACRecord());
-        assertArrayEquals(new boolean[] { false, false, false, true }, acasReport.getResolutionAdvisoriesComplementsRecord());
+        assertArrayEquals(new boolean[]{false, false, false, true}, acasReport.getResolutionAdvisoriesComplementsRecord());
 
         assertEquals(0b10101011110011011110111100, acasReport.getThreatIdentity().intValue());
         assertEquals(0xabcdef, acasReport.getThreatIdentityData().getIcao24().intValue());
     }
-
 }

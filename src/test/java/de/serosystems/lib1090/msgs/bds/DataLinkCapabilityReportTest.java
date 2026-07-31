@@ -29,12 +29,10 @@ public class DataLinkCapabilityReportTest {
 
     @BeforeAll
     public static void setup() {
-
         msg = new byte[]{
                 (byte) 0b00010000, (byte) 0b11000000, (byte) 0b00000011, (byte) 0b010110011, (byte) 0b11111101,
                 (byte) 0b01110010, (byte) 0b01100000
         };
-
     }
 
     @Test
@@ -159,17 +157,17 @@ public class DataLinkCapabilityReportTest {
 
     @Test
     void tcacsVersion0() {
-       byte[] message =  new byte[]{
-               (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
-               (byte) 0b11111100,
-               (byte) 0xff, (byte) 0xff
-       };
+        byte[] message = new byte[]{
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0b11111100,
+                (byte) 0xff, (byte) 0xff
+        };
         assertEquals(0, DataLinkCapabilityReport.extractTcasVersionNumber(message));
     }
 
     @Test
     void tcacsVersion1() {
-        byte[] message =  new byte[]{
+        byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111110,
                 (byte) 0xff, (byte) 0xff
@@ -179,7 +177,7 @@ public class DataLinkCapabilityReportTest {
 
     @Test
     void tcacsVersion2() {
-        byte[] message =  new byte[]{
+        byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111101,
                 (byte) 0xff, (byte) 0xff
@@ -189,7 +187,7 @@ public class DataLinkCapabilityReportTest {
 
     @Test
     void tcacsVersion3() {
-        byte[] message =  new byte[]{
+        byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111111,
                 (byte) 0xff, (byte) 0xff

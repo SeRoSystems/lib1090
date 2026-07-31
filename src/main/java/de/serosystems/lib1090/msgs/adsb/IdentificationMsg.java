@@ -71,11 +71,16 @@ public interface IdentificationMsg {
      */
     default CategorySet getCategorySet() {
         switch (getFormatTypeCode()) {
-            case 4: return CategorySet.A;
-            case 3: return CategorySet.B;
-            case 2: return CategorySet.C;
-            case 1: return CategorySet.D;
-            default: throw new IllegalStateException("Unexpected format type code: " + getFormatTypeCode());
+            case 4:
+                return CategorySet.A;
+            case 3:
+                return CategorySet.B;
+            case 2:
+                return CategorySet.C;
+            case 1:
+                return CategorySet.D;
+            default:
+                throw new IllegalStateException("Unexpected format type code: " + getFormatTypeCode());
         }
     }
 }

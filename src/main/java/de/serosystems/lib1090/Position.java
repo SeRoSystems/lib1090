@@ -19,268 +19,273 @@
 package de.serosystems.lib1090;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static java.lang.Math.*;
 
 /**
  * Container class for WGS84 positions
- *
- * @author Markus Fuchs (fuchs@opensky-network.org)
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class Position implements Serializable {
-	private static final long serialVersionUID = 1562401753853965728L;
+    private static final long serialVersionUID = 1562401753853965728L;
 
-	// WGS84 ellipsoid constants
-	private final static double a = 6378137.0; // semi-major axis
-	private final static double f = 1/298.257223563; // flattening
-	private final static double b = a*(1-f); // semi-minor axis
-	private final static double e2 = 2*f-f*f; // eccentricity squared
+    // WGS84 ellipsoid constants
+    private final static double a = 6378137.0; // semi-major axis
+    private final static double f = 1 / 298.257223563; // flattening
+    private final static double b = a * (1 - f); // semi-minor axis
+    private final static double e2 = 2 * f - f * f; // eccentricity squared
 
-	private Double longitude;
-	private Double latitude;
-	private Double altitude;
-	private boolean reasonable;
+    private Double longitude;
+    private Double latitude;
+    private Double altitude;
+    private boolean reasonable;
 
-	public enum AltitudeType {
-		BAROMETRIC_ALTITUDE, // as reported by the transponder
-		ABOVE_WGS84_ELLIPSOID, // above WGS 84 ellipsoid
-		ABOVE_GROUND_LEVEL,
-		UNKNOWN
-	}
-	private AltitudeType altitude_type;
+    public enum AltitudeType {
+        BAROMETRIC_ALTITUDE, // as reported by the transponder
+        ABOVE_WGS84_ELLIPSOID, // above WGS 84 ellipsoid
+        ABOVE_GROUND_LEVEL,
+        UNKNOWN
+    }
 
-	public Position() {
-		longitude = null;
-		latitude = null;
-		altitude = null;
-		altitude_type = AltitudeType.UNKNOWN;
+    private AltitudeType altitude_type;
 
-		setReasonable(true); // be optimistic :-)
-	}
+    public Position() {
+        longitude = null;
+        latitude = null;
+        altitude = null;
+        altitude_type = AltitudeType.UNKNOWN;
 
-	/**
-	 * @param lon longitude in decimal degrees
-	 * @param lat latitude in decimal degrees
-	 * @param alt altitude in feet
-	 * @param altType reference system of altitude
-	 */
-	public Position(Double lon, Double lat, Double alt, AltitudeType altType) {
-		longitude = lon;
-		latitude = lat;
-		altitude = alt;
-		this.altitude_type = altType;
-		setReasonable(true);
-	}
+        setReasonable(true); // be optimistic :-)
+    }
 
-	/**
-	 * Uses UNKNOWN reference system for altitude.
-	 *
-	 * @param lon longitude in decimal degrees
-	 * @param lat latitude in decimal degrees
-	 * @param alt altitude in feet
-	 */
-	public Position(Double lon, Double lat, Double alt) {
-		longitude = lon;
-		latitude = lat;
-		altitude = alt;
-		this.altitude_type = AltitudeType.UNKNOWN;
-		setReasonable(true);
-	}
+    /**
+     * @param lon     longitude in decimal degrees
+     * @param lat     latitude in decimal degrees
+     * @param alt     altitude in feet
+     * @param altType reference system of altitude
+     */
+    public Position(Double lon, Double lat, Double alt, AltitudeType altType) {
+        longitude = lon;
+        latitude = lat;
+        altitude = alt;
+        this.altitude_type = altType;
+        setReasonable(true);
+    }
 
-	/**
-	 * @return longitude in decimal degrees
-	 */
-	public Double getLongitude() {
-		return longitude;
-	}
+    /**
+     * Uses UNKNOWN reference system for altitude.
+     *
+     * @param lon longitude in decimal degrees
+     * @param lat latitude in decimal degrees
+     * @param alt altitude in feet
+     */
+    public Position(Double lon, Double lat, Double alt) {
+        longitude = lon;
+        latitude = lat;
+        altitude = alt;
+        this.altitude_type = AltitudeType.UNKNOWN;
+        setReasonable(true);
+    }
 
-	/**
-	 * @param longitude in decimal degrees
-	 */
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
-	}
+    /**
+     * @return longitude in decimal degrees
+     */
+    public Double getLongitude() {
+        return longitude;
+    }
 
-	/**
-	 * @return latitude in decimal degrees
-	 */
-	public Double getLatitude() {
-		return latitude;
-	}
+    /**
+     * @param longitude in decimal degrees
+     */
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 
-	/**
-	 * @param latitude in decimal degrees
-	 */
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
+    /**
+     * @return latitude in decimal degrees
+     */
+    public Double getLatitude() {
+        return latitude;
+    }
 
-	/**
-	 * @return altitude in feet
-	 */
-	public Double getAltitude() {
-		return altitude;
-	}
+    /**
+     * @param latitude in decimal degrees
+     */
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
 
-	/**
-	 * @param altitude in feet
-	 */
-	public void setAltitude(Double altitude) {
-		this.altitude = altitude;
-	}
+    /**
+     * @return altitude in feet
+     */
+    public Double getAltitude() {
+        return altitude;
+    }
 
-	/**
-	 * @return altitude reference system
-	 */
-	public AltitudeType getAltitudeType() {
-		return altitude_type;
-	}
+    /**
+     * @param altitude in feet
+     */
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
+    }
 
-	/**
-	 * @param altitudeType reference system of altitude of this position
-	 */
-	public void setAltitudeType(AltitudeType altitudeType) {
-		this.altitude_type = altitudeType;
-	}
+    /**
+     * @return altitude reference system
+     */
+    public AltitudeType getAltitudeType() {
+        return altitude_type;
+    }
 
-	/**
-	 * Calculates the two-dimensional great circle distance (haversine)
-	 * @param other position to which we calculate the distance
-	 * @return distance between this and other position in meters
-	 */
-	public Double haversine(Position other) {
-		double lon0r = toRadians(this.longitude);
-		double lat0r = toRadians(this.latitude);
-		double lon1r = toRadians(other.longitude);
-		double lat1r = toRadians(other.latitude);
-		double a = pow(sin((lat1r - lat0r) / 2.0), 2);
-		double b = cos(lat0r) * cos(lat1r) * pow(sin((lon1r - lon0r) / 2.0), 2);
+    /**
+     * @param altitudeType reference system of altitude of this position
+     */
+    public void setAltitudeType(AltitudeType altitudeType) {
+        this.altitude_type = altitudeType;
+    }
 
-		return 6371000.0 * 2 * asin(sqrt(a + b));
-	}
+    /**
+     * Calculates the two-dimensional great circle distance (haversine)
+     *
+     * @param other position to which we calculate the distance
+     * @return distance between this and other position in meters
+     */
+    public Double haversine(Position other) {
+        double lon0r = toRadians(this.longitude);
+        double lat0r = toRadians(this.latitude);
+        double lon1r = toRadians(other.longitude);
+        double lat1r = toRadians(other.latitude);
+        double a = pow(sin((lat1r - lat0r) / 2.0), 2);
+        double b = cos(lat0r) * cos(lat1r) * pow(sin((lon1r - lon0r) / 2.0), 2);
 
-	/**
-	 * Converts the WGS84 position to cartesian coordinates
-	 * @return earth-centered earth-fixed coordinates as [x, y, z] or null if wrong altitude type
-	 */
-	public double[] toECEF () {
-		if (altitude_type != AltitudeType.ABOVE_WGS84_ELLIPSOID)
-			return null;
+        return 6371000.0 * 2 * asin(sqrt(a + b));
+    }
 
-		double lon0r = toRadians(this.longitude);
-		double lat0r = toRadians(this.latitude);
-		double height = Tools.feet2Meters(altitude);
+    /**
+     * Converts the WGS84 position to cartesian coordinates
+     *
+     * @return earth-centered earth-fixed coordinates as [x, y, z] or null if wrong altitude type
+     */
+    public double[] toECEF() {
+        if (altitude_type != AltitudeType.ABOVE_WGS84_ELLIPSOID)
+            return null;
 
-		double v = a / Math.sqrt(1 - e2*Math.sin(lat0r)*Math.sin(lat0r));
+        double lon0r = toRadians(this.longitude);
+        double lat0r = toRadians(this.latitude);
+        double height = Tools.feet2Meters(altitude);
 
-		return new double[] {
-				(v + height) * Math.cos(lat0r) * Math.cos(lon0r), // x
-				(v + height) * Math.cos(lat0r) * Math.sin(lon0r), // y
-				(v * (1 - e2) + height) * Math.sin(lat0r) // z
-		};
-	}
+        double v = a / Math.sqrt(1 - e2 * Math.sin(lat0r) * Math.sin(lat0r));
 
-	/**
-	 * Converts a cartesian earth-centered earth-fixed coordinate into an WGS84 LLA position
-	 * @param x coordinate in meters
-	 * @param y coordinate in meters
-	 * @param z coordinate in meters
-	 * @return a position object representing the WGS84 position
-	 */
-	public static Position fromECEF (double x, double y, double z) {
-		double p = sqrt(x*x + y*y);
-		double th = atan2(a * z, b * p);
-		double lon = atan2(y, x);
-		double lat = atan2(
-				(z + (a*a - b*b) / (b*b) * b * pow(sin(th), 3)),
-				p - e2 * a * pow(cos(th), 3));
-		double N = a / sqrt(1 - pow(sqrt(e2) * sin(lat), 2));
-		double alt = p / cos(lat) - N;
+        return new double[]{
+                (v + height) * Math.cos(lat0r) * Math.cos(lon0r), // x
+                (v + height) * Math.cos(lat0r) * Math.sin(lon0r), // y
+                (v * (1 - e2) + height) * Math.sin(lat0r) // z
+        };
+    }
 
-		// correct for numerical instability in altitude near exact poles:
-		// after this correction, error is about 2 millimeters, which is about
-		// the same as the numerical precision of the overall function
-		if (abs(x) < 1 && abs(y) < 1)
-			alt = abs(z) - b;
+    /**
+     * Converts a cartesian earth-centered earth-fixed coordinate into an WGS84 LLA position
+     *
+     * @param x coordinate in meters
+     * @param y coordinate in meters
+     * @param z coordinate in meters
+     * @return a position object representing the WGS84 position
+     */
+    public static Position fromECEF(double x, double y, double z) {
+        double p = sqrt(x * x + y * y);
+        double th = atan2(a * z, b * p);
+        double lon = atan2(y, x);
+        double lat = atan2(
+                (z + (a * a - b * b) / (b * b) * b * pow(sin(th), 3)),
+                p - e2 * a * pow(cos(th), 3));
+        double N = a / sqrt(1 - pow(sqrt(e2) * sin(lat), 2));
+        double alt = p / cos(lat) - N;
 
-		return new Position(toDegrees(lon), toDegrees(lat), Tools.meters2Feet(alt), AltitudeType.ABOVE_WGS84_ELLIPSOID);
-	}
+        // correct for numerical instability in altitude near exact poles:
+        // after this correction, error is about 2 millimeters, which is about
+        // the same as the numerical precision of the overall function
+        if (abs(x) < 1 && abs(y) < 1)
+            alt = abs(z) - b;
 
-	/**
-	 * Calculate the three-dimensional distance between this and another position.
-	 * This method assumes that the coordinates are WGS84.
-	 * @param other position
-	 * @return 3d distance in meters or null if lat, lon, or alt is missing
-	 */
-	public Double distance3d(Position other) {
-		if (other == null || latitude == null || longitude == null || altitude == null)
-			return null;
+        return new Position(toDegrees(lon), toDegrees(lat), Tools.meters2Feet(alt), AltitudeType.ABOVE_WGS84_ELLIPSOID);
+    }
 
-		double[] xyz1 = this.toECEF();
-		double[] xyz2 = other.toECEF();
+    /**
+     * Calculate the three-dimensional distance between this and another position.
+     * This method assumes that the coordinates are WGS84.
+     *
+     * @param other position
+     * @return 3d distance in meters or null if lat, lon, or alt is missing
+     */
+    public Double distance3d(Position other) {
+        if (other == null || latitude == null || longitude == null || altitude == null)
+            return null;
 
-		if (xyz1 == null || xyz2 == null)
-			return null;
+        double[] xyz1 = this.toECEF();
+        double[] xyz2 = other.toECEF();
 
-		return Math.sqrt(
-				Math.pow(xyz2[0] - xyz1[0], 2) +
-						Math.pow(xyz2[1] - xyz1[1], 2) +
-						Math.pow(xyz2[2] - xyz1[2], 2)
-		);
-	}
+        if (xyz1 == null || xyz2 == null)
+            return null;
 
-	/**
-	 * This is used to mark positions as unreasonable if a
-	 * plausibility check fails during decoding. Some transponders
-	 * broadcast false positions and if detected, this flag is unset.
-	 * Note that we assume positions to be reasonable by default.
-	 * @return true if position has been flagged reasonable by the decoder
-	 */
-	public boolean isReasonable() {
-		return reasonable;
-	}
+        return Math.sqrt(
+                Math.pow(xyz2[0] - xyz1[0], 2) +
+                        Math.pow(xyz2[1] - xyz1[1], 2) +
+                        Math.pow(xyz2[2] - xyz1[2], 2)
+        );
+    }
 
-	/**
-	 * Set/unset reasonable flag.
-	 * @param reasonable false if position is considered unreasonable
-	 */
-	public void setReasonable(boolean reasonable) {
-		this.reasonable = reasonable;
-	}
+    /**
+     * This is used to mark positions as unreasonable if a
+     * plausibility check fails during decoding. Some transponders
+     * broadcast false positions and if detected, this flag is unset.
+     * Note that we assume positions to be reasonable by default.
+     *
+     * @return true if position has been flagged reasonable by the decoder
+     */
+    public boolean isReasonable() {
+        return reasonable;
+    }
 
-	@Override
-	public String toString() {
-		return "Position{" +
-				"latitude=" + latitude +
-				", longitude=" + longitude +
-				", altitude=" + altitude +
-				", reasonable=" + reasonable +
-				", altitude_type=" + altitude_type +
-				'}';
-	}
+    /**
+     * Set/unset reasonable flag.
+     *
+     * @param reasonable false if position is considered unreasonable
+     */
+    public void setReasonable(boolean reasonable) {
+        this.reasonable = reasonable;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public String toString() {
+        return "Position{" +
+                "latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", altitude=" + altitude +
+                ", reasonable=" + reasonable +
+                ", altitude_type=" + altitude_type +
+                '}';
+    }
 
-		Position position = (Position) o;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-		if (reasonable != position.reasonable) return false;
-		if (longitude != null ? !longitude.equals(position.longitude) : position.longitude != null) return false;
-		if (latitude != null ? !latitude.equals(position.latitude) : position.latitude != null) return false;
-		if (altitude != null ? !altitude.equals(position.altitude) : position.altitude != null) return false;
-		return altitude_type == position.altitude_type;
-	}
+        Position position = (Position) o;
 
-	@Override
-	public int hashCode() {
-		int result = longitude != null ? longitude.hashCode() : 0;
-		result = 31 * result + (latitude != null ? latitude.hashCode() : 0);
-		result = 31 * result + (altitude != null ? altitude.hashCode() : 0);
-		result = 31 * result + (reasonable ? 1 : 0);
-		result = 31 * result + (altitude_type != null ? altitude_type.hashCode() : 0);
-		return result;
-	}
+        if (reasonable != position.reasonable) return false;
+        if (!Objects.equals(longitude, position.longitude)) return false;
+        if (!Objects.equals(latitude, position.latitude)) return false;
+        if (!Objects.equals(altitude, position.altitude)) return false;
+        return altitude_type == position.altitude_type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = longitude != null ? longitude.hashCode() : 0;
+        result = 31 * result + (latitude != null ? latitude.hashCode() : 0);
+        result = 31 * result + (altitude != null ? altitude.hashCode() : 0);
+        result = 31 * result + (reasonable ? 1 : 0);
+        result = 31 * result + (altitude_type != null ? altitude_type.hashCode() : 0);
+        return result;
+    }
 }

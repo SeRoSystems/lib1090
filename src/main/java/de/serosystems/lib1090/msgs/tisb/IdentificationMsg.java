@@ -30,109 +30,112 @@ import static de.serosystems.lib1090.decoding.InternationalAlphabet5.mapChar;
 
 /**
  * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
- * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = -1692656992966148114L;
+    private static final long serialVersionUID = -1692656992966148114L;
 
-	private byte emitter_category;
-	private byte[] identity;
+    private byte emitter_category;
+    private byte[] identity;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected IdentificationMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected IdentificationMsg() {
+    }
 
-	/**
-	 * @param raw_message raw TIS-B identification and category message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public IdentificationMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw TIS-B identification and category message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public IdentificationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw TIS-B identity and category message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public IdentificationMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw TIS-B identity and category message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public IdentificationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter containing the identity and category message
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter extended squitter containing the identity and category message
+     * @throws BadFormatException if message has wrong format
+     */
+    public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
 
-		if (getDownlinkFormat() != 18) {
-			throw new BadFormatException("TIS-B messages must have downlink format 18.");
-		}
+        if (getDownlinkFormat() != 18) {
+            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+        }
 
-		if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4) {
-			throw new BadFormatException("Identification messages must have typecode of 1-4.");
-		}
+        if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4) {
+            throw new BadFormatException("Identification messages must have typecode of 1-4.");
+        }
 
-		// Table 2-13
-		if (getFirstField() != 2 && getFirstField() != 5)
-			throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+        // Table 2-13
+        if (getFirstField() != 2 && getFirstField() != 5)
+            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-		byte[] msg = this.getMessage();
-		emitter_category = (byte) (msg[0] & 0x7);
+        byte[] msg = this.getMessage();
+        emitter_category = (byte) (msg[0] & 0x7);
 
-		// extract identity
-		identity = new byte[8];
-		int byte_off, bit_off;
-		for (int i=8; i>=1; i--) {
-			// calculate offsets
-			byte_off = (i*6)/8; bit_off = (i*6)%8;
+        // extract identity
+        identity = new byte[8];
+        int byte_off, bit_off;
+        for (int i = 8; i >= 1; i--) {
+            // calculate offsets
+            byte_off = (i * 6) / 8;
+            bit_off = (i * 6) % 8;
 
-			// char aligned with byte?
-			if (bit_off == 0) identity[i-1] = (byte) (msg[byte_off]&0x3F);
-			else {
-				++byte_off;
-				identity[i-1] = (byte) (msg[byte_off]>>>(8-bit_off)&(0x3F>>>(6-bit_off)));
-				// should we add bits from the next byte?
-				if (bit_off < 6) identity[i-1] |= msg[byte_off-1]<<bit_off&0x3F;
-			}
-		}
-	}
+            // char aligned with byte?
+            if (bit_off == 0) identity[i - 1] = (byte) (msg[byte_off] & 0x3F);
+            else {
+                ++byte_off;
+                identity[i - 1] = (byte) (msg[byte_off] >>> (8 - bit_off) & (0x3F >>> (6 - bit_off)));
+                // should we add bits from the next byte?
+                if (bit_off < 6) identity[i - 1] |= msg[byte_off - 1] << bit_off & 0x3F;
+            }
+        }
+    }
 
-	/**
-	 * @return the emitter's category (numerical)
-	 */
-	public byte getEmitterCategory() {
-		return emitter_category;
-	}
+    /**
+     * @return the emitter's category (numerical)
+     */
+    public byte getEmitterCategory() {
+        return emitter_category;
+    }
 
-	/**
-	 * @return the call sign as 8 characters array
-	 */
-	public char[] getIdentity() {
-		return mapChar(identity);
-	}
+    /**
+     * @return the call sign as 8 characters array
+     */
+    public char[] getIdentity() {
+        return mapChar(identity);
+    }
 
-	/**
-	 * @return the decription of the emitter's category according to
-	 *         the ADS-B message format specification
-	 */
-	public String getCategoryDescription () {
-		// TIS-B messages carry no ADS-B version information
-		return categoryDescription(getFormatTypeCode(), emitter_category, 0);
-	}
+    /**
+     * @return the decription of the emitter's category according to
+     * the ADS-B message format specification
+     */
+    public String getCategoryDescription() {
+        // TIS-B messages carry no ADS-B version information
+        return categoryDescription(getFormatTypeCode(), emitter_category, 0);
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tIdentificationMsg{" +
-				"emitter_category=" + emitter_category +
-				", identity=" + Arrays.toString(identity) +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tIdentificationMsg{" +
+                "emitter_category=" + emitter_category +
+                ", identity=" + Arrays.toString(identity) +
+                '}';
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.TISB_IDENTIFICATION;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.TISB_IDENTIFICATION;
+    }
 }

@@ -22,30 +22,28 @@ package de.serosystems.lib1090.exceptions;
  * Exception which is thrown when someone calls a getter but the information
  * is actually not available. The programmer has to check the subtype codes
  * to avoid this exception.
- * 
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class BadFormatException extends Exception {
-	private static final long serialVersionUID = 5630832543039853589L;
+    private static final long serialVersionUID = 5630832543039853589L;
 
-	private final String msg;
-	private final String reason;
-	
-	public BadFormatException(String reason, String message) {
-		super(reason);
-		this.msg = message;
-		this.reason = reason;
-	}
-	
-	public BadFormatException(String reason) {
-		super(reason);
-		this.msg = "[unknown]"; // unknown
-		this.reason = reason;
-	}
+    private final String msg;
+    private final String reason;
 
-	@Override
-	public String getMessage() {
-		return "Message '" + this.msg + "' has an illegal format: "
-				+ this.reason;
-	}
+    public BadFormatException(String reason, String message) {
+        super(reason);
+        this.msg = message;
+        this.reason = reason;
+    }
+
+    public BadFormatException(String reason) {
+        super(reason);
+        this.msg = "[unknown]"; // unknown
+        this.reason = reason;
+    }
+
+    @Override
+    public String getMessage() {
+        return "Message '" + this.msg + "' has an illegal format: "
+                + this.reason;
+    }
 }

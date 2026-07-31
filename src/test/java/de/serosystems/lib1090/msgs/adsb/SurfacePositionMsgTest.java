@@ -19,62 +19,61 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Position;
-import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class SurfacePositionMsgTest {
 
-	// A surface position report observed in the wild, decomposed by single bits
-	public static final String SURF_POS =
-			"8c" +
+    // A surface position report observed in the wild, decomposed by single bits
+    public static final String SURF_POS =
+            "8c" +
 
-			// ICAO 24 bit address
-			"3c4dc6" +
+                    // ICAO 24 bit address
+                    "3c4dc6" +
 
-			//             00111 => type code 7
-			//           0000001 => Movement
-			//                 1 => Heading/Ground Track Status
-			//           1000000 => Heading/Ground Track
-			//                 0 => Time
-			//                 1 => CPR format
-			// 11001100110001101 => CPR lat
-			// 10000001010011110 => CPT lon
-			"381c07331b029e" +
+                    //             00111 => type code 7
+                    //           0000001 => Movement
+                    //                 1 => Heading/Ground Track Status
+                    //           1000000 => Heading/Ground Track
+                    //                 0 => Time
+                    //                 1 => CPR format
+                    // 11001100110001101 => CPR lat
+                    // 10000001010011110 => CPT lon
+                    "381c07331b029e" +
 
-			// parity bits (valid, not tested here)
-			"b308de";
+                    // parity bits (valid, not tested here)
+                    "b308de";
 
-	protected abstract SurfacePositionMsg create(String hex) throws Exception;
+    protected abstract SurfacePositionMsg create(String hex) throws Exception;
 
-	@Test
-	void testDecodeSurfacePosition() throws Exception {
-		final SurfacePositionMsg sPos = create(SURF_POS);
+    @Test
+    void testDecodeSurfacePosition() throws Exception {
+        final SurfacePositionMsg sPos = create(SURF_POS);
 
-		assertEquals(2, sPos.getSIL());
-		assertTrue(sPos.hasGroundSpeed());
-		assertEquals(0, sPos.getGroundSpeed());
-		assertEquals(0.125, sPos.getGroundSpeedResolution());
-		assertTrue(sPos.hasValidHeading());
-		assertEquals(64*360D/128D, sPos.getHeading());
-		assertTrue(sPos.hasValidPosition());
-		assertEquals(0, sPos.getAltitude());
-		assertEquals(Position.AltitudeType.ABOVE_GROUND_LEVEL, sPos.getAltitudeType());
-	}
+        assertEquals(2, sPos.getSIL());
+        assertTrue(sPos.hasGroundSpeed());
+        assertEquals(0, sPos.getGroundSpeed());
+        assertEquals(0.125, sPos.getGroundSpeedResolution());
+        assertTrue(sPos.hasValidHeading());
+        assertEquals(64 * 360D / 128D, sPos.getHeading());
+        assertTrue(sPos.hasValidPosition());
+        assertEquals(0, sPos.getAltitude());
+        assertEquals(Position.AltitudeType.ABOVE_GROUND_LEVEL, sPos.getAltitudeType());
+    }
 
-	@Test
-	void testGetNIC() throws Exception {
-		final SurfacePositionMsg sPos = create(SURF_POS);
+    @Test
+    void testGetNIC() throws Exception {
+        final SurfacePositionMsg sPos = create(SURF_POS);
 
-		assertEquals(8, sPos.getNIC());
-	}
+        assertEquals(8, sPos.getNIC());
+    }
 
-	@Test
-	void testGetHorizontalContainmentRadiusLimit() throws Exception {
-		final SurfacePositionMsg sPos = create(SURF_POS);
+    @Test
+    void testGetHorizontalContainmentRadiusLimit() throws Exception {
+        final SurfacePositionMsg sPos = create(SURF_POS);
 
-		assertEquals(185.2, sPos.getHorizontalContainmentRadiusLimit());
-	}
+        assertEquals(185.2, sPos.getHorizontalContainmentRadiusLimit());
+    }
 }

@@ -32,190 +32,194 @@ import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 
 /**
  * Decoder for TIS-B coarse position (DO-260B, 2.2.17.3.5).
- * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
 
-	private static final long serialVersionUID = -8532037642870724311L;
+    private static final long serialVersionUID = -8532037642870724311L;
 
-	private boolean imf;
-	private byte surveillance_status;
-	private byte svid;
-	private short encoded_altitude;
-	private boolean ground_track_status;
-	private byte ground_track_angle;
-	private byte ground_speed;
-	CPREncodedPosition position;
+    private boolean imf;
+    private byte surveillance_status;
+    private byte svid;
+    private short encoded_altitude;
+    private boolean ground_track_status;
+    private byte ground_track_angle;
+    private byte ground_speed;
+    CPREncodedPosition position;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected CoarsePositionMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected CoarsePositionMsg() {
+    }
 
-	/**
-	 * @param raw_message raw TIS-B coarse position message as hex string
-	 * @param timestamp timestamp for this position message in milliseconds
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public CoarsePositionMsg(String raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw TIS-B coarse position message as hex string
+     * @param timestamp   timestamp for this position message in milliseconds
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public CoarsePositionMsg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param raw_message raw TIS-B coarse position message as byte array
-	 * @param timestamp timestamp for this position message in milliseconds
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public CoarsePositionMsg(byte[] raw_message, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message), timestamp);
-	}
+    /**
+     * @param rawMessage raw TIS-B coarse position message as byte array
+     * @param timestamp   timestamp for this position message in milliseconds
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public CoarsePositionMsg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage), timestamp);
+    }
 
-	/**
-	 * @param squitter extended squitter containing the TIS-B position and velocity in low resolution
-	 * @param timestamp timestamp for this position message in milliseconds
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public CoarsePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter  extended squitter containing the TIS-B position and velocity in low resolution
+     * @param timestamp timestamp for this position message in milliseconds
+     * @throws BadFormatException if message has wrong format
+     */
+    public CoarsePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+        super(squitter);
 
-		if (getDownlinkFormat() != 18) {
-			throw new BadFormatException("TIS-B messages must have downlink format 18.");
-		}
+        if (getDownlinkFormat() != 18) {
+            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+        }
 
-		// Table 2-13
-		if (getFirstField() != 3)
-			throw new BadFormatException("Coarse TIS-B messages must have CF value 3.");
+        // Table 2-13
+        if (getFirstField() != 3)
+            throw new BadFormatException("Coarse TIS-B messages must have CF value 3.");
 
-		byte[] msg = getMessage();
+        byte[] msg = getMessage();
 
-		imf = (msg[0]&0x80) > 0;
-		surveillance_status = (byte) ((msg[0]>>>5)&0x3);
-		svid = (byte) ((msg[0]>>>1)&0xf);
-		encoded_altitude = (short) (((msg[0]&0x1)<<11) | ((msg[1]&0xff)<<3) | ((msg[2]>>>5)&0x7));
-		ground_track_status = (msg[2]&0x10) > 0;
-		ground_track_angle = (byte) (((msg[2]&0xf)<<1) | ((msg[3]>>>7)&0x1));
-		ground_speed = (byte) ((msg[3]>>>1)&0x3f);
+        imf = (msg[0] & 0x80) > 0;
+        surveillance_status = (byte) ((msg[0] >>> 5) & 0x3);
+        svid = (byte) ((msg[0] >>> 1) & 0xf);
+        encoded_altitude = (short) (((msg[0] & 0x1) << 11) | ((msg[1] & 0xff) << 3) | ((msg[2] >>> 5) & 0x7));
+        ground_track_status = (msg[2] & 0x10) > 0;
+        ground_track_angle = (byte) (((msg[2] & 0xf) << 1) | ((msg[3] >>> 7) & 0x1));
+        ground_speed = (byte) ((msg[3] >>> 1) & 0x3f);
 
-		boolean cpr_format = (msg[3]&0x1) > 0;
-		short cpr_encoded_lat = (short) (((msg[4]&0xff)<<4) | ((msg[5]&0xff)>>4));
-		short cpr_encoded_lon = (short) (((msg[5]&0x0f)<<8) | (msg[6]&0xff));
+        boolean cpr_format = (msg[3] & 0x1) > 0;
+        short cpr_encoded_lat = (short) (((msg[4] & 0xff) << 4) | ((msg[5] & 0xff) >> 4));
+        short cpr_encoded_lon = (short) (((msg[5] & 0x0f) << 8) | (msg[6] & 0xff));
 
-		position = CPREncodedPosition.ofAirborne(12, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
-				timestamp == null ? System.currentTimeMillis() : timestamp);
+        position = CPREncodedPosition.ofAirborne(12, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
+                timestamp == null ? System.currentTimeMillis() : timestamp);
+    }
 
-	}
+    /**
+     * @return the surveillance status
+     * @see #getSurveillanceStatusDescription()
+     */
+    public byte getSurveillanceStatus() {
+        return surveillance_status;
+    }
 
-	/**
-	 * @see #getSurveillanceStatusDescription()
-	 * @return the surveillance status
-	 */
-	public byte getSurveillanceStatus() {
-		return surveillance_status;
-	}
+    /**
+     * This is a function of the surveillance status field in the position
+     * message.
+     *
+     * @return surveillance status description as defines in DO-260B
+     */
+    public String getSurveillanceStatusDescription() {
+        String[] desc = {
+                "No condition information",
+                "Permanent alert (emergency condition)",
+                "Temporary alert (change in Mode A identity code other than emergency condition)",
+                "SPI condition"
+        };
 
-	/**
-	 * This is a function of the surveillance status field in the position
-	 * message.
-	 *
-	 * @return surveillance status description as defines in DO-260B
-	 */
-	public String getSurveillanceStatusDescription() {
-		String[] desc = {
-				"No condition information",
-				"Permanent alert (emergency condition)",
-				"Temporary alert (change in Mode A identity code other than emergency condition)",
-				"SPI condition"
-		};
+        return desc[surveillance_status];
+    }
 
-		return desc[surveillance_status];
-	}
+    /**
+     * @return ID to identify TIS-B site
+     */
+    public byte getServiceVolumeID() {
+        return svid;
+    }
 
-	/**
-	 * @return ID to identify TIS-B site
-	 */
-	public byte getServiceVolumeID() {
-		return svid;
-	}
+    /**
+     * @return ground track angle in degrees clockwise from true north
+     */
+    public Float getGroundTrackAngle() {
+        if (!ground_track_status) return null;
+        return ground_track_angle * 11.25f;
+    }
 
-	/**
-	 * @return ground track angle in degrees clockwise from true north
-	 */
-	public Float getGroundTrackAngle () {
-		if (!ground_track_status) return null;
-		return ground_track_angle*11.25f;
-	}
+    /**
+     * See also {@link #getMaxGroundSpeed()}.
+     *
+     * @return ground speed in knots (lower end of possible 32 knots window)
+     */
+    public Integer getMinGroundSpeed() {
+        if (ground_speed == 0) return null;
+        else if (ground_speed == 1) return 0;
+        else return 16 + (ground_speed - 2) * 32;
+    }
 
-	/**
-	 * See also {@link #getMaxGroundSpeed()}.
-	 * @return ground speed in knots (lower end of possible 32 knots window)
-	 */
-	public Integer getMinGroundSpeed () {
-		if (ground_speed == 0) return null;
-		else if (ground_speed == 1) return 0;
-		else return 16 + (ground_speed-2)*32;
-	}
+    /**
+     * See also {@link #getMinGroundSpeed()}.
+     *
+     * @return ground speed in knots (upper end of possible 32 knots window)
+     */
+    public Integer getMaxGroundSpeed() {
+        if (ground_speed == 0) return null;
+        else if (ground_speed == 1) return 16;
+        else return 16 + (ground_speed - 1) * 32;
+    }
 
-	/**
-	 * See also {@link #getMinGroundSpeed()}.
-	 * @return ground speed in knots (upper end of possible 32 knots window)
-	 */
-	public Integer getMaxGroundSpeed () {
-		if (ground_speed == 0) return null;
-		else if (ground_speed == 1) return 16;
-		else return 16 + (ground_speed-1)*32;
-	}
+    @Override
+    public boolean hasValidPosition() {
+        return getFormatTypeCode() >= 9;
+    }
 
-	@Override
-	public boolean hasValidPosition() {
-		return getFormatTypeCode() >= 9;
-	}
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
 
-	@Override
-	public CPREncodedPosition getCPREncodedPosition() {
-		return position;
-	}
+    @Override
+    public boolean hasValidAltitude() {
+        return getFormatTypeCode() >= 9;
+    }
 
-	@Override
-	public boolean hasValidAltitude() {
-		return getFormatTypeCode() >= 9;
-	}
+    @Override
+    public Integer getAltitude() {
+        if (!hasValidAltitude()) return null;
+        return decode12BitAltitude(encoded_altitude);
+    }
 
-	@Override
-	public Integer getAltitude() {
-		if (!hasValidAltitude()) return null;
-		return decode12BitAltitude(encoded_altitude);
-	}
+    @Override
+    public Position.AltitudeType getAltitudeType() {
+        return Position.AltitudeType.BAROMETRIC_ALTITUDE;
+    }
 
-	@Override
-	public Position.AltitudeType getAltitudeType () {
-		return Position.AltitudeType.BAROMETRIC_ALTITUDE;
-	}
+    /**
+     * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+     *
+     * @return value of the Q bit or null if message does not contain a valid altitude
+     */
+    public Boolean hasQBit() {
+        if (!hasValidAltitude()) return null;
+        return decode12BitQBit(encoded_altitude);
+    }
 
-	/**
-	 * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
-	 * @return value of the Q bit or null if message does not contain a valid altitude
-	 */
-	public Boolean hasQBit() {
-		if (!hasValidAltitude()) return null;
-		return decode12BitQBit(encoded_altitude);
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tCoarsePositionMsg{" +
+                "imf=" + imf +
+                ", surveillance_status=" + surveillance_status +
+                ", svid=" + svid +
+                ", encoded_altitude=" + encoded_altitude +
+                ", ground_track_status=" + ground_track_status +
+                ", ground_track_angle=" + getGroundTrackAngle() +
+                ", ground_speed=" + getMinGroundSpeed() + "-" + getMaxGroundSpeed() +
+                ", position=" + position +
+                '}';
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tCoarsePositionMsg{" +
-				"imf=" + imf +
-				", surveillance_status=" + surveillance_status +
-				", svid=" + svid +
-				", encoded_altitude=" + encoded_altitude +
-				", ground_track_status=" + ground_track_status +
-				", ground_track_angle=" + getGroundTrackAngle() +
-				", ground_speed=" + getMinGroundSpeed()+"-"+getMaxGroundSpeed() +
-				", position=" + position +
-				'}';
-	}
-
-	@Override
-	public subtype getType() {
-		return subtype.TISB_COARSE_POSITION;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.TISB_COARSE_POSITION;
+    }
 }

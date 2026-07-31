@@ -26,225 +26,222 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-R velocity messages
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
-	private static final long serialVersionUID = -4871907161197614315L;
+    private static final long serialVersionUID = -4871907161197614315L;
 
-	private byte msg_subtype;
-	private boolean imf;
-	private boolean ifr_capability;
-	private byte navigation_accuracy_category;
-	private boolean direction_west; // 0 = east, 1 = west
-	private short east_west_velocity; // in kn
-	private boolean velocity_info_available;
-	private boolean direction_south; // 0 = north, 1 = south
-	private short north_south_velocity; // in kn
-	private boolean vertical_source; // 0 = geometric, 1 = barometric
-	private boolean vertical_rate_down; // 0 = up, 1 = down
-	private short vertical_rate; // in ft/min
-	private boolean vertical_rate_info_available;
-	private int geo_minus_baro; // in ft
-	private boolean geo_minus_baro_available;
+    private byte msg_subtype;
+    private boolean imf;
+    private boolean ifr_capability;
+    private byte navigation_accuracy_category;
+    private boolean direction_west; // 0 = east, 1 = west
+    private short east_west_velocity; // in kn
+    private boolean velocity_info_available;
+    private boolean direction_south; // 0 = north, 1 = south
+    private short north_south_velocity; // in kn
+    private boolean vertical_source; // 0 = geometric, 1 = barometric
+    private boolean vertical_rate_down; // 0 = up, 1 = down
+    private short vertical_rate; // in ft/min
+    private boolean vertical_rate_info_available;
+    private int geo_minus_baro; // in ft
+    private boolean geo_minus_baro_available;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected VelocityOverGroundMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected VelocityOverGroundMsg() {
+    }
 
-	/**
-	 * @param raw_message raw ADS-R velocity-over-ground message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public VelocityOverGroundMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-R velocity-over-ground message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public VelocityOverGroundMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw ADS-R velocity-over-ground message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public VelocityOverGroundMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage raw ADS-R velocity-over-ground message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public VelocityOverGroundMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this velocity over ground msg
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
+    /**
+     * @param squitter extended squitter which contains this velocity over ground msg
+     * @throws BadFormatException if message has wrong format
+     */
+    public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
 
-		if (this.getFormatTypeCode() != 19) {
-			throw new BadFormatException("Velocity messages must have typecode 19.");
-		}
+        if (this.getFormatTypeCode() != 19) {
+            throw new BadFormatException("Velocity messages must have typecode 19.");
+        }
 
-		byte[] msg = this.getMessage();
+        byte[] msg = this.getMessage();
 
-		msg_subtype = (byte) (msg[0]&0x7);
-		if (msg_subtype != 1 && msg_subtype != 2) {
-			throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-		}
+        msg_subtype = (byte) (msg[0] & 0x7);
+        if (msg_subtype != 1 && msg_subtype != 2) {
+            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
+        }
 
-		imf = (msg[1]&0x80)>0;
-		ifr_capability = (msg[1]&0x40)>0;
-		navigation_accuracy_category = (byte) ((msg[1]>>>3)&0x7);
+        imf = (msg[1] & 0x80) > 0;
+        ifr_capability = (msg[1] & 0x40) > 0;
+        navigation_accuracy_category = (byte) ((msg[1] >>> 3) & 0x7);
 
-		// check this later
-		velocity_info_available = true;
-		vertical_rate_info_available = true;
-		geo_minus_baro_available = true;
+        // check this later
+        velocity_info_available = true;
+        vertical_rate_info_available = true;
+        geo_minus_baro_available = true;
 
-		direction_west = (msg[1]&0x4)>0;
-		east_west_velocity = (short) (((msg[1]&0x3)<<8 | msg[2]&0xFF)-1);
-		if (east_west_velocity == -1) velocity_info_available = false;
-		if (msg_subtype == 2) east_west_velocity<<=2;
+        direction_west = (msg[1] & 0x4) > 0;
+        east_west_velocity = (short) (((msg[1] & 0x3) << 8 | msg[2] & 0xFF) - 1);
+        if (east_west_velocity == -1) velocity_info_available = false;
+        if (msg_subtype == 2) east_west_velocity <<= 2;
 
-		direction_south = (msg[3]&0x80)>0;
-		north_south_velocity = (short) (((msg[3]&0x7F)<<3 | (msg[4]>>>5)&0x07)-1);
-		if (north_south_velocity == -1) velocity_info_available = false;
-		if (msg_subtype == 2) north_south_velocity<<=2;
+        direction_south = (msg[3] & 0x80) > 0;
+        north_south_velocity = (short) (((msg[3] & 0x7F) << 3 | (msg[4] >>> 5) & 0x07) - 1);
+        if (north_south_velocity == -1) velocity_info_available = false;
+        if (msg_subtype == 2) north_south_velocity <<= 2;
 
-		vertical_source = (msg[4]&0x10)>0;
-		vertical_rate_down = (msg[4]&0x08)>0;
-		int raw_vr = ((msg[4]&0x07)<<6 | (msg[5]>>>2)&0x3F);
-		if (raw_vr == 0) {
-			vertical_rate_info_available = false;
-		} else {
-			vertical_rate = (short) ((raw_vr-1)<<6);
-		}
+        vertical_source = (msg[4] & 0x10) > 0;
+        vertical_rate_down = (msg[4] & 0x08) > 0;
+        int raw_vr = ((msg[4] & 0x07) << 6 | (msg[5] >>> 2) & 0x3F);
+        if (raw_vr == 0) {
+            vertical_rate_info_available = false;
+        } else {
+            vertical_rate = (short) ((raw_vr - 1) << 6);
+        }
 
-		geo_minus_baro = msg[6]&0x7F;
-		if (geo_minus_baro == 0) geo_minus_baro_available = false;
-		else geo_minus_baro = (geo_minus_baro-1)*25;
-		if ((msg[6]&0x80)>0) geo_minus_baro *= -1;
-	}
+        geo_minus_baro = msg[6] & 0x7F;
+        if (geo_minus_baro == 0) geo_minus_baro_available = false;
+        else geo_minus_baro = (geo_minus_baro - 1) * 25;
+        if ((msg[6] & 0x80) > 0) geo_minus_baro *= -1;
+    }
 
-	/**
-	 * @return whether velocity info is available
-	 */
-	public boolean hasVelocityInfo() {
-		return velocity_info_available;
-	}
+    /**
+     * @return whether velocity info is available
+     */
+    public boolean hasVelocityInfo() {
+        return velocity_info_available;
+    }
 
-	@Override
-	public boolean hasVerticalRateInfo() {
-		return vertical_rate_info_available;
-	}
+    @Override
+    public boolean hasVerticalRateInfo() {
+        return vertical_rate_info_available;
+    }
 
-	@Override
-	public boolean hasGeoMinusBaroInfo() {
-		return geo_minus_baro_available;
-	}
+    @Override
+    public boolean hasGeoMinusBaroInfo() {
+        return geo_minus_baro_available;
+    }
 
-	/**
-	 * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
-	 */
-	public boolean isSupersonic() {
-		return msg_subtype == 2;
-	}
+    /**
+     * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
+     */
+    public boolean isSupersonic() {
+        return msg_subtype == 2;
+    }
 
-	@Override
-	public boolean getIMF () {
-		return imf;
-	}
+    @Override
+    public boolean getIMF() {
+        return imf;
+    }
 
-	@Override
-	public boolean hasIFRCapability() {
-		return ifr_capability;
-	}
+    @Override
+    public boolean hasIFRCapability() {
+        return ifr_capability;
+    }
 
-	@Override
-	public byte getNACv() {
-		return navigation_accuracy_category;
-	}
+    @Override
+    public byte getNACv() {
+        return navigation_accuracy_category;
+    }
 
+    /**
+     * @return velocity from east to south in knots or null if information is not available
+     */
+    public Integer getEastToWestVelocity() {
+        if (!velocity_info_available) return null;
+        return (direction_west ? east_west_velocity : -east_west_velocity);
+    }
 
-	/**
-	 * @return velocity from east to south in knots or null if information is not available
-	 */
-	public Integer getEastToWestVelocity() {
-		if (!velocity_info_available) return null;
-		return (direction_west ? east_west_velocity : -east_west_velocity);
-	}
+    /**
+     * @return velocity from north to south in knots or null if information is not available
+     */
+    public Integer getNorthToSouthVelocity() {
+        if (!velocity_info_available) return null;
+        return (direction_south ? north_south_velocity : -north_south_velocity);
+    }
 
+    @Override
+    public boolean isBarometricVerticalSpeed() {
+        return vertical_source;
+    }
 
-	/**
-	 * @return velocity from north to south in knots or null if information is not available
-	 */
-	public Integer getNorthToSouthVelocity() {
-		if (!velocity_info_available) return null;
-		return (direction_south ? north_south_velocity : -north_south_velocity);
-	}
+    @Override
+    public Integer getVerticalRate() {
+        if (!vertical_rate_info_available) return null;
+        return (vertical_rate_down ? -vertical_rate : vertical_rate);
+    }
 
+    @Override
+    public Integer getGeoMinusBaro() {
+        if (!geo_minus_baro_available) return null;
+        return geo_minus_baro;
+    }
 
-	@Override
-	public boolean isBarometricVerticalSpeed() {
-		return vertical_source;
-	}
+    /**
+     * @return heading in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
+     * The latter can also be checked with {@link #hasVelocityInfo()}.
+     */
+    public Double getTrueTrackAngle() {
+        if (!velocity_info_available) return null;
+        double angle = Math.toDegrees(Math.atan2(
+                -this.getEastToWestVelocity(),
+                -this.getNorthToSouthVelocity()));
 
+        // if negative => clockwise
+        if (angle < 0) return 360 + angle;
+        else return angle;
+    }
 
-	@Override
-	public Integer getVerticalRate() {
-		if (!vertical_rate_info_available) return null;
-		return (vertical_rate_down ? -vertical_rate : vertical_rate);
-	}
+    /**
+     * @return speed over ground in knots or null if information is not available. The latter can also be checked
+     * with {@link #hasVelocityInfo()}.
+     */
+    public Double getGroundSpeed() {
+        if (!velocity_info_available) return null;
+        return Math.hypot(north_south_velocity, east_west_velocity);
+    }
 
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tVelocityOverGroundMsg{" +
+                "msg_subtype=" + msg_subtype +
+                ", imf=" + imf +
+                ", ifr_capability=" + ifr_capability +
+                ", navigation_accuracy_category=" + navigation_accuracy_category +
+                ", direction_west=" + direction_west +
+                ", east_west_velocity=" + east_west_velocity +
+                ", velocity_info_available=" + velocity_info_available +
+                ", direction_south=" + direction_south +
+                ", north_south_velocity=" + north_south_velocity +
+                ", vertical_source=" + vertical_source +
+                ", vertical_rate_down=" + vertical_rate_down +
+                ", vertical_rate=" + vertical_rate +
+                ", vertical_rate_info_available=" + vertical_rate_info_available +
+                ", geo_minus_baro=" + geo_minus_baro +
+                ", geo_minus_baro_available=" + geo_minus_baro_available +
+                '}';
+    }
 
-	@Override
-	public Integer getGeoMinusBaro() {
-		if (!geo_minus_baro_available) return null;
-		return geo_minus_baro;
-	}
-
-	/**
-	 * @return heading in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
-	 * The latter can also be checked with {@link #hasVelocityInfo()}.
-	 */
-	public Double getTrueTrackAngle() {
-		if (!velocity_info_available) return null;
-		double angle = Math.toDegrees(Math.atan2(
-				-this.getEastToWestVelocity(),
-				-this.getNorthToSouthVelocity()));
-
-		// if negative => clockwise
-		if (angle < 0) return 360+angle;
-		else return angle;
-	}
-
-	/**
-	 * @return speed over ground in knots or null if information is not available. The latter can also be checked
-	 * with {@link #hasVelocityInfo()}.
-	 */
-	public Double getGroundSpeed() {
-		if (!velocity_info_available) return null;
-		return Math.hypot(north_south_velocity, east_west_velocity);
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tVelocityOverGroundMsg{" +
-				"msg_subtype=" + msg_subtype +
-				", imf=" + imf +
-				", ifr_capability=" + ifr_capability +
-				", navigation_accuracy_category=" + navigation_accuracy_category +
-				", direction_west=" + direction_west +
-				", east_west_velocity=" + east_west_velocity +
-				", velocity_info_available=" + velocity_info_available +
-				", direction_south=" + direction_south +
-				", north_south_velocity=" + north_south_velocity +
-				", vertical_source=" + vertical_source +
-				", vertical_rate_down=" + vertical_rate_down +
-				", vertical_rate=" + vertical_rate +
-				", vertical_rate_info_available=" + vertical_rate_info_available +
-				", geo_minus_baro=" + geo_minus_baro +
-				", geo_minus_baro_available=" + geo_minus_baro_available +
-				'}';
-	}
-
-	@Override
-	public subtype getType() {
-		return subtype.ADSR_VELOCITY;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.ADSR_VELOCITY;
+    }
 }

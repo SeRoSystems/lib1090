@@ -26,55 +26,55 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTest {
 
-	// ME = F8 00 02 00 49 29 00 (subtype 0/airborne, version 1, nacP=9)
-	private static final String BASE_MESSAGE = "8D000000F8000200492900000000";
+    // ME = F8 00 02 00 49 29 00 (subtype 0/airborne, version 1, nacP=9)
+    private static final String BASE_MESSAGE = "8D000000F8000200492900000000";
 
-	@Override
-	protected byte[] baseMessage() {
-		return Tools.hexStringToByteArray(BASE_MESSAGE);
-	}
+    @Override
+    protected byte[] baseMessage() {
+        return Tools.hexStringToByteArray(BASE_MESSAGE);
+    }
 
-	@Override
-	protected AirborneOperationalStatusV1Msg create(byte[] msg) throws Exception {
-		return new AirborneOperationalStatusV1Msg(msg);
-	}
+    @Override
+    protected AirborneOperationalStatusV1Msg create(byte[] msg) throws Exception {
+        return new AirborneOperationalStatusV1Msg(msg);
+    }
 
-	@Test
-	public void testCapabilityCodeWithHighByteBits() throws Exception {
-		// Bypass CRC checks
-		// 14 bytes: DF(1) + ICAO(3) + ME(7) + CRC(3)
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8008000002900000000");
-		AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
-		assertEquals(1, status.getVersion());
-	}
+    @Test
+    public void testCapabilityCodeWithHighByteBits() throws Exception {
+        // Bypass CRC checks
+        // 14 bytes: DF(1) + ICAO(3) + ME(7) + CRC(3)
+        byte[] msg = Tools.hexStringToByteArray("8D000000F8008000002900000000");
+        AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
+        assertEquals(1, status.getVersion());
+    }
 
-	@Test
-	public void testOperationalModeCodeWithHighByte() throws Exception {
-		byte[] msg = Tools.hexStringToByteArray("8D000000F8000280492900000000");
-		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
-	}
+    @Test
+    public void testOperationalModeCodeWithHighByte() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray("8D000000F8000280492900000000");
+        assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
+    }
 
-	@Test
-	public void testValidVersion1Message() throws Exception {
-		AirborneOperationalStatusV1Msg status = create(baseMessage());
-		assertTrue(status instanceof OperationalStatusV1Msg);
-		assertEquals(0, status.getSubtypeCode());
-		assertEquals(1, status.getVersion());
-		assertEquals(9, status.getNACpEncoded());
-	}
+    @Test
+    public void testValidVersion1Message() throws Exception {
+        AirborneOperationalStatusV1Msg status = create(baseMessage());
+        assertInstanceOf(OperationalStatusV1Msg.class, status);
+        assertEquals(0, status.getSubtypeCode());
+        assertEquals(1, status.getVersion());
+        assertEquals(9, status.getNACpEncoded());
+    }
 
-	@Test
-	public void testRejectVersion0Message() throws Exception {
-		byte[] msg = baseMessage();
-		msg[9] = 0x09;
+    @Test
+    public void testRejectVersion0Message() throws Exception {
+        byte[] msg = baseMessage();
+        msg[9] = 0x09;
 
-		assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
-	}
+        assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
+    }
 
-	@Test
-	void testHasOperationalTCAS() throws Exception {
-		// In version 1, the bit means "TCAS NOT operational" -- unset (or unknown) means operational.
-		assertTrue(create(baseMessage()).hasOperationalTCAS());
-		assertFalse(withCapabilityClassCode(0x2000).hasOperationalTCAS());
-	}
+    @Test
+    void testHasOperationalTCAS() throws Exception {
+        // In version 1, the bit means "TCAS NOT operational" -- unset (or unknown) means operational.
+        assertTrue(create(baseMessage()).hasOperationalTCAS());
+        assertFalse(withCapabilityClassCode(0x2000).hasOperationalTCAS());
+    }
 }

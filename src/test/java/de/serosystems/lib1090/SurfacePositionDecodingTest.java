@@ -34,7 +34,6 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class SurfacePositionDecodingTest {
 
     private final static String DATA_FILE = "20221005-DEDUPLICATED_MODE_S-Surface-Positions-a53436.json";

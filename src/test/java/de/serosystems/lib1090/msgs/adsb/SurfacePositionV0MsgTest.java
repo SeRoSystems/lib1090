@@ -22,19 +22,19 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
 
-	@Override
-	protected SurfacePositionMsg create(String hex) throws Exception {
-		return new SurfacePositionV0Msg(hex, Instant.EPOCH);
-	}
+    @Override
+    protected SurfacePositionMsg create(String hex) throws Exception {
+        return new SurfacePositionV0Msg(hex, Instant.EPOCH);
+    }
 
-	@Test
-	void testHasTimeFlag() throws Exception {
-		final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
+    @Test
+    void testHasTimeFlag() throws Exception {
+        final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
 
-		assertFalse(sPos.hasTimeFlag());
-	}
+        assertFalse(sPos.hasTimeFlag());
+    }
 }

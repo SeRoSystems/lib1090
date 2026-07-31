@@ -20,20 +20,20 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EmergencyOrPriorityStatusV0V1MsgTest {
 
-	@Test
-	public void testEmergencyState() throws Exception {
-		EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
-		assertEquals(0, msg.getEmergencyStateCode());
-		assertEquals("no emergency", msg.getEmergencyStateText());
-	}
+    @Test
+    public void testEmergencyState() throws Exception {
+        EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
+        assertEquals(0, msg.getEmergencyStateCode());
+        assertEquals("no emergency", msg.getEmergencyStateText());
+    }
 
-	@Test
-	public void testTypeCode28() throws Exception {
-		EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
-		assertEquals(28, msg.getFormatTypeCode());
-	}
+    @Test
+    public void testTypeCode28() throws Exception {
+        EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
+        assertEquals(28, msg.getFormatTypeCode());
+    }
 }

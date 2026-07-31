@@ -20,8 +20,8 @@ package de.serosystems.lib1090.msgs.adsb;
 
 class IdentificationV3MsgTest extends IdentificationMsgTest {
 
-	@Override
-	protected IdentificationMsg create(String hex) throws Exception {
-		return new IdentificationV3Msg(hex);
-	}
+    @Override
+    protected IdentificationMsg create(String hex) throws Exception {
+        return new IdentificationV3Msg(hex);
+    }
 }

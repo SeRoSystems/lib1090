@@ -28,232 +28,235 @@ import java.io.Serializable;
 
 /**
  * Decoder for TIS-B airspeed+heading message (DO-260B, 2.2.17.3.4).
- * @author Matthias Schaefer (schaefer@sero-systems.de)
  */
 public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
 
-	private static final long serialVersionUID = 944130622021621845L;
+    private static final long serialVersionUID = 944130622021621845L;
 
-	private byte msg_subtype;
-	private boolean imf;
-	private byte nacp;
+    private byte msg_subtype;
+    private boolean imf;
+    private byte nacp;
 
-	private boolean vertical_rate_down; // 0 = up, 1 = down
-	private short vertical_rate; // in ft/min
-	private boolean vertical_rate_info_available;
+    private boolean vertical_rate_down; // 0 = up, 1 = down
+    private short vertical_rate; // in ft/min
+    private boolean vertical_rate_info_available;
 
-	private boolean heading_status_bit;
-	private double heading; // in degrees
-	private boolean true_airspeed; // 0 = indicated AS, 1 = true AS
-	private short airspeed; // in knots
-	private boolean airspeed_available;
+    private boolean heading_status_bit;
+    private double heading; // in degrees
+    private boolean true_airspeed; // 0 = indicated AS, 1 = true AS
+    private short airspeed; // in knots
+    private boolean airspeed_available;
 
-	private Integer geo_minus_baro; // in ft
+    private Integer geo_minus_baro; // in ft
 
-	private Byte nacv;
-	private Byte sil;
-	private Boolean magnetic_heading;
+    private Byte nacv;
+    private Byte sil;
+    private Boolean magnetic_heading;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected AirspeedHeadingMsg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected AirspeedHeadingMsg() {
+    }
 
-	/**
-	 * @param raw_message raw TIS-B velocity message as hex string
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirspeedHeadingMsg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
-
-	/**
-	 * @param raw_message raw TIS-B velocity message as byte array
-	 * @throws BadFormatException if message has wrong format
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public AirspeedHeadingMsg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
-
-	/**
-	 * @param squitter extended squitter containing the velocity message
-	 * @throws BadFormatException if message has wrong format
-	 */
-	public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
-		super(squitter);
-
-		if (getDownlinkFormat() != 18)
-			throw new BadFormatException("TIS-B messages must have downlink format 18.");
-
-		if (this.getFormatTypeCode() != 19)
-			throw new BadFormatException("Velocity messages must have typecode 19.");
-
-		// Table 2-13
-		if (getFirstField() != 2 && getFirstField() != 5)
-			throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
-
-		byte[] msg = this.getMessage();
-
-		msg_subtype = (byte) (msg[0]&0x7);
-		if (msg_subtype != 3 && msg_subtype != 4) {
-			throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-		}
-
-		imf = (msg[1]&0x80)>0;
-		nacp = (byte) ((msg[1]>>>3)&0xF);
-
-		// heading available in ADS-B version 1+, indicates true/magnetic north for version 0
-		heading_status_bit = (msg[1]&0x4)>0;
-		heading = ((msg[1]&0x3)<<8 | msg[2]&0xFF) * 360./1024.;
-
-		true_airspeed = (msg[3]&0x80)>0;
-		airspeed = (short) (((msg[3]&0x7F)<<3 | msg[4]>>>5&0x07)-1);
-		if (airspeed != -1) {
-			airspeed_available = true;
-			if (msg_subtype == 4) airspeed<<=2;
-		}
-
-		// 0 = no geo data available, 1 = geo data available
-		boolean geo_flag = (msg[4] & 0x10) > 0;
-
-		vertical_rate_down = (msg[4]&0x08)>0;
-		vertical_rate = (short) ((((msg[4]&0x07)<<6 | msg[5]>>>2&0x3F)-1)<<6);
-
-		if (geo_flag) {
-			geo_minus_baro = msg[6] & 0x7F;
-			geo_minus_baro = (geo_minus_baro - 1) * 25;
-			if ((msg[6] & 0x80) > 0) geo_minus_baro *= -1;
-
-			nacv = null;
-			sil = null;
-			magnetic_heading = null;
-		} else {
-			geo_minus_baro = null;
-			nacv = (byte) (((msg[5]&0x1)<<2) | ((msg[6]>>>6)&0x3));
-			sil = (byte) ((msg[6]>>>4)&0x3);
-			magnetic_heading = (msg[6]&0x2) > 0;
-		}
-	}
-
-	@Override
-	public boolean getIMF () {
-		return imf;
-	}
-
-	@Override
-	public boolean hasVerticalRateInfo() {
-		return vertical_rate_info_available;
-	}
-
-	@Override
-	public boolean hasGeoMinusBaroInfo() {
-		return geo_minus_baro != null;
-	}
-
-	/**
-	 * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
-	 */
-	public Double getHeading() {
-		if (!heading_status_bit) return null;
-		return heading;
-	}
-
-	/**
-	 * @return airspeed in knots or null if information is not available.
-	 */
-	public Integer getAirspeed() {
-		if (!airspeed_available) return null;
-		return (int) airspeed;
-	}
-
-	/**
-	 * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
-	 */
-	public boolean isTrueAirspeed() {
-		return true_airspeed;
-	}
-
-	/**
-	 * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
-	 */
-	public boolean isSupersonic() {
-		return msg_subtype == 4;
-	}
-
-	@Override
-	public Byte getNACv() {
-		return nacv;
-	}
-
-	@Override
-	public Integer getVerticalRate() {
-		if (!vertical_rate_info_available) return null;
-		return (vertical_rate_down ? -vertical_rate : vertical_rate);
-	}
-
-	@Override
-	public Integer getGeoMinusBaro() {
-		return geo_minus_baro;
-	}
-
-	/**
-     * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
-	 * in the operational status message. For version 0 it is derived from the format type code.
-	 *
-	 * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
-	 * {@link AirborneOperationalStatusV1Msg}. Returns null if not available.
+    /**
+     * @param rawMessage raw TIS-B velocity message as hex string
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-	public byte getNACp() {
-		return nacp;
-	}
+    public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-	 *
-	 * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-	 * is reflected by this method.
-	 * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-	 * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
-	 * version 1 and 2.
-	 *
-	 * @return the source integrity level (SIL) which indicates the probability of exceeding
-	 *         the NIC containment radius. Returns null if not available.
-	 */
-	public Byte getSIL() {
-		return sil;
-	}
+    /**
+     * @param rawMessage raw TIS-B velocity message as byte array
+     * @throws BadFormatException     if message has wrong format
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * According to DO-260B, 2.2.3.2.7.2.13
-	 * @return true if horizontal reference direction is magnet north; false if true north; null if info not available
-	 */
-	public Boolean isMagneticHeading () {
-		return magnetic_heading;
-	}
+    /**
+     * @param squitter extended squitter containing the velocity message
+     * @throws BadFormatException if message has wrong format
+     */
+    public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
+        super(squitter);
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tAirspeedHeadingMsg{" +
-				"msg_subtype=" + msg_subtype +
-				", imf=" + imf +
-				", nacp=" + nacp +
-				", vertical_rate_down=" + vertical_rate_down +
-				", vertical_rate=" + vertical_rate +
-				", vertical_rate_info_available=" + vertical_rate_info_available +
-				", heading_status_bit=" + heading_status_bit +
-				", heading=" + heading +
-				", true_airspeed=" + true_airspeed +
-				", airspeed=" + airspeed +
-				", airspeed_available=" + airspeed_available +
-				", geo_minus_baro=" + geo_minus_baro +
-				", nacv=" + nacv +
-				", sil=" + sil +
-				", magnetic_heading=" + magnetic_heading +
-				'}';
-	}
+        if (getDownlinkFormat() != 18)
+            throw new BadFormatException("TIS-B messages must have downlink format 18.");
 
-	@Override
-	public subtype getType() {
-		return subtype.TISB_VELOCITY;
-	}
+        if (this.getFormatTypeCode() != 19)
+            throw new BadFormatException("Velocity messages must have typecode 19.");
+
+        // Table 2-13
+        if (getFirstField() != 2 && getFirstField() != 5)
+            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+
+        byte[] msg = this.getMessage();
+
+        msg_subtype = (byte) (msg[0] & 0x7);
+        if (msg_subtype != 3 && msg_subtype != 4) {
+            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
+        }
+
+        imf = (msg[1] & 0x80) > 0;
+        nacp = (byte) ((msg[1] >>> 3) & 0xF);
+
+        // heading available in ADS-B version 1+, indicates true/magnetic north for version 0
+        heading_status_bit = (msg[1] & 0x4) > 0;
+        heading = ((msg[1] & 0x3) << 8 | msg[2] & 0xFF) * 360. / 1024.;
+
+        true_airspeed = (msg[3] & 0x80) > 0;
+        airspeed = (short) (((msg[3] & 0x7F) << 3 | msg[4] >>> 5 & 0x07) - 1);
+        if (airspeed != -1) {
+            airspeed_available = true;
+            if (msg_subtype == 4) airspeed <<= 2;
+        }
+
+        // 0 = no geo data available, 1 = geo data available
+        boolean geo_flag = (msg[4] & 0x10) > 0;
+
+        vertical_rate_down = (msg[4] & 0x08) > 0;
+        vertical_rate = (short) ((((msg[4] & 0x07) << 6 | msg[5] >>> 2 & 0x3F) - 1) << 6);
+
+        if (geo_flag) {
+            geo_minus_baro = msg[6] & 0x7F;
+            geo_minus_baro = (geo_minus_baro - 1) * 25;
+            if ((msg[6] & 0x80) > 0) geo_minus_baro *= -1;
+
+            nacv = null;
+            sil = null;
+            magnetic_heading = null;
+        } else {
+            geo_minus_baro = null;
+            nacv = (byte) (((msg[5] & 0x1) << 2) | ((msg[6] >>> 6) & 0x3));
+            sil = (byte) ((msg[6] >>> 4) & 0x3);
+            magnetic_heading = (msg[6] & 0x2) > 0;
+        }
+    }
+
+    @Override
+    public boolean getIMF() {
+        return imf;
+    }
+
+    @Override
+    public boolean hasVerticalRateInfo() {
+        return vertical_rate_info_available;
+    }
+
+    @Override
+    public boolean hasGeoMinusBaroInfo() {
+        return geo_minus_baro != null;
+    }
+
+    /**
+     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
+     */
+    public Double getHeading() {
+        if (!heading_status_bit) return null;
+        return heading;
+    }
+
+    /**
+     * @return airspeed in knots or null if information is not available.
+     */
+    public Integer getAirspeed() {
+        if (!airspeed_available) return null;
+        return (int) airspeed;
+    }
+
+    /**
+     * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
+     */
+    public boolean isTrueAirspeed() {
+        return true_airspeed;
+    }
+
+    /**
+     * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
+     */
+    public boolean isSupersonic() {
+        return msg_subtype == 4;
+    }
+
+    @Override
+    public Byte getNACv() {
+        return nacv;
+    }
+
+    @Override
+    public Integer getVerticalRate() {
+        if (!vertical_rate_info_available) return null;
+        return (vertical_rate_down ? -vertical_rate : vertical_rate);
+    }
+
+    @Override
+    public Integer getGeoMinusBaro() {
+        return geo_minus_baro;
+    }
+
+    /**
+     * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
+     * in the operational status message. For version 0 it is derived from the format type code.
+     *
+     * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
+     * {@link AirborneOperationalStatusV1Msg}. Returns null if not available.
+     */
+    public byte getNACp() {
+        return nacp;
+    }
+
+    /**
+     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
+     * <p>
+     * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
+     * is reflected by this method.
+     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
+     * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
+     * version 1 and 2.
+     *
+     * @return the source integrity level (SIL) which indicates the probability of exceeding
+     * the NIC containment radius. Returns null if not available.
+     */
+    public Byte getSIL() {
+        return sil;
+    }
+
+    /**
+     * According to DO-260B, 2.2.3.2.7.2.13
+     *
+     * @return true if horizontal reference direction is magnet north; false if true north; null if info not available
+     */
+    public Boolean isMagneticHeading() {
+        return magnetic_heading;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tAirspeedHeadingMsg{" +
+                "msg_subtype=" + msg_subtype +
+                ", imf=" + imf +
+                ", nacp=" + nacp +
+                ", vertical_rate_down=" + vertical_rate_down +
+                ", vertical_rate=" + vertical_rate +
+                ", vertical_rate_info_available=" + vertical_rate_info_available +
+                ", heading_status_bit=" + heading_status_bit +
+                ", heading=" + heading +
+                ", true_airspeed=" + true_airspeed +
+                ", airspeed=" + airspeed +
+                ", airspeed_available=" + airspeed_available +
+                ", geo_minus_baro=" + geo_minus_baro +
+                ", nacv=" + nacv +
+                ", sil=" + sil +
+                ", magnetic_heading=" + magnetic_heading +
+                '}';
+    }
+
+    @Override
+    public subtype getType() {
+        return subtype.TISB_VELOCITY;
+    }
 }

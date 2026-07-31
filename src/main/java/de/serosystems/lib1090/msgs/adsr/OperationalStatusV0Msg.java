@@ -26,110 +26,114 @@ import java.io.Serializable;
 
 /**
  * Decoder for ADS-R operational status message as specified in DO-260 (ADS-R version 0).
- * @author Markus Fuchs (fuchs@opensky-network.org)
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = 9184941370982030335L;
+    private static final long serialVersionUID = 9184941370982030335L;
 
-	private byte enroute_capabilities;
-	private boolean imf;
+    private byte enroute_capabilities;
+    private boolean imf;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected OperationalStatusV0Msg() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected OperationalStatusV0Msg() {
+    }
 
-	/**
-	 * @param raw_message The full Mode S message in hex representation
-	 * @throws BadFormatException if message has the wrong typecode or ADS-R version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message in hex representation
+     * @throws BadFormatException     if message has the wrong typecode or ADS-R version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param raw_message The full Mode S message as byte array
-	 * @throws BadFormatException if message has the wrong typecode or ADS-R version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ExtendedSquitter(raw_message));
-	}
+    /**
+     * @param rawMessage The full Mode S message as byte array
+     * @throws BadFormatException     if message has the wrong typecode or ADS-R version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ExtendedSquitter(rawMessage));
+    }
 
-	/**
-	 * @param squitter extended squitter which contains this message
-	 * @throws BadFormatException  if message has the wrong typecode or ADS-R version
-	 * @throws UnspecifiedFormatError if message has the wrong subtype
-	 */
-	public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
-		super(squitter);
+    /**
+     * @param squitter extended squitter which contains this message
+     * @throws BadFormatException     if message has the wrong typecode or ADS-R version
+     * @throws UnspecifiedFormatError if message has the wrong subtype
+     */
+    public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+        super(squitter);
 
-		if (getFormatTypeCode() != 31) {
-			throw new BadFormatException("Operational status messages must have typecode 31.");
-		}
+        if (getFormatTypeCode() != 31) {
+            throw new BadFormatException("Operational status messages must have typecode 31.");
+        }
 
-		byte[] msg = this.getMessage();
+        byte[] msg = this.getMessage();
 
-		if ((msg[5]>>>5) != 0)
-			throw new BadFormatException("Not a DO-260/version 0 status message.");
+        if ((msg[5] >>> 5) != 0)
+            throw new BadFormatException("Not a DO-260/version 0 status message.");
 
-		byte subtype_code = (byte)(msg[0] & 0x7);
-		if (subtype_code > 0) // all others are reserved
-			throw new UnspecifiedFormatError("Operational status message subtype "+subtype_code+" reserved.");
+        byte subtype_code = (byte) (msg[0] & 0x7);
+        if (subtype_code > 0) // all others are reserved
+            throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
 
-		enroute_capabilities = msg[1];
-		// All other capability fields are "TBD" in standard
-		imf = (msg[6] & 0x1) != 0;
-	}
+        enroute_capabilities = msg[1];
+        // All other capability fields are "TBD" in standard
+        imf = (msg[6] & 0x1) != 0;
+    }
 
-	/**
-	 * DO-260 2.2.3.2.7.3.3.1
-	 * @return true if TCAS is operational or unknown
-	 */
-	public boolean hasOperationalTCAS() {
-		// first three bits zero
-		return (enroute_capabilities & 0xe0) == 0;
-	}
+    /**
+     * DO-260 2.2.3.2.7.3.3.1
+     *
+     * @return true if TCAS is operational or unknown
+     */
+    public boolean hasOperationalTCAS() {
+        // first three bits zero
+        return (enroute_capabilities & 0xe0) == 0;
+    }
 
-	/**
-	 * DO-260 2.2.3.2.7.3.3.1
-	 * @return true if CDTI is operational or unknown
-	 */
-	public boolean hasOperationalCDTI() {
-		// status of 4th bit when first two bits zero
-		return (enroute_capabilities & 0xd0) == 16;
-	}
+    /**
+     * DO-260 2.2.3.2.7.3.3.1
+     *
+     * @return true if CDTI is operational or unknown
+     */
+    public boolean hasOperationalCDTI() {
+        // status of 4th bit when first two bits zero
+        return (enroute_capabilities & 0xd0) == 16;
+    }
 
-	/**
-	 * the version number of the formats and protocols in use on the aircraft installation.<br>
-	 * 	       0: Conformant to DO-260/ED-102 and DO-242<br>
-	 * 	       1: Conformant to DO-260A and DO-242A<br>
-	 * 	       2: Conformant to DO-260B/ED-102A and DO-242B<br>
-	 * 	       3-7: reserved
-	 * @return always 0
-	 */
-	public byte getVersion() {
-		return 0;
-	}
+    /**
+     * the version number of the formats and protocols in use on the aircraft installation.<br>
+     * 0: Conformant to DO-260/ED-102 and DO-242<br>
+     * 1: Conformant to DO-260A and DO-242A<br>
+     * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
+     * 3-7: reserved
+     *
+     * @return always 0
+     */
+    public byte getVersion() {
+        return 0;
+    }
 
-	/**
-	 * @return the ICAO Mode A Flag (for address type determination)
-	 */
-	public boolean getIMF () {
-		return imf;
-	}
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString() + "\n\tOperationalStatusV0Msg{" +
-				"enroute_capabilities=" + enroute_capabilities +
-				", imf=" + imf +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "\n\tOperationalStatusV0Msg{" +
+                "enroute_capabilities=" + enroute_capabilities +
+                ", imf=" + imf +
+                '}';
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.ADSR_STATUS_V0;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.ADSR_STATUS_V0;
+    }
 }

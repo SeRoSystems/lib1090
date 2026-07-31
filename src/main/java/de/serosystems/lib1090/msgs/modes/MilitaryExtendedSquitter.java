@@ -27,57 +27,59 @@ import java.io.Serializable;
 /**
  * Decoder for Mode S military extended squitters (DF19)<br>
  * Note: this format is practically unspecified
- * @author Matthias Schäfer (schaefer@sero-systems.de)
  */
 public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serializable {
 
-	private static final long serialVersionUID = 2459913562133769670L;
+    private static final long serialVersionUID = 2459913562133769670L;
 
-	/** protected no-arg constructor e.g. for serialization with Kryo **/
-	protected MilitaryExtendedSquitter() { }
+    /**
+     * protected no-arg constructor e.g. for serialization with Kryo
+     **/
+    protected MilitaryExtendedSquitter() {
+    }
 
-	/**
-	 * @param raw_message raw military extended squitter as hex string
-	 * @throws BadFormatException if message is not military extended squitter or
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public MilitaryExtendedSquitter(String raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw military extended squitter as hex string
+     * @throws BadFormatException     if message is not military extended squitter or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public MilitaryExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param raw_message raw military extended squitter as byte array
-	 * @throws BadFormatException if message is not military extended squitter or
-	 * contains wrong values.
-	 * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
-	 */
-	public MilitaryExtendedSquitter(byte[] raw_message) throws BadFormatException, UnspecifiedFormatError {
-		this(new ModeSDownlinkMsg(raw_message));
-	}
+    /**
+     * @param rawMessage raw military extended squitter as byte array
+     * @throws BadFormatException     if message is not military extended squitter or
+     *                                contains wrong values.
+     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     */
+    public MilitaryExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+        this(new ModeSDownlinkMsg(rawMessage));
+    }
 
-	/**
-	 * @param reply Mode S reply containing this military extended squitter
-	 * @throws BadFormatException if message is not a military extended squitter
-	 */
-	public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
-		super(reply);
+    /**
+     * @param reply Mode S reply containing this military extended squitter
+     * @throws BadFormatException if message is not a military extended squitter
+     */
+    public MilitaryExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
+        super(reply);
 
-		if (getDownlinkFormat() != 19)
-			throw new BadFormatException("Message is not a military extended squitter!");
-	}
+        if (getDownlinkFormat() != 19)
+            throw new BadFormatException("Message is not a military extended squitter!");
+    }
 
-	/**
-	 * Copy constructor for subclasses
-	 * 
-	 * @param squitter instance of MilitaryExtendedSquitter to copy from
-	 */
-	public MilitaryExtendedSquitter(MilitaryExtendedSquitter squitter) {
-		super(squitter);
-	}
+    /**
+     * Copy constructor for subclasses
+     *
+     * @param squitter instance of MilitaryExtendedSquitter to copy from
+     */
+    public MilitaryExtendedSquitter(MilitaryExtendedSquitter squitter) {
+        super(squitter);
+    }
 
-	@Override
-	public subtype getType() {
-		return subtype.MILITARY_EXTENDED_SQUITTER;
-	}
+    @Override
+    public subtype getType() {
+        return subtype.MILITARY_EXTENDED_SQUITTER;
+    }
 }

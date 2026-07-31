@@ -163,7 +163,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         return (operationalModeCode & 0x800) != 0;
     }
 
-
     /**
      * @return raw aircraft vehicle length and width code (4 bit)
      */

@@ -22,18 +22,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 public class SelectedVerticalIntentionTest {
 
     private static byte[] msg;
 
     @BeforeAll
     public static void setup() {
-
         msg = new byte[]{
                 (byte) 0b10000101, (byte) 0b11100100, (byte) 0b00101111, (byte) 0b00110001, (byte) 0b00110000,
                 (byte) 0b00000000, (byte) 0b00000000
         };
-
     }
 
     @Test
@@ -65,7 +64,7 @@ public class SelectedVerticalIntentionTest {
         Float barometricPressureSetting = SelectedVerticalIntention.computeBarometricPressureSetting(status, value);
 
         assertTrue(status);
-        assertEquals(2200, value ,0.0);
+        assertEquals(2200, value, 0.0);
         assertEquals(1020, barometricPressureSetting, 0.0);
     }
 

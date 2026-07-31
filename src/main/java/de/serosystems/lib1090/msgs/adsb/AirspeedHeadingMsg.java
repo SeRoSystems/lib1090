@@ -54,7 +54,7 @@ public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
 
     /**
      * @return raw heading field value (10 bit). Check {@link #hasHeadingStatusFlag()} to determine whether this value
-     *         is valid.
+     * is valid.
      */
     short getHeadingEncoded();
 
