@@ -34,7 +34,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
 
     private static final byte SUBTYPE = 4;
 
-    private byte contingencyPlanEncoded;
+    private byte contingencyPlan;
     private boolean currentOrNext;
     private short tcpAltitudeEncoded;
     private int tcpLatitudeEncoded;
@@ -79,7 +79,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
         if (b.readByte(6, 8) != SUBTYPE)
             throw new BadFormatException("UAS/RPAS contingency reports have subtype 4.");
 
-        contingencyPlanEncoded = b.readByte(9, 12);
+        contingencyPlan = b.readByte(9, 12);
         currentOrNext = b.readByte(13, 13) != 0;
         tcpAltitudeEncoded = b.readShort(14, 22);
         tcpLatitudeEncoded = b.readInt(23, 39);
@@ -94,10 +94,10 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * @return the encoded contingency plan bits
+     * @return the contingency plan
      */
-    public byte getContingencyPlanEncoded() {
-        return contingencyPlanEncoded;
+    public byte getContingencyPlan() {
+        return contingencyPlan;
     }
 
     /**
@@ -163,7 +163,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
     @Override
     public String toString() {
         return "UASRPASContingencyMsg{" + super.toString() +
-                ", contingencyPlanEncoded=" + contingencyPlanEncoded +
+                ", contingencyPlan=" + contingencyPlan +
                 ", currentOrNext=" + currentOrNext +
                 ", tcpAltitudeEncoded=" + tcpAltitudeEncoded +
                 ", tcpLatitudeEncoded=" + tcpLatitudeEncoded +

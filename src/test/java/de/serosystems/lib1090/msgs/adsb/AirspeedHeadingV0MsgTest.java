@@ -32,6 +32,6 @@ class AirspeedHeadingV0MsgTest extends AirspeedHeadingMsgTest {
     @Test
     public void testNUCrRaw() throws Exception {
         AirspeedHeadingV0Msg msg = new AirspeedHeadingV0Msg("8DA05F219B06B6AF189400CBC33F");
-        assertEquals(0, msg.getNUCrEncoded());
+        assertEquals(0, msg.getNUCr());
     }
 }

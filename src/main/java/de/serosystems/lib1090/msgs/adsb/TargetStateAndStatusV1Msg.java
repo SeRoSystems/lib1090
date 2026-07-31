@@ -145,7 +145,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
     }
 
     @Override
-    public byte getNACpEncoded() {
+    public byte getNACp() {
         return nacP;
     }
 
@@ -155,7 +155,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
     }
 
     @Override
-    public byte getSILEncoded() {
+    public byte getSIL() {
         return sil;
     }
 

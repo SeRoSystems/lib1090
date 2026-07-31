@@ -35,7 +35,7 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
     private byte messageSubtype;
     private boolean intentChange;
     private boolean ifrCapability;
-    private byte navigationAccuracyCategoryEncoded;
+    private byte navigationAccuracyCategory;
     private boolean headingStatusBit;
     private short headingEncoded;
     private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
@@ -88,7 +88,7 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
 
         intentChange = br.readByte(9, 9) == 1;
         ifrCapability = br.readByte(10, 10) == 1;
-        navigationAccuracyCategoryEncoded = br.readByte(11, 13);
+        navigationAccuracyCategory = br.readByte(11, 13);
 
         headingStatusBit = br.readByte(14, 14) == 1;
         headingEncoded = br.readShort(15, 24);
@@ -125,8 +125,8 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
     }
 
     @Override
-    public byte getNUCrEncoded() {
-        return navigationAccuracyCategoryEncoded;
+    public byte getNUCr() {
+        return navigationAccuracyCategory;
     }
 
     @Override
@@ -175,7 +175,7 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
                 ", messageSubtype=" + messageSubtype +
                 ", intentChange=" + intentChange +
                 ", ifrCapability=" + ifrCapability +
-                ", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
+                ", navigationAccuracyCategory=" + navigationAccuracyCategory +
                 ", headingStatusBit=" + headingStatusBit +
                 ", headingEncoded=" + headingEncoded +
                 ", trueAirspeed=" + trueAirspeed +

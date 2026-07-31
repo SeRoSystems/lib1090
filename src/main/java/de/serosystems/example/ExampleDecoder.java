@@ -329,9 +329,9 @@ public class ExampleDecoder {
                     System.out.println("[" + icao24 + "]: Target State and Status reported");
                     if (msg instanceof TargetStateAndStatusV1Msg) {
                         TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
-                        System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
+                        System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
                         System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                        System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSILEncoded());
+                        System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
                         System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
                         if (tStatus.hasSelectedAltitude()) {
                             System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
@@ -346,9 +346,9 @@ public class ExampleDecoder {
                     } else {
 
                         TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
-                        System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
+                        System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
                         System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                        System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSILEncoded());
+                        System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
                         System.out.println("          Has SIL supplement: " + tStatus.hasSILSupplement());
                         System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
 

@@ -35,7 +35,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     private byte messageSubtype;
     private boolean intentChange;
     private boolean ifrCapability;
-    private byte navigationAccuracyCategoryEncoded;
+    private byte navigationAccuracyCategory;
     private boolean velocityToEastNegative; // 0 = positive (east), 1 = negative (west)
     private short velocityToEastEncoded; // raw encoded velocity-to-east field
     private boolean velocityToNorthNegative; // 0 = positive (north), 1 = negative (south)
@@ -90,7 +90,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
 
         intentChange = br.readByte(9, 9) == 1;
         ifrCapability = br.readByte(10, 10) == 1;
-        navigationAccuracyCategoryEncoded = br.readByte(11, 13);
+        navigationAccuracyCategory = br.readByte(11, 13);
 
         velocityToEastNegative = br.readByte(14, 14) == 1;
         velocityToEastEncoded = br.readShort(15, 24);
@@ -122,8 +122,8 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     }
 
     @Override
-    public byte getNUCrEncoded() {
-        return navigationAccuracyCategoryEncoded;
+    public byte getNUCr() {
+        return navigationAccuracyCategory;
     }
 
     @Override
@@ -177,7 +177,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
                 ", messageSubtype=" + messageSubtype +
                 ", intentChange=" + intentChange +
                 ", ifrCapability=" + ifrCapability +
-                ", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
+                ", navigationAccuracyCategory=" + navigationAccuracyCategory +
                 ", velocityToEastNegative=" + velocityToEastNegative +
                 ", velocityToEastEncoded=" + velocityToEastEncoded +
                 ", velocityToNorthNegative=" + velocityToNorthNegative +
