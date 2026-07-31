@@ -27,17 +27,23 @@ import java.time.Instant;
  * Stateful decoder for positions. Use this one to decode positions.
  */
 public class StatefulPositionDecoder implements PositionDecoder {
-    private CPREncodedPosition last_even_airborne;
-    private CPREncodedPosition last_odd_airborne;
-    private Position last_pos; // lat lon
-    private Instant last_time;
-    private int num_reasonable; // number of successive reasonable msgs
-    private boolean disableSpeedTest = false;
+    /**
+     * Maximum distance [m] to receiver
+     */
+    private static final int MAX_DIST_TO_SENDER = 700000; // 700km
+
+    private CPREncodedPosition lastEven;
+    private CPREncodedPosition lastOdd;
+    private Position lastPosition;
+    private Instant lastTime;
+    private int numReasonable; // number of successive reasonable messages
+    private final boolean disableSpeedTest;
 
     /**
      * Default constructor that uses speed test
      */
     public StatefulPositionDecoder() {
+        this(false);
     }
 
     /**
@@ -49,65 +55,6 @@ public class StatefulPositionDecoder implements PositionDecoder {
      */
     public StatefulPositionDecoder(boolean disableSpeedTest) {
         this.disableSpeedTest = disableSpeedTest;
-    }
-
-    // distance to receiver threshold
-    private static final int MAX_DIST_TO_SENDER = 700000; // 700km
-
-    /**
-     * @param cpr              CPR encoded position
-     * @param receiver         position of the receiver for surface decoding and to check if received position was more than 700km away;
-     *                         null disables checks and surface decoding
-     * @param disableSpeedTest do not perform speed estimation for reasonableness testing (use this, e.g., when you are merging
-     *                         data from different streams with different delays)
-     * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
-     * if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
-     * the position.
-     */
-    public Position decodePosition(CPREncodedPosition cpr, Position receiver, boolean disableSpeedTest) {
-        if (cpr == null) return null;
-
-        // get last position in complementary format for global decoding
-        CPREncodedPosition lastOther =
-                cpr.isOddFormat() ? last_even_airborne : last_odd_airborne;
-
-        // store position message for global decoding
-        if (cpr.isOddFormat()) last_odd_airborne = cpr;
-        else last_even_airborne = cpr;
-
-        // only use receiver as reference for surface positions (might be too far away for airborne)
-        Position refPos = last_pos != null ? last_pos : (cpr.isSurface() ? receiver : null);
-
-        Position newPos = cpr.decodePosition(lastOther, refPos);
-
-        if (newPos == null) return null;
-
-        //////// apply some additional (stateful) reasonableness tests //////////
-
-        // check if it's realistic that the target covered this distance (faster than 1000 knots?)
-        if (!disableSpeedTest && last_pos != null && last_time != null) {
-            double td = Duration.between(last_time, cpr.getTimestamp()).abs().toMillis() / 1_000.;
-            double groundSpeed = newPos.haversine(last_pos) / td; // in meters per second
-
-            if (groundSpeed > 514.4) {
-                newPos.setReasonable(false);
-            }
-        }
-
-        last_pos = newPos;
-        last_time = cpr.getTimestamp();
-
-        if (!newPos.isReasonable()) num_reasonable = 0; // reset
-            // at least n good msgs before we declare reasonable
-        else if (num_reasonable++ < 2) newPos.setReasonable(false);
-
-        // apply additional reasonableness test
-        if (receiver != null && receiver.haversine(newPos) > MAX_DIST_TO_SENDER) {
-            newPos.setReasonable(false);
-            num_reasonable = 0;
-        }
-
-        return newPos;
     }
 
     /**
@@ -122,7 +69,47 @@ public class StatefulPositionDecoder implements PositionDecoder {
      */
     @Override
     public Position decodePosition(CPREncodedPosition cpr, Position receiver) {
-        return decodePosition(cpr, receiver, disableSpeedTest);
+        if (cpr == null) return null;
+
+        // get last position in complementary format for global decoding
+        CPREncodedPosition lastOther = cpr.isOddFormat() ? lastEven : lastOdd;
+
+        // store position message for global decoding
+        if (cpr.isOddFormat()) lastOdd = cpr;
+        else lastEven = cpr;
+
+        // only use receiver as reference for surface positions (might be too far away for airborne)
+        Position refPos = lastPosition != null ? lastPosition : (cpr.isSurface() ? receiver : null);
+
+        Position newPosition = cpr.decodePosition(lastOther, refPos);
+
+        if (newPosition == null) return null;
+
+        //////// apply some additional (stateful) reasonableness tests //////////
+
+        // check if it's realistic that the target covered this distance (faster than 1000 knots?)
+        if (!disableSpeedTest && lastPosition != null && lastTime != null) {
+            double td = Duration.between(lastTime, cpr.getTimestamp()).abs().toMillis() / 1_000.;
+            double groundSpeed = newPosition.haversine(lastPosition) / td; // in meters per second
+
+            if (groundSpeed > 514.4)
+                newPosition.setReasonable(false);
+        }
+
+        lastPosition = newPosition;
+        lastTime = cpr.getTimestamp();
+
+        if (!newPosition.isReasonable()) numReasonable = 0; // reset
+            // at least 2 good messages before we declare reasonable
+        else if (numReasonable++ < 2) newPosition.setReasonable(false);
+
+        // apply additional reasonableness test
+        if (receiver != null && receiver.haversine(newPosition) > MAX_DIST_TO_SENDER) {
+            newPosition.setReasonable(false);
+            numReasonable = 0;
+        }
+
+        return newPosition;
     }
 
 }
