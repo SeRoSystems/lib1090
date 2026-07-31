@@ -264,7 +264,7 @@ public class ExampleDecoder {
 					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + ((SurfaceOperationalStatusV2Msg) msg).getNACv());
 					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
 					System.out.println("          Has UAT in: " + ((SurfaceOperationalStatusV2Msg) msg).hasUATIn());
-					System.out.println("          Encoded GPS antenna offset: " + ((SurfaceOperationalStatusV2Msg) msg).getGPSAntennaOffset());
+					System.out.println("          Encoded GPS antenna offset: " + ((SurfaceOperationalStatusV2Msg) msg).getGPSAntennaOffsetEncoded());
 					System.out.println("          Uses single antenna: " + ((SurfaceOperationalStatusV2Msg) msg).hasSingleAntenna());
 				}
 

@@ -138,7 +138,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     @Override
     public boolean hasPositionOffsetApplied() {
         // Note: using definition of ED-129B, which is a bit more explicit than DO-260B
-        return getGPSAntennaOffset() == 0x1;
+        return getGPSAntennaOffsetEncoded() == 0x1;
     }
 
     @Override
@@ -257,7 +257,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft
      * (see Table 2-66 and 2-67, RTCA DO-260B)
      */
-    public byte getGPSAntennaOffset() {
+    public byte getGPSAntennaOffsetEncoded() {
         return (byte) (operationalModeCode & 0xFF);
     }
 
@@ -266,10 +266,11 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * <ul>
      *     <li>values are measured from the longitudinal center line (=roll axis) of the aircraft</li>
      *     <li>values are given in meters</li>
+     *     <li>values denote an upper bound</li>
      *     <li>positive values mean "toward left wing tip"</li>
      *     <li>negative values mean "toward right wind tip"</li>
      *     <li>values have a resolution of 2m</li>
-     *     <li>values are capped at 6m</li>
+     *     <li>values are capped at 6m, i.e. 6 means "or above"</li>
      *     <li>{@code null} means "no data"</li>
      * </ul>
      *
@@ -277,8 +278,9 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @see #hasPositionOffsetApplied() to check if the aircraft already corrects the antenna offset. In that case, this function won't return meaningful data.
      */
     public Integer getLateralAxisGPSAntennaOffset() {
-        int offset = getGPSAntennaOffset() & 0x60;
-        boolean right = (getGPSAntennaOffset() & 0x80) != 0;
+        int offset3 = getGPSAntennaOffsetEncoded() >>> 5;
+        int offset = offset3 & 0x3;
+        boolean right = (offset3 & 0x4) != 0;
         return !right && offset == 0 ? null :
                 2 * (right ? -offset : offset);
     }
@@ -288,8 +290,9 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * <ul>
      *     <li>values are measured from the nose of the aircraft</li>
      *     <li>values are given in meters</li>
+     *     <li>values denote an upper bound</li>
      *     <li>values have a resolution of 2m</li>
-     *     <li>values are capped at 60m</li>
+     *     <li>values are capped at 60m, i.e. 60 means "or above"</li>
      *     <li>{@code null} means "no data"</li>
      * </ul>
      *
@@ -297,8 +300,8 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @see #hasPositionOffsetApplied() to check if the aircraft already corrects the antenna offset. In that case, this function won't return meaningful data.
      */
     public Integer getLongitudinalAxisGPSAntennaOffset() {
-        int offset = getGPSAntennaOffset() & 0x1e;
-        return (offset & 0x30) == 0 ? null : 2 * (offset - 1);
+        int offset = getGPSAntennaOffsetEncoded() & 0x1f;
+        return offset == 0 ? null : 2 * (offset - 1);
     }
 
     /**

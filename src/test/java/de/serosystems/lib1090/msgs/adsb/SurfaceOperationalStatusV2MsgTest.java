@@ -50,17 +50,17 @@ class SurfaceOperationalStatusV2MsgTest {
 		SurfaceOperationalStatusV2Msg singleAntenna = statusWithOperationalModeCode(0x0400);
 		assertTrue(singleAntenna.hasSingleAntenna());
 		assertEquals(0, singleAntenna.getSDAEncoded());
-		assertEquals(0, singleAntenna.getGPSAntennaOffset());
+		assertEquals(0, singleAntenna.getGPSAntennaOffsetEncoded());
 
 		SurfaceOperationalStatusV2Msg systemDesignAssurance = statusWithOperationalModeCode(0x0300);
 		assertFalse(systemDesignAssurance.hasSingleAntenna());
 		assertEquals(3, systemDesignAssurance.getSDAEncoded());
-		assertEquals(0, systemDesignAssurance.getGPSAntennaOffset());
+		assertEquals(0, systemDesignAssurance.getGPSAntennaOffsetEncoded());
 
 		SurfaceOperationalStatusV2Msg gpsAntennaOffset = statusWithOperationalModeCode(0x005A);
 		assertFalse(gpsAntennaOffset.hasSingleAntenna());
 		assertEquals(0, gpsAntennaOffset.getSDAEncoded());
-		assertEquals(0x5A, gpsAntennaOffset.getGPSAntennaOffset());
+		assertEquals(0x5A, gpsAntennaOffset.getGPSAntennaOffsetEncoded());
 	}
 
 	@Test
