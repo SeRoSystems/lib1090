@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -57,7 +58,7 @@ public class SurfacePositionDecodingTest {
         for (Object dedup : json) {
             JSONObject reply = (JSONObject) ((JSONArray) ((JSONObject) dedup).get("reply")).get(0);
             byte[] raw = Base64.getDecoder().decode((String) reply.get("reply"));
-            long timestamp = Long.parseLong((String) reply.get("sensorTimestamp"));
+            Instant timestamp = Instant.ofEpochMilli(Long.parseLong((String) reply.get("sensorTimestamp")));
 
             ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
 

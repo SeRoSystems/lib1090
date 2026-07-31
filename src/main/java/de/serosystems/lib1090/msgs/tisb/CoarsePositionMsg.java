@@ -26,6 +26,8 @@ import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
 import static de.serosystems.lib1090.decoding.Altitude.decode12BitAltitude;
 import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
@@ -54,30 +56,30 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
     /**
      * @param rawMessage raw TIS-B coarse position message as hex string
-     * @param timestamp   timestamp for this position message in milliseconds
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public CoarsePositionMsg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public CoarsePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param rawMessage raw TIS-B coarse position message as byte array
-     * @param timestamp   timestamp for this position message in milliseconds
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public CoarsePositionMsg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public CoarsePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param squitter  extended squitter containing the TIS-B position and velocity in low resolution
-     * @param timestamp timestamp for this position message in milliseconds
+     * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public CoarsePositionMsg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+    public CoarsePositionMsg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18) {
@@ -103,7 +105,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
         short cpr_encoded_lon = (short) (((msg[5] & 0x0f) << 8) | (msg[6] & 0xff));
 
         position = CPREncodedPosition.ofAirborne(12, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
-                timestamp == null ? System.currentTimeMillis() : timestamp);
+                Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**

@@ -24,6 +24,7 @@ import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Decoder for ADS-B airborne position version 2 (DO-260B).
@@ -40,30 +41,30 @@ public class AirbornePositionV2Msg extends AirbornePositionV1Msg implements Seri
 
     /**
      * @param rawMessage raw ADS-B airborne position message as hex string
-     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AirbornePositionV2Msg(String rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public AirbornePositionV2Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param rawMessage raw ADS-B airborne position message as byte array
-     * @param timestamp   timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp   timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AirbornePositionV2Msg(byte[] rawMessage, Long timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public AirbornePositionV2Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
      * @param squitter  extended squitter containing the airborne position msg
-     * @param timestamp timestamp for this position message in milliseconds; will use {@link System#currentTimeMillis()} if null
+     * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public AirbornePositionV2Msg(ExtendedSquitter squitter, Long timestamp) throws BadFormatException {
+    public AirbornePositionV2Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter, timestamp);
     }
 

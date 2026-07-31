@@ -20,6 +20,8 @@ package de.serosystems.lib1090.cpr;
 
 import de.serosystems.lib1090.Position;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -60,7 +62,7 @@ public final class CPREncodedPosition {
     /**
      * Timestamp of position message.
      */
-    private final long timestamp;
+    private final Instant timestamp;
 
     /**
      * Scaling factor for encoded values
@@ -84,7 +86,7 @@ public final class CPREncodedPosition {
                                boolean isHighSurfaceSpeed,
                                int yz,
                                int xz,
-                               long timestamp) {
+                               Instant timestamp) {
         if (nBits != 12 && nBits != 14 && nBits != 17)
             throw new IllegalArgumentException("Unexpected number of bits");
         this.nBits = nBits;
@@ -94,7 +96,7 @@ public final class CPREncodedPosition {
         this.isHighSurfaceSpeed = isSurface && isHighSurfaceSpeed;
         this.yz = yz;
         this.xz = xz;
-        this.timestamp = timestamp;
+        this.timestamp = Objects.requireNonNull(timestamp, "timestamp");
 
         scale = 1L << nBits;
     }
@@ -113,7 +115,7 @@ public final class CPREncodedPosition {
                                                 boolean isOdd,
                                                 int yz,
                                                 int xz,
-                                                long timestamp) {
+                                                Instant timestamp) {
         return new CPREncodedPosition(nBits, isOdd, false, false, yz, xz, timestamp);
     }
 
@@ -133,7 +135,7 @@ public final class CPREncodedPosition {
                                                boolean isHighSurfaceSpeed,
                                                int yz,
                                                int xz,
-                                               long timestamp) {
+                                               Instant timestamp) {
         return new CPREncodedPosition(nBits, isOdd, true, isHighSurfaceSpeed, yz, xz, timestamp);
     }
 
@@ -157,7 +159,7 @@ public final class CPREncodedPosition {
         return xz;
     }
 
-    public long getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
@@ -166,16 +168,16 @@ public final class CPREncodedPosition {
      * This is only applicable if messages are of different CPR format (even/odd).
      *
      * @param other other message, see constraints above
-     * @return maximum duration [ms] between messages
+     * @return maximum duration between messages
      */
-    public long maxGap(CPREncodedPosition other) {
+    public Duration maxGap(CPREncodedPosition other) {
         if (isSurface && other.isSurface) {
             if (isHighSurfaceSpeed || other.isHighSurfaceSpeed)
-                return 25_000L;
+                return Duration.ofMillis(25_000L);
             else
-                return 50_000L;
+                return Duration.ofMillis(50_000L);
         } else {
-            return 10_000L;
+            return Duration.ofMillis(10_000L);
         }
     }
 
@@ -206,8 +208,8 @@ public final class CPREncodedPosition {
         if (isOdd == other.isOdd) return null;
         if (isSurface != other.isSurface) return null;
         if (isSurface && reference == null) return null;
-        long gap = Math.abs(timestamp - other.timestamp);
-        if (gap > maxGap(other)) return null;
+        Duration gap = Duration.between(timestamp, other.timestamp).abs();
+        if (gap.compareTo(maxGap(other)) > 0) return null;
 
         final CPREncodedPosition even = isOdd ? other : this;
         final CPREncodedPosition odd = isOdd ? this : other;
@@ -400,7 +402,7 @@ public final class CPREncodedPosition {
                 this.isHighSurfaceSpeed == that.isHighSurfaceSpeed &&
                 this.yz == that.yz &&
                 this.xz == that.xz &&
-                this.timestamp == that.timestamp;
+                this.timestamp.equals(that.timestamp);
     }
 
     @Override
