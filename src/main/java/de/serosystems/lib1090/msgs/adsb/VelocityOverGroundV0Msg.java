@@ -110,16 +110,6 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     }
 
     @Override
-    public boolean hasVerticalRate() {
-        return verticalRateEncoded != 0;
-    }
-
-    @Override
-    public boolean hasDiffBaroAlt() {
-        return diffBaroAltEncoded != 0;
-    }
-
-    @Override
     public boolean isSupersonic() {
         return messageSubtype == 2;
     }

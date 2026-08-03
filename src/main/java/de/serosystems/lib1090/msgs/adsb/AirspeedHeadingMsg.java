@@ -24,25 +24,25 @@ package de.serosystems.lib1090.msgs.adsb;
 public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
 
     /**
-     * This must be checked before retrieving heading information.
+     * This must be checked before retrieving heading.
      *
-     * @return the flag indicates whether heading information is available or not
+     * @return the flag indicates whether heading is available or not
      */
     boolean hasHeadingStatusFlag();
 
     /**
-     * Must be checked before accessing airspeed!
-     *
-     * @return whether airspeed info is available
+     * @return whether airspeed is available
      */
-    boolean hasAirspeedInfo();
+    default boolean hasAirspeed() {
+        return getAirspeedEncoded() != 0;
+    }
 
     /**
-     * @return airspeed in knots or null if information is not available. The latter can also be checked using
-     * {@link #hasAirspeedInfo()}.
+     * @return airspeed in knots or null if not available. The latter can also be checked using
+     * {@link #hasAirspeed()}.
      */
     default Integer getAirspeed() {
-        if (!hasAirspeedInfo()) return null;
+        if (!hasAirspeed()) return null;
         int scale = isSupersonic() ? 4 : 1;
         return (getAirspeedEncoded() - 1) * scale;
     }
@@ -59,7 +59,7 @@ public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
     short getHeadingEncoded();
 
     /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
+     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if not available.
      * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
      */
     default Double getHeading() {

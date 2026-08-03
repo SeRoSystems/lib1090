@@ -37,7 +37,7 @@ abstract class AirspeedHeadingMsgTest {
 	@Test
 	public void testAirspeed() throws Exception {
 		AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
-		assertTrue(msg.hasAirspeedInfo());
+		assertTrue(msg.hasAirspeed());
 		assertEquals(375, msg.getAirspeed().intValue());
 	}
 

@@ -31,7 +31,9 @@ public interface AirborneVelocityMsg {
     /**
      * @return whether the vertical rate field is available
      */
-    boolean hasVerticalRate();
+    default boolean hasVerticalRate() {
+        return getVerticalRateEncoded() != 0;
+    }
 
     /**
      * @return the raw encoded vertical rate field
@@ -60,7 +62,9 @@ public interface AirborneVelocityMsg {
     /**
      * @return whether the Difference from Barometric Altitude is available
      */
-    boolean hasDiffBaroAlt();
+    default boolean hasDiffBaroAlt() {
+        return getDiffBaroAltEncoded() != 0;
+    }
 
     /**
      * @return the raw encoded Difference from Barometric Altitude field
