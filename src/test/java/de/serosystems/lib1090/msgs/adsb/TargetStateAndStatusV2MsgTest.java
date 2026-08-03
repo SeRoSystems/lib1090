@@ -157,7 +157,7 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
 		assertEquals(3, tss.getSILEncoded());
-		assertTrue(tss.hasModeInfo());
+		assertTrue(tss.hasMode());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());
 		assertFalse(tss.hasActiveAltitudeHoldMode());
@@ -186,7 +186,7 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
 		assertEquals(3, tss.getSILEncoded());
-		assertTrue(tss.hasModeInfo());
+		assertTrue(tss.hasMode());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());
 		assertFalse(tss.hasActiveAltitudeHoldMode());
@@ -215,7 +215,7 @@ public class TargetStateAndStatusV2MsgTest {
 		assertEquals(9, tss.getNACpEncoded());
 		assertTrue(tss.getBarometricAltitudeIntegrityCode());
 		assertEquals(3, tss.getSILEncoded());
-		assertTrue(tss.hasModeInfo());
+		assertTrue(tss.hasMode());
 		assertTrue(tss.hasAutopilotEngaged());
 		assertTrue(tss.hasVNAVModeEngaged());
 		assertFalse(tss.hasActiveAltitudeHoldMode());

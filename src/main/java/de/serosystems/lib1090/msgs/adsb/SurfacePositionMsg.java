@@ -87,7 +87,7 @@ public interface SurfacePositionMsg extends PositionMsg {
     byte getHeadingEncoded();
 
     /**
-     * @return whether ground speed information is available
+     * @return whether ground speed is available
      */
     default boolean hasGroundSpeed() {
         byte movement = getMovementEncoded();
@@ -109,7 +109,7 @@ public interface SurfacePositionMsg extends PositionMsg {
     }
 
     /**
-     * @return whether valid heading information is available
+     * @return whether valid heading is available
      */
     boolean hasValidHeading();
 

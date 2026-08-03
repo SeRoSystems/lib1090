@@ -116,7 +116,7 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
      * @return the Track Angle/Heading allows correct interpretation of the data
      * contained in the Heading/Ground Track subfield of ADS-B Surface Position Messages.
      */
-    boolean hasTrackHeadingInfo();
+    boolean hasTrackHeading();
 
     /**
      * @return 0 if horizontal reference direction is the true north, 1 if magnetic north

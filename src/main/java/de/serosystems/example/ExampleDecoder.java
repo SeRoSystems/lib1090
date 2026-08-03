@@ -276,7 +276,7 @@ public class ExampleDecoder {
 				System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
 				System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
 				System.out.println("          Low (<70W) TX power: " + opstatS.hasLowTxPower());
-				System.out.println("          Has track heading info: " + opstatS.hasTrackHeadingInfo());
+				System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
 
 				if (msg instanceof SurfaceOperationalStatusV2V3Msg) {
 					SurfaceOperationalStatusV2V3Msg opstatSV2V3 = (SurfaceOperationalStatusV2V3Msg) msg;
@@ -360,7 +360,7 @@ public class ExampleDecoder {
 					} else {
 						System.out.println("          No selected heading info");
 					}
-					if (tStatus.hasModeInfo()) {
+					if (tStatus.hasMode()) {
 						System.out.printf("          Autopilot is%s enganged\n", tStatus.hasAutopilotEngaged() ? "" : " not");
 						System.out.printf("          VNAV mode is%s enganged\n", tStatus.hasVNAVModeEngaged() ? "" : " not");
 						System.out.printf("          Altitude hold mode is%s enganged\n", tStatus.hasActiveAltitudeHoldMode() ? "" : " not");

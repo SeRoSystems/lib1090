@@ -175,7 +175,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
      * Availability of this information can also be checked with {@link #hasBarometricPressureSetting()}.
      *
      * @return the barometric pressure settings that has been adjusted by subtracting 800 millibars from the pressure
-     * source (in millibars), or null if the information is not available.
+     * source (in millibars), or null if not available.
      */
     public Float getBarometricPressureSetting() {
         return barometricPressureSetting != 0 ? (barometricPressureSetting - 1) * 0.8F : null;
@@ -214,24 +214,23 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * MCP/FCU mode status bit information according to DO-260B 2.2.3.2.7.1.3.11
+     * MCP/FCU mode status bit according to DO-260B 2.2.3.2.7.1.3.11
      * <p>
-     * A value of false indidates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
+     * A value of false indicates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
      * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
      *
-     * @return true if Mode information is deliberately being provided, false otherwise
+     * @return true if Mode is deliberately being provided, false otherwise
      */
-    public boolean hasModeInfo() {
+    public boolean hasMode() {
         return mcpFcuStatus;
     }
 
     /**
      * Auto pilot engaged flag according to DO-260B 2.2.3.2.7.1.3.12
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if information
-     * is not available.
+     * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if not available.
      */
     public Boolean hasAutopilotEngaged() {
         if (!mcpFcuStatus) return null;
@@ -241,10 +240,9 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * VNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.13
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if information is
-     * not available
+     * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if not available
      */
     public Boolean hasVNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
@@ -254,10 +252,9 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * Altitude Hold Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.14
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if altitude hold mode is active, false if inactive or status unknown, null if information is not
-     * available
+     * @return true if altitude hold mode is active, false if inactive or status unknown, null if not available
      */
     public Boolean hasActiveAltitudeHoldMode() {
         if (!mcpFcuStatus) return null;
@@ -267,10 +264,9 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * Approach Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.16
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if approach mode is active, false if inactive or status unknown, null if information is not
-     * available
+     * @return true if approach mode is active, false if inactive or status unknown, null if not available
      */
     public Boolean hasActiveApproachMode() {
         if (!mcpFcuStatus) return null;
@@ -285,10 +281,9 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * LNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.18
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if information
-     * is not available
+     * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if not available
      */
     public Boolean hasLNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
