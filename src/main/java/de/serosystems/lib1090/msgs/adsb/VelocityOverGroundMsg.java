@@ -31,7 +31,7 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return velocity from west to east in knots or null if information is not available
+     * @return velocity from west to east in knots or null if not available
      */
     default Integer getWestToEastVelocity() {
         if (!hasVelocity()) return null;
@@ -40,7 +40,7 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return velocity from south to north in knots or null if information is not available
+     * @return velocity from south to north in knots or null if not available
      */
     default Integer getSouthToNorthVelocity() {
         if (!hasVelocity()) return null;
@@ -49,7 +49,7 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
+     * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if not available.
      * The latter can also be checked with {@link #hasVelocity()}.
      */
     default Double getTrueTrackAngle() {
@@ -66,7 +66,7 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return speed over ground in knots or null if information is not available. The latter can also be checked
+     * @return speed over ground in knots or null if not available. The latter can also be checked
      * with {@link #hasVelocity()}.
      */
     default Double getGroundSpeed() {

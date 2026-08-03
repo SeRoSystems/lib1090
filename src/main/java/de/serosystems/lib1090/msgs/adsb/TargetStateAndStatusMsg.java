@@ -55,7 +55,7 @@ public interface TargetStateAndStatusMsg {
      * Look at {@link SurfaceOperationalStatusV1Msg#getHorizontalReferenceDirection()} resp.
      * {@link AirborneOperationalStatusV1Msg#getHorizontalReferenceDirection()} to determine whether this heading
      * is referring to true north or magnetic north.
-     * If information is not available, assume magnetic north as the de-facto standard.
+     * If not available, assume magnetic north as the de-facto standard.
      *
      * @return the selected heading in decimal degrees ([0, 360]) clockwise, or {@code null} if unavailable
      */

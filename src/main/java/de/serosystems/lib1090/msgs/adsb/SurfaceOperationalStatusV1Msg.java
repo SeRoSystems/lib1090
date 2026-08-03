@@ -39,8 +39,8 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     private boolean nicSupplement; // may be passed to position messages
     private byte nacPos; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
-    private boolean trackHeadingInfo; // heading/ground track info
-    private boolean horizontalReferenceDirection; // heading info is based on true north (0) or magnetic north (1)
+    private boolean trackHeading; // heading/ground track
+    private boolean horizontalReferenceDirection; // heading is based on true north (0) or magnetic north (1)
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -105,7 +105,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         nacPos = b.readByte(45, 48);
         // bits 49 and 50 reserved
         sil = b.readByte(51, 52);
-        trackHeadingInfo = b.readByte(53, 53) == 1;
+        trackHeading = b.readByte(53, 53) == 1;
         horizontalReferenceDirection = b.readByte(54, 54) == 1;
     }
 
@@ -203,8 +203,8 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * contained in the Heading/Ground Track subfield of ADS-B Surface
      * Position Messages.
      */
-    public boolean hasTrackHeadingInfo() {
-        return trackHeadingInfo;
+    public boolean hasTrackHeading() {
+        return trackHeading;
     }
 
     /**
@@ -223,7 +223,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
                 ", nicSupplement=" + nicSupplement +
                 ", nacPos=" + nacPos +
                 ", sil=" + sil +
-                ", trackHeadingInfo=" + trackHeadingInfo +
+                ", trackHeading=" + trackHeading +
                 ", horizontalReferenceDirection=" + horizontalReferenceDirection +
                 '}';
     }

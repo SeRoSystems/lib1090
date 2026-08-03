@@ -40,8 +40,8 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     private boolean nicSupplement; // may be passed to position messages
     private byte nacPos; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
-    private boolean trackHeadingInfo; // heading/ground track info
-    private boolean horizontalReferenceDirection; // heading info is based on true north (0) or magnetic north (1)
+    private boolean trackHeading; // heading/ground track
+    private boolean horizontalReferenceDirection; // heading is based on true north (0) or magnetic north (1)
     private boolean silSupplement;
 
     /**
@@ -108,7 +108,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         nicSupplement = b.readByte(44, 44) == 1;
         nacPos = b.readByte(45, 48);
         sil = b.readByte(51, 52);
-        trackHeadingInfo = b.readByte(53, 53) == 1;
+        trackHeading = b.readByte(53, 53) == 1;
         horizontalReferenceDirection = b.readByte(54, 54) == 1;
 
         silSupplement = b.readByte(55, 55) == 1;
@@ -208,8 +208,8 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
      * Position Messages.
      */
     @Override
-    public boolean hasTrackHeadingInfo() {
-        return trackHeadingInfo;
+    public boolean hasTrackHeading() {
+        return trackHeading;
     }
 
     /**

@@ -40,7 +40,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
     private boolean nicBaro;
-    private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
+    private boolean hrd; // heading is based on true north (0) or magnetic north (1)
     private byte gva; // bit 49 and 50
     private boolean silSupplement;
 

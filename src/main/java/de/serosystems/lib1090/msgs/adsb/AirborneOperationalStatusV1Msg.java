@@ -40,7 +40,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
     private byte sil; // surveillance integrity level
     private byte baq;
     private boolean nicBaro;
-    private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
+    private boolean hrd; // heading is based on true north (0) or magnetic north (1)
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
