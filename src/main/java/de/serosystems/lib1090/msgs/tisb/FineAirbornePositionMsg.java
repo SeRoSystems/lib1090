@@ -43,15 +43,9 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 
     private static final long serialVersionUID = 8691583253646403341L;
 
-    // bits 6-7
     private byte surveillanceStatus;
-    // bit 8
     private boolean imf;
-    // bits 9-20
     private short altitudeEncoded;
-    // bit 21 -> reserved
-
-    // bites 22-56
     CPREncodedPosition position;
 
     /**
@@ -88,9 +82,8 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     public FineAirbornePositionMsg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
-        if (getDownlinkFormat() != 18) {
+        if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
-        }
 
         if (!((getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
                 (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))

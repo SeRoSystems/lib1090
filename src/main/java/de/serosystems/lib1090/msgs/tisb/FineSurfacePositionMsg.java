@@ -84,9 +84,8 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
     public FineSurfacePositionMsg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
-        if (getDownlinkFormat() != 18) {
+        if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
-        }
 
         if (getFormatTypeCode() < 5 || getFormatTypeCode() > 8)
             throw new BadFormatException("Invalid format type code (" + getFormatTypeCode() + ") for surface positions.");
@@ -210,7 +209,6 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      */
     public Double getHeading() {
         if (!headingStatus) return null;
-
         return groundTrack * 360D / 128D;
     }
 

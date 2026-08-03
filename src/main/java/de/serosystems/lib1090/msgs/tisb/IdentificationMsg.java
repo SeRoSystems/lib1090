@@ -67,13 +67,11 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (getDownlinkFormat() != 18) {
+        if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
-        }
 
-        if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4) {
+        if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
             throw new BadFormatException("Identification messages must have typecode of 1-4.");
-        }
 
         // Table 2-13
         if (getFirstField() != 2 && getFirstField() != 5)
@@ -96,8 +94,8 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
 
     @Override
     public String getEmitterCategory() {
-        // TIS-B messages carry no ADS-B version information
-        return Identification.categoryDescription(getFormatTypeCode(), emitterCategory, 0);
+        // TIS-B messages carry no ADS-B version information; TIS-B was introduced with v1, so fall back on that
+        return Identification.categoryDescription(getFormatTypeCode(), emitterCategory, 1);
     }
 
     @Override
