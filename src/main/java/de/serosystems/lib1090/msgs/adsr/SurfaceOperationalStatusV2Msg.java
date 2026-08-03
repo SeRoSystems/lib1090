@@ -18,14 +18,14 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusV2V3Msg;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
-
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusV2V3Msg;
 
 import java.io.Serializable;
 
@@ -33,24 +33,20 @@ import java.io.Serializable;
  * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with
  * subtype 1 (surface)
  */
-public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg {
+public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg {
 
-    private static final long serialVersionUID = -6641427757750236499L;
+    private static final long serialVersionUID = 8102934857612039485L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
     private byte airplaneLenWidth; // length / width code
-    private byte version;
-    private boolean nicSupplement; // may be passed to position messages
-    private byte nacPos; // navigational accuracy category - position
+    private byte mopsVersion;
+    private boolean nicSupplementA; // may be passed to position messages
+    private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
-    private boolean trackHeadingInfo; // heading/ground track info
-    private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
+    private boolean trackHeading; // heading/ground track
+    private boolean horizontalReferenceDirection; // heading is based on true north (0) or magnetic north (1)
     private boolean silSupplement;
-    private boolean uatIn;
-    private byte nacv;
-    private boolean nicSupplementC;
-    private boolean nicSupplementB;
     private boolean imf; // ADS-R-specific, occupies an otherwise-spare/reserved bit
 
     /**
@@ -80,7 +76,8 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     /**
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version or is not a surface
-     *                                operational status message or the capability class code is invalid.
+     *                                operational status message or the capability class code or operational mode
+     *                                code is invalid.
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
     public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
@@ -102,30 +99,33 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         capabilityClassCode = b.readInt(9, 20);
         airplaneLenWidth = b.readByte(21, 24);
         operationalModeCode = b.readInt(25, 40);
-        version = b.readByte(41, 43);
-        if (version != 2)
-            throw new BadFormatException("Not a DO-260B/version 2 status message.");
+        mopsVersion = b.readByte(41, 43);
+
+        if (mopsVersion < 2)
+            throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC00) != 0)
             throw new BadFormatException("Unknown capability class code!");
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplement = b.readByte(44, 44) == 1;
-        nacPos = b.readByte(45, 48);
+        nicSupplementA = b.readByte(44, 44) == 1;
+        nacP = b.readByte(45, 48);
         // bits 49 and 50 reserved
         sil = b.readByte(51, 52);
-        trackHeadingInfo = b.readByte(53, 53) == 1;
-        hrd = b.readByte(54, 54) == 1;
-        silSupplement = b.readByte(55, 55) == 1;
-        imf = b.readByte(56, 56) == 1;
+        trackHeading = b.readByte(53, 53) == 1;
+        horizontalReferenceDirection = b.readByte(54, 54) == 1;
 
-        uatIn = b.readByte(12, 12) == 1;
-        nacv = b.readByte(13, 15);
-        nicSupplementC = b.readByte(16, 16) == 1;
-        nicSupplementB = b.readByte(20, 20) == 1;
+        silSupplement = b.readByte(55, 55) == 1;
+        // ME bit 56 is redefined as the IMF flag for ADS-R
+        imf = b.readByte(56, 56) == 1;
     }
 
+    /**
+     * @return the subtype code is 0 for airborne operational status msgs
+     * and 1 for surface operational status msgs; all other codes
+     * are "reserved"
+     */
     @Override
     public byte getSubtypeCode() {
         return SUBTYPE_CODE;
@@ -152,16 +152,25 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         return airplaneLenWidth;
     }
 
+    /**
+     * @return whether TCAS Resolution Advisory (RA) is active
+     */
     @Override
     public boolean hasTCASResolutionAdvisory() {
         return (operationalModeCode & 0x2000) != 0;
     }
 
+    /**
+     * @return whether the IDENT switch is active
+     */
     @Override
     public boolean hasActiveIDENTSwitch() {
         return (operationalModeCode & 0x1000) != 0;
     }
 
+    /**
+     * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
+     */
     @Override
     public boolean hasReceivingATCServices() {
         return (operationalModeCode & 0x800) != 0;
@@ -169,17 +178,17 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public byte getMOPSVersion() {
-        return version;
+        return mopsVersion;
     }
 
     @Override
     public boolean hasNICSupplementA() {
-        return nicSupplement;
+        return nicSupplementA;
     }
 
     @Override
     public byte getNACpEncoded() {
-        return nacPos;
+        return nacP;
     }
 
     @Override
@@ -192,43 +201,55 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         return sil;
     }
 
+    /**
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     */
     @Override
     public boolean getHorizontalReferenceDirection() {
-        return hrd;
+        return horizontalReferenceDirection;
     }
 
+    /**
+     * @return the Track Angle/Heading allows correct interpretation of the data
+     * contained in the Heading/Ground Track subfield of ADS-B Surface
+     * Position Messages.
+     */
     @Override
     public boolean hasTrackHeading() {
-        return trackHeadingInfo;
+        return trackHeading;
     }
 
+    /**
+     * @return whether aircraft has an UAT receiver
+     */
     @Override
     public boolean hasUATIn() {
-        return uatIn;
+        return (capabilityClassCode & 0x10) != 0;
     }
 
     @Override
     public byte getNACv() {
-        return nacv;
+        return (byte) ((capabilityClassCode & 0xE) >>> 1);
     }
 
     @Override
     public boolean hasNICSupplementC() {
-        return nicSupplementC;
+        return (capabilityClassCode & 0x1) != 0;
     }
 
     /**
-     * @return NIC supplement B for use on the surface
+     * @return whether aircraft uses a single antenna or two
      */
-    public boolean getNICSupplementB() {
-        return nicSupplementB;
-    }
-
     @Override
     public boolean hasSingleAntenna() {
         return (operationalModeCode & 0x400) != 0;
     }
 
+    /**
+     * For interpretation see Table 2-65 in DO-260B
+     *
+     * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+     */
     @Override
     public byte getSDAEncoded() {
         return (byte) ((operationalModeCode & 0x300) >>> 8);
@@ -250,9 +271,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         return silSupplement;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
@@ -263,17 +282,13 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
                 ", airplaneLenWidth=" + airplaneLenWidth +
-                ", version=" + version +
-                ", nicSupplement=" + nicSupplement +
-                ", nacPos=" + nacPos +
+                ", mopsVersion=" + mopsVersion +
+                ", nicSupplementA=" + nicSupplementA +
+                ", nacP=" + nacP +
                 ", sil=" + sil +
-                ", trackHeadingInfo=" + trackHeadingInfo +
-                ", hrd=" + hrd +
+                ", trackHeading=" + trackHeading +
+                ", horizontalReferenceDirection=" + horizontalReferenceDirection +
                 ", silSupplement=" + silSupplement +
-                ", uatIn=" + uatIn +
-                ", nacv=" + nacv +
-                ", nicSupplementC=" + nicSupplementC +
-                ", nicSupplementB=" + nicSupplementB +
                 ", imf=" + imf +
                 '}';
     }

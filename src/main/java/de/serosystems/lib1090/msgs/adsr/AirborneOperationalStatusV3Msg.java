@@ -22,34 +22,36 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
+import de.serosystems.lib1090.msgs.squitter.ADSBReceiverVersionMsg;
+import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV2V3Msg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
+import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2V3Msg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260A (ADS-R version 1) with
+ * Decoder for ADS-R operational status message as specified in DO-260C (ADS-R version 3) with
  * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, OperationalStatusV1Msg, IMFMsg {
+public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg, ADSBReceiverVersionMsg, IMFMsg {
 
-    private static final long serialVersionUID = -4917283654012938471L;
+    private static final long serialVersionUID = 6172938451029384756L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
-    private boolean nicSupplement; // may be passed to position messages
+    private byte mopsVersion;
+    private boolean nicSupplementA; // may be passed to position messages
     private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
-    private byte baq;
-    private boolean nicBaro;
-    private boolean hrd; // heading is based on true north (0) or magnetic north (1)
+    private byte gva; // bit 49 and 50
+    private boolean silSupplement;
     private boolean imf; // ADS-R-specific, occupies an otherwise-spare/reserved bit
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected AirborneOperationalStatusV1Msg() {
+    protected AirborneOperationalStatusV3Msg() {
     }
 
     /**
@@ -57,7 +59,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public AirborneOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -66,7 +68,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public AirborneOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -77,53 +79,52 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
      *                                code is invalid.
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public AirborneOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
 
         if (getFormatTypeCode() != 31)
             throw new BadFormatException("Operational status messages must have typecode 31.");
 
-        BitReader b = BitReader.forBigEndian(this.getMessage());
+        BitReader b = BitReader.forBigEndian(getMessage());
 
         byte subtypeCode = b.readByte(6, 8);
-        if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
+        if (subtypeCode > 1) // currently only 0 and 1 specified, 2-7 are reserved
             throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
-        } else if (subtypeCode != SUBTYPE_CODE) {
+        else if (subtypeCode != SUBTYPE_CODE)
             throw new BadFormatException("Not an airborne operational status message");
-        }
 
         capabilityClassCode = b.readInt(9, 24);
         operationalModeCode = b.readInt(25, 40);
 
-        int mopsVersion = b.readByte(41, 43);
-        if (mopsVersion != 1)
+        mopsVersion = b.readByte(41, 43);
+        if (mopsVersion < 3)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC000) != 0)
             throw new BadFormatException("Unknown capability class code!");
+
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplement = b.readByte(44, 44) == 1;
+        nicSupplementA = b.readByte(44, 44) == 1;
         nacP = b.readByte(45, 48);
-        baq = b.readByte(49, 50);
+        gva = b.readByte(49, 50);
         sil = b.readByte(51, 52);
-        nicBaro = b.readByte(53, 53) == 1;
+        // bits 53 and 54 reserved
 
-        hrd = b.readByte(54, 54) == 1;
-
+        silSupplement = b.readByte(55, 55) == 1;
         // ME bit 56 is redefined as the IMF flag for ADS-R
         imf = b.readByte(56, 56) == 1;
     }
 
     @Override
     public byte getSubtypeCode() {
-        return SUBTYPE_CODE;
+        return AirborneOperationalStatusV2V3Msg.super.getSubtypeCode();
     }
 
     @Override
     public boolean hasOperationalTCAS() {
-        return (capabilityClassCode & 0x2000) == 0;
+        return (capabilityClassCode & 0x2000) != 0;
     }
 
     @Override
@@ -131,19 +132,45 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         return (capabilityClassCode & 0x1000) != 0;
     }
 
-    @Override
-    public boolean hasAirReferencedVelocity() {
-        return (capabilityClassCode & 0x0200) != 0;
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded transponder side indication (ME bits 15-16, see DO-260C)
+     */
+    public byte getTransponderSideIndicationEncoded() {
+        return (byte) ((capabilityClassCode & 0x300) >>> 8);
     }
 
-    @Override
-    public boolean hasTargetStateReport() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    @Override
-    public byte getTargetChangeReportCapabilityEncoded() {
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded transmit power (ME bits 17-18, see DO-260C)
+     */
+    public byte getTxPowerEncoded() {
         return (byte) ((capabilityClassCode & 0xC0) >>> 6);
+    }
+
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded Reduced Capability Equipment (RCE) capability (ME bits 21-22, see DO-260C)
+     */
+    public byte getReducedCapabilityEquipmentEncoded() {
+        return (byte) ((capabilityClassCode & 0xC) >>> 2);
+    }
+
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded Detect and Avoid (DAA) capability (ME bits 23-24, see DO-260C)
+     */
+    public byte getDetectAndAvoidEncoded() {
+        return (byte) (capabilityClassCode & 0x3);
+    }
+
+    @Override
+    public byte getADSBReceiverVersionEncoded() {
+        return (byte) ((capabilityClassCode & 0xC00) >>> 10);
     }
 
     /**
@@ -172,12 +199,12 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
     @Override
     public byte getMOPSVersion() {
-        return 1;
+        return mopsVersion;
     }
 
     @Override
     public boolean hasNICSupplementA() {
-        return nicSupplement;
+        return nicSupplementA;
     }
 
     @Override
@@ -187,7 +214,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
     @Override
     public double getPositionUncertainty() {
-        return AirborneOperationalStatusV1V2Msg.super.getPositionUncertainty();
+        return AirborneOperationalStatusV2V3Msg.super.getPositionUncertainty();
     }
 
     @Override
@@ -195,21 +222,29 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         return sil;
     }
 
-    /**
-     * @return the barometric altitude quality BAQ bit.
-     */
-    public byte getBAQ() {
-        return baq;
+    @Override
+    public boolean hasUATIn() {
+        return (capabilityClassCode & 0x20) != 0;
     }
 
     @Override
-    public boolean getBarometricAltitudeIntegrityCode() {
-        return nicBaro;
+    public boolean hasSingleAntenna() {
+        return (operationalModeCode & 0x400) != 0;
     }
 
     @Override
-    public boolean getHorizontalReferenceDirection() {
-        return hrd;
+    public byte getGVAEncoded() {
+        return gva;
+    }
+
+    @Override
+    public byte getSDAEncoded() {
+        return (byte) ((operationalModeCode & 0x300) >>> 8);
+    }
+
+    @Override
+    public boolean hasSILSupplement() {
+        return silSupplement;
     }
 
     @Override
@@ -219,21 +254,25 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
 
     @Override
     public String toString() {
-        return "AirborneOperationalStatusV1Msg{" + super.toString() +
+        return "AirborneOperationalStatusV3Msg{" + super.toString() +
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
-                ", nicSupplement=" + nicSupplement +
-                ", nacPos=" + nacP +
+                ", mopsVersion=" + mopsVersion +
+                ", nicSupplement=" + nicSupplementA +
+                ", nacP=" + nacP +
                 ", sil=" + sil +
-                ", baq=" + baq +
-                ", nicBaro=" + nicBaro +
-                ", hrd=" + hrd +
+                ", transponderSideIndication=" + getTransponderSideIndicationEncoded() +
+                ", txPower=" + getTxPowerEncoded() +
+                ", rce=" + getReducedCapabilityEquipmentEncoded() +
+                ", daa=" + getDetectAndAvoidEncoded() +
+                ", geometricVerticalAccuracy=" + gva +
+                ", silSupplement=" + silSupplement +
                 ", imf=" + imf +
                 '}';
     }
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_AIRBORN_STATUS_V1;
+        return subtype.ADSR_AIRBORN_STATUS_V3;
     }
 }

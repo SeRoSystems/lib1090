@@ -18,32 +18,31 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
-import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
-
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R emergency and priority status messages
+ * Decoder for ADS-R version 1 emergency and priority status messages
  */
-public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg, ModeACodeMsg {
+public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, IMFMsg {
 
-    private static final long serialVersionUID = 2611795026824285668L;
+    private static final long serialVersionUID = 1154983892373289756L;
 
     private static final byte SUBTYPE = 1;
 
     private byte emergencyState;
-    private short modeACode;
     private boolean imf;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected EmergencyOrPriorityStatusMsg() {
+    protected EmergencyOrPriorityStatusV1Msg() {
     }
 
     /**
@@ -51,7 +50,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public EmergencyOrPriorityStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -60,7 +59,7 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public EmergencyOrPriorityStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -68,21 +67,19 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
      * @param squitter extended squitter which contains this emergency or priority status msg
      * @throws BadFormatException if message has wrong format
      */
-    public EmergencyOrPriorityStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public EmergencyOrPriorityStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 28) {
+        if (this.getFormatTypeCode() != 28)
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
-        }
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
-        if (b.readByte(6, 8) != SUBTYPE) {
+        if (b.readByte(6, 8) != SUBTYPE)
             throw new BadFormatException("Emergency and priority status reports have subtype 1.");
-        }
 
         emergencyState = b.readByte(9, 11);
-        modeACode = b.readShort(12, 24);
+        // ME bit 56 is redefined as the IMF flag for ADS-R
         imf = b.readByte(56, 56) == 1;
     }
 
@@ -96,32 +93,21 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
         return emergencyState;
     }
 
-    /**
-     * @return the four-digit Mode A (4096) code (only ADS-R version 2)
-     */
     @Override
-    public short getModeACode() {
-        return modeACode;
-    }
-
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
     public boolean getIMF() {
         return imf;
     }
 
     @Override
     public String toString() {
-        return "EmergencyOrPriorityStatusMsg{" + super.toString() +
+        return "EmergencyOrPriorityStatusV1Msg{" + super.toString() +
                 ", emergencyState=" + emergencyState +
-                ", modeACode=" + modeACode +
                 ", imf=" + imf +
                 '}';
     }
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_EMERGENCY;
+        return subtype.ADSR_EMERGENCY_V1;
     }
 }

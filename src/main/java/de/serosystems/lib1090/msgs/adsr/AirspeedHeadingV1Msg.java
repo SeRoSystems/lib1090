@@ -21,26 +21,29 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.adsb.NACvMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
 import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R velocity messages
+ * Decoder for ADS-R version 1 airspeed and heading messages
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, IFRCapabilityMsg {
+public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, IFRCapabilityMsg, IMFMsg, NACvMsg {
 
-    private static final long serialVersionUID = -4871907161197614315L;
+    private static final long serialVersionUID = 630565906302130265L;
 
     private byte messageSubtype;
     private boolean imf;
     private boolean ifrCapability;
-    private byte navigationAccuracyCategory;
-    private boolean velocityToEastNegative; // 0 = positive (east), 1 = negative (west)
-    private short velocityToEastEncoded; // raw encoded velocity-to-east field
-    private boolean velocityToNorthNegative; // 0 = positive (north), 1 = negative (south)
-    private short velocityToNorthEncoded; // raw encoded velocity-to-north field
+    private byte navigationAccuracyCategoryEncoded;
+    private boolean headingStatusBit;
+    private short headingEncoded;
+    private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
+    private short airspeedEncoded; // raw encoded airspeed field
     private boolean verticalSource; // 0 = geometric, 1 = barometric
     private boolean verticalRateDown; // 0 = up, 1 = down
     private short verticalRateEncoded; // raw encoded vertical rate field
@@ -50,54 +53,53 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected VelocityOverGroundMsg() {
+    protected AirspeedHeadingV1Msg() {
     }
 
     /**
-     * @param rawMessage raw ADS-R velocity-over-ground message as hex string
+     * @param rawMessage raw ADS-R airspeed and heading message as hex string
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public VelocityOverGroundMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirspeedHeadingV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
     /**
-     * @param rawMessage raw ADS-R velocity-over-ground message as byte array
+     * @param rawMessage raw ADS-R airspeed and heading message as byte array
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public VelocityOverGroundMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirspeedHeadingV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
     /**
-     * @param squitter extended squitter which contains this velocity over ground msg
+     * @param squitter extended squitter containing the airspeed and heading msg
      * @throws BadFormatException if message has wrong format
      */
-    public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirspeedHeadingV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 19) {
-            throw new BadFormatException("Velocity messages must have typecode 19.");
-        }
+        if (this.getFormatTypeCode() != 19)
+            throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
-        if (messageSubtype != 1 && messageSubtype != 2) {
-            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-        }
+        if (messageSubtype != 3 && messageSubtype != 4)
+            throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
 
+        // ME bit 9 is redefined as the IMF flag for ADS-R
         imf = br.readByte(9, 9) == 1;
         ifrCapability = br.readByte(10, 10) == 1;
-        navigationAccuracyCategory = br.readByte(11, 13);
+        navigationAccuracyCategoryEncoded = br.readByte(11, 13);
 
-        velocityToEastNegative = br.readByte(14, 14) == 1;
-        velocityToEastEncoded = br.readShort(15, 24);
+        headingStatusBit = br.readByte(14, 14) == 1;
+        headingEncoded = br.readShort(15, 24);
 
-        velocityToNorthNegative = br.readByte(25, 25) == 1;
-        velocityToNorthEncoded = br.readShort(26, 35);
+        trueAirspeed = br.readByte(25, 25) == 1;
+        airspeedEncoded = br.readShort(26, 35);
 
         verticalSource = br.readByte(36, 36) == 1;
         verticalRateDown = br.readByte(37, 37) == 1;
@@ -107,41 +109,34 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         diffBaroAltEncoded = br.readByte(50, 56);
     }
 
-    /**
-     * @return the ICAO Mode A Flag used for address type determination
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
 
-    /**
-     * Note: only defined for ADS-R version 0 and 1.
-     */
     @Override
     public boolean hasIFRCapability() {
         return ifrCapability;
     }
 
-    /**
-     * @return the raw encoded Navigation Accuracy Category for velocity
-     */
-    public byte getNACv() {
-        return navigationAccuracyCategory;
-    }
-
     @Override
-    public boolean hasVerticalRate() {
-        return verticalRateEncoded != 0;
-    }
-
-    @Override
-    public boolean hasDiffBaroAlt() {
-        return diffBaroAltEncoded != 0;
+    public boolean hasHeadingStatusFlag() {
+        return headingStatusBit;
     }
 
     @Override
     public boolean isSupersonic() {
-        return messageSubtype == 2;
+        return messageSubtype == 4;
+    }
+
+    @Override
+    public byte getNACvEncoded() {
+        return navigationAccuracyCategoryEncoded;
+    }
+
+    @Override
+    public short getAirspeedEncoded() {
+        return airspeedEncoded;
     }
 
     @Override
@@ -150,33 +145,8 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public boolean isVelocityToEastNegative() {
-        return velocityToEastNegative;
-    }
-
-    @Override
-    public boolean isVelocityToNorthNegative() {
-        return velocityToNorthNegative;
-    }
-
-    @Override
     public boolean isVerticalRateDown() {
         return verticalRateDown;
-    }
-
-    @Override
-    public boolean isDiffBaroAltNegative() {
-        return diffBaroAltNegative;
-    }
-
-    @Override
-    public short getWestToEastVelocityEncoded() {
-        return velocityToEastEncoded;
-    }
-
-    @Override
-    public short getSouthToNorthVelocityEncoded() {
-        return velocityToNorthEncoded;
     }
 
     @Override
@@ -185,21 +155,36 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     @Override
+    public boolean isDiffBaroAltNegative() {
+        return diffBaroAltNegative;
+    }
+
+    @Override
     public short getDiffBaroAltEncoded() {
         return diffBaroAltEncoded;
     }
 
     @Override
+    public short getHeadingEncoded() {
+        return headingEncoded;
+    }
+
+    @Override
+    public boolean isTrueAirspeed() {
+        return trueAirspeed;
+    }
+
+    @Override
     public String toString() {
-        return "VelocityOverGroundMsg{" + super.toString() +
+        return "AirspeedHeadingV1Msg{" + super.toString() +
                 ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
                 ", ifrCapability=" + ifrCapability +
-                ", navigationAccuracyCategory=" + navigationAccuracyCategory +
-                ", velocityToEastNegative=" + velocityToEastNegative +
-                ", velocityToEastEncoded=" + velocityToEastEncoded +
-                ", velocityToNorthNegative=" + velocityToNorthNegative +
-                ", velocityToNorthEncoded=" + velocityToNorthEncoded +
+                ", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
+                ", headingStatusBit=" + headingStatusBit +
+                ", headingEncoded=" + headingEncoded +
+                ", trueAirspeed=" + trueAirspeed +
+                ", airspeedEncoded=" + airspeedEncoded +
                 ", verticalSource=" + verticalSource +
                 ", verticalRateDown=" + verticalRateDown +
                 ", verticalRateEncoded=" + verticalRateEncoded +
@@ -210,6 +195,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_VELOCITY;
+        return subtype.ADSR_AIRSPEED_V1;
     }
 }

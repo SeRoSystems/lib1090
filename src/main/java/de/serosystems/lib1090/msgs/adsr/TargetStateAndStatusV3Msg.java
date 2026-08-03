@@ -22,15 +22,17 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R target state and status message as specified in DO-260B §2.2.3.2.7.1
+ * Decoder for ADS-R version 3 target state and status message as specified in DO-260C §2.2.3.2.7.1
  */
-public class TargetStateAndStatusMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg {
+public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg {
 
-    private static final long serialVersionUID = 6313459928974958939L;
+    private static final long serialVersionUID = -8618117963376758290L;
 
     private boolean silSupplement;
     private boolean selectedAltitudeType;
@@ -40,21 +42,20 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     private boolean selectedHeadingSign;
     private int selectedHeading;
     private byte nacP;
-    private boolean nicBaro;
     private byte sil;
     private boolean mcpFcuStatus;
     private boolean autopilotEngaged;
     private boolean vnavModeEngaged;
     private boolean altitudeHoldMode;
-    private boolean imf; // occupies an otherwise-spare/reserved bit
+    private boolean imf;
     private boolean approachMode;
-    private boolean operationalTcas;
+    private boolean collisionAvoidanceOperational;
     private boolean lnavModeEngaged;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected TargetStateAndStatusMsg() {
+    protected TargetStateAndStatusV3Msg() {
     }
 
     /**
@@ -62,7 +63,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -71,7 +72,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -80,7 +81,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or if reserved bits are set
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
 
         if (getFormatTypeCode() != 29) {
@@ -92,9 +93,6 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         byte subtypeCode = b.readByte(6, 7);
         if (subtypeCode != 1) // all others are reserved
             throw new UnspecifiedFormatError("Target state and status message subtype " + subtypeCode + " reserved.");
-
-        // message with ME bit 11 set to 1 should be discarded, but only for ADS-R v0 transmitters
-        // ModeSDecoder class takes care of that as ADS-R version is unknown at this place
 
         silSupplement = b.readByte(8, 8) == 1;
         selectedAltitudeType = b.readByte(9, 9) == 1;
@@ -108,7 +106,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         selectedHeading = b.readShort(32, 39);
         nacP = b.readByte(40, 43);
 
-        nicBaro = b.readByte(44, 44) == 1;
+        // ME bit 44 (NIC baro in version 2) is no longer available in version 3
         sil = b.readByte(45, 46);
 
         mcpFcuStatus = b.readByte(47, 47) == 1;
@@ -117,12 +115,13 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         autopilotEngaged = b.readByte(48, 48) == 1;
         vnavModeEngaged = b.readByte(49, 49) == 1;
         altitudeHoldMode = b.readByte(50, 50) == 1;
+        // ME bit 51 is redefined as the IMF flag for ADS-R
         imf = b.readByte(51, 51) == 1;
         approachMode = b.readByte(52, 52) == 1;
         lnavModeEngaged = b.readByte(54, 54) == 1;
 
         // this is always set and valid
-        operationalTcas = b.readByte(53, 53) == 1;
+        collisionAvoidanceOperational = b.readByte(53, 53) == 1;
 
         // DO-260B 2.2.3.2.7.1.3.19
         if (b.readByte(55, 56) != 0)
@@ -180,7 +179,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * Availability of this information can also be checked with {@link #hasBarometricPressureSetting()}.
      *
      * @return the barometric pressure settings that has been adjusted by subtracting 800 millibars from the pressure
-     * source (in millibars), or null if the information is not available.
+     * source (in millibars), or null if not available.
      */
     public Float getBarometricPressureSetting() {
         return barometricPressureSetting != 0 ? (barometricPressureSetting - 1) * 0.8F : null;
@@ -208,9 +207,13 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         return nacP;
     }
 
+    /**
+     * @return false; the barometric altitude integrity code (NIC baro) is no longer available in
+     * ADS-B version 3
+     */
     @Override
     public boolean getBarometricAltitudeIntegrityCode() {
-        return nicBaro;
+        return false;
     }
 
     @Override
@@ -219,24 +222,23 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     }
 
     /**
-     * MCP/FCU mode status bit information according to DO-260B 2.2.3.2.7.1.3.11
+     * MCP/FCU mode status bit according to DO-260B 2.2.3.2.7.1.3.11
      * <p>
-     * A value of false indidates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
+     * A value of false indicates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
      * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
      *
-     * @return true if Mode information is deliberately being provided, false otherwise
+     * @return true if Mode is deliberately being provided, false otherwise
      */
-    public boolean hasModeInfo() {
+    public boolean hasMode() {
         return mcpFcuStatus;
     }
 
     /**
      * Auto pilot engaged flag according to DO-260B 2.2.3.2.7.1.3.12
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if information
-     * is not available.
+     * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if not available.
      */
     public Boolean hasAutopilotEngaged() {
         if (!mcpFcuStatus) return null;
@@ -246,10 +248,9 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     /**
      * VNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.13
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if information is
-     * not available
+     * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if not available
      */
     public Boolean hasVNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
@@ -259,10 +260,9 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     /**
      * Altitude Hold Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.14
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if altitude hold mode is active, false if inactive or status unknown, null if information is not
-     * available
+     * @return true if altitude hold mode is active, false if inactive or status unknown, null if not available
      */
     public Boolean hasActiveAltitudeHoldMode() {
         if (!mcpFcuStatus) return null;
@@ -272,10 +272,9 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     /**
      * Approach Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.16
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if approach mode is active, false if inactive or status unknown, null if information is not
-     * available
+     * @return true if approach mode is active, false if inactive or status unknown, null if not available
      */
     public Boolean hasActiveApproachMode() {
         if (!mcpFcuStatus) return null;
@@ -284,32 +283,29 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 
     @Override
     public boolean hasOperationalTCAS() {
-        return operationalTcas;
+        return collisionAvoidanceOperational;
     }
 
     /**
      * LNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.18
      * <p>
-     * Information is only available if {@link #hasModeInfo()} is true.
+     * Information is only available if {@link #hasMode()} is true.
      *
-     * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if information
-     * is not available
+     * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if not available
      */
     public Boolean hasLNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
         return lnavModeEngaged;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
 
     @Override
     public String toString() {
-        return "TargetStateAndStatusMsg{" + super.toString() +
+        return "TargetStateAndStatusV3Msg{" + super.toString() +
                 ", silSupplement=" + silSupplement +
                 ", selectedAltitudeType=" + selectedAltitudeType +
                 ", selectedAltitude=" + selectedAltitude +
@@ -318,7 +314,6 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
                 ", selectedHeadingSign=" + selectedHeadingSign +
                 ", selectedHeading=" + selectedHeading +
                 ", nacP=" + nacP +
-                ", nicBaro=" + nicBaro +
                 ", sil=" + sil +
                 ", mcpFcuStatus=" + mcpFcuStatus +
                 ", autopilotEngaged=" + autopilotEngaged +
@@ -326,13 +321,13 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
                 ", altitudeHoldMode=" + altitudeHoldMode +
                 ", imf=" + imf +
                 ", approachMode=" + approachMode +
-                ", operationalTcas=" + operationalTcas +
+                ", collisionAvoidanceOperational=" + collisionAvoidanceOperational +
                 ", lnavModeEngaged=" + lnavModeEngaged +
                 '}';
     }
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_TARGET_STATE_AND_STATUS;
+        return subtype.ADSR_TARGET_STATE_AND_STATUS_V3;
     }
 }
