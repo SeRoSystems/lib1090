@@ -111,21 +111,6 @@ public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializab
     }
 
     @Override
-    public boolean hasAirspeedInfo() {
-        return airspeedEncoded != 0;
-    }
-
-    @Override
-    public boolean hasVerticalRate() {
-        return verticalRateEncoded != 0;
-    }
-
-    @Override
-    public boolean hasDiffBaroAlt() {
-        return diffBaroAltEncoded != 0;
-    }
-
-    @Override
     public boolean isSupersonic() {
         return messageSubtype == 4;
     }

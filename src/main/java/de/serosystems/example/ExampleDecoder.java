@@ -186,7 +186,7 @@ public class ExampleDecoder {
 			case ADSB_AIRSPEED_V2:
 				AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;
 				System.out.println("["+icao24+"]: Airspeed: "+
-						(airspeed.hasAirspeedInfo() ? airspeed.getAirspeed()+" kt" : "unknown"));
+						(airspeed.hasAirspeed() ? airspeed.getAirspeed()+" kt" : "unknown"));
 
 				if (decoder.getAdsbVersion(msg) == 0) {
 					// version 0 flag indicates true or magnetic north
