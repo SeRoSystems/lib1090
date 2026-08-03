@@ -33,16 +33,16 @@ abstract class AirborneOperationalStatusMsgTest {
 
 	protected abstract byte[] baseMessage();
 
-	protected abstract AirborneOperationalStatusMsg create(byte[] msg) throws Exception;
+	protected abstract AirborneOperationalStatusV1V2Msg create(byte[] msg) throws Exception;
 
-	protected AirborneOperationalStatusMsg withCapabilityClassCode(int capabilityClassCode) throws Exception {
+	protected AirborneOperationalStatusV1V2Msg withCapabilityClassCode(int capabilityClassCode) throws Exception {
 		byte[] msg = baseMessage();
 		msg[5] = (byte) (capabilityClassCode >>> 8);
 		msg[6] = (byte) capabilityClassCode;
 		return create(msg);
 	}
 
-	protected AirborneOperationalStatusMsg withOperationalModeCode(int operationalModeCode) throws Exception {
+	protected AirborneOperationalStatusV1V2Msg withOperationalModeCode(int operationalModeCode) throws Exception {
 		byte[] msg = baseMessage();
 		msg[7] = (byte) (operationalModeCode >>> 8);
 		msg[8] = (byte) operationalModeCode;
@@ -56,17 +56,17 @@ abstract class AirborneOperationalStatusMsgTest {
 
 	@Test
 	void testCapabilityClassCodeFlags() throws Exception {
-		AirborneOperationalStatusMsg es1090In = withCapabilityClassCode(0x1000);
+		AirborneOperationalStatusV1V2Msg es1090In = withCapabilityClassCode(0x1000);
 		assertTrue(es1090In.has1090ESIn());
 		assertFalse(es1090In.hasAirReferencedVelocity());
 		assertFalse(es1090In.hasTargetStateReport());
 
-		AirborneOperationalStatusMsg airReferencedVelocity = withCapabilityClassCode(0x0200);
+		AirborneOperationalStatusV1V2Msg airReferencedVelocity = withCapabilityClassCode(0x0200);
 		assertFalse(airReferencedVelocity.has1090ESIn());
 		assertTrue(airReferencedVelocity.hasAirReferencedVelocity());
 		assertFalse(airReferencedVelocity.hasTargetStateReport());
 
-		AirborneOperationalStatusMsg targetStateReport = withCapabilityClassCode(0x0100);
+		AirborneOperationalStatusV1V2Msg targetStateReport = withCapabilityClassCode(0x0100);
 		assertFalse(targetStateReport.has1090ESIn());
 		assertFalse(targetStateReport.hasAirReferencedVelocity());
 		assertTrue(targetStateReport.hasTargetStateReport());
@@ -90,17 +90,17 @@ abstract class AirborneOperationalStatusMsgTest {
 
 	@Test
 	void testOperationalModeCodeFlags() throws Exception {
-		AirborneOperationalStatusMsg tcasResolutionAdvisory = withOperationalModeCode(0x2000);
+		AirborneOperationalStatusV1V2Msg tcasResolutionAdvisory = withOperationalModeCode(0x2000);
 		assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
 		assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
 		assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
 
-		AirborneOperationalStatusMsg activeIdentSwitch = withOperationalModeCode(0x1000);
+		AirborneOperationalStatusV1V2Msg activeIdentSwitch = withOperationalModeCode(0x1000);
 		assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
 		assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
 		assertFalse(activeIdentSwitch.hasReceivingATCServices());
 
-		AirborneOperationalStatusMsg receivingAtcServices = withOperationalModeCode(0x0800);
+		AirborneOperationalStatusV1V2Msg receivingAtcServices = withOperationalModeCode(0x0800);
 		assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
 		assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
 		assertTrue(receivingAtcServices.hasReceivingATCServices());
