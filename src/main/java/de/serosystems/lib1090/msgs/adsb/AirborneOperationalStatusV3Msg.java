@@ -26,28 +26,26 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B operational status message as specified in DO-260B (ADS-B version 2) with
- * subtype 1 (airborne)
+ * Decoder for ADS-B operational status message as specified in DO-260C (ADS-B version 3) with
+ * subtype 0 (airborne)
  */
-public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg {
+public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg {
 
-    private static final long serialVersionUID = 5774750859726557576L;
+    private static final long serialVersionUID = 8236451097734510298L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
-    private byte airplaneLenWidth; // length / width code
     private byte version;
     private boolean nicSupplement; // may be passed to position messages
-    private byte nacPos; // navigational accuracy category - position
+    private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
-    private boolean trackHeadingInfo; // heading/ground track info
-    private boolean horizontalReferenceDirection; // heading info is based on true north (0) or magnetic north (1)
+    private byte gva; // bit 49 and 50
     private boolean silSupplement;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected SurfaceOperationalStatusV2Msg() {
+    protected AirborneOperationalStatusV3Msg() {
     }
 
     /**
@@ -55,7 +53,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -64,107 +62,115 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not a surface
+     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public AirborneOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_SURFACE_STATUS_V2);
+        setType(subtype.ADSB_AIRBORN_STATUS_V3);
 
-        if (getFormatTypeCode() != 31) {
+        if (getFormatTypeCode() != 31)
             throw new BadFormatException("Operational status messages must have typecode 31.");
-        }
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         byte subtypeCode = b.readByte(6, 8);
-        if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
+        if (subtypeCode > 1) // currently only 0 and 1 specified, 2-7 are reserved
             throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
-        } else if (subtypeCode != SUBTYPE_CODE) {
-            throw new BadFormatException("Not surface operational status message");
-        }
+        else if (subtypeCode != SUBTYPE_CODE)
+            throw new BadFormatException("Not an airborne operational status message");
 
-        capabilityClassCode = b.readInt(9, 20);
-        airplaneLenWidth = b.readByte(21, 24);
+        capabilityClassCode = b.readInt(9, 24);
         operationalModeCode = b.readInt(25, 40);
-        version = b.readByte(41, 43);
 
-        if (version < 2)
+        version = b.readByte(41, 43);
+        if (version < 3)
             throw new BadFormatException("Unsupported operational status version " + version);
 
-        if ((capabilityClassCode & 0xC00) != 0)
+        if ((capabilityClassCode & 0xC000) != 0)
             throw new BadFormatException("Unknown capability class code!");
+
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
         nicSupplement = b.readByte(44, 44) == 1;
-        nacPos = b.readByte(45, 48);
-        // bits 49 and 50 reserved
+        nacP = b.readByte(45, 48);
+        gva = b.readByte(49, 50);
         sil = b.readByte(51, 52);
-        trackHeadingInfo = b.readByte(53, 53) == 1;
-        horizontalReferenceDirection = b.readByte(54, 54) == 1;
+        // bits 53 and 54 reserved
 
         silSupplement = b.readByte(55, 55) == 1;
     }
 
-    /**
-     * @return the subtype code is 0 for airborne operational status msgs
-     * and 1 for surface operational status msgs; all other codes
-     * are "reserved"
-     */
     @Override
     public byte getSubtypeCode() {
-        return SUBTYPE_CODE;
+        return AirborneOperationalStatusV2V3Msg.super.getSubtypeCode();
+    }
+
+    @Override
+    public boolean hasOperationalTCAS() {
+        return (capabilityClassCode & 0x2000) != 0;
     }
 
     @Override
     public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    @Override
-    public boolean hasLowTxPower() {
-        return (capabilityClassCode & 0x20) != 0;
-    }
-
-    @Override
-    public boolean hasPositionOffsetApplied() {
-        // Note: using definition of ED-129B, which is a bit more explicit than DO-260B
-        return getGPSAntennaOffsetEncoded() == 0x1;
-    }
-
-    @Override
-    public byte getAircraftVehicleLengthAndWidthEncoded() {
-        return airplaneLenWidth;
+        return (capabilityClassCode & 0x1000) != 0;
     }
 
     /**
-     * @return whether TCAS Resolution Advisory (RA) is active
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded transponder side indication (ME bits 15-16, see DO-260C)
      */
+    public byte getTransponderSideIndicationEncoded() {
+        return (byte) ((capabilityClassCode & 0x300) >>> 8);
+    }
+
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded transmit power (ME bits 17-18, see DO-260C)
+     */
+    public byte getTxPowerEncoded() {
+        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
+    }
+
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded Reduced Capability Equipment (RCE) capability (ME bits 21-22, see DO-260C)
+     */
+    public byte getReducedCapabilityEquipmentEncoded() {
+        return (byte) ((capabilityClassCode & 0xC) >>> 2);
+    }
+
+    /**
+     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
+     *
+     * @return the encoded Detect and Avoid (DAA) capability (ME bits 23-24, see DO-260C)
+     */
+    public byte getDetectAndAvoidEncoded() {
+        return (byte) (capabilityClassCode & 0x3);
+    }
+
     @Override
     public boolean hasTCASResolutionAdvisory() {
         return (operationalModeCode & 0x2000) != 0;
     }
 
-    /**
-     * @return whether the IDENT switch is active
-     */
     @Override
     public boolean hasActiveIDENTSwitch() {
         return (operationalModeCode & 0x1000) != 0;
     }
 
-    /**
-     * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
-     */
     @Override
     public boolean hasReceivingATCServices() {
         return (operationalModeCode & 0x800) != 0;
@@ -182,12 +188,12 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public byte getNACpEncoded() {
-        return nacPos;
+        return nacP;
     }
 
     @Override
     public double getPositionUncertainty() {
-        return SurfaceOperationalStatusV2V3Msg.super.getPositionUncertainty();
+        return AirborneOperationalStatusV2V3Msg.super.getPositionUncertainty();
     }
 
     @Override
@@ -195,71 +201,26 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         return sil;
     }
 
-    /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
-     */
-    @Override
-    public boolean getHorizontalReferenceDirection() {
-        return horizontalReferenceDirection;
-    }
-
-    /**
-     * @return the Track Angle/Heading allows correct interpretation of the data
-     * contained in the Heading/Ground Track subfield of ADS-B Surface
-     * Position Messages.
-     */
-    @Override
-    public boolean hasTrackHeadingInfo() {
-        return trackHeadingInfo;
-    }
-
-    /**
-     * @return whether aircraft has an UAT receiver
-     */
     @Override
     public boolean hasUATIn() {
-        return (capabilityClassCode & 0x10) != 0;
+        return (capabilityClassCode & 0x20) != 0;
     }
 
-    @Override
-    public byte getNACv() {
-        return (byte) ((capabilityClassCode & 0xE) >>> 1);
-    }
-
-    @Override
-    public boolean getNICSupplementC() {
-        return (capabilityClassCode & 0x1) != 0;
-    }
-
-    /**
-     * @return whether aircraft uses a single antenna or two
-     */
     @Override
     public boolean hasSingleAntenna() {
         return (operationalModeCode & 0x400) != 0;
     }
 
-    /**
-     * For interpretation see Table 2-65 in DO-260B
-     *
-     * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
-     */
+    @Override
+    public byte getGVAEncoded() {
+        return gva;
+    }
+
     @Override
     public byte getSDAEncoded() {
         return (byte) ((operationalModeCode & 0x300) >>> 8);
     }
 
-    @Override
-    public byte getGPSAntennaOffsetEncoded() {
-        return (byte) (operationalModeCode & 0xFF);
-    }
-
-    /**
-     * DO-260B 2.2.3.2.7.2.14
-     *
-     * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-     * it's based on "per hour".
-     */
     @Override
     public boolean hasSILSupplement() {
         return silSupplement;
@@ -267,10 +228,19 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public String toString() {
-        return "SurfaceOperationalStatusV2Msg{" + super.toString() +
-                ", silSupplement=" + silSupplement +
+        return "AirborneOperationalStatusV3Msg{" + super.toString() +
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
+                ", version=" + version +
+                ", nicSupplement=" + nicSupplement +
+                ", nacPos=" + nacP +
+                ", sil=" + sil +
+                ", transponderSideIndication=" + getTransponderSideIndicationEncoded() +
+                ", txPower=" + getTxPowerEncoded() +
+                ", rce=" + getReducedCapabilityEquipmentEncoded() +
+                ", daa=" + getDetectAndAvoidEncoded() +
+                ", geometricVerticalAccuracy=" + gva +
+                ", silSupplement=" + silSupplement +
                 '}';
     }
 }

@@ -26,12 +26,12 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B operational status message as specified in DO-260B (ADS-B version 2) with
+ * Decoder for ADS-B operational status message as specified in DO-260C (ADS-B version 3) with
  * subtype 1 (airborne)
  */
-public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg {
+public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg {
 
-    private static final long serialVersionUID = 5774750859726557576L;
+    private static final long serialVersionUID = -6412897503618274091L;
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
@@ -47,7 +47,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected SurfaceOperationalStatusV2Msg() {
+    protected SurfaceOperationalStatusV3Msg() {
     }
 
     /**
@@ -55,7 +55,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceOperationalStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -64,7 +64,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceOperationalStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -75,9 +75,9 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      *                                code is invalid.
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
-        setType(subtype.ADSB_SURFACE_STATUS_V2);
+        setType(subtype.ADSB_SURFACE_STATUS_V3);
 
         if (getFormatTypeCode() != 31) {
             throw new BadFormatException("Operational status messages must have typecode 31.");
@@ -97,7 +97,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         operationalModeCode = b.readInt(25, 40);
         version = b.readByte(41, 43);
 
-        if (version < 2)
+        if (version < 3)
             throw new BadFormatException("Unsupported operational status version " + version);
 
         if ((capabilityClassCode & 0xC00) != 0)
@@ -107,7 +107,6 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
         nicSupplement = b.readByte(44, 44) == 1;
         nacPos = b.readByte(45, 48);
-        // bits 49 and 50 reserved
         sil = b.readByte(51, 52);
         trackHeadingInfo = b.readByte(53, 53) == 1;
         horizontalReferenceDirection = b.readByte(54, 54) == 1;
@@ -267,7 +266,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public String toString() {
-        return "SurfaceOperationalStatusV2Msg{" + super.toString() +
+        return "SurfaceOperationalStatusV3Msg{" + super.toString() +
                 ", silSupplement=" + silSupplement +
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +

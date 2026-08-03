@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Decoder for ADS-B operational status message as specified in DO-260B (ADS-B version 2) with
  * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, OperationalStatusV2Msg {
+public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg {
 
     private static final long serialVersionUID = -2032348919695227545L;
 
@@ -115,7 +115,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
 
     @Override
     public byte getSubtypeCode() {
-        return AirborneOperationalStatusMsg.super.getSubtypeCode();
+        return AirborneOperationalStatusV1V2Msg.super.getSubtypeCode();
     }
 
     @Override
@@ -175,7 +175,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
 
     @Override
     public double getPositionUncertainty() {
-        return AirborneOperationalStatusMsg.super.getPositionUncertainty();
+        return AirborneOperationalStatusV1V2Msg.super.getPositionUncertainty();
     }
 
     @Override
@@ -203,22 +203,9 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         return (operationalModeCode & 0x400) != 0;
     }
 
-    /**
-     * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
-     */
+    @Override
     public byte getGVAEncoded() {
         return gva;
-    }
-
-    /**
-     * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
-     */
-    public int getGeometricVerticalAccuracy() {
-        if (gva == 1)
-            return 150;
-        else if (gva == 2)
-            return 45;
-        else return -1;
     }
 
     @Override

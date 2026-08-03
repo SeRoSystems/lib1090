@@ -40,37 +40,6 @@ public interface AirborneOperationalStatusMsg extends OperationalStatusMsg {
     boolean hasOperationalTCAS();
 
     /**
-     * @return whether aircraft has capability of sending messages to support Air-Referenced Velocity Reports
-     */
-    boolean hasAirReferencedVelocity();
-
-    /**
-     * @return whether aircraft has capability of sending messages to support Target State Reports
-     */
-    boolean hasTargetStateReport();
-
-    /**
-     * @return whether target change reports are supported
-     */
-    default boolean supportsTargetChangeReport() {
-        byte targetChangeReportCapability = getTargetChangeReportCapabilityEncoded();
-        return targetChangeReportCapability == 1 || targetChangeReportCapability == 2;
-    }
-
-    /**
-     * Get target change report capability.
-     * <ul>
-     *     <li>0: Not supported</li>
-     *     <li>1: Supports TC+0 only</li>
-     *     <li>2: Supports multiple TCs</li>
-     *     <li>3: Reserved</li>
-     * </ul>
-     *
-     * @return target change report capability
-     */
-    byte getTargetChangeReportCapabilityEncoded();
-
-    /**
      * @return whether TCAS Resolution Advisory (RA) is active
      */
     boolean hasTCASResolutionAdvisory();
@@ -108,14 +77,4 @@ public interface AirborneOperationalStatusMsg extends OperationalStatusMsg {
      * @return the source integrity level (SIL)
      */
     byte getSILEncoded();
-
-    /**
-     * @return the barometric altitude integrity code which indicates whether barometric altitude was cross-checked
-     */
-    boolean getBarometricAltitudeIntegrityCode();
-
-    /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
-     */
-    boolean getHorizontalReferenceDirection();
 }
