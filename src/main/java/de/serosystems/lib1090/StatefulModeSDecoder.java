@@ -54,6 +54,7 @@ public class StatefulModeSDecoder {
 
     private final PositionDecoderSupplier positionDecoderSupplier;
     private final boolean decodeDf19Adsb;
+    private final boolean tisbV2CompatibilityMode;
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
     private int afterLastCleanup;
     private Instant latestTimestamp;
@@ -69,6 +70,7 @@ public class StatefulModeSDecoder {
     private StatefulModeSDecoder(Builder builder) {
         this.positionDecoderSupplier = builder.positionDecoderSupplier;
         this.decodeDf19Adsb = builder.decodeDf19Adsb;
+        this.tisbV2CompatibilityMode = builder.tisbV2CompatibilityMode;
     }
 
     /**
@@ -114,8 +116,11 @@ public class StatefulModeSDecoder {
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
                     return decodeTISB(modes, timestamp);
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 3) {
+                    // CF=3 (coarse TIS-B airborne position) is reserved as of DO-260C; still
+                    // decoded as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                     ExtendedSquitter es1090 = new ExtendedSquitter(modes);
-                    return new CoarsePositionMsg(es1090, timestamp);
+                    if (tisbV2CompatibilityMode) return new CoarsePositionMsg(es1090, timestamp);
+                    return es1090;
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
                     // TIS-B or ADS-R Management Message
                     return new ManagementMessage(new ExtendedSquitter(modes));
@@ -296,7 +301,9 @@ public class StatefulModeSDecoder {
                 if (vog.hasGeoMinusBaroInfo())
                     dd.geoMinusBaro = (double) vog.getGeoMinusBaro();
                 return vog;
-            } else if (subtype == 3 || subtype == 4) {
+            } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
+                // subtypes 3/4 (airspeed & heading) are reserved as of DO-260C; still decoded
+                // as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                 de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
                 if (ash.hasGeoMinusBaroInfo())
@@ -672,6 +679,7 @@ public class StatefulModeSDecoder {
     public static class Builder {
         private PositionDecoderSupplier positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
         private boolean decodeDf19Adsb = false;
+        private boolean tisbV2CompatibilityMode = true;
 
         private Builder() {
         }
@@ -714,6 +722,24 @@ public class StatefulModeSDecoder {
          */
         public Builder decodeDf19Adsb(boolean decodeDf19Adsb) {
             this.decodeDf19Adsb = decodeDf19Adsb;
+            return this;
+        }
+
+        /**
+         * Enables TIS-B version 2 compatibility mode.
+         * <p>
+         * Per DO-260C, CF=3 (coarse TIS-B airborne position) and velocity message subtypes 3/4
+         * (airspeed and heading) are reserved and no longer used. In compatibility mode, they are
+         * still decoded as such, as a fallback for TIS-B services that have not yet transitioned
+         * away from them. TIS-B itself does not distinguish versions, so this is a purely
+         * decoder-side compatibility switch, not a per-target version assumption.
+         * Defaults to true.
+         *
+         * @param tisbV2CompatibilityMode whether to decode CF=3 and velocity subtypes 3/4
+         * @return this builder
+         */
+        public Builder tisbV2CompatibilityMode(boolean tisbV2CompatibilityMode) {
+            this.tisbV2CompatibilityMode = tisbV2CompatibilityMode;
             return this;
         }
 
