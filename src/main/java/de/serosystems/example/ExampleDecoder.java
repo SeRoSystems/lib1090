@@ -218,14 +218,9 @@ public class ExampleDecoder {
 				break;
 			case ADSB_AIRBORN_STATUS_V1:
 			case ADSB_AIRBORN_STATUS_V2:
+			case ADSB_AIRBORN_STATUS_V3:
 				AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
 				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA.getVersion());
-				System.out.println("          Barometric altitude cross-checked: "+opstatA.getBarometricAltitudeIntegrityCode());
-
-				if (opstatA.getHorizontalReferenceDirection())
-					System.out.println("          Horizontal reference: true north");
-				else
-					System.out.println("          Horizontal reference: true north");
 				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
@@ -234,27 +229,43 @@ public class ExampleDecoder {
 				System.out.println("          IDENT switch active: " + opstatA.hasActiveIDENTSwitch());
 				System.out.println("          Has operational TCAS: " + opstatA.hasOperationalTCAS());
 				System.out.println("          Has TCAS resolution advisory: " + opstatA.hasTCASResolutionAdvisory());
-				System.out.println("          Supports air-referenced velocity reports: " + opstatA.hasAirReferencedVelocity());
 
-				if (msg instanceof AirborneOperationalStatusV2Msg) {
-					System.out.println("          Gemoetric vertical accuracy: "+((AirborneOperationalStatusV2Msg) msg).getGeometricVerticalAccuracy()+"m");
-					System.out.println("          System design assurance: " + ((AirborneOperationalStatusV2Msg) msg).getSDAEncoded());
-					System.out.println("          Has UAT in: " + ((AirborneOperationalStatusV2Msg) msg).hasUATIn());
-					System.out.println("          Has SIL supplement: " + ((AirborneOperationalStatusV2Msg) msg).hasSILSupplement());
-					System.out.println("          Uses single antenna: " + ((AirborneOperationalStatusV2Msg) msg).hasSingleAntenna());
+				if (msg instanceof AirborneOperationalStatusV1V2Msg) {
+					AirborneOperationalStatusV1V2Msg opstatV1V2 = (AirborneOperationalStatusV1V2Msg) msg;
+					System.out.println("          Barometric altitude cross-checked: " + opstatV1V2.getBarometricAltitudeIntegrityCode());
+					System.out.println("          Horizontal reference: " + (opstatV1V2.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
+					System.out.println("          Supports air-referenced velocity reports: " + opstatV1V2.hasAirReferencedVelocity());
+				}
+
+				if (msg instanceof OperationalStatusV2V3Msg) {
+					OperationalStatusV2V3Msg opstatV2V3 = (OperationalStatusV2V3Msg) msg;
+					System.out.println("          System design assurance: " + opstatV2V3.getSDAEncoded());
+					System.out.println("          Has UAT in: " + opstatV2V3.hasUATIn());
+					System.out.println("          Has SIL supplement: " + opstatV2V3.hasSILSupplement());
+					System.out.println("          Uses single antenna: " + opstatV2V3.hasSingleAntenna());
+				}
+
+				if (msg instanceof AirborneOperationalStatusV2V3Msg) {
+					System.out.println("          Geometric vertical accuracy: " + ((AirborneOperationalStatusV2V3Msg) msg).getGeometricVerticalAccuracy() + "m");
+				}
+
+				if (msg instanceof AirborneOperationalStatusV3Msg) {
+					AirborneOperationalStatusV3Msg opstatV3 = (AirborneOperationalStatusV3Msg) msg;
+					System.out.println("          Transponder side indication: " + opstatV3.getTransponderSideIndicationEncoded());
+					System.out.println("          Tx power: " + opstatV3.getTxPowerEncoded());
+					System.out.println("          Reduced Capability Equipment: " + opstatV3.getReducedCapabilityEquipmentEncoded());
+					System.out.println("          Detect and Avoid: " + opstatV3.getDetectAndAvoidEncoded());
 				}
 
 				break;
 			case ADSB_SURFACE_STATUS_V1:
 			case ADSB_SURFACE_STATUS_V2:
+			case ADSB_SURFACE_STATUS_V3:
 				SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
 
 				System.out.println("["+icao24+"]: Using ADS-B version "+opstatS.getVersion());
 
-				if (opstatS.getHorizontalReferenceDirection())
-					System.out.println("          Horizontal reference: true north");
-				else
-					System.out.println("          Horizontal reference: true north");
+				System.out.println("          Horizontal reference: " + (opstatS.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
 				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatS.hasNICSupplementA());
@@ -267,14 +278,19 @@ public class ExampleDecoder {
 				System.out.println("          Low (<70W) TX power: " + opstatS.hasLowTxPower());
 				System.out.println("          Has track heading info: " + opstatS.hasTrackHeadingInfo());
 
-				if (msg instanceof SurfaceOperationalStatusV2Msg) {
-					System.out.println("          Has NIC supplement C: " + ((SurfaceOperationalStatusV2Msg) msg).getNICSupplementC());
-					System.out.println("          System design assurance: " + ((SurfaceOperationalStatusV2Msg) msg).getSDAEncoded());
-					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + ((SurfaceOperationalStatusV2Msg) msg).getNACv());
-					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
-					System.out.println("          Has UAT in: " + ((SurfaceOperationalStatusV2Msg) msg).hasUATIn());
-					System.out.println("          Encoded GPS antenna offset: " + ((SurfaceOperationalStatusV2Msg) msg).getGPSAntennaOffsetEncoded());
-					System.out.println("          Uses single antenna: " + ((SurfaceOperationalStatusV2Msg) msg).hasSingleAntenna());
+				if (msg instanceof SurfaceOperationalStatusV2V3Msg) {
+					SurfaceOperationalStatusV2V3Msg opstatSV2V3 = (SurfaceOperationalStatusV2V3Msg) msg;
+					System.out.println("          Has NIC supplement C: " + opstatSV2V3.getNICSupplementC());
+					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + opstatSV2V3.getNACv());
+					System.out.println("          Encoded GPS antenna offset: " + opstatSV2V3.getGPSAntennaOffsetEncoded());
+				}
+
+				if (msg instanceof OperationalStatusV2V3Msg) {
+					OperationalStatusV2V3Msg opstatV2V3 = (OperationalStatusV2V3Msg) msg;
+					System.out.println("          System design assurance: " + opstatV2V3.getSDAEncoded());
+					System.out.println("          Has UAT in: " + opstatV2V3.hasUATIn());
+					System.out.println("          Has SIL supplement: " + opstatV2V3.hasSILSupplement());
+					System.out.println("          Uses single antenna: " + opstatV2V3.hasSingleAntenna());
 				}
 
 				break;

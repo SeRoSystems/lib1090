@@ -468,10 +468,14 @@ public class StatefulModeSDecoder {
 						dd.nicSupplA = s1.hasNICSupplementA();
 						return s1;
 					case 2:
-					default:
 						AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						return s2;
+					case 3:
+					default:
+						AirborneOperationalStatusV3Msg s3 = new AirborneOperationalStatusV3Msg(es1090);
+						dd.nicSupplA = s3.hasNICSupplementA();
+						return s3;
 				}
 			} else if (subtype == 1) {
 				// surface
@@ -483,11 +487,16 @@ public class StatefulModeSDecoder {
 						dd.nicSupplA = s1.hasNICSupplementA();
 						return s1;
 					case 2:
-					default:
 						SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
 						dd.nicSupplC = s2.getNICSupplementC();
 						return s2;
+					case 3:
+					default:
+						SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
+						dd.nicSupplA = s3.hasNICSupplementA();
+						dd.nicSupplC = s3.getNICSupplementC();
+						return s3;
 				}
 			}
 		}
