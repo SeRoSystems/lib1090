@@ -16,9 +16,7 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
-
-import de.serosystems.lib1090.msgs.SingleAntennaMsg;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
  * Common API for ADS-B operational status version 2 and 3 messages, for both airborne and surface subtype.

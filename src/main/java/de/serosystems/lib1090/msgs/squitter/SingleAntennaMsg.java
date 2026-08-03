@@ -16,27 +16,17 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B airborne operational status version 2 and 3 messages.
+ * Common API for messages that expose the single-antenna flag.
  */
-public interface AirborneOperationalStatusV2V3Msg extends AirborneOperationalStatusMsg {
+public interface SingleAntennaMsg {
 
     /**
-     * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
+     * Whether the transmitting system uses a single antenna.
+     *
+     * @return true if the transmitting system uses a single antenna
      */
-    byte getGVAEncoded();
-
-    /**
-     * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
-     */
-    default int getGeometricVerticalAccuracy() {
-        byte gva = getGVAEncoded();
-        if (gva == 1)
-            return 150;
-        else if (gva == 2)
-            return 45;
-        else return -1;
-    }
+    boolean hasSingleAntenna();
 }

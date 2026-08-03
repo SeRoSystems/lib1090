@@ -18,6 +18,9 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
+import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
+
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -27,13 +30,14 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-R emergency and priority status messages
  */
-public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable {
+public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg, ModeACodeMsg {
 
     private static final long serialVersionUID = 2611795026824285668L;
 
-    private byte msgsubtype;
-    private byte emergency_state;
-    private short mode_a_code;
+    private static final byte SUBTYPE = 1;
+
+    private byte emergencyState;
+    private short modeACode;
     private boolean imf;
 
     /**
@@ -71,78 +75,33 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
         }
 
-        byte[] msg = this.getMessage();
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-        msgsubtype = (byte) (msg[0] & 0x7);
-        if (msgsubtype != 1) {
+        if (b.readByte(6, 8) != SUBTYPE) {
             throw new BadFormatException("Emergency and priority status reports have subtype 1.");
         }
 
-        emergency_state = (byte) ((msg[1] & 0xFF) >>> 5);
-        mode_a_code = (short) (((msg[1] & 0x1F) << 8) | (msg[2] & 0xFF));
-        imf = (msg[6] & 0x1) != 0;
+        emergencyState = b.readByte(9, 11);
+        modeACode = b.readShort(12, 24);
+        imf = b.readByte(56, 56) == 1;
     }
 
-    /**
-     * @return the subtype code of the aircraft status report (should always be 1)
-     */
+    @Override
     public byte getSubtype() {
-        return msgsubtype;
+        return SUBTYPE;
     }
 
-    /**
-     * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
-     */
+    @Override
     public byte getEmergencyStateCode() {
-        return emergency_state;
-    }
-
-    /**
-     * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
-     */
-    public String getEmergencyStateText() {
-        switch (emergency_state) {
-            case 0:
-                return "no emergency";
-            case 1:
-                return "general emergency";
-            case 2:
-                return "lifeguard/medical";
-            case 3:
-                return "minimum fuel";
-            case 4:
-                return "no communications";
-            case 5:
-                return "unlawful interference";
-            case 6:
-                return "downed aircraft";
-            default:
-                return "unknown";
-        }
+        return emergencyState;
     }
 
     /**
      * @return the four-digit Mode A (4096) code (only ADS-R version 2)
      */
-    public byte[] getModeACode() {
-        // the sequence is C1, A1, C2, A2, C4, A4, ZERO, B1, D1, B2, D2, B4, D4
-        int C1 = (mode_a_code >>> 12) & 0x1;
-        int A1 = (mode_a_code >>> 11) & 0x1;
-        int C2 = (mode_a_code >>> 10) & 0x1;
-        int A2 = (mode_a_code >>> 9) & 0x1;
-        int C4 = (mode_a_code >>> 8) & 0x1;
-        int A4 = (mode_a_code >>> 7) & 0x1;
-        int B1 = (mode_a_code >>> 5) & 0x1;
-        int D1 = (mode_a_code >>> 4) & 0x1;
-        int B2 = (mode_a_code >>> 3) & 0x1;
-        int D2 = (mode_a_code >>> 2) & 0x1;
-        int B4 = (mode_a_code >>> 1) & 0x1;
-        int D4 = mode_a_code & 0x1;
-        return new byte[]{
-                (byte) (A1 + (A2 << 1) + (A4 << 2)),
-                (byte) (B1 + (B2 << 1) + (B4 << 2)),
-                (byte) (C1 + (C2 << 1) + (C4 << 2)),
-                (byte) (D1 + (D2 << 1) + (D4 << 2))};
+    @Override
+    public short getModeACode() {
+        return modeACode;
     }
 
     /**
@@ -154,10 +113,9 @@ public class EmergencyOrPriorityStatusMsg extends ExtendedSquitter implements Se
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tEmergencyOrPriorityStatusMsg{" +
-                "msgsubtype=" + msgsubtype +
-                ", emergency_state=" + emergency_state +
-                ", mode_a_code=" + mode_a_code +
+        return "EmergencyOrPriorityStatusMsg{" + super.toString() +
+                ", emergencyState=" + emergencyState +
+                ", modeACode=" + modeACode +
                 ", imf=" + imf +
                 '}';
     }

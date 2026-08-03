@@ -18,25 +18,23 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
-import java.util.Arrays;
-
-import static de.serosystems.lib1090.decoding.Identification.categoryDescription;
-import static de.serosystems.lib1090.decoding.InternationalAlphabet5.mapChar;
 
 /**
  * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
  */
-public class IdentificationMsg extends ExtendedSquitter implements Serializable {
+public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg {
 
     private static final long serialVersionUID = -1692656992966148114L;
 
-    private byte emitter_category;
-    private byte[] identity;
+    private byte emitterCategory;
+    private long identificationEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -81,56 +79,33 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable 
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-        byte[] msg = this.getMessage();
-        emitter_category = (byte) (msg[0] & 0x7);
-
-        // extract identity
-        identity = new byte[8];
-        int byte_off, bit_off;
-        for (int i = 8; i >= 1; i--) {
-            // calculate offsets
-            byte_off = (i * 6) / 8;
-            bit_off = (i * 6) % 8;
-
-            // char aligned with byte?
-            if (bit_off == 0) identity[i - 1] = (byte) (msg[byte_off] & 0x3F);
-            else {
-                ++byte_off;
-                identity[i - 1] = (byte) (msg[byte_off] >>> (8 - bit_off) & (0x3F >>> (6 - bit_off)));
-                // should we add bits from the next byte?
-                if (bit_off < 6) identity[i - 1] |= msg[byte_off - 1] << bit_off & 0x3F;
-            }
-        }
+        BitReader b = BitReader.forBigEndian(getMessage());
+        emitterCategory = b.readByte(6, 8);
+        identificationEncoded = b.readLong(9, 56);
     }
 
-    /**
-     * @return the emitter's category (numerical)
-     */
-    public byte getEmitterCategory() {
-        return emitter_category;
+    @Override
+    public byte getEmitterCategoryEncoded() {
+        return emitterCategory;
     }
 
-    /**
-     * @return the call sign as 8 characters array
-     */
-    public char[] getIdentity() {
-        return mapChar(identity);
+    @Override
+    public long getIdentificationEncoded() {
+        return identificationEncoded;
     }
 
-    /**
-     * @return the decription of the emitter's category according to
-     * the ADS-B message format specification
-     */
-    public String getCategoryDescription() {
+    @Override
+    public String getEmitterCategory() {
         // TIS-B messages carry no ADS-B version information
-        return categoryDescription(getFormatTypeCode(), emitter_category, 0);
+        return Identification.categoryDescription(getFormatTypeCode(), emitterCategory, 0);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tIdentificationMsg{" +
-                "emitter_category=" + emitter_category +
-                ", identity=" + Arrays.toString(identity) +
+        return "IdentificationMsg{" + super.toString() +
+                ", categorySet=" + getCategorySet() +
+                ", emitterCategory=" + emitterCategory +
+                ", identificationEncoded=" + identificationEncoded +
                 '}';
     }
 

@@ -18,34 +18,34 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
 
 import java.io.Serializable;
 
 /**
  * Decoder for ADS-R airspeed and heading messages
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
+public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, IFRCapabilityMsg {
 
     private static final long serialVersionUID = -5847938116356997891L;
 
-    private byte msg_subtype;
+    private byte messageSubtype;
     private boolean imf;
-    private boolean ifr_capability;
-    private byte navigation_accuracy_category;
-    private boolean heading_status_bit;
-    private double heading; // in degrees
-    private boolean true_airspeed; // 0 = indicated AS, 1 = true AS
-    private short airspeed; // in knots
-    private boolean airspeed_available;
-    private boolean vertical_source; // 0 = geometric, 1 = barometric
-    private boolean vertical_rate_down; // 0 = up, 1 = down
-    private short vertical_rate; // in ft/s
-    private boolean vertical_rate_info_available;
-    private int geo_minus_baro; // in ft
-    private boolean geo_minus_baro_available;
+    private boolean ifrCapability;
+    private byte navigationAccuracyCategory;
+    private boolean headingStatusBit;
+    private short headingEncoded;
+    private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
+    private short airspeedEncoded; // raw encoded airspeed field
+    private boolean verticalSource; // 0 = geometric, 1 = barometric
+    private boolean verticalRateDown; // 0 = up, 1 = down
+    private short verticalRateEncoded; // raw encoded vertical rate field
+    private boolean diffBaroAltNegative;
+    private short diffBaroAltEncoded; // raw encoded geometric minus barometric altitude difference field
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -82,155 +82,129 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
             throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
         }
 
-        byte[] msg = this.getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-        msg_subtype = (byte) (msg[0] & 0x7);
-        if (msg_subtype != 3 && msg_subtype != 4) {
+        messageSubtype = br.readByte(6, 8);
+        if (messageSubtype != 3 && messageSubtype != 4) {
             throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
         }
 
-        imf = (msg[1] & 0x80) > 0;
-        ifr_capability = (msg[1] & 0x40) > 0;
-        navigation_accuracy_category = (byte) ((msg[1] >>> 3) & 0x7);
+        imf = br.readByte(9, 9) == 1;
+        ifrCapability = br.readByte(10, 10) == 1;
+        navigationAccuracyCategory = br.readByte(11, 13);
 
-        // check this later
-        vertical_rate_info_available = true;
-        geo_minus_baro_available = true;
+        headingStatusBit = br.readByte(14, 14) == 1;
+        headingEncoded = br.readShort(15, 24);
 
-        // heading available in ADS-R version 1+, indicates true/magnetic north for version 0
-        heading_status_bit = (msg[1] & 0x4) > 0;
-        heading = ((msg[1] & 0x3) << 8 | msg[2] & 0xFF) * 360. / 1024.;
+        trueAirspeed = br.readByte(25, 25) == 1;
+        airspeedEncoded = br.readShort(26, 35);
 
-        true_airspeed = (msg[3] & 0x80) > 0;
-        airspeed = (short) (((msg[3] & 0x7F) << 3 | msg[4] >>> 5 & 0x07) - 1);
-        if (airspeed != -1) {
-            airspeed_available = true;
-            if (msg_subtype == 4) airspeed <<= 2;
-        }
+        verticalSource = br.readByte(36, 36) == 1;
+        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalRateEncoded = br.readShort(38, 46);
 
-        vertical_source = (msg[4] & 0x10) > 0;
-        vertical_rate_down = (msg[4] & 0x08) > 0;
-        vertical_rate = (short) ((((msg[4] & 0x07) << 6 | msg[5] >>> 2 & 0x3F) - 1) << 6);
-
-        geo_minus_baro = (short) (((msg[6] & 0x7F) - 1) * 25);
-        if ((msg[6] & 0x80) > 0) geo_minus_baro *= -1;
+        diffBaroAltNegative = br.readByte(49, 49) == 1;
+        diffBaroAltEncoded = br.readByte(50, 56);
     }
 
     /**
-     * For ADS-R version 1 and 2 this must be checked before retrieving heading information.
-     *
-     * @return Depending on the ADS-R version, different interpretations:
-     * <ul>
-     *     <li><strong>Version 0</strong> the flag indicates whether heading is relative to magnetic north (true) or
-     *     true north (false)</li>
-     *     <li><strong>Version 1+</strong> the flag indicates whether heading information is available or not</li>
-     * </ul>
+     * @return the ICAO Mode A Flag used for address type determination
      */
-    public boolean hasHeadingStatusFlag() {
-        return heading_status_bit;
-    }
-
-    /**
-     * Must be checked before accessing airspeed!
-     *
-     * @return whether airspeed info is available
-     */
-    public boolean hasAirspeedInfo() {
-        return airspeed_available;
-    }
-
-    @Override
-    public boolean hasVerticalRateInfo() {
-        return vertical_rate_info_available;
-    }
-
-    @Override
-    public boolean hasGeoMinusBaroInfo() {
-        return geo_minus_baro_available;
-    }
-
-    /**
-     * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
-     */
-    public boolean isSupersonic() {
-        return msg_subtype == 4;
-    }
-
-    @Override
     public boolean getIMF() {
         return imf;
     }
 
+    /**
+     * Note: only defined for ADS-R version 0 and 1.
+     */
     @Override
     public boolean hasIFRCapability() {
-        return ifr_capability;
-    }
-
-    @Override
-    public byte getNACv() {
-        return navigation_accuracy_category;
+        return ifrCapability;
     }
 
     /**
-     * @return airspeed in knots or null if information is not available. The latter can also be checked using
-     * {@link #hasAirspeedInfo()}.
+     * @return the raw encoded Navigation Accuracy Category for velocity
      */
-    public Integer getAirspeed() {
-        if (!airspeed_available) return null;
-        return (int) airspeed;
+    public byte getNACv() {
+        return navigationAccuracyCategory;
+    }
+
+    @Override
+    public boolean hasHeadingStatusFlag() {
+        return headingStatusBit;
+    }
+
+    @Override
+    public boolean hasVerticalRate() {
+        return verticalRateEncoded != 0;
+    }
+
+    @Override
+    public boolean hasDiffBaroAlt() {
+        return diffBaroAltEncoded != 0;
+    }
+
+    @Override
+    public boolean isSupersonic() {
+        return messageSubtype == 4;
+    }
+
+    @Override
+    public short getAirspeedEncoded() {
+        return airspeedEncoded;
     }
 
     @Override
     public boolean isBarometricVerticalSpeed() {
-        return vertical_source;
+        return verticalSource;
     }
 
     @Override
-    public Integer getVerticalRate() {
-        if (!vertical_rate_info_available) return null;
-        return (vertical_rate_down ? -vertical_rate : vertical_rate);
+    public boolean isVerticalRateDown() {
+        return verticalRateDown;
     }
 
     @Override
-    public Integer getGeoMinusBaro() {
-        if (!geo_minus_baro_available) return null;
-        return geo_minus_baro;
+    public short getVerticalRateEncoded() {
+        return verticalRateEncoded;
     }
 
-    /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
-     * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
-     */
-    public Double getHeading() {
-        if (!heading_status_bit) return null;
-        return heading;
+    @Override
+    public boolean isDiffBaroAltNegative() {
+        return diffBaroAltNegative;
     }
 
-    /**
-     * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
-     */
+    @Override
+    public short getDiffBaroAltEncoded() {
+        return diffBaroAltEncoded;
+    }
+
+    @Override
+    public short getHeadingEncoded() {
+        return headingEncoded;
+    }
+
+    @Override
     public boolean isTrueAirspeed() {
-        return true_airspeed;
+        return trueAirspeed;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tAirspeedHeadingMsg{" +
-                "msg_subtype=" + msg_subtype +
+        return "AirspeedHeadingMsg{" + super.toString() +
+                ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
-                ", ifr_capability=" + ifr_capability +
-                ", navigation_accuracy_category=" + navigation_accuracy_category +
-                ", heading_status_bit=" + heading_status_bit +
-                ", heading=" + heading +
-                ", true_airspeed=" + true_airspeed +
-                ", airspeed=" + airspeed +
-                ", airspeed_available=" + airspeed_available +
-                ", vertical_source=" + vertical_source +
-                ", vertical_rate_down=" + vertical_rate_down +
-                ", vertical_rate=" + vertical_rate +
-                ", vertical_rate_info_available=" + vertical_rate_info_available +
-                ", geo_minus_baro=" + geo_minus_baro +
-                ", geo_minus_baro_available=" + geo_minus_baro_available +
+                ", ifrCapability=" + ifrCapability +
+                ", navigationAccuracyCategory=" + navigationAccuracyCategory +
+                ", headingStatusBit=" + headingStatusBit +
+                ", headingEncoded=" + headingEncoded +
+                ", trueAirspeed=" + trueAirspeed +
+                ", airspeedEncoded=" + airspeedEncoded +
+                ", verticalSource=" + verticalSource +
+                ", verticalRateDown=" + verticalRateDown +
+                ", verticalRateEncoded=" + verticalRateEncoded +
+                ", diffBaroAltNegative=" + diffBaroAltNegative +
+                ", diffBaroAltEncoded=" + diffBaroAltEncoded +
                 '}';
     }
 

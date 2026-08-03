@@ -16,17 +16,28 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the single-antenna flag.
+ * Common API for ADS-B operational status messages.
  */
-public interface SingleAntennaMsg {
+public interface OperationalStatusMsg {
 
     /**
-     * Whether the transmitting system uses a single antenna.
-     *
-     * @return true if the transmitting system uses a single antenna
+     * @return whether 1090ES IN is available
      */
-    boolean hasSingleAntenna();
+    boolean has1090ESIn();
+
+    /**
+     * The version number of the formats and protocols in use on the aircraft installation.
+     * <ul>
+     *     <li>0: Conformant to DO-260/ED-102 and DO-242</li>
+     *     <li>1: Conformant to DO-260A and DO-242A</li>
+     *     <li>2: Conformant to DO-260B/ED-102A and DO-242B</li>
+     *     <li>3-7: reserved</li>
+     * </ul>
+     *
+     * @return the version number
+     */
+    byte getVersion();
 }

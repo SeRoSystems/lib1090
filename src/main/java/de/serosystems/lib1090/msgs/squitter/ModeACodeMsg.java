@@ -16,15 +16,24 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs;
+package de.serosystems.lib1090.msgs.squitter;
 
-public interface PositionMsgWithTime extends PositionMsg {
+import de.serosystems.lib1090.decoding.Identity;
+
+/**
+ * Common API for ADS-B messages that expose a Mode A code.
+ */
+public interface ModeACodeMsg {
 
     /**
-     * @return flag which will indicate whether the Time of Applicability of the message
-     * is synchronized with UTC time. False will denote that the time is not synchronized
-     * to UTC. True will denote that Time of Applicability is synchronized to UTC time.
+     * @return the four-digit Mode A (4096) code
      */
-    boolean hasTimeFlag();
+    short getModeACode();
 
+    /**
+     * @return decoded Mode A code as four digits
+     */
+    default String getIdentity() {
+        return Identity.decodeIdentity(getModeACode());
+    }
 }

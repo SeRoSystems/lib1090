@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+
 import de.serosystems.lib1090.Position;
 import org.junit.jupiter.api.Test;
 

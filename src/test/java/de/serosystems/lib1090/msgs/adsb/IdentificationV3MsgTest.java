@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
+
 class IdentificationV3MsgTest extends IdentificationMsgTest {
 
     @Override

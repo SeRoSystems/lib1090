@@ -22,9 +22,10 @@ import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.Altitude;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -43,11 +44,11 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     private static final long serialVersionUID = 8691583253646403341L;
 
     // bits 6-7
-    private byte surveillance_status;
+    private byte surveillanceStatus;
     // bit 8
     private boolean imf;
     // bits 9-20
-    private short encoded_altitude;
+    private short altitudeEncoded;
     // bit 21 -> reserved
 
     // bites 22-56
@@ -99,17 +100,17 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-        byte[] msg = getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-        surveillance_status = (byte) ((msg[0] >>> 1) & 0x3);
-        imf = (msg[0] & 0x1) == 1;
-        encoded_altitude = (short) (((msg[1] << 4) | ((msg[2] >>> 4) & 0xF)) & 0xFFF);
+        surveillanceStatus = br.readByte(6, 7);
+        imf = br.readByte(8, 8) == 1;
+        altitudeEncoded = br.readShort(9, 20);
 
-        boolean cpr_format = ((msg[2] >>> 2) & 0x1) == 1;
-        int cpr_encoded_lat = (((msg[2] & 0x3) << 15) | ((msg[3] & 0xFF) << 7) | ((msg[4] >>> 1) & 0x7F)) & 0x1FFFF;
-        int cpr_encoded_lon = (((msg[4] & 0x1) << 16) | ((msg[5] & 0xFF) << 8) | (msg[6] & 0xFF)) & 0x1FFFF;
+        boolean cprFormat = br.readByte(22, 22) == 1;
+        int cprEncodedLat = br.readInt(23, 39);
+        int cprEncodedLon = br.readInt(40, 56);
 
-        position = CPREncodedPosition.ofAirborne(17, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
+        position = CPREncodedPosition.ofAirborne(17, cprFormat, cprEncodedLat, cprEncodedLon,
                 Objects.requireNonNull(timestamp, "timestamp"));
     }
 
@@ -187,7 +188,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      * @see #getSurveillanceStatusDescription()
      */
     public byte getSurveillanceStatus() {
-        return surveillance_status;
+        return surveillanceStatus;
     }
 
     /**
@@ -204,7 +205,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
                 "SPI condition"
         };
 
-        return desc[surveillance_status];
+        return desc[surveillanceStatus];
     }
 
     @Override
@@ -225,7 +226,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     @Override
     public Integer getAltitude() {
         if (!hasValidAltitude()) return null;
-        return Altitude.decode12BitAltitude(encoded_altitude);
+        return Altitude.decode12BitAltitude(altitudeEncoded);
     }
 
     @Override
@@ -244,15 +245,15 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      */
     public Boolean hasQBit() {
         if (!hasValidAltitude()) return null;
-        return decode12BitQBit(encoded_altitude);
+        return decode12BitQBit(altitudeEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tFineAirbornePositionMsg{" +
-                "surveillance_status=" + surveillance_status +
+        return "FineAirbornePositionMsg{" + super.toString() +
+                "surveillanceStatus=" + surveillanceStatus +
                 ", imf=" + imf +
-                ", encoded_altitude=" + encoded_altitude +
+                ", altitudeEncoded=" + altitudeEncoded +
                 ", position=" + position +
                 '}';
     }

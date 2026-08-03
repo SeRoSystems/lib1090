@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
@@ -33,25 +34,25 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     private static final long serialVersionUID = 944130622021621845L;
 
-    private byte msg_subtype;
+    private byte messageSubtype;
     private boolean imf;
     private byte nacp;
 
-    private boolean vertical_rate_down; // 0 = up, 1 = down
-    private short vertical_rate; // in ft/min
-    private boolean vertical_rate_info_available;
+    private boolean verticalRateDown; // 0 = up, 1 = down
+    private short verticalRateEncoded; // in ft/min
+    private boolean verticalRateInfoAvailable;
 
-    private boolean heading_status_bit;
+    private boolean headingStatusBit;
     private double heading; // in degrees
-    private boolean true_airspeed; // 0 = indicated AS, 1 = true AS
-    private short airspeed; // in knots
-    private boolean airspeed_available;
+    private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
+    private short airspeedEncoded; // in knots
+    private boolean airspeedAvailable;
 
-    private Integer geo_minus_baro; // in ft
+    private Integer diffBaroAlt; // in ft
 
     private Byte nacv;
     private Byte sil;
-    private Boolean magnetic_heading;
+    private Boolean magneticHeading;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -94,46 +95,46 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-        byte[] msg = this.getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-        msg_subtype = (byte) (msg[0] & 0x7);
-        if (msg_subtype != 3 && msg_subtype != 4) {
+        messageSubtype = br.readByte(6, 8);
+        if (messageSubtype != 3 && messageSubtype != 4) {
             throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
         }
 
-        imf = (msg[1] & 0x80) > 0;
-        nacp = (byte) ((msg[1] >>> 3) & 0xF);
+        imf = br.readByte(9, 9) == 1;
+        nacp = br.readByte(10, 13);
 
         // heading available in ADS-B version 1+, indicates true/magnetic north for version 0
-        heading_status_bit = (msg[1] & 0x4) > 0;
-        heading = ((msg[1] & 0x3) << 8 | msg[2] & 0xFF) * 360. / 1024.;
+        headingStatusBit = br.readByte(14, 14) == 1;
+        heading = br.readShort(15, 24) * 360. / 1024.;
 
-        true_airspeed = (msg[3] & 0x80) > 0;
-        airspeed = (short) (((msg[3] & 0x7F) << 3 | msg[4] >>> 5 & 0x07) - 1);
-        if (airspeed != -1) {
-            airspeed_available = true;
-            if (msg_subtype == 4) airspeed <<= 2;
+        trueAirspeed = br.readByte(25, 25) == 1;
+        airspeedEncoded = (short) (br.readShort(26, 35) - 1);
+        if (airspeedEncoded != -1) {
+            airspeedAvailable = true;
+            if (messageSubtype == 4) airspeedEncoded <<= 2;
         }
 
         // 0 = no geo data available, 1 = geo data available
-        boolean geo_flag = (msg[4] & 0x10) > 0;
+        boolean geoFlag = br.readByte(36, 36) == 1;
 
-        vertical_rate_down = (msg[4] & 0x08) > 0;
-        vertical_rate = (short) ((((msg[4] & 0x07) << 6 | msg[5] >>> 2 & 0x3F) - 1) << 6);
+        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalRateEncoded = (short) ((br.readShort(38, 46) - 1) << 6);
 
-        if (geo_flag) {
-            geo_minus_baro = msg[6] & 0x7F;
-            geo_minus_baro = (geo_minus_baro - 1) * 25;
-            if ((msg[6] & 0x80) > 0) geo_minus_baro *= -1;
+        if (geoFlag) {
+            int diffBaroAltEncoded = br.readByte(50, 56);
+            diffBaroAlt = (diffBaroAltEncoded - 1) * 25;
+            if (br.readByte(49, 49) == 1) diffBaroAlt *= -1;
 
             nacv = null;
             sil = null;
-            magnetic_heading = null;
+            magneticHeading = null;
         } else {
-            geo_minus_baro = null;
-            nacv = (byte) (((msg[5] & 0x1) << 2) | ((msg[6] >>> 6) & 0x3));
-            sil = (byte) ((msg[6] >>> 4) & 0x3);
-            magnetic_heading = (msg[6] & 0x2) > 0;
+            diffBaroAlt = null;
+            nacv = br.readByte(48, 50);
+            sil = br.readByte(51, 52);
+            magneticHeading = br.readByte(55, 55) == 1;
         }
     }
 
@@ -144,19 +145,19 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     @Override
     public boolean hasVerticalRateInfo() {
-        return vertical_rate_info_available;
+        return verticalRateInfoAvailable;
     }
 
     @Override
     public boolean hasGeoMinusBaroInfo() {
-        return geo_minus_baro != null;
+        return diffBaroAlt != null;
     }
 
     /**
      * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
      */
     public Double getHeading() {
-        if (!heading_status_bit) return null;
+        if (!headingStatusBit) return null;
         return heading;
     }
 
@@ -164,22 +165,22 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @return airspeed in knots or null if information is not available.
      */
     public Integer getAirspeed() {
-        if (!airspeed_available) return null;
-        return (int) airspeed;
+        if (!airspeedAvailable) return null;
+        return (int) airspeedEncoded;
     }
 
     /**
      * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
      */
     public boolean isTrueAirspeed() {
-        return true_airspeed;
+        return trueAirspeed;
     }
 
     /**
      * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
      */
     public boolean isSupersonic() {
-        return msg_subtype == 4;
+        return messageSubtype == 4;
     }
 
     @Override
@@ -189,13 +190,13 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     @Override
     public Integer getVerticalRate() {
-        if (!vertical_rate_info_available) return null;
-        return (vertical_rate_down ? -vertical_rate : vertical_rate);
+        if (!verticalRateInfoAvailable) return null;
+        return (verticalRateDown ? -verticalRateEncoded : verticalRateEncoded);
     }
 
     @Override
     public Integer getGeoMinusBaro() {
-        return geo_minus_baro;
+        return diffBaroAlt;
     }
 
     /**
@@ -231,27 +232,27 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @return true if horizontal reference direction is magnet north; false if true north; null if info not available
      */
     public Boolean isMagneticHeading() {
-        return magnetic_heading;
+        return magneticHeading;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tAirspeedHeadingMsg{" +
-                "msg_subtype=" + msg_subtype +
+        return "AirspeedHeadingMsg{" + super.toString() +
+                ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
                 ", nacp=" + nacp +
-                ", vertical_rate_down=" + vertical_rate_down +
-                ", vertical_rate=" + vertical_rate +
-                ", vertical_rate_info_available=" + vertical_rate_info_available +
-                ", heading_status_bit=" + heading_status_bit +
+                ", verticalRateDown=" + verticalRateDown +
+                ", verticalRateEncoded=" + verticalRateEncoded +
+                ", verticalRateInfoAvailable=" + verticalRateInfoAvailable +
+                ", headingStatusBit=" + headingStatusBit +
                 ", heading=" + heading +
-                ", true_airspeed=" + true_airspeed +
-                ", airspeed=" + airspeed +
-                ", airspeed_available=" + airspeed_available +
-                ", geo_minus_baro=" + geo_minus_baro +
+                ", trueAirspeed=" + trueAirspeed +
+                ", airspeedEncoded=" + airspeedEncoded +
+                ", airspeedAvailable=" + airspeedAvailable +
+                ", diffBaroAlt=" + diffBaroAlt +
                 ", nacv=" + nacv +
                 ", sil=" + sil +
-                ", magnetic_heading=" + magnetic_heading +
+                ", magneticHeading=" + magneticHeading +
                 '}';
     }
 

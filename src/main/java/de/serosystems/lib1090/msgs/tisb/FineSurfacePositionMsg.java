@@ -20,10 +20,11 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV1Msg;
@@ -44,8 +45,8 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
     private static final long serialVersionUID = 8325609209771059717L;
 
     private byte movement;
-    private boolean heading_status; // is heading valid?
-    private byte ground_track;
+    private boolean headingStatus; // is heading valid?
+    private byte groundTrack;
     private boolean imf;
     private CPREncodedPosition position;
 
@@ -94,19 +95,19 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
-        byte[] msg = getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-        movement = (byte) ((((msg[0] & 0x7) << 4) | ((msg[1] & 0xF0) >>> 4)) & 0x7F);
-        heading_status = (msg[1] & 0x8) != 0;
-        ground_track = (byte) ((((msg[1] & 0x7) << 4) | ((msg[2] & 0xF0) >>> 4)) & 0x7F);
+        movement = br.readByte(6, 12);
+        headingStatus = br.readByte(13, 13) == 1;
+        groundTrack = br.readByte(14, 20);
 
-        imf = ((msg[2] >>> 3) & 0x1) == 1;
-        boolean cpr_format = ((msg[2] >>> 2) & 0x1) == 1;
-        int cpr_encoded_lat = (((msg[2] & 0x3) << 15) | ((msg[3] & 0xFF) << 7) | ((msg[4] >>> 1) & 0x7F)) & 0x1FFFF;
-        int cpr_encoded_lon = (((msg[4] & 0x1) << 16) | ((msg[5] & 0xFF) << 8) | (msg[6] & 0xFF)) & 0x1FFFF;
+        imf = br.readByte(21, 21) == 1;
+        boolean cprFormat = br.readByte(22, 22) == 1;
+        int cprEncodedLat = br.readInt(23, 39);
+        int cprEncodedLon = br.readInt(40, 56);
 
         boolean highGroundSpeed = movement == 0 || movement > 49;
-        position = CPREncodedPosition.ofSurface(17, cpr_format, highGroundSpeed, cpr_encoded_lat, cpr_encoded_lon,
+        position = CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon,
                 Objects.requireNonNull(timestamp, "timestamp"));
     }
 
@@ -200,7 +201,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @return whether valid heading information is available
      */
     public boolean hasValidHeading() {
-        return heading_status;
+        return headingStatus;
     }
 
     /**
@@ -208,9 +209,9 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * This can also be checked using {@link #hasValidHeading()}
      */
     public Double getHeading() {
-        if (!heading_status) return null;
+        if (!headingStatus) return null;
 
-        return ground_track * 360D / 128D;
+        return groundTrack * 360D / 128D;
     }
 
     /**
@@ -247,10 +248,10 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tFineSurfacePositionMsg{" +
+        return "FineSurfacePositionMsg{" + super.toString() +
                 "movement=" + movement +
-                ", heading_status=" + heading_status +
-                ", ground_track=" + ground_track +
+                ", headingStatus=" + headingStatus +
+                ", groundTrack=" + groundTrack +
                 ", imf=" + imf +
                 ", position=" + position +
                 '}';

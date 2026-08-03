@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
+
 /**
  * Marker interface for ADS-B version 2 airborne velocity messages.
  */

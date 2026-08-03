@@ -16,28 +16,20 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B operational status messages.
+ * Common API for ADS-B/ADS-R Wx AIREP messages, introduced in ADS-B version 3.
+ * <p>
+ * The aircraft state, weather state and alternate weather state subtypes share no fields at this
+ * level, so this interface currently serves only to mark all three subtypes as members of the
+ * Wx AIREP message family.
  */
-public interface OperationalStatusMsg {
+public interface WxAIREPMsg {
 
     /**
-     * @return whether 1090ES IN is available
+     * @return the raw encoded message subtype (0 for the aircraft state subtype, 1 for the
+     * weather state subtype, 2 for the alternate weather state subtype)
      */
-    boolean has1090ESIn();
-
-    /**
-     * The version number of the formats and protocols in use on the aircraft installation.
-     * <ul>
-     *     <li>0: Conformant to DO-260/ED-102 and DO-242</li>
-     *     <li>1: Conformant to DO-260A and DO-242A</li>
-     *     <li>2: Conformant to DO-260B/ED-102A and DO-242B</li>
-     *     <li>3-7: reserved</li>
-     * </ul>
-     *
-     * @return the version number
-     */
-    byte getVersion();
+    byte getMessageSubtype();
 }

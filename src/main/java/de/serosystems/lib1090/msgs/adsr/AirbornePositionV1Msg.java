@@ -18,6 +18,11 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
+import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.AirbornePosition;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
@@ -25,18 +30,24 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 import java.time.Instant;
-
-import static de.serosystems.lib1090.decoding.AirbornePosition.decodeHCR;
-import static de.serosystems.lib1090.decoding.AirbornePosition.decodeNIC;
+import java.util.Objects;
 
 /**
  * Decoder for ADS-R airborne position messages version 1 (DO-260A)
  */
-public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Serializable {
+public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg {
 
     private static final long serialVersionUID = 2487388116642019598L;
 
-    private boolean nic_suppl_a;
+    private boolean horizontalPositionAvailable;
+    private boolean altitudeAvailable;
+    private byte surveillanceStatus;
+    private boolean imf;
+    private short altitudeEncoded;
+    private boolean timeFlag;
+    private CPREncodedPosition position;
+
+    private boolean nicSupplementA;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -46,7 +57,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 
     /**
      * @param rawMessage raw ADS-R airborne position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -56,7 +67,7 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
 
     /**
      * @param rawMessage raw ADS-R airborne position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -70,22 +81,34 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
      * @throws BadFormatException if message has wrong format
      */
     public AirbornePositionV1Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
-        super(squitter, timestamp);
+        super(squitter);
+
+        byte formatTypeCode = getFormatTypeCode();
+        AirbornePosition.validateAirbornePositionFormat(formatTypeCode);
+
+        horizontalPositionAvailable = formatTypeCode != 0;
+        BitReader br = BitReader.forBigEndian(getMessage());
+        surveillanceStatus = br.readByte(6, 7);
+        imf = br.readByte(8, 8) == 1;
+        altitudeEncoded = br.readShort(9, 20);
+        altitudeAvailable = altitudeEncoded != 0;
+        timeFlag = br.readByte(21, 21) == 1;
+        position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
-     * @param nic_suppl Navigation Integrity Category (NIC) supplement from operational status message.
-     *                  Otherwise worst case is assumed for containment radius limit and NIC. ADS-R version 1+ only!
+     * @param nicSupplementA Navigation Integrity Category (NIC) supplement from operational status message.
+     *                       Otherwise worst case is assumed for containment radius limit and NIC. ADS-R version 1+ only!
      */
-    public void setNICSupplementA(boolean nic_suppl) {
-        this.nic_suppl_a = nic_suppl;
+    public void setNICSupplementA(boolean nicSupplementA) {
+        this.nicSupplementA = nicSupplementA;
     }
 
     /**
      * @return NIC supplement that was set before
      */
     public boolean hasNICSupplementA() {
-        return nic_suppl_a;
+        return nicSupplementA;
     }
 
     /**
@@ -98,8 +121,9 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
      * If aircraft uses ADS-R version 1+, set NIC supplement A from Operational Status Message
      * for better precision.
      */
+    @Override
     public double getHorizontalContainmentRadiusLimit() {
-        return decodeHCR(getFormatTypeCode(), nic_suppl_a);
+        return AirbornePosition.decodeHCR(getFormatTypeCode(), nicSupplementA);
     }
 
     /**
@@ -107,14 +131,69 @@ public class AirbornePositionV1Msg extends AirbornePositionV0Msg implements Seri
      *
      * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
+    @Override
     public byte getNIC() {
-        return decodeNIC(getFormatTypeCode(), nic_suppl_a);
+        return AirbornePosition.decodeNIC(getFormatTypeCode(), nicSupplementA);
+    }
+
+    @Override
+    public byte getNACp() {
+        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
+    }
+
+    @Override
+    public double getPositionUncertainty() {
+        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    }
+
+    @Override
+    public byte getSurveillanceStatusEncoded() {
+        return surveillanceStatus;
+    }
+
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
+
+    @Override
+    public boolean hasTimeFlag() {
+        return timeFlag;
+    }
+
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
+
+    @Override
+    public boolean hasValidPosition() {
+        return horizontalPositionAvailable;
+    }
+
+    @Override
+    public boolean hasValidAltitude() {
+        return altitudeAvailable;
+    }
+
+    @Override
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tAirbornePositionV1Msg{" +
-                "nic_suppl_a=" + nic_suppl_a +
+        return "AirbornePositionV1Msg{" + super.toString() +
+                ", horizontalPositionAvailable=" + horizontalPositionAvailable +
+                ", altitudeAvailable=" + altitudeAvailable +
+                ", surveillanceStatus=" + surveillanceStatus +
+                ", imf=" + imf +
+                ", altitudeEncoded=" + altitudeEncoded +
+                ", timeFlag=" + timeFlag +
+                ", position=" + position +
+                ", nicSupplementA=" + nicSupplementA +
                 '}';
     }
 

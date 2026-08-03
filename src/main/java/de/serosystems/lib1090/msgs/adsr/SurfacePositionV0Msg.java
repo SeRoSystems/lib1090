@@ -18,12 +18,13 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
-import de.serosystems.lib1090.Position;
+import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
+
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV1Msg;
@@ -34,19 +35,17 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-import static de.serosystems.lib1090.decoding.SurfacePosition.*;
-
 /**
- * Decoder for ADS-R surface position messages
+ * Decoder for ADS-R surface position messages version 0.
  */
-public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg {
 
     private static final long serialVersionUID = -257270493057596465L;
 
-    private boolean horizontal_position_available;
+    private boolean horizontalPositionAvailable;
     private byte movement;
-    private boolean heading_status; // is heading valid?
-    private byte ground_track;
+    private boolean headingStatus;
+    private byte groundTrack;
     private boolean imf;
     private CPREncodedPosition position;
 
@@ -58,7 +57,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 
     /**
      * @param rawMessage raw ADS-R surface position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -68,7 +67,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 
     /**
      * @param rawMessage raw ADS-R surface position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -84,26 +83,16 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
     public SurfacePositionV0Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
-        if (!(getFormatTypeCode() == 0 ||
-                (getFormatTypeCode() >= 5 && getFormatTypeCode() <= 8)))
-            throw new BadFormatException("This is not a position message! Wrong format type code (" + getFormatTypeCode() + ").");
+        byte formatTypeCode = getFormatTypeCode();
+        SurfacePosition.validateSurfacePositionFormat(formatTypeCode);
 
-        byte[] msg = getMessage();
-
-        horizontal_position_available = getFormatTypeCode() != 0;
-
-        movement = (byte) ((((msg[0] & 0x7) << 4) | ((msg[1] & 0xF0) >>> 4)) & 0x7F);
-        heading_status = (msg[1] & 0x8) != 0;
-        ground_track = (byte) ((((msg[1] & 0x7) << 4) | ((msg[2] & 0xF0) >>> 4)) & 0x7F);
-
-        imf = ((msg[2] >>> 3) & 0x1) == 1;
-        boolean cpr_format = ((msg[2] >>> 2) & 0x1) == 1;
-        int cpr_encoded_lat = (((msg[2] & 0x3) << 15) | ((msg[3] & 0xFF) << 7) | ((msg[4] >>> 1) & 0x7F)) & 0x1FFFF;
-        int cpr_encoded_lon = (((msg[4] & 0x1) << 16) | ((msg[5] & 0xFF) << 8) | (msg[6] & 0xFF)) & 0x1FFFF;
-
-        boolean highGroundSpeed = movement == 0 || movement > 49;
-        position = CPREncodedPosition.ofSurface(17, cpr_format, highGroundSpeed, cpr_encoded_lat, cpr_encoded_lon,
-                Objects.requireNonNull(timestamp, "timestamp"));
+        horizontalPositionAvailable = formatTypeCode != 0;
+        BitReader br = BitReader.forBigEndian(getMessage());
+        movement = br.readByte(6, 12);
+        headingStatus = br.readByte(13, 13) == 1;
+        groundTrack = br.readByte(14, 20);
+        imf = br.readByte(21, 21) == 1;
+        position = SurfacePosition.extractCPREncodedPosition(br, movement, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
@@ -113,9 +102,9 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      *
      * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
      */
+    @Override
     public double getHorizontalContainmentRadiusLimit() {
-        return decodeHCR(getFormatTypeCode());
-
+        return SurfacePosition.decodeHCR(getFormatTypeCode());
     }
 
     /**
@@ -127,8 +116,9 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
      * {@link AirborneOperationalStatusV1Msg}.
      */
+    @Override
     public byte getNACp() {
-        return this.getNIC();
+        return getNIC();
     }
 
     /**
@@ -142,71 +132,32 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
+    @Override
     public double getPositionUncertainty() {
-        return decodeEPU(getFormatTypeCode());
+        return SurfacePosition.decodeEPU(getFormatTypeCode());
     }
 
     /**
      * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
      */
+    @Override
     public byte getNIC() {
         return SurfacePosition.decodeNIC(getFormatTypeCode());
     }
 
-    /**
-     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-     * <p>
-     * The concept of SIL has been introduced in ADS-R version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
-     * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-R
-     * version 1 and 2.
-     *
-     * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius.
-     */
-    public byte getSIL() {
-        return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
+    @Override
+    public byte getMovementEncoded() {
+        return movement;
     }
 
-    /**
-     * @return whether ground speed information is available
-     */
-    public boolean hasGroundSpeed() {
-        return movement >= 1 && movement <= 124;
+    @Override
+    public byte getHeadingEncoded() {
+        return groundTrack;
     }
 
-    /**
-     * @return speed in knots or null if ground speed is not available. The latter can also be checked with
-     * {@link #hasGroundSpeed()}.
-     */
-    public Double getGroundSpeed() {
-        return groundSpeed(movement);
-    }
-
-    /**
-     * @return speed resolution (accuracy) in knots or null if ground speed is not available. The latter can also be
-     * checked with {@link #hasGroundSpeed()}.
-     */
-    public Double getGroundSpeedResolution() {
-        return groundSpeedResolution(movement);
-    }
-
-    /**
-     * @return whether valid heading information is available
-     */
+    @Override
     public boolean hasValidHeading() {
-        return heading_status;
-    }
-
-    /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north. Returns null if heading is not available.
-     * This can also be checked using {@link #hasValidHeading()}
-     */
-    public Double getHeading() {
-        if (!heading_status) return null;
-
-        return ground_track * 360D / 128D;
+        return headingStatus;
     }
 
     /**
@@ -223,31 +174,16 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
 
     @Override
     public boolean hasValidPosition() {
-        return horizontal_position_available;
-    }
-
-    @Override
-    public boolean hasValidAltitude() {
-        return true;
-    }
-
-    @Override
-    public Integer getAltitude() {
-        return 0;
-    }
-
-    @Override
-    public Position.AltitudeType getAltitudeType() {
-        return Position.AltitudeType.ABOVE_GROUND_LEVEL;
+        return horizontalPositionAvailable;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tSurfacePositionV0Msg{" +
-                "horizontal_position_available=" + horizontal_position_available +
+        return "SurfacePositionV0Msg{" + super.toString() +
+                ", horizontalPositionAvailable=" + horizontalPositionAvailable +
                 ", movement=" + movement +
-                ", heading_status=" + heading_status +
-                ", ground_track=" + ground_track +
+                ", headingStatus=" + headingStatus +
+                ", groundTrack=" + groundTrack +
                 ", imf=" + imf +
                 ", position=" + position +
                 '}';

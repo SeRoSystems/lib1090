@@ -19,8 +19,8 @@
 package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
-import de.serosystems.lib1090.msgs.PositionMsg;
-import de.serosystems.lib1090.msgs.adsb.SurfacePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

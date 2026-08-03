@@ -16,16 +16,16 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.decoding.OperationalStatus;
 
 /**
- * Common API for ADS-B surface operational status messages.
+ * Common API for ADS-B airborne operational status messages.
  */
-public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
+public interface AirborneOperationalStatusMsg extends OperationalStatusMsg {
 
-    byte SUBTYPE_CODE = 1;
+    byte SUBTYPE_CODE = 0;
 
     /**
      * @return the subtype code, 0 for airborne operational status messages
@@ -35,20 +35,9 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
     }
 
     /**
-     * @return whether 1090ES IN / CDTI is available
+     * @return true if TCAS is operational or unknown, false if TCAS is not operational.
      */
-    @Override
-    boolean has1090ESIn();
-
-    /**
-     * @return whether transponder has less than 70 Watts transmit power
-     */
-    boolean hasLowTxPower();
-
-    /**
-     * @return true if POA bit is 1.
-     */
-    boolean hasPositionOffsetApplied();
+    boolean hasOperationalTCAS();
 
     /**
      * @return whether TCAS Resolution Advisory (RA) is active
@@ -88,38 +77,4 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
      * @return the source integrity level (SIL)
      */
     byte getSILEncoded();
-
-    /**
-     * @return raw aircraft vehicle length and width code (4 bit)
-     */
-    byte getAircraftVehicleLengthAndWidthEncoded();
-
-    /**
-     * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2
-     *
-     * @return the airplane's length in meters; -1 for unknown
-     */
-    default int getAirplaneLength() {
-        return OperationalStatus.decodeAirplaneLength(getAircraftVehicleLengthAndWidthEncoded());
-    }
-
-    /**
-     * According to DO-260B Table 2-74. Compatible with ADS-B version 1 and 2.
-     *
-     * @return the airplane's width in meters
-     */
-    default double getAirplaneWidth() {
-        return OperationalStatus.decodeAirplaneWidth(getAircraftVehicleLengthAndWidthEncoded());
-    }
-
-    /**
-     * @return the Track Angle/Heading allows correct interpretation of the data
-     * contained in the Heading/Ground Track subfield of ADS-B Surface Position Messages.
-     */
-    boolean hasTrackHeading();
-
-    /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
-     */
-    boolean getHorizontalReferenceDirection();
 }

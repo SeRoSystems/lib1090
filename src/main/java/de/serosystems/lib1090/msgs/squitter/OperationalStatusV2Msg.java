@@ -16,15 +16,15 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the IFR capability flag.
+ * Common API for ADS-B operational status version 2 messages.
  */
-public interface IFRCapabilityMsg {
+public interface OperationalStatusV2Msg extends OperationalStatusV2V3Msg {
 
     /**
-     * @return true if the aircraft reports IFR capability
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
      */
-    boolean hasIFRCapability();
+    boolean getHorizontalReferenceDirection();
 }
