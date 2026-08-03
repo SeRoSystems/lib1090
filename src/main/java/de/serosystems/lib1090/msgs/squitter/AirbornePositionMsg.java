@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.squitter;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.Altitude;
 
-public interface AirbornePositionMsg extends PositionMsgWithTime {
+public interface AirbornePositionMsg extends PositionMsg {
 
     /**
      * @return the message's format type code.

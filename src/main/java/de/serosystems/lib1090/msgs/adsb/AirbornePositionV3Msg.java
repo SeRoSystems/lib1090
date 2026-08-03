@@ -39,7 +39,6 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
     private byte surveillanceStatus;
     private boolean nicSupplementB;
     private short altitudeEncoded;
-    private boolean timeFlag;
     private CPREncodedPosition position;
 
     /**
@@ -85,7 +84,6 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
         nicSupplementB = br.readByte(8, 8) == 1;
         altitudeEncoded = br.readShort(9, 20);
         altitudeAvailable = altitudeEncoded != 0;
-        timeFlag = br.readByte(21, 21) == 1;
         position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
@@ -149,11 +147,6 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public boolean hasTimeFlag() {
-        return timeFlag;
-    }
-
-    @Override
     public CPREncodedPosition getCPREncodedPosition() {
         return position;
     }
@@ -181,7 +174,6 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
                 ", surveillanceStatus=" + surveillanceStatus +
                 ", nicSupplementB=" + nicSupplementB +
                 ", altitudeEncoded=" + altitudeEncoded +
-                ", timeFlag=" + timeFlag +
                 ", position=" + position +
                 '}';
     }
