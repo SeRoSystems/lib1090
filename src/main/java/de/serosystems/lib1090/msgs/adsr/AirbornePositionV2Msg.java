@@ -18,8 +18,6 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
-import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
-
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
@@ -27,6 +25,9 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -35,7 +36,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-R airborne position messages version 2 (DO-260B).
  */
-public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg {
+public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg {
 
     private static final long serialVersionUID = 6290709359481466246L;
 
@@ -205,9 +206,7 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
         return surveillanceStatus;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }

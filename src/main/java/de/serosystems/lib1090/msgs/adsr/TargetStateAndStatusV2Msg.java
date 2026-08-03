@@ -22,15 +22,17 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R target state and status message as specified in DO-260B §2.2.3.2.7.1
+ * Decoder for ADS-R version 2 target state and status message as specified in DO-260B §2.2.3.2.7.1
  */
-public class TargetStateAndStatusMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg {
+public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg {
 
-    private static final long serialVersionUID = 6313459928974958939L;
+    private static final long serialVersionUID = 5538791271227307531L;
 
     private boolean silSupplement;
     private boolean selectedAltitudeType;
@@ -46,7 +48,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     private boolean autopilotEngaged;
     private boolean vnavModeEngaged;
     private boolean altitudeHoldMode;
-    private boolean imf; // occupies an otherwise-spare/reserved bit
+    private boolean imf;
     private boolean approachMode;
     private boolean operationalTcas;
     private boolean lnavModeEngaged;
@@ -54,7 +56,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected TargetStateAndStatusMsg() {
+    protected TargetStateAndStatusV2Msg() {
     }
 
     /**
@@ -62,7 +64,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -71,7 +73,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -80,7 +82,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
      * @throws BadFormatException     if message has the wrong typecode or if reserved bits are set
      * @throws UnspecifiedFormatError if message has the wrong subtype
      */
-    public TargetStateAndStatusMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
 
         if (getFormatTypeCode() != 29) {
@@ -117,6 +119,7 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         autopilotEngaged = b.readByte(48, 48) == 1;
         vnavModeEngaged = b.readByte(49, 49) == 1;
         altitudeHoldMode = b.readByte(50, 50) == 1;
+        // ME bit 51 is redefined as the IMF flag for ADS-R
         imf = b.readByte(51, 51) == 1;
         approachMode = b.readByte(52, 52) == 1;
         lnavModeEngaged = b.readByte(54, 54) == 1;
@@ -300,16 +303,14 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
         return lnavModeEngaged;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
 
     @Override
     public String toString() {
-        return "TargetStateAndStatusMsg{" + super.toString() +
+        return "TargetStateAndStatusV2Msg{" + super.toString() +
                 ", silSupplement=" + silSupplement +
                 ", selectedAltitudeType=" + selectedAltitudeType +
                 ", selectedAltitude=" + selectedAltitude +
@@ -333,6 +334,6 @@ public class TargetStateAndStatusMsg extends ExtendedSquitter implements Seriali
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_TARGET_STATE_AND_STATUS;
+        return subtype.ADSR_TARGET_STATE_AND_STATUS_V2;
     }
 }

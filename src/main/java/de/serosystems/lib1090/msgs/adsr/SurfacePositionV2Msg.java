@@ -18,8 +18,6 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
-import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
-
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.SurfacePosition;
@@ -27,6 +25,8 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-R surface position messages version 2.
  */
-public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg {
+public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg {
 
     private static final long serialVersionUID = 7058731502891153722L;
 
@@ -214,9 +214,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
         return headingStatus;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }

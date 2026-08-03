@@ -21,22 +21,23 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.adsb.NACvMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
+import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R airspeed and heading messages
+ * Decoder for ADS-R version 2 airspeed and heading messages
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, IFRCapabilityMsg {
+public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, IMFMsg, NACvMsg {
 
-    private static final long serialVersionUID = -5847938116356997891L;
+    private static final long serialVersionUID = -3439568191943485753L;
 
     private byte messageSubtype;
     private boolean imf;
-    private boolean ifrCapability;
-    private byte navigationAccuracyCategory;
+    private byte navigationAccuracyCategoryEncoded;
     private boolean headingStatusBit;
     private short headingEncoded;
     private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
@@ -50,7 +51,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected AirspeedHeadingMsg() {
+    protected AirspeedHeadingV2Msg() {
     }
 
     /**
@@ -58,7 +59,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirspeedHeadingV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -67,7 +68,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public AirspeedHeadingV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -75,23 +76,21 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @param squitter extended squitter containing the airspeed and heading msg
      * @throws BadFormatException if message has wrong format
      */
-    public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirspeedHeadingV2Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 19) {
+        if (this.getFormatTypeCode() != 19)
             throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
-        }
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
-        if (messageSubtype != 3 && messageSubtype != 4) {
+        if (messageSubtype != 3 && messageSubtype != 4)
             throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
-        }
 
+        // ME bit 9 is redefined as the IMF flag for ADS-R
         imf = br.readByte(9, 9) == 1;
-        ifrCapability = br.readByte(10, 10) == 1;
-        navigationAccuracyCategory = br.readByte(11, 13);
+        navigationAccuracyCategoryEncoded = br.readByte(11, 13);
 
         headingStatusBit = br.readByte(14, 14) == 1;
         headingEncoded = br.readShort(15, 24);
@@ -107,26 +106,9 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
         diffBaroAltEncoded = br.readByte(50, 56);
     }
 
-    /**
-     * @return the ICAO Mode A Flag used for address type determination
-     */
+    @Override
     public boolean getIMF() {
         return imf;
-    }
-
-    /**
-     * Note: only defined for ADS-R version 0 and 1.
-     */
-    @Override
-    public boolean hasIFRCapability() {
-        return ifrCapability;
-    }
-
-    /**
-     * @return the raw encoded Navigation Accuracy Category for velocity
-     */
-    public byte getNACv() {
-        return navigationAccuracyCategory;
     }
 
     @Override
@@ -135,18 +117,13 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     @Override
-    public boolean hasVerticalRate() {
-        return verticalRateEncoded != 0;
-    }
-
-    @Override
-    public boolean hasDiffBaroAlt() {
-        return diffBaroAltEncoded != 0;
-    }
-
-    @Override
     public boolean isSupersonic() {
         return messageSubtype == 4;
+    }
+
+    @Override
+    public byte getNACvEncoded() {
+        return navigationAccuracyCategoryEncoded;
     }
 
     @Override
@@ -191,11 +168,10 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     @Override
     public String toString() {
-        return "AirspeedHeadingMsg{" + super.toString() +
+        return "AirspeedHeadingV2Msg{" + super.toString() +
                 ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
-                ", ifrCapability=" + ifrCapability +
-                ", navigationAccuracyCategory=" + navigationAccuracyCategory +
+                ", navigationAccuracyCategoryEncoded=" + navigationAccuracyCategoryEncoded +
                 ", headingStatusBit=" + headingStatusBit +
                 ", headingEncoded=" + headingEncoded +
                 ", trueAirspeed=" + trueAirspeed +
@@ -210,6 +186,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_AIRSPEED;
+        return subtype.ADSR_AIRSPEED_V2;
     }
 }

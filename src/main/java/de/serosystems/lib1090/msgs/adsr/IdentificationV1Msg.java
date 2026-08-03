@@ -23,15 +23,16 @@ import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R identification messages
+ * Decoder for ADS-R version 1 identification messages
  */
-public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg {
+public class IdentificationV1Msg extends ExtendedSquitter implements Serializable, IdentificationMsg {
 
-    private static final long serialVersionUID = -7843589383745529023L;
+    private static final long serialVersionUID = 6181332385305529287L;
 
     private byte emitterCategory;
     private long identificationEncoded;
@@ -39,7 +40,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected IdentificationMsg() {
+    protected IdentificationV1Msg() {
     }
 
     /**
@@ -47,7 +48,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
      * @throws BadFormatException     if message has the wrong typecode
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public IdentificationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public IdentificationV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -56,7 +57,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
      * @throws BadFormatException     if message has the wrong typecode
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
-    public IdentificationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public IdentificationV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -64,7 +65,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
      * @param squitter extended squitter which contains this identification msg
      * @throws BadFormatException if message has the wrong typecode
      */
-    public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public IdentificationV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
@@ -87,12 +88,12 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
 
     @Override
     public String getEmitterCategory() {
-        return Identification.categoryDescription(getFormatTypeCode(), emitterCategory, 0);
+        return Identification.categoryDescription(getFormatTypeCode(), emitterCategory, 1);
     }
 
     @Override
     public String toString() {
-        return "IdentificationMsg{" + super.toString() +
+        return "IdentificationV1Msg{" + super.toString() +
                 ", categorySet=" + getCategorySet() +
                 ", emitterCategory=" + emitterCategory +
                 ", identificationEncoded=" + identificationEncoded +
@@ -101,6 +102,6 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
 
     @Override
     public subtype getType() {
-        return subtype.ADSR_IDENTIFICATION;
+        return subtype.ADSR_IDENTIFICATION_V1;
     }
 }
