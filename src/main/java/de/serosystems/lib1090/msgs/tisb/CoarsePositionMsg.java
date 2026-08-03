@@ -23,8 +23,9 @@ import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -36,9 +37,9 @@ import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 /**
  * Decoder for TIS-B coarse position (DO-260B, 2.2.17.3.5).
  */
-public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg {
 
-    private static final long serialVersionUID = -8532037642870724311L;
+    private static final long serialVersionUID = 6920442725399745427L;
 
     private boolean imf;
     private byte surveillanceStatus;
@@ -47,7 +48,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     private boolean groundTrackStatus;
     private byte groundTrackAngle;
     private byte groundSpeed;
-    CPREncodedPosition position;
+    private CPREncodedPosition position;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -57,7 +58,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
     /**
      * @param rawMessage raw TIS-B coarse position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -67,7 +68,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
     /**
      * @param rawMessage raw TIS-B coarse position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -83,9 +84,8 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     public CoarsePositionMsg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
-        if (getDownlinkFormat() != 18) {
+        if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
-        }
 
         // Table 2-13
         if (getFirstField() != 3)
@@ -107,6 +107,11 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
         position = CPREncodedPosition.ofAirborne(12, cprFormat, cprEncodedLat, cprEncodedLon,
                 Objects.requireNonNull(timestamp, "timestamp"));
+    }
+
+    @Override
+    public boolean getIMF() {
+        return imf;
     }
 
     /**
@@ -150,22 +155,22 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     }
 
     /**
-     * See also {@link #getMaxGroundSpeed()}.
+     * See also {@link #getGroundSpeedUpperBound()}.
      *
-     * @return ground speed in knots (lower end of possible 32 knots window)
+     * @return ground speed in knots (lower bound of possible 32 knots window)
      */
-    public Integer getMinGroundSpeed() {
+    public Integer getGroundSpeedLowerBound() {
         if (groundSpeed == 0) return null;
         else if (groundSpeed == 1) return 0;
         else return 16 + (groundSpeed - 2) * 32;
     }
 
     /**
-     * See also {@link #getMinGroundSpeed()}.
+     * See also {@link #getGroundSpeedLowerBound()}.
      *
-     * @return ground speed in knots (upper end of possible 32 knots window)
+     * @return ground speed in knots (upper bound of possible 32 knots window)
      */
-    public Integer getMaxGroundSpeed() {
+    public Integer getGroundSpeedUpperBound() {
         if (groundSpeed == 0) return null;
         else if (groundSpeed == 1) return 16;
         else return 16 + (groundSpeed - 1) * 32;
@@ -216,7 +221,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
                 ", altitudeEncoded=" + altitudeEncoded +
                 ", groundTrackStatus=" + groundTrackStatus +
                 ", groundTrackAngle=" + getGroundTrackAngle() +
-                ", groundSpeed=" + getMinGroundSpeed() + "-" + getMaxGroundSpeed() +
+                ", groundSpeed=" + getGroundSpeedLowerBound() + "-" + getGroundSpeedUpperBound() +
                 ", position=" + position +
                 '}';
     }

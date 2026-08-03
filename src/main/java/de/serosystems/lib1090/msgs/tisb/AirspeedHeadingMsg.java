@@ -30,29 +30,28 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B airspeed+heading message (DO-260B, 2.2.17.3.4).
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
+public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg {
 
-    private static final long serialVersionUID = 944130622021621845L;
+    private static final long serialVersionUID = -8123616227800921480L;
 
     private byte messageSubtype;
     private boolean imf;
     private byte nacp;
 
     private boolean verticalRateDown; // 0 = up, 1 = down
-    private short verticalRateEncoded; // in ft/min
-    private boolean verticalRateInfoAvailable;
+    private short verticalRateEncoded; // raw encoded vertical rate field
 
     private boolean headingStatusBit;
-    private double heading; // in degrees
+    private short headingEncoded; // raw encoded heading field
     private boolean trueAirspeed; // 0 = indicated AS, 1 = true AS
-    private short airspeedEncoded; // in knots
-    private boolean airspeedAvailable;
+    private short airspeedEncoded; // raw encoded airspeed field
 
-    private Integer diffBaroAlt; // in ft
-
-    private Byte nacv;
-    private Byte sil;
-    private Boolean magneticHeading;
+    private boolean geoFlag;
+    private boolean diffBaroAltNegative;
+    private short diffBaroAltEncoded;
+    private byte nacv;
+    private byte sil;
+    private boolean magneticHeading;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -98,40 +97,28 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
-        if (messageSubtype != 3 && messageSubtype != 4) {
+        if (messageSubtype != 3 && messageSubtype != 4)
             throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-        }
 
         imf = br.readByte(9, 9) == 1;
         nacp = br.readByte(10, 13);
 
-        // heading available in ADS-B version 1+, indicates true/magnetic north for version 0
         headingStatusBit = br.readByte(14, 14) == 1;
-        heading = br.readShort(15, 24) * 360. / 1024.;
+        headingEncoded = br.readShort(15, 24);
 
         trueAirspeed = br.readByte(25, 25) == 1;
-        airspeedEncoded = (short) (br.readShort(26, 35) - 1);
-        if (airspeedEncoded != -1) {
-            airspeedAvailable = true;
-            if (messageSubtype == 4) airspeedEncoded <<= 2;
-        }
+        airspeedEncoded = br.readShort(26, 35);
 
         // 0 = no geo data available, 1 = geo data available
-        boolean geoFlag = br.readByte(36, 36) == 1;
+        geoFlag = br.readByte(36, 36) == 1;
 
         verticalRateDown = br.readByte(37, 37) == 1;
-        verticalRateEncoded = (short) ((br.readShort(38, 46) - 1) << 6);
+        verticalRateEncoded = br.readShort(38, 46);
 
         if (geoFlag) {
-            int diffBaroAltEncoded = br.readByte(50, 56);
-            diffBaroAlt = (diffBaroAltEncoded - 1) * 25;
-            if (br.readByte(49, 49) == 1) diffBaroAlt *= -1;
-
-            nacv = null;
-            sil = null;
-            magneticHeading = null;
+            diffBaroAltNegative = br.readByte(49, 49) == 1;
+            diffBaroAltEncoded = br.readByte(50, 56);
         } else {
-            diffBaroAlt = null;
             nacv = br.readByte(48, 50);
             sil = br.readByte(51, 52);
             magneticHeading = br.readByte(55, 55) == 1;
@@ -144,59 +131,68 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     @Override
-    public boolean hasVerticalRateInfo() {
-        return verticalRateInfoAvailable;
+    public boolean hasGeoFlag() {
+        return geoFlag;
     }
 
     @Override
-    public boolean hasGeoMinusBaroInfo() {
-        return diffBaroAlt != null;
+    public boolean hasHeadingStatusFlag() {
+        return headingStatusBit;
     }
 
-    /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if no information is available.
-     */
-    public Double getHeading() {
-        if (!headingStatusBit) return null;
-        return heading;
+    @Override
+    public short getHeadingEncoded() {
+        return headingEncoded;
     }
 
-    /**
-     * @return airspeed in knots or null if information is not available.
-     */
-    public Integer getAirspeed() {
-        if (!airspeedAvailable) return null;
-        return (int) airspeedEncoded;
-    }
-
-    /**
-     * @return true if airspeed is true airspeed, false if airspeed is indicated airspeed
-     */
+    @Override
     public boolean isTrueAirspeed() {
         return trueAirspeed;
     }
 
-    /**
-     * @return If supersonic, velocity has only 4 kts accuracy, otherwise 1 kt
-     */
+    @Override
+    public short getAirspeedEncoded() {
+        return airspeedEncoded;
+    }
+
+    @Override
     public boolean isSupersonic() {
         return messageSubtype == 4;
     }
 
     @Override
+    public boolean isVerticalRateDown() {
+        return verticalRateDown;
+    }
+
+    @Override
+    public short getVerticalRateEncoded() {
+        return verticalRateEncoded;
+    }
+
+    @Override
+    public boolean isBarometricVerticalSpeed() {
+        return false;
+    }
+
+    @Override
+    public boolean hasDiffBaroAlt() {
+        return hasGeoFlag() && diffBaroAltEncoded != 0;
+    }
+
+    @Override
+    public short getDiffBaroAltEncoded() {
+        return diffBaroAltEncoded;
+    }
+
+    @Override
+    public boolean isDiffBaroAltNegative() {
+        return diffBaroAltNegative;
+    }
+
+    @Override
     public Byte getNACv() {
-        return nacv;
-    }
-
-    @Override
-    public Integer getVerticalRate() {
-        if (!verticalRateInfoAvailable) return null;
-        return (verticalRateDown ? -verticalRateEncoded : verticalRateEncoded);
-    }
-
-    @Override
-    public Integer getGeoMinusBaro() {
-        return diffBaroAlt;
+        return hasGeoFlag() ? null : nacv;
     }
 
     /**
@@ -223,7 +219,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * the NIC containment radius. Returns null if not available.
      */
     public Byte getSIL() {
-        return sil;
+        return hasGeoFlag() ? null : sil;
     }
 
     /**
@@ -232,7 +228,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      * @return true if horizontal reference direction is magnet north; false if true north; null if info not available
      */
     public Boolean isMagneticHeading() {
-        return magneticHeading;
+        return hasGeoFlag() ? null : magneticHeading;
     }
 
     @Override
@@ -243,13 +239,13 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
                 ", nacp=" + nacp +
                 ", verticalRateDown=" + verticalRateDown +
                 ", verticalRateEncoded=" + verticalRateEncoded +
-                ", verticalRateInfoAvailable=" + verticalRateInfoAvailable +
                 ", headingStatusBit=" + headingStatusBit +
-                ", heading=" + heading +
+                ", headingEncoded=" + headingEncoded +
                 ", trueAirspeed=" + trueAirspeed +
                 ", airspeedEncoded=" + airspeedEncoded +
-                ", airspeedAvailable=" + airspeedAvailable +
-                ", diffBaroAlt=" + diffBaroAlt +
+                ", geoFlag=" + geoFlag +
+                ", diffBaroAltNegative=" + diffBaroAltNegative +
+                ", diffBaroAltEncoded=" + diffBaroAltEncoded +
                 ", nacv=" + nacv +
                 ", sil=" + sil +
                 ", magneticHeading=" + magneticHeading +
@@ -258,6 +254,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
     @Override
     public subtype getType() {
-        return subtype.TISB_VELOCITY;
+        return subtype.TISB_AIRSPEED;
     }
 }

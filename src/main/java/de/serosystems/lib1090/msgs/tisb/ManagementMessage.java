@@ -25,11 +25,11 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
+ * Decoder for TIS-B/ADS-R Management Message (DO-260B, 2.2.17.3.6).
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable {
 
-    private static final long serialVersionUID = 1526130029633174669L;
+    private static final long serialVersionUID = 6266047064873866100L;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -62,9 +62,8 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
     public ManagementMessage(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (getDownlinkFormat() != 18) {
+        if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
-        }
 
         // Table 2-13
         if (getFirstField() != 4)
@@ -75,11 +74,11 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tManagementMessage{}";
+        return "ManagementMessage{" + super.toString() + '}';
     }
 
     @Override
     public subtype getType() {
-        return subtype.TISB_IDENTIFICATION;
+        return subtype.TISB_MANAGEMENT;
     }
 }

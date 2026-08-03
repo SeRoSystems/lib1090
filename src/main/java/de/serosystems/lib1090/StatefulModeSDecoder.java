@@ -18,22 +18,18 @@
 
 package de.serosystems.lib1090;
 
-import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
-import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
-import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
-import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
-import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
-
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
-import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
+import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
+import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import de.serosystems.lib1090.msgs.tisb.CoarsePositionMsg;
 import de.serosystems.lib1090.msgs.tisb.FineAirbornePositionMsg;
 import de.serosystems.lib1090.msgs.tisb.FineSurfacePositionMsg;
@@ -298,16 +294,16 @@ public class StatefulModeSDecoder {
             if (subtype == 1 || subtype == 2) {
                 de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
                         new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
-                if (vog.hasGeoMinusBaroInfo())
-                    dd.geoMinusBaro = (double) vog.getGeoMinusBaro();
+                if (vog.hasDiffBaroAlt())
+                    dd.geoMinusBaro = vog.getDiffBaroAlt();
                 return vog;
             } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
                 // subtypes 3/4 (airspeed & heading) are reserved as of DO-260C; still decoded
                 // as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                 de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
-                if (ash.hasGeoMinusBaroInfo())
-                    dd.geoMinusBaro = (double) ash.getGeoMinusBaro();
+                if (ash.hasDiffBaroAlt())
+                    dd.geoMinusBaro = ash.getDiffBaroAlt();
                 return ash;
             }
         } else if (ftc >= 1 && ftc <= 4) {
@@ -482,49 +478,49 @@ public class StatefulModeSDecoder {
             }
         }
 
-		if (ftc == 31) { // operational status message
-			int subtype = es1090.getMessage()[0] & 0x7;
+        if (ftc == 31) { // operational status message
+            int subtype = es1090.getMessage()[0] & 0x7;
 
-			dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
-			if (subtype == 0) {
-				// airborne
-				switch (dd.adsbVersion) {
-					case 0:
-						return new OperationalStatusV0Msg(es1090);
-					case 1:
-						AirborneOperationalStatusV1Msg s1 = new AirborneOperationalStatusV1Msg(es1090);
-						dd.nicSupplA = s1.hasNICSupplementA();
-						return s1;
-					case 2:
-						AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
-						dd.nicSupplA = s2.hasNICSupplementA();
-						return s2;
-					case 3:
-					default:
-						AirborneOperationalStatusV3Msg s3 = new AirborneOperationalStatusV3Msg(es1090);
-						dd.nicSupplA = s3.hasNICSupplementA();
-						return s3;
-				}
-			} else if (subtype == 1) {
-				// surface
-				switch (dd.adsbVersion) {
-					case 0: // undefined subtype for v0, handle like any other undefined subtype
-						break;
-					case 1:
-						SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
-						dd.nicSupplA = s1.hasNICSupplementA();
-						return s1;
-					case 2:
-						SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
-						dd.nicSupplA = s2.hasNICSupplementA();
-						dd.nicSupplC = s2.hasNICSupplementC();
-						return s2;
-					case 3:
-					default:
-						SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
-						dd.nicSupplA = s3.hasNICSupplementA();
-						dd.nicSupplC = s3.hasNICSupplementC();
-						return s3;
+            dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+            if (subtype == 0) {
+                // airborne
+                switch (dd.adsbVersion) {
+                    case 0:
+                        return new OperationalStatusV0Msg(es1090);
+                    case 1:
+                        AirborneOperationalStatusV1Msg s1 = new AirborneOperationalStatusV1Msg(es1090);
+                        dd.nicSupplA = s1.hasNICSupplementA();
+                        return s1;
+                    case 2:
+                        AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
+                        dd.nicSupplA = s2.hasNICSupplementA();
+                        return s2;
+                    case 3:
+                    default:
+                        AirborneOperationalStatusV3Msg s3 = new AirborneOperationalStatusV3Msg(es1090);
+                        dd.nicSupplA = s3.hasNICSupplementA();
+                        return s3;
+                }
+            } else if (subtype == 1) {
+                // surface
+                switch (dd.adsbVersion) {
+                    case 0: // undefined subtype for v0, handle like any other undefined subtype
+                        break;
+                    case 1:
+                        SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
+                        dd.nicSupplA = s1.hasNICSupplementA();
+                        return s1;
+                    case 2:
+                        SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
+                        dd.nicSupplA = s2.hasNICSupplementA();
+                        dd.nicSupplC = s2.hasNICSupplementC();
+                        return s2;
+                    case 3:
+                    default:
+                        SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
+                        dd.nicSupplA = s3.hasNICSupplementA();
+                        dd.nicSupplC = s3.hasNICSupplementC();
+                        return s3;
                 }
             }
         }

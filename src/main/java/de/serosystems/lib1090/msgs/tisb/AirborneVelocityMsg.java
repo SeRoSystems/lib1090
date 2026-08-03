@@ -19,21 +19,12 @@
 package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.decoding.AirborneVelocity;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 /**
  * Common API for TIS-B airborne velocity messages across message subtypes.
  */
-public interface AirborneVelocityMsg {
-
-    /**
-     * @return the ICAO Mode A Flag used for address type determination
-     */
-    boolean getIMF();
-
-    /**
-     * @return whether the vertical rate field is available
-     */
-    boolean hasVerticalRateInfo();
+public interface AirborneVelocityMsg extends IMFMsg {
 
     /**
      * @return the raw encoded Navigation Accuracy Category for velocity, or {@code null} if unavailable
@@ -41,28 +32,24 @@ public interface AirborneVelocityMsg {
     Byte getNACv();
 
     /**
+     * The Geo Flag determines whether the geometric minus barometric altitude difference (see
+     * {@link de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg#hasDiffBaroAlt()}) or the
+     * Navigation Accuracy Category for velocity and Source Integrity Level (see {@link #getNACv()})
+     * are present in this message; the two are mutually exclusive.
+     *
+     * @return true if geometric minus barometric altitude difference data is present, false if
+     * NACv/SIL data is present instead
+     */
+    boolean hasGeoFlag();
+
+    /**
      * @return the interpreted 95% horizontal velocity accuracy in m/s, or {@code null} if unavailable
      */
     default Float getAccuracyBound() {
         Byte nacv = getNACv();
-        if (nacv == null) {
+        if (nacv == null)
             return null;
-        }
         return AirborneVelocity.decodeAccuracyBound(nacv);
     }
 
-    /**
-     * @return the vertical rate in feet/min, or {@code null} if unavailable
-     */
-    Integer getVerticalRate();
-
-    /**
-     * @return whether the geometric minus barometric altitude difference is available
-     */
-    boolean hasGeoMinusBaroInfo();
-
-    /**
-     * @return the geometric minus barometric altitude difference in feet, or {@code null} if unavailable
-     */
-    Integer getGeoMinusBaro();
 }
