@@ -25,13 +25,14 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, SingleAntennaMsg {
+public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg {
 
     private static final long serialVersionUID = 7082589986335644703L;
 
