@@ -18,31 +18,32 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.SurfaceOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-import static de.serosystems.lib1090.decoding.SurfacePosition.*;
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeEPU;
+import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
 
 /**
  * Decoder for TIS-B fine surface position (DO-260B, 2.2.17.3.2).
  */
-public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg {
 
-    private static final long serialVersionUID = 8325609209771059717L;
+    private static final long serialVersionUID = -8306226295512272609L;
 
     private byte movement;
     private boolean headingStatus; // is heading valid?
@@ -58,7 +59,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 
     /**
      * @param rawMessage raw TIS-B fine surface position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -68,7 +69,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
 
     /**
      * @param rawMessage raw TIS-B fine surface position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -117,9 +118,9 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      *
      * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
      */
+    @Override
     public double getHorizontalContainmentRadiusLimit() {
         return decodeHCR(getFormatTypeCode());
-
     }
 
     /**
@@ -131,6 +132,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
      * {@link AirborneOperationalStatusV1Msg}.
      */
+    @Override
     public byte getNACp() {
         return this.getNIC();
     }
@@ -146,6 +148,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
+    @Override
     public double getPositionUncertainty() {
         return decodeEPU(getFormatTypeCode());
     }
@@ -153,68 +156,27 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
     /**
      * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
      */
+    @Override
     public byte getNIC() {
         return SurfacePosition.decodeNIC(getFormatTypeCode());
     }
 
-    /**
-     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-     * <p>
-     * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to those of {@link SurfaceOperationalStatusV1Msg}'s and
-     * {@link SurfaceOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
-     * version 1 and 2.
-     *
-     * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius.
-     */
-    public byte getSIL() {
-        return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
+    @Override
+    public byte getMovementEncoded() {
+        return movement;
     }
 
-    /**
-     * @return whether ground speed information is available
-     */
-    public boolean hasGroundSpeed() {
-        return movement >= 1 && movement <= 124;
+    @Override
+    public byte getHeadingEncoded() {
+        return groundTrack;
     }
 
-    /**
-     * @return speed in knots or null if ground speed is not available. The latter can also be checked with
-     * {@link #hasGroundSpeed()}.
-     */
-    public Double getGroundSpeed() {
-        return groundSpeed(movement);
-    }
-
-    /**
-     * @return speed resolution (accuracy) in knots or null if ground speed is not available. The latter can also be
-     * checked with {@link #hasGroundSpeed()}.
-     */
-    public Double getGroundSpeedResolution() {
-        return groundSpeedResolution(movement);
-    }
-
-    /**
-     * @return whether valid heading information is available
-     */
+    @Override
     public boolean hasValidHeading() {
         return headingStatus;
     }
 
-    /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north. Returns null if heading is not available.
-     * This can also be checked using {@link #hasValidHeading()}
-     */
-    public Double getHeading() {
-        if (!headingStatus) return null;
-        return groundTrack * 360D / 128D;
-    }
-
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
@@ -227,21 +189,6 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
     @Override
     public boolean hasValidPosition() {
         return true;
-    }
-
-    @Override
-    public boolean hasValidAltitude() {
-        return true;
-    }
-
-    @Override
-    public Integer getAltitude() {
-        return 0;
-    }
-
-    @Override
-    public Position.AltitudeType getAltitudeType() {
-        return Position.AltitudeType.ABOVE_GROUND_LEVEL;
     }
 
     @Override

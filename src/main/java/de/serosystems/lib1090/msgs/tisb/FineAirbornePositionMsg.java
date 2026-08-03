@@ -18,35 +18,32 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
-import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
-
 /**
  * Decoder for TIS-B fine airborne position (DO-260B, 2.2.17.3.1).
  */
-public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg {
+public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, IMFMsg {
 
-    private static final long serialVersionUID = 8691583253646403341L;
+    private static final long serialVersionUID = -5506126020860066506L;
 
     private byte surveillanceStatus;
     private boolean imf;
     private short altitudeEncoded;
-    CPREncodedPosition position;
+    private CPREncodedPosition position;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -56,7 +53,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 
     /**
      * @param rawMessage raw TIS-B fine airborne position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -66,7 +63,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 
     /**
      * @param rawMessage raw TIS-B fine airborne position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -114,6 +111,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      *
      * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
      */
+    @Override
     public double getHorizontalContainmentRadiusLimit() {
         return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
     }
@@ -127,6 +125,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
      * {@link AirborneOperationalStatusV1Msg}.
      */
+    @Override
     public byte getNACp() {
         return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
     }
@@ -142,6 +141,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
+    @Override
     public double getPositionUncertainty() {
         return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
     }
@@ -149,56 +149,24 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     /**
      * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
+    @Override
     public byte getNIC() {
         return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
     }
 
-    /**
-     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
-     * <p>
-     * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-     * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
-     * version 1 and 2.
-     *
-     * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius.
-     */
-    public byte getSIL() {
-        return AirbornePosition.typeCodeToSIL(getFormatTypeCode());
+    @Override
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
     }
 
-    /**
-     * @return the ICAO Mode A Flag (for address type determination)
-     */
+    @Override
     public boolean getIMF() {
         return imf;
     }
 
-    /**
-     * @return the surveillance status
-     * @see #getSurveillanceStatusDescription()
-     */
-    public byte getSurveillanceStatus() {
+    @Override
+    public byte getSurveillanceStatusEncoded() {
         return surveillanceStatus;
-    }
-
-    /**
-     * This is a function of the surveillance status field in the position
-     * message.
-     *
-     * @return surveillance status description as defines in DO-260B
-     */
-    public String getSurveillanceStatusDescription() {
-        String[] desc = {
-                "No condition information",
-                "Permanent alert (emergency condition)",
-                "Temporary alert (change in Mode A identity code other than emergency condition)",
-                "SPI condition"
-        };
-
-        return desc[surveillanceStatus];
     }
 
     @Override
@@ -214,31 +182,6 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     @Override
     public boolean hasValidAltitude() {
         return getFormatTypeCode() >= 9;
-    }
-
-    @Override
-    public Integer getAltitude() {
-        if (!hasValidAltitude()) return null;
-        return Altitude.decode12BitAltitude(altitudeEncoded);
-    }
-
-    @Override
-    public Position.AltitudeType getAltitudeType() {
-        if (getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18)
-            return Position.AltitudeType.BAROMETRIC_ALTITUDE;
-        else if (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)
-            return Position.AltitudeType.ABOVE_WGS84_ELLIPSOID;
-        else return Position.AltitudeType.UNKNOWN;
-    }
-
-    /**
-     * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
-     *
-     * @return value of the Q bit or null if message does not contain a valid altitude
-     */
-    public Boolean hasQBit() {
-        if (!hasValidAltitude()) return null;
-        return decode12BitQBit(altitudeEncoded);
     }
 
     @Override

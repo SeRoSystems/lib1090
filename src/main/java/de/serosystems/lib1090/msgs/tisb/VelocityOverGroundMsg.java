@@ -30,27 +30,26 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B velocity message (DO-260B, 2.2.17.3.4).
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg {
+public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg {
 
-    private static final long serialVersionUID = 4633940058263818959L;
+    private static final long serialVersionUID = -2121820203874488709L;
 
     private byte messageSubtype;
     private boolean imf;
     private byte nacp;
     private boolean velocityToEastNegative; // 0 = east, 1 = west
-    private short velocityToEastEncoded; // in kn
-    private boolean velocityInfoAvailable;
+    private short velocityToEastEncoded; // raw encoded velocity-to-east field
     private boolean velocityToNorthNegative; // 0 = north, 1 = south
-    private short velocityToNorthEncoded; // in kn
+    private short velocityToNorthEncoded; // raw encoded velocity-to-north field
 
     private boolean verticalRateDown; // 0 = up, 1 = down
-    private short verticalRateEncoded; // in ft/min
-    private boolean verticalRateInfoAvailable;
+    private short verticalRateEncoded; // raw encoded vertical rate field
 
-    private Integer diffBaroAlt; // in ft
-
-    private Byte nacv;
-    private Byte sil;
+    private boolean geoFlag;
+    private boolean diffBaroAltNegative;
+    private short diffBaroAltEncoded;
+    private byte nacv;
+    private byte sil;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -103,35 +102,22 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         imf = br.readByte(9, 9) == 1;
         nacp = br.readByte(10, 13);
 
-        // check this later
-        velocityInfoAvailable = true;
-        verticalRateInfoAvailable = true;
-
         velocityToEastNegative = br.readByte(14, 14) == 1;
-        velocityToEastEncoded = (short) (br.readShort(15, 24) - 1);
-        if (velocityToEastEncoded == -1) velocityInfoAvailable = false;
-        if (messageSubtype == 2) velocityToEastEncoded <<= 2;
+        velocityToEastEncoded = br.readShort(15, 24);
 
         velocityToNorthNegative = br.readByte(25, 25) == 1;
-        velocityToNorthEncoded = (short) (br.readShort(26, 35) - 1);
-        if (velocityToNorthEncoded == -1) velocityInfoAvailable = false;
-        if (messageSubtype == 2) velocityToNorthEncoded <<= 2;
+        velocityToNorthEncoded = br.readShort(26, 35);
 
         // 0 = no geo data available, 1 = geo data available
-        boolean geoFlag = br.readByte(36, 36) == 1;
+        geoFlag = br.readByte(36, 36) == 1;
 
         verticalRateDown = br.readByte(37, 37) == 1;
-        verticalRateEncoded = (short) ((br.readShort(38, 46) - 1) << 6);
+        verticalRateEncoded = br.readShort(38, 46);
 
         if (geoFlag) {
-            int diffBaroAltEncoded = br.readByte(50, 56);
-            diffBaroAlt = (diffBaroAltEncoded - 1) * 25;
-            if (br.readByte(49, 49) == 1) diffBaroAlt *= -1;
-
-            nacv = null;
-            sil = null;
+            diffBaroAltNegative = br.readByte(49, 49) == 1;
+            diffBaroAltEncoded = br.readByte(50, 56);
         } else {
-            diffBaroAlt = null;
             nacv = br.readByte(48, 50);
             sil = br.readByte(51, 52);
         }
@@ -142,21 +128,24 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         return imf;
     }
 
-    /**
-     * @return whether velocity info is available
-     */
-    public boolean hasVelocityInfo() {
-        return velocityInfoAvailable;
+    @Override
+    public boolean hasGeoFlag() {
+        return geoFlag;
     }
 
     @Override
-    public boolean hasVerticalRateInfo() {
-        return verticalRateInfoAvailable;
+    public boolean hasDiffBaroAlt() {
+        return hasGeoFlag() && diffBaroAltEncoded != 0;
     }
 
     @Override
-    public boolean hasGeoMinusBaroInfo() {
-        return diffBaroAlt != null;
+    public short getDiffBaroAltEncoded() {
+        return diffBaroAltEncoded;
+    }
+
+    @Override
+    public boolean isDiffBaroAltNegative() {
+        return diffBaroAltNegative;
     }
 
     /**
@@ -168,58 +157,52 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 
     @Override
     public Byte getNACv() {
-        return nacv;
+        return hasGeoFlag() ? null : nacv;
     }
 
     /**
-     * @return velocity from east to south in knots or null if information is not available
+     * @return true if the velocity from west to east is negative (i.e. towards the west)
      */
-    public Integer getEastToWestVelocity() {
-        if (!velocityInfoAvailable) return null;
-        return (velocityToEastNegative ? velocityToEastEncoded : -velocityToEastEncoded);
+    public boolean isVelocityToEastNegative() {
+        return velocityToEastNegative;
     }
 
     /**
-     * @return velocity from north to south in knots or null if information is not available
+     * @return the raw encoded velocity from west to east field
      */
-    public Integer getNorthToSouthVelocity() {
-        if (!velocityInfoAvailable) return null;
-        return (velocityToNorthNegative ? velocityToNorthEncoded : -velocityToNorthEncoded);
+    public short getWestToEastVelocityEncoded() {
+        return velocityToEastEncoded;
+    }
+
+    /**
+     * @return true if the velocity from south to north is negative (i.e. towards the south)
+     */
+    public boolean isVelocityToNorthNegative() {
+        return velocityToNorthNegative;
+    }
+
+    /**
+     * @return the raw encoded velocity from south to north field
+     */
+    public short getSouthToNorthVelocityEncoded() {
+        return velocityToNorthEncoded;
+    }
+
+    /**
+     * @return true if the vertical rate is negative
+     */
+    public boolean isVerticalRateDown() {
+        return verticalRateDown;
     }
 
     @Override
-    public Integer getVerticalRate() {
-        if (!verticalRateInfoAvailable) return null;
-        return (verticalRateDown ? -verticalRateEncoded : verticalRateEncoded);
+    public boolean isBarometricVerticalSpeed() {
+        return false;
     }
 
     @Override
-    public Integer getGeoMinusBaro() {
-        return diffBaroAlt;
-    }
-
-    /**
-     * @return heading in decimal degrees ([0, 360]) clockwise from geographic north or null if information is not available.
-     * The latter can also be checked with {@link #hasVelocityInfo()}.
-     */
-    public Double getHeading() {
-        if (!velocityInfoAvailable) return null;
-        double angle = Math.toDegrees(Math.atan2(
-                -this.getEastToWestVelocity(),
-                -this.getNorthToSouthVelocity()));
-
-        // if negative => clockwise
-        if (angle < 0) return 360 + angle;
-        else return angle;
-    }
-
-    /**
-     * @return speed over ground in knots or null if information is not available. The latter can also be checked
-     * with {@link #hasVelocityInfo()}.
-     */
-    public Double getGroundSpeed() {
-        if (!velocityInfoAvailable) return null;
-        return Math.hypot(velocityToNorthEncoded, velocityToEastEncoded);
+    public short getVerticalRateEncoded() {
+        return verticalRateEncoded;
     }
 
     /**
@@ -246,7 +229,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * the NIC containment radius. Returns null if not available.
      */
     public Byte getSIL() {
-        return sil;
+        return hasGeoFlag() ? null : sil;
     }
 
     @Override
@@ -257,13 +240,13 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
                 ", nacp=" + nacp +
                 ", velocityToEastNegative=" + velocityToEastNegative +
                 ", velocityToEastEncoded=" + velocityToEastEncoded +
-                ", velocityInfoAvailable=" + velocityInfoAvailable +
                 ", velocityToNorthNegative=" + velocityToNorthNegative +
                 ", velocityToNorthEncoded=" + velocityToNorthEncoded +
                 ", verticalRateDown=" + verticalRateDown +
                 ", verticalRateEncoded=" + verticalRateEncoded +
-                ", verticalRateInfoAvailable=" + verticalRateInfoAvailable +
-                ", diffBaroAlt=" + diffBaroAlt +
+                ", geoFlag=" + geoFlag +
+                ", diffBaroAltNegative=" + diffBaroAltNegative +
+                ", diffBaroAltEncoded=" + diffBaroAltEncoded +
                 ", nacv=" + nacv +
                 ", sil=" + sil +
                 '}';

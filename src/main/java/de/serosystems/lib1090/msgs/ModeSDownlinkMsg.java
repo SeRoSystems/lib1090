@@ -105,7 +105,9 @@ public class ModeSDownlinkMsg implements Serializable {
         TISB_FINE_SURFACE_POSITION,
         TISB_IDENTIFICATION,
         TISB_VELOCITY,
+        TISB_AIRSPEED,
         TISB_COARSE_POSITION,
+        TISB_MANAGEMENT,
 
         // ADS-R subtypes
         ADSR_AIRBORN_POSITION_V1,

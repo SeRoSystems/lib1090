@@ -31,7 +31,7 @@ import java.io.Serializable;
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg {
 
-    private static final long serialVersionUID = -1692656992966148114L;
+    private static final long serialVersionUID = 6991597271679287771L;
 
     private byte emitterCategory;
     private long identificationEncoded;
