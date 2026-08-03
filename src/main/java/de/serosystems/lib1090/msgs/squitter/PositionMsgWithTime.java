@@ -16,20 +16,15 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
-/**
- * Common API for ADS-B Wx AIREP messages, introduced in ADS-B version 3.
- * <p>
- * {@link WxAIREPAircraftStateMsg}, {@link WxAIREPWeatherStateMsg} and
- * {@link WxAIREPAlternateWeatherStateMsg} share no fields at this level, so this interface
- * currently serves only to mark all three subtypes as members of the Wx AIREP message family.
- */
-public interface WxAIREPMsg {
+public interface PositionMsgWithTime extends PositionMsg {
 
     /**
-     * @return the raw encoded message subtype (0 for {@link WxAIREPAircraftStateMsg}, 1 for
-     * {@link WxAIREPWeatherStateMsg}, 2 for {@link WxAIREPAlternateWeatherStateMsg})
+     * @return flag which will indicate whether the Time of Applicability of the message
+     * is synchronized with UTC time. False will denote that the time is not synchronized
+     * to UTC. True will denote that Time of Applicability is synchronized to UTC time.
      */
-    byte getMessageSubtype();
+    boolean hasTimeFlag();
+
 }

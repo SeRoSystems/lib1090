@@ -16,12 +16,12 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for the weather-related ADS-B Wx AIREP subtypes: {@link WxAIREPWeatherStateMsg} (1)
- * and {@link WxAIREPAlternateWeatherStateMsg} (2). Further fields shared by these two subtypes
- * will be added here as they are decoded.
+ * Common API for the weather-related ADS-B/ADS-R Wx AIREP subtypes: the weather state subtype (1)
+ * and the alternate weather state subtype (2). Further fields shared by these two subtypes will
+ * be added here as they are decoded.
  */
 public interface WxAIREPWeatherMsg extends WxAIREPMsg {
 

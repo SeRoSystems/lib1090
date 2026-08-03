@@ -23,6 +23,7 @@ import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.WxAIREPMsg;
 
 import java.io.Serializable;
 

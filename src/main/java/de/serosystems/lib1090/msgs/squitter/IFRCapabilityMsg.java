@@ -16,24 +16,15 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
-
-import de.serosystems.lib1090.decoding.Identity;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B messages that expose a Mode A code.
+ * Common API for messages that expose the IFR capability flag.
  */
-public interface ModeACodeMsg {
+public interface IFRCapabilityMsg {
 
     /**
-     * @return the four-digit Mode A (4096) code
+     * @return true if the aircraft reports IFR capability
      */
-    short getModeACode();
-
-    /**
-     * @return decoded Mode A code as four digits
-     */
-    default String getIdentity() {
-        return Identity.decodeIdentity(getModeACode());
-    }
+    boolean hasIFRCapability();
 }

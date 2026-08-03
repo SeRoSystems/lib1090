@@ -16,15 +16,27 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B operational status version 2 messages.
+ * Common API for ADS-B airborne operational status version 2 and 3 messages.
  */
-public interface OperationalStatusV2Msg extends OperationalStatusV2V3Msg {
+public interface AirborneOperationalStatusV2V3Msg extends AirborneOperationalStatusMsg {
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
      */
-    boolean getHorizontalReferenceDirection();
+    byte getGVAEncoded();
+
+    /**
+     * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
+     */
+    default int getGeometricVerticalAccuracy() {
+        byte gva = getGVAEncoded();
+        if (gva == 1)
+            return 150;
+        else if (gva == 2)
+            return 45;
+        else return -1;
+    }
 }

@@ -18,12 +18,19 @@
 
 package de.serosystems.lib1090;
 
+import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
+import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
+import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
+import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
+import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
+
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
@@ -193,12 +200,12 @@ public class StatefulModeSDecoder {
             if (subtype == 1 || subtype == 2) { // velocity over ground
                 de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg velocity =
                         new de.serosystems.lib1090.msgs.adsr.VelocityOverGroundMsg(es1090);
-                if (velocity.hasGeoMinusBaroInfo()) dd.geoMinusBaro = (double) velocity.getGeoMinusBaro();
+                if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
                 return velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg airspeed =
                         new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingMsg(es1090);
-                if (airspeed.hasGeoMinusBaroInfo()) dd.geoMinusBaro = (double) airspeed.getGeoMinusBaro();
+                if (airspeed.hasDiffBaroAlt()) dd.geoMinusBaro = airspeed.getDiffBaroAlt();
                 return airspeed;
             }
         }

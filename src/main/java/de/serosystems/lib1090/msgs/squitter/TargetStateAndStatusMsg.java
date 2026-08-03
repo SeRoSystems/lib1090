@@ -16,7 +16,7 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.decoding.OperationalStatus;
 
@@ -52,8 +52,8 @@ public interface TargetStateAndStatusMsg {
     /**
      * The selected heading according to DO-260B 2.2.3.2.7.1.3.7
      * <p>
-     * Look at {@link SurfaceOperationalStatusV1Msg#getHorizontalReferenceDirection()} resp.
-     * {@link AirborneOperationalStatusV1Msg#getHorizontalReferenceDirection()} to determine whether this heading
+     * Look at {@link SurfaceOperationalStatusMsg#getHorizontalReferenceDirection()} resp.
+     * {@link AirborneOperationalStatusV1V2Msg#getHorizontalReferenceDirection()} to determine whether this heading
      * is referring to true north or magnetic north.
      * If not available, assume magnetic north as the de-facto standard.
      *

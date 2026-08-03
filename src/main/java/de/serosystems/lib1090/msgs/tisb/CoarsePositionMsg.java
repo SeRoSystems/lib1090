@@ -20,9 +20,10 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
@@ -40,12 +41,12 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     private static final long serialVersionUID = -8532037642870724311L;
 
     private boolean imf;
-    private byte surveillance_status;
+    private byte surveillanceStatus;
     private byte svid;
-    private short encoded_altitude;
-    private boolean ground_track_status;
-    private byte ground_track_angle;
-    private byte ground_speed;
+    private short altitudeEncoded;
+    private boolean groundTrackStatus;
+    private byte groundTrackAngle;
+    private byte groundSpeed;
     CPREncodedPosition position;
 
     /**
@@ -90,21 +91,21 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
         if (getFirstField() != 3)
             throw new BadFormatException("Coarse TIS-B messages must have CF value 3.");
 
-        byte[] msg = getMessage();
+        BitReader br = BitReader.forBigEndian(getMessage());
 
-        imf = (msg[0] & 0x80) > 0;
-        surveillance_status = (byte) ((msg[0] >>> 5) & 0x3);
-        svid = (byte) ((msg[0] >>> 1) & 0xf);
-        encoded_altitude = (short) (((msg[0] & 0x1) << 11) | ((msg[1] & 0xff) << 3) | ((msg[2] >>> 5) & 0x7));
-        ground_track_status = (msg[2] & 0x10) > 0;
-        ground_track_angle = (byte) (((msg[2] & 0xf) << 1) | ((msg[3] >>> 7) & 0x1));
-        ground_speed = (byte) ((msg[3] >>> 1) & 0x3f);
+        imf = br.readByte(1, 1) == 1;
+        surveillanceStatus = br.readByte(2, 3);
+        svid = br.readByte(4, 7);
+        altitudeEncoded = br.readShort(8, 19);
+        groundTrackStatus = br.readByte(20, 20) == 1;
+        groundTrackAngle = br.readByte(21, 25);
+        groundSpeed = br.readByte(26, 31);
 
-        boolean cpr_format = (msg[3] & 0x1) > 0;
-        short cpr_encoded_lat = (short) (((msg[4] & 0xff) << 4) | ((msg[5] & 0xff) >> 4));
-        short cpr_encoded_lon = (short) (((msg[5] & 0x0f) << 8) | (msg[6] & 0xff));
+        boolean cprFormat = br.readByte(32, 32) == 1;
+        short cprEncodedLat = br.readShort(33, 44);
+        short cprEncodedLon = br.readShort(45, 56);
 
-        position = CPREncodedPosition.ofAirborne(12, cpr_format, cpr_encoded_lat, cpr_encoded_lon,
+        position = CPREncodedPosition.ofAirborne(12, cprFormat, cprEncodedLat, cprEncodedLon,
                 Objects.requireNonNull(timestamp, "timestamp"));
     }
 
@@ -113,7 +114,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @see #getSurveillanceStatusDescription()
      */
     public byte getSurveillanceStatus() {
-        return surveillance_status;
+        return surveillanceStatus;
     }
 
     /**
@@ -130,7 +131,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
                 "SPI condition"
         };
 
-        return desc[surveillance_status];
+        return desc[surveillanceStatus];
     }
 
     /**
@@ -144,8 +145,8 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @return ground track angle in degrees clockwise from true north
      */
     public Float getGroundTrackAngle() {
-        if (!ground_track_status) return null;
-        return ground_track_angle * 11.25f;
+        if (!groundTrackStatus) return null;
+        return groundTrackAngle * 11.25f;
     }
 
     /**
@@ -154,9 +155,9 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @return ground speed in knots (lower end of possible 32 knots window)
      */
     public Integer getMinGroundSpeed() {
-        if (ground_speed == 0) return null;
-        else if (ground_speed == 1) return 0;
-        else return 16 + (ground_speed - 2) * 32;
+        if (groundSpeed == 0) return null;
+        else if (groundSpeed == 1) return 0;
+        else return 16 + (groundSpeed - 2) * 32;
     }
 
     /**
@@ -165,9 +166,9 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @return ground speed in knots (upper end of possible 32 knots window)
      */
     public Integer getMaxGroundSpeed() {
-        if (ground_speed == 0) return null;
-        else if (ground_speed == 1) return 16;
-        else return 16 + (ground_speed - 1) * 32;
+        if (groundSpeed == 0) return null;
+        else if (groundSpeed == 1) return 16;
+        else return 16 + (groundSpeed - 1) * 32;
     }
 
     @Override
@@ -188,7 +189,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     @Override
     public Integer getAltitude() {
         if (!hasValidAltitude()) return null;
-        return decode12BitAltitude(encoded_altitude);
+        return decode12BitAltitude(altitudeEncoded);
     }
 
     @Override
@@ -203,19 +204,19 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      */
     public Boolean hasQBit() {
         if (!hasValidAltitude()) return null;
-        return decode12BitQBit(encoded_altitude);
+        return decode12BitQBit(altitudeEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tCoarsePositionMsg{" +
-                "imf=" + imf +
-                ", surveillance_status=" + surveillance_status +
+        return "CoarsePositionMsg{" + super.toString() +
+                ", imf=" + imf +
+                ", surveillanceStatus=" + surveillanceStatus +
                 ", svid=" + svid +
-                ", encoded_altitude=" + encoded_altitude +
-                ", ground_track_status=" + ground_track_status +
-                ", ground_track_angle=" + getGroundTrackAngle() +
-                ", ground_speed=" + getMinGroundSpeed() + "-" + getMaxGroundSpeed() +
+                ", altitudeEncoded=" + altitudeEncoded +
+                ", groundTrackStatus=" + groundTrackStatus +
+                ", groundTrackAngle=" + getGroundTrackAngle() +
+                ", groundSpeed=" + getMinGroundSpeed() + "-" + getMaxGroundSpeed() +
                 ", position=" + position +
                 '}';
     }

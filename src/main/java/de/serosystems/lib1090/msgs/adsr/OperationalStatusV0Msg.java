@@ -18,6 +18,9 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
+import de.serosystems.lib1090.msgs.squitter.OperationalStatusMsg;
+
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -27,12 +30,12 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-R operational status message as specified in DO-260 (ADS-R version 0).
  */
-public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable {
+public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg {
 
     private static final long serialVersionUID = 9184941370982030335L;
 
-    private byte enroute_capabilities;
-    private boolean imf;
+    private byte enrouteCapabilities;
+    private boolean imf; // ADS-R-specific, occupies an otherwise-spare/reserved bit
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -70,49 +73,48 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
             throw new BadFormatException("Operational status messages must have typecode 31.");
         }
 
-        byte[] msg = this.getMessage();
+        BitReader b = BitReader.forBigEndian(getMessage());
 
-        if ((msg[5] >>> 5) != 0)
+        if (b.readByte(41, 43) != 0)
             throw new BadFormatException("Not a DO-260/version 0 status message.");
 
-        byte subtype_code = (byte) (msg[0] & 0x7);
-        if (subtype_code > 0) // all others are reserved
-            throw new UnspecifiedFormatError("Operational status message subtype " + subtype_code + " reserved.");
+        byte subtypeCode = b.readByte(6, 8);
+        if (subtypeCode > 0) // all others are reserved
+            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
 
-        enroute_capabilities = msg[1];
+        enrouteCapabilities = b.readByte(9, 16);
         // All other capability fields are "TBD" in standard
-        imf = (msg[6] & 0x1) != 0;
+        imf = b.readByte(56, 56) == 1;
     }
 
     /**
      * DO-260 2.2.3.2.7.3.3.1
      *
-     * @return true if TCAS is operational or unknown
+     * @return true if TCAS is operational or unknown, false if TCAS is not operational.
      */
     public boolean hasOperationalTCAS() {
-        // first three bits zero
-        return (enroute_capabilities & 0xe0) == 0;
+        return (enrouteCapabilities & 0x20) == 0;
     }
 
     /**
      * DO-260 2.2.3.2.7.3.3.1
      *
-     * @return true if CDTI is operational or unknown
+     * @return true if CDTI is operational or unknown, false if CDTI is not operational.
      */
     public boolean hasOperationalCDTI() {
-        // status of 4th bit when first two bits zero
-        return (enroute_capabilities & 0xd0) == 16;
+        return (enrouteCapabilities & 0x10) != 0;
     }
 
     /**
-     * the version number of the formats and protocols in use on the aircraft installation.<br>
-     * 0: Conformant to DO-260/ED-102 and DO-242<br>
-     * 1: Conformant to DO-260A and DO-242A<br>
-     * 2: Conformant to DO-260B/ED-102A and DO-242B<br>
-     * 3-7: reserved
-     *
-     * @return always 0
+     * @return whether 1090ES IN is available
+     * @see #hasOperationalCDTI() alias: the field has been renamed in V1
      */
+    @Override
+    public boolean has1090ESIn() {
+        return hasOperationalCDTI();
+    }
+
+    @Override
     public byte getVersion() {
         return 0;
     }
@@ -126,8 +128,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tOperationalStatusV0Msg{" +
-                "enroute_capabilities=" + enroute_capabilities +
+        return "OperationalStatusV0Msg{" + super.toString() +
+                ", enrouteCapabilities=" + enrouteCapabilities +
                 ", imf=" + imf +
                 '}';
     }

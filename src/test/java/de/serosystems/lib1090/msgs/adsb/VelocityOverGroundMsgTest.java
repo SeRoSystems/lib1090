@@ -18,6 +18,9 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
+import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

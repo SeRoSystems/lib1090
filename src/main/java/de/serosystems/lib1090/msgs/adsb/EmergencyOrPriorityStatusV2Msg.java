@@ -22,6 +22,8 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
 
 import java.io.Serializable;
 

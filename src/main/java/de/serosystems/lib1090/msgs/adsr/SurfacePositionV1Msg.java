@@ -18,6 +18,11 @@
 
 package de.serosystems.lib1090.msgs.adsr;
 
+import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
+
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
@@ -25,15 +30,23 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
-import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
-import static de.serosystems.lib1090.decoding.SurfacePosition.decodeNIC;
-
-public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serializable {
+/**
+ * Decoder for ADS-R surface position messages version 1.
+ */
+public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg {
 
     private static final long serialVersionUID = 5508826457167641894L;
 
-    private boolean nic_suppl_a;
+    private boolean horizontalPositionAvailable;
+    private byte movement;
+    private boolean headingStatus;
+    private byte groundTrack;
+    private boolean imf;
+    private CPREncodedPosition position;
+
+    private boolean nicSupplementA;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -43,7 +56,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 
     /**
      * @param rawMessage raw ADS-R surface position message as hex string
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -53,7 +66,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
 
     /**
      * @param rawMessage raw ADS-R surface position message as byte array
-     * @param timestamp   timestamp for this position message
+     * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
      */
@@ -67,22 +80,33 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
      * @throws BadFormatException if message has wrong format
      */
     public SurfacePositionV1Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
-        super(squitter, timestamp);
+        super(squitter);
+
+        byte formatTypeCode = getFormatTypeCode();
+        SurfacePosition.validateSurfacePositionFormat(formatTypeCode);
+
+        horizontalPositionAvailable = formatTypeCode != 0;
+        BitReader br = BitReader.forBigEndian(getMessage());
+        movement = br.readByte(6, 12);
+        headingStatus = br.readByte(13, 13) == 1;
+        groundTrack = br.readByte(14, 20);
+        imf = br.readByte(21, 21) == 1;
+        position = SurfacePosition.extractCPREncodedPosition(br, movement, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
      * @return NIC supplement that was set before
      */
     public boolean hasNICSupplementA() {
-        return nic_suppl_a;
+        return nicSupplementA;
     }
 
     /**
-     * @param nic_suppl Navigation Integrity Category (NIC) supplement from operational status message.
-     *                  Otherwise worst case is assumed for containment radius limit and NIC.
+     * @param nicSupplementA Navigation Integrity Category (NIC) supplement from operational status message.
+     *                       Otherwise worst case is assumed for containment radius limit and NIC.
      */
-    public void setNICSupplementA(boolean nic_suppl) {
-        this.nic_suppl_a = nic_suppl;
+    public void setNICSupplementA(boolean nicSupplementA) {
+        this.nicSupplementA = nicSupplementA;
     }
 
     /**
@@ -97,7 +121,7 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
      */
     @Override
     public double getHorizontalContainmentRadiusLimit() {
-        return decodeHCR(getFormatTypeCode(), hasNICSupplementA());
+        return SurfacePosition.decodeHCR(getFormatTypeCode(), hasNICSupplementA());
     }
 
     /**
@@ -108,13 +132,61 @@ public class SurfacePositionV1Msg extends SurfacePositionV0Msg implements Serial
      */
     @Override
     public byte getNIC() {
-        return decodeNIC(getFormatTypeCode(), hasNICSupplementA());
+        return SurfacePosition.decodeNIC(getFormatTypeCode(), hasNICSupplementA());
+    }
+
+    @Override
+    public byte getNACp() {
+        return getNIC();
+    }
+
+    @Override
+    public double getPositionUncertainty() {
+        return SurfacePosition.decodeEPU(getFormatTypeCode());
+    }
+
+    @Override
+    public byte getMovementEncoded() {
+        return movement;
+    }
+
+    @Override
+    public byte getHeadingEncoded() {
+        return groundTrack;
+    }
+
+    @Override
+    public boolean hasValidHeading() {
+        return headingStatus;
+    }
+
+    /**
+     * @return the ICAO Mode A Flag (for address type determination)
+     */
+    public boolean getIMF() {
+        return imf;
+    }
+
+    @Override
+    public CPREncodedPosition getCPREncodedPosition() {
+        return position;
+    }
+
+    @Override
+    public boolean hasValidPosition() {
+        return horizontalPositionAvailable;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tSurfacePositionV1Msg{" +
-                "nic_suppl_a=" + nic_suppl_a +
+        return "SurfacePositionV1Msg{" + super.toString() +
+                ", horizontalPositionAvailable=" + horizontalPositionAvailable +
+                ", movement=" + movement +
+                ", headingStatus=" + headingStatus +
+                ", groundTrack=" + groundTrack +
+                ", imf=" + imf +
+                ", position=" + position +
+                ", nicSupplementA=" + nicSupplementA +
                 '}';
     }
 
