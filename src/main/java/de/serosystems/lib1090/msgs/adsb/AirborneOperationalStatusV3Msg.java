@@ -22,6 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.ADSBReceiverVersionMsg;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusMsg;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV2V3Msg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2V3Msg;
@@ -32,7 +33,7 @@ import java.io.Serializable;
  * Decoder for ADS-B operational status message as specified in DO-260C (ADS-B version 3) with
  * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg {
+public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg, ADSBReceiverVersionMsg {
 
     private static final long serialVersionUID = 8236451097734510298L;
 
@@ -161,6 +162,11 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
      */
     public byte getDetectAndAvoidEncoded() {
         return (byte) (capabilityClassCode & 0x3);
+    }
+
+    @Override
+    public byte getADSBReceiverVersionEncoded() {
+        return (byte) ((capabilityClassCode & 0xC00) >>> 10);
     }
 
     @Override
