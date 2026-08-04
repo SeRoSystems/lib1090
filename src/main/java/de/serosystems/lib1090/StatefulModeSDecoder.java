@@ -468,8 +468,10 @@ public class StatefulModeSDecoder {
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
             if (subtype == 0 && dd.adsbVersion == 1) {
                 return new TargetStateAndStatusV1Msg(es1090);
-            } else if (subtype == 1 && dd.adsbVersion >= 2) {
+            } else if (subtype == 1 && dd.adsbVersion == 2) {
                 return new TargetStateAndStatusV2Msg(es1090);
+            } else if (subtype == 1 && dd.adsbVersion >= 3) {
+                return new TargetStateAndStatusV3Msg(es1090);
             }
         }
 

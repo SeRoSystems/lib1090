@@ -92,6 +92,7 @@ public class ModeSDownlinkMsg implements Serializable {
         ADSB_SURFACE_STATUS_V3,
         ADSB_TARGET_STATE_AND_STATUS_V1,
         ADSB_TARGET_STATE_AND_STATUS_V2,
+        ADSB_TARGET_STATE_AND_STATUS_V3,
         ADSB_HVA_POSITION,
         ADSB_HVA_VELOCITY,
         ADSB_WX_AIREP_AIRCRAFT_STATE,
