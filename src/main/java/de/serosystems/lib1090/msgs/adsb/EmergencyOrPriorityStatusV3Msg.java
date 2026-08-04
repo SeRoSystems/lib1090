@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.EmergencyOrPriorityStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -137,7 +138,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
      * (0.850 denotes 0.850 or larger), or null if no mean EDR is available (see {@link #hasMeanEdr()})
      */
     public Double getMeanEdr() {
-        return hasMeanEdr() ? decodeEdr(meanEdrEncoded) : null;
+        return hasMeanEdr() ? EmergencyOrPriorityStatus.decodeEdr(meanEdrEncoded) : null;
     }
 
     /**
@@ -159,21 +160,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
      * (0.850 denotes 0.850 or larger), or null if no peak EDR is available (see {@link #hasPeakEdr()})
      */
     public Double getPeakEdr() {
-        return hasPeakEdr() ? decodeEdr(peakEdrEncoded) : null;
-    }
-
-    /**
-     * Decodes the upper bound of an eddy dissipation rate (EDR) value in m^(2/3)/s
-     * (0.850 denotes 0.850 or larger).
-     *
-     * @param n the encoded EDR value; must not be 0 (i.e. only call when EDR is available)
-     * @return the upper bound of the eddy dissipation rate (EDR) in m^(2/3)/s
-     */
-    private static double decodeEdr(int n) {
-        if (n <= 10) return n * 0.002;
-        else if (n <= 76) return (n - 10) * 0.005 + 0.02;
-        else if (n <= 126) return (n - 76) * 0.01 + 0.35;
-        else return 0.850;
+        return hasPeakEdr() ? EmergencyOrPriorityStatus.decodeEdr(peakEdrEncoded) : null;
     }
 
     /**
