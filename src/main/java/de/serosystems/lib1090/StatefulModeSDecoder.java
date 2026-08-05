@@ -508,13 +508,13 @@ public class StatefulModeSDecoder {
 					case 2:
 						SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
 						dd.nicSupplA = s2.hasNICSupplementA();
-						dd.nicSupplC = s2.getNICSupplementC();
+						dd.nicSupplC = s2.hasNICSupplementC();
 						return s2;
 					case 3:
 					default:
 						SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
 						dd.nicSupplA = s3.hasNICSupplementA();
-						dd.nicSupplC = s3.getNICSupplementC();
+						dd.nicSupplC = s3.hasNICSupplementC();
 						return s3;
                 }
             }

@@ -39,7 +39,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     protected int operationalModeCode; // actually 16 bit unsigned
     private byte airplaneLenWidth; // length / width code
     private boolean nicSupplement; // may be passed to position messages
-    private byte nacPos; // navigational accuracy category - position
+    private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
     private boolean trackHeading; // heading/ground track
     private boolean horizontalReferenceDirection; // heading is based on true north (0) or magnetic north (1)
@@ -93,9 +93,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         airplaneLenWidth = b.readByte(21, 24);
         operationalModeCode = b.readInt(25, 40);
 
-        int version = b.readByte(41, 43);
-        if (version != 1)
-            throw new BadFormatException("Unsupported operational status version " + version);
+        int mopsVersion = b.readByte(41, 43);
+        if (mopsVersion != 1)
+            throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC00) != 0)
             throw new BadFormatException("Unknown capability class code!");
@@ -103,7 +103,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
             throw new BadFormatException("Unknown operational mode code!");
 
         nicSupplement = b.readByte(44, 44) == 1;
-        nacPos = b.readByte(45, 48);
+        nacP = b.readByte(45, 48);
         // bits 49 and 50 reserved
         sil = b.readByte(51, 52);
         trackHeading = b.readByte(53, 53) == 1;
@@ -174,7 +174,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return 1;
     }
 
@@ -185,7 +185,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
     @Override
     public byte getNACpEncoded() {
-        return nacPos;
+        return nacP;
     }
 
     @Override
@@ -221,7 +221,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
                 ", operationalModeCode=" + operationalModeCode +
                 ", airplaneLenWidth=" + airplaneLenWidth +
                 ", nicSupplement=" + nicSupplement +
-                ", nacPos=" + nacPos +
+                ", nacP=" + nacP +
                 ", sil=" + sil +
                 ", trackHeading=" + trackHeading +
                 ", horizontalReferenceDirection=" + horizontalReferenceDirection +

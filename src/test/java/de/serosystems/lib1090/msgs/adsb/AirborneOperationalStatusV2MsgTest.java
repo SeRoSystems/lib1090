@@ -77,7 +77,7 @@ public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatu
         assertEquals(31, opstat.getFormatTypeCode());
         assertFalse(opstat.hasSingleAntenna());
 
-        assertEquals(2, opstat.getVersion());
+        assertEquals(2, opstat.getMOPSVersion());
         assertFalse(opstat.has1090ESIn());
         assertFalse(opstat.hasNICSupplementA());
         assertEquals(9, opstat.getNACpEncoded());

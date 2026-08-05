@@ -162,7 +162,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return 1;
     }
 

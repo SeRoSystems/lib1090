@@ -226,7 +226,7 @@ public class ExampleDecoder {
 				break;
 			case ADSB_STATUS_V0:
 				OperationalStatusV0Msg opstat0 = (OperationalStatusV0Msg) msg;
-				System.out.println("["+icao24+"]: Using ADS-B version "+opstat0.getVersion());
+				System.out.println("["+icao24+"]: Using ADS-B version "+opstat0.getMOPSVersion());
 				System.out.println("          Has operational TCAS: "+ opstat0.hasOperationalTCAS());
 				System.out.println("          Has operational CDTI: "+ opstat0.hasOperationalCDTI());
 				break;
@@ -234,7 +234,7 @@ public class ExampleDecoder {
 			case ADSB_AIRBORN_STATUS_V2:
 			case ADSB_AIRBORN_STATUS_V3:
 				AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
-				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA.getVersion());
+				System.out.println("["+icao24+"]: Using ADS-B version "+opstatA.getMOPSVersion());
 				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
@@ -277,7 +277,7 @@ public class ExampleDecoder {
 			case ADSB_SURFACE_STATUS_V3:
 				SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
 
-                    System.out.println("[" + icao24 + "]: Using ADS-B version " + opstatS.getVersion());
+                    System.out.println("[" + icao24 + "]: Using ADS-B version " + opstatS.getMOPSVersion());
 
                     System.out.println("          Horizontal reference: " + (opstatS.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
@@ -294,7 +294,7 @@ public class ExampleDecoder {
 
                     if (msg instanceof SurfaceOperationalStatusV2V3Msg) {
 					SurfaceOperationalStatusV2V3Msg opstatSV2V3 = (SurfaceOperationalStatusV2V3Msg) msg;
-                        System.out.println("          Has NIC supplement C: " + opstatSV2V3.getNICSupplementC());
+                        System.out.println("          Has NIC supplement C: " + opstatSV2V3.hasNICSupplementC());
                         System.out.println("          Navigation Accuracy Category for velocity (NACv): " + opstatSV2V3.getNACv());
                         System.out.println("          Encoded GPS antenna offset: " + opstatSV2V3.getGPSAntennaOffsetEncoded());
 				}
