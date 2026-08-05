@@ -114,7 +114,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return 0;
     }
 

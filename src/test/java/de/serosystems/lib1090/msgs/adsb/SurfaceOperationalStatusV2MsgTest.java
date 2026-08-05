@@ -48,7 +48,7 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         assertInstanceOf(OperationalStatusV2Msg.class, opstat);
         assertInstanceOf(SingleAntennaMsg.class, opstat);
 
-        assertEquals(2, opstat.getVersion());
+        assertEquals(2, opstat.getMOPSVersion());
         assertFalse(opstat.has1090ESIn());
         assertFalse(opstat.hasUATIn());
         assertFalse(opstat.hasSingleAntenna());
@@ -69,17 +69,17 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
         assertTrue(uatIn.hasUATIn());
         assertEquals(0, uatIn.getNACv());
-        assertFalse(uatIn.getNICSupplementC());
+        assertFalse(uatIn.hasNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
         assertFalse(nacv.hasUATIn());
         assertEquals(5, nacv.getNACv());
-        assertFalse(nacv.getNICSupplementC());
+        assertFalse(nacv.hasNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
         assertFalse(nicSupplementC.hasUATIn());
         assertEquals(0, nicSupplementC.getNACv());
-        assertTrue(nicSupplementC.getNICSupplementC());
+        assertTrue(nicSupplementC.hasNICSupplementC());
     }
 
     @Test

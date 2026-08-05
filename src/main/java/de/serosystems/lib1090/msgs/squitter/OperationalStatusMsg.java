@@ -39,5 +39,5 @@ public interface OperationalStatusMsg {
      *
      * @return the version number
      */
-    byte getVersion();
+    byte getMOPSVersion();
 }

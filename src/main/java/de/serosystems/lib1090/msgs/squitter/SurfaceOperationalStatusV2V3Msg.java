@@ -31,7 +31,7 @@ public interface SurfaceOperationalStatusV2V3Msg extends SurfaceOperationalStatu
     /**
      * @return NIC supplement C for use on the surface
      */
-    boolean getNICSupplementC();
+    boolean hasNICSupplementC();
 
     /**
      * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft

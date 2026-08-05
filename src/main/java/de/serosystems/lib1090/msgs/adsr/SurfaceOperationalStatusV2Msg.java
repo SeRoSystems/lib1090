@@ -168,7 +168,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return version;
     }
 
@@ -213,7 +213,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public boolean getNICSupplementC() {
+    public boolean hasNICSupplementC() {
         return nicSupplementC;
     }
 

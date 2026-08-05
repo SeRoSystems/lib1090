@@ -93,9 +93,9 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         capabilityClassCode = b.readInt(9, 24);
         operationalModeCode = b.readInt(25, 40);
 
-        int version = b.readByte(41, 43);
-        if (version != 1)
-            throw new BadFormatException("Unsupported operational status version " + version);
+        int mopsVersion = b.readByte(41, 43);
+        if (mopsVersion != 1)
+            throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC000) != 0)
             throw new BadFormatException("Unknown capability class code!");
@@ -157,7 +157,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return 1;
     }
 

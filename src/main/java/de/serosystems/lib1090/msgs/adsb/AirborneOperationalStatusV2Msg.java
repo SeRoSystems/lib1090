@@ -38,8 +38,8 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
 
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
-    private byte version;
-    private boolean nicSupplement; // may be passed to position messages
+    private byte mopsVersion;
+    private boolean nicSupplementA; // may be passed to position messages
     private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
     private boolean nicBaro;
@@ -95,9 +95,9 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         capabilityClassCode = b.readInt(9, 24);
         operationalModeCode = b.readInt(25, 40);
 
-        version = b.readByte(41, 43);
-        if (version < 2)
-            throw new BadFormatException("Unsupported operational status version " + version);
+        mopsVersion = b.readByte(41, 43);
+        if (mopsVersion < 2)
+            throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC000) != 0)
             throw new BadFormatException("Unknown capability class code!");
@@ -105,7 +105,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplement = b.readByte(44, 44) == 1;
+        nicSupplementA = b.readByte(44, 44) == 1;
         nacP = b.readByte(45, 48);
         gva = b.readByte(49, 50);
         sil = b.readByte(51, 52);
@@ -161,13 +161,13 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public byte getVersion() {
-        return version;
+    public byte getMOPSVersion() {
+        return mopsVersion;
     }
 
     @Override
     public boolean hasNICSupplementA() {
-        return nicSupplement;
+        return nicSupplementA;
     }
 
     @Override
@@ -225,9 +225,9 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         return "AirborneOperationalStatusV2Msg{" + super.toString() +
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
-                ", version=" + version +
-                ", nicSupplement=" + nicSupplement +
-                ", nacPos=" + nacP +
+                ", mopsVersion=" + mopsVersion +
+                ", nicSupplementA=" + nicSupplementA +
+                ", nacP=" + nacP +
                 ", sil=" + sil +
                 ", nicBaro=" + nicBaro +
                 ", hrd=" + hrd +

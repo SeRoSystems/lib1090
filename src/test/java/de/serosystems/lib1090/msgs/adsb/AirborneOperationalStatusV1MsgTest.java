@@ -47,7 +47,7 @@ class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTes
         // 14 bytes: DF(1) + ICAO(3) + ME(7) + CRC(3)
         byte[] msg = Tools.hexStringToByteArray("8D000000F8008000002900000000");
         AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
-        assertEquals(1, status.getVersion());
+        assertEquals(1, status.getMOPSVersion());
     }
 
     @Test
@@ -61,7 +61,7 @@ class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTes
         AirborneOperationalStatusV1Msg status = create(baseMessage());
         assertInstanceOf(OperationalStatusV1Msg.class, status);
         assertEquals(0, status.getSubtypeCode());
-        assertEquals(1, status.getVersion());
+        assertEquals(1, status.getMOPSVersion());
         assertEquals(9, status.getNACpEncoded());
     }
 

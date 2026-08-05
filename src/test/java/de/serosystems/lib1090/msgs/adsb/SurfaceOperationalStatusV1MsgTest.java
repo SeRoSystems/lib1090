@@ -44,7 +44,7 @@ class SurfaceOperationalStatusV1MsgTest extends SurfaceOperationalStatusMsgTest 
     public void testValidVersion1Message() throws Exception {
         SurfaceOperationalStatusV1Msg status = create(baseMessage());
         assertEquals(1, status.getSubtypeCode());
-        assertEquals(1, status.getVersion());
+        assertEquals(1, status.getMOPSVersion());
     }
 
     @Test

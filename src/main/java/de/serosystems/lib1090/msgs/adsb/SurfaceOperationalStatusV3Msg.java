@@ -39,9 +39,9 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     private int capabilityClassCode; // actually 16 bit unsigned
     private int operationalModeCode; // actually 16 bit unsigned
     private byte airplaneLenWidth; // length / width code
-    private byte version;
-    private boolean nicSupplement; // may be passed to position messages
-    private byte nacPos; // navigational accuracy category - position
+    private byte mopsVersion;
+    private boolean nicSupplementA; // may be passed to position messages
+    private byte nacP; // navigational accuracy category - position
     private byte sil; // surveillance integrity level
     private boolean trackHeading; // heading/ground track
     private boolean horizontalReferenceDirection; // heading is based on true north (0) or magnetic north (1)
@@ -97,18 +97,18 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         capabilityClassCode = b.readInt(9, 20);
         airplaneLenWidth = b.readByte(21, 24);
         operationalModeCode = b.readInt(25, 40);
-        version = b.readByte(41, 43);
+        mopsVersion = b.readByte(41, 43);
 
-        if (version < 3)
-            throw new BadFormatException("Unsupported operational status version " + version);
+        if (mopsVersion < 3)
+            throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC00) != 0)
             throw new BadFormatException("Unknown capability class code!");
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplement = b.readByte(44, 44) == 1;
-        nacPos = b.readByte(45, 48);
+        nicSupplementA = b.readByte(44, 44) == 1;
+        nacP = b.readByte(45, 48);
         sil = b.readByte(51, 52);
         trackHeading = b.readByte(53, 53) == 1;
         horizontalReferenceDirection = b.readByte(54, 54) == 1;
@@ -172,18 +172,18 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public byte getVersion() {
-        return version;
+    public byte getMOPSVersion() {
+        return mopsVersion;
     }
 
     @Override
     public boolean hasNICSupplementA() {
-        return nicSupplement;
+        return nicSupplementA;
     }
 
     @Override
     public byte getNACpEncoded() {
-        return nacPos;
+        return nacP;
     }
 
     @Override
@@ -228,7 +228,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public boolean getNICSupplementC() {
+    public boolean hasNICSupplementC() {
         return (capabilityClassCode & 0x1) != 0;
     }
 
@@ -269,9 +269,16 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     @Override
     public String toString() {
         return "SurfaceOperationalStatusV3Msg{" + super.toString() +
-                ", silSupplement=" + silSupplement +
                 ", capabilityClassCode=" + capabilityClassCode +
                 ", operationalModeCode=" + operationalModeCode +
+                ", airplaneLenWidth=" + airplaneLenWidth +
+                ", version=" + mopsVersion +
+                ", nicSupplementA=" + nicSupplementA +
+                ", nacP=" + nacP +
+                ", sil=" + sil +
+                ", trackHeading=" + trackHeading +
+                ", horizontalReferenceDirection=" + horizontalReferenceDirection +
+                ", silSupplement=" + silSupplement +
                 '}';
     }
 

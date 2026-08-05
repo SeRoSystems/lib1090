@@ -169,7 +169,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public byte getVersion() {
+    public byte getMOPSVersion() {
         return version;
     }
 
