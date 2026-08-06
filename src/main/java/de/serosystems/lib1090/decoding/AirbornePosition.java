@@ -52,7 +52,7 @@ public final class AirbornePosition {
      */
     public static CPREncodedPosition extractCPREncodedPosition(BitReader br, Instant timestamp) {
         Objects.requireNonNull(timestamp, "timestamp");
-        boolean cprFormat = br.readByte(22, 22) == 1;
+        boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
         return CPREncodedPosition.ofAirborne(17, cprFormat, cprEncodedLat, cprEncodedLon, timestamp);

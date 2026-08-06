@@ -35,11 +35,11 @@ public class TCASResolutionAdvisory {
     }
 
     public static boolean decodeMultiThreatEncounter(BitReader reader) {
-        return reader.readByte(28, 28) == 1;
+        return reader.readBoolean(28);
     }
 
     public static boolean decodeRaTerminated(BitReader reader) {
-        return reader.readByte(27, 27) == 1;
+        return reader.readBoolean(27);
     }
 
     public static byte decodeRacRecord(BitReader reader) {
@@ -52,28 +52,28 @@ public class TCASResolutionAdvisory {
 
     public static boolean[] extractActiveResolutionAdvisories(BitReader reader) {
         return new boolean[]{
-                reader.readByte(9, 9) == 1,
-                reader.readByte(10, 10) == 1,
-                reader.readByte(11, 11) == 1,
-                reader.readByte(12, 12) == 1,
-                reader.readByte(13, 13) == 1,
-                reader.readByte(14, 14) == 1,
-                reader.readByte(15, 15) == 1,
-                reader.readByte(16, 16) == 1,
-                reader.readByte(17, 17) == 1,
-                reader.readByte(18, 18) == 1,
-                reader.readByte(19, 19) == 1,
-                reader.readByte(20, 20) == 1,
-                reader.readByte(21, 21) == 1,
-                reader.readByte(22, 22) == 1
+                reader.readBoolean(9),
+                reader.readBoolean(10),
+                reader.readBoolean(11),
+                reader.readBoolean(12),
+                reader.readBoolean(13),
+                reader.readBoolean(14),
+                reader.readBoolean(15),
+                reader.readBoolean(16),
+                reader.readBoolean(17),
+                reader.readBoolean(18),
+                reader.readBoolean(19),
+                reader.readBoolean(20),
+                reader.readBoolean(21),
+                reader.readBoolean(22)
         };
     }
 
     public static boolean[] extractResolutionAdvisoriesComplementsRecord(BitReader reader) {
-        boolean doNotPassBelow = reader.readByte(23, 23) == 1;
-        boolean doNotPassAbove = reader.readByte(24, 24) == 1;
-        boolean doNotTurnLef = reader.readByte(25, 25) == 1;
-        boolean doNotTurnRight = reader.readByte(26, 26) == 1;
+        boolean doNotPassBelow = reader.readBoolean(23);
+        boolean doNotPassAbove = reader.readBoolean(24);
+        boolean doNotTurnLef = reader.readBoolean(25);
+        boolean doNotTurnRight = reader.readBoolean(26);
 
         return new boolean[]{doNotPassBelow, doNotPassAbove, doNotTurnLef, doNotTurnRight};
     }

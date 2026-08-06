@@ -80,7 +80,7 @@ public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements 
 
         emergencyState = b.readByte(9, 11);
         // ME bit 56 is redefined as the IMF flag for ADS-R
-        imf = b.readByte(56, 56) == 1;
+        imf = b.readBoolean(56);
     }
 
     @Override

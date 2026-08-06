@@ -107,14 +107,14 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplementA = b.readByte(44, 44) == 1;
+        nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
         // bits 49 and 50 reserved
         sil = b.readByte(51, 52);
-        trackHeading = b.readByte(53, 53) == 1;
-        horizontalReferenceDirection = b.readByte(54, 54) == 1;
+        trackHeading = b.readBoolean(53);
+        horizontalReferenceDirection = b.readBoolean(54);
 
-        silSupplement = b.readByte(55, 55) == 1;
+        silSupplement = b.readBoolean(55);
     }
 
     /**

@@ -75,6 +75,16 @@ public class BitReader {
     }
 
     /**
+     * Convenience reader for a single-bit flag.
+     *
+     * @param position the bit position (1-based, same convention as the other readers)
+     * @return true if the bit at {@code position} is set, false otherwise
+     */
+    public boolean readBoolean(int position) {
+        return readByte(position, position) == 1;
+    }
+
+    /**
      * Internal extraction logic.
      * * @param from    The starting bit position (inclusive, starts at 1).
      *

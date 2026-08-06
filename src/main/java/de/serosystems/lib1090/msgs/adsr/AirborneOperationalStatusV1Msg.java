@@ -105,16 +105,16 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplement = b.readByte(44, 44) == 1;
+        nicSupplement = b.readBoolean(44);
         nacP = b.readByte(45, 48);
         baq = b.readByte(49, 50);
         sil = b.readByte(51, 52);
-        nicBaro = b.readByte(53, 53) == 1;
+        nicBaro = b.readBoolean(53);
 
-        hrd = b.readByte(54, 54) == 1;
+        hrd = b.readBoolean(54);
 
         // ME bit 56 is redefined as the IMF flag for ADS-R
-        imf = b.readByte(56, 56) == 1;
+        imf = b.readBoolean(56);
     }
 
     @Override

@@ -89,17 +89,17 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
 
         navigationAccuracyCategoryEncoded = br.readByte(11, 13);
 
-        velocityToEastNegative = br.readByte(14, 14) == 1;
+        velocityToEastNegative = br.readBoolean(14);
         velocityToEastEncoded = br.readShort(15, 24);
 
-        velocityToNorthNegative = br.readByte(25, 25) == 1;
+        velocityToNorthNegative = br.readBoolean(25);
         velocityToNorthEncoded = br.readShort(26, 35);
 
-        verticalSource = br.readByte(36, 36) == 1;
-        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalSource = br.readBoolean(36);
+        verticalRateDown = br.readBoolean(37);
         verticalRateEncoded = br.readShort(38, 46);
 
-        diffBaroAltNegative = br.readByte(49, 49) == 1;
+        diffBaroAltNegative = br.readBoolean(49);
         diffBaroAltEncoded = br.readByte(50, 56);
 
         // In ADS-B version 3, ME bits 47-48 are re-purposed: if the Difference from Barometric

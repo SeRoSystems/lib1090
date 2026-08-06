@@ -82,7 +82,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
         if (b.readByte(6, 8) != SUBTYPE)
             throw new BadFormatException("CAS operational coordination reports have subtype 3.");
 
-        multipleThreatBit = b.readByte(10, 10) != 0;
+        multipleThreatBit = b.readBoolean(10);
         cancelVerticalRaComplementEncoded = b.readByte(11, 12);
         verticalRaComplementEncoded = b.readByte(13, 14);
         cancelHorizontalRaComplementEncoded = b.readByte(15, 17);

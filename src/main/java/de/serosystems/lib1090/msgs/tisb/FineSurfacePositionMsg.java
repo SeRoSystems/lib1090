@@ -98,11 +98,11 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
         BitReader br = BitReader.forBigEndian(getMessage());
 
         movement = br.readByte(6, 12);
-        headingStatus = br.readByte(13, 13) == 1;
+        headingStatus = br.readBoolean(13);
         groundTrack = br.readByte(14, 20);
 
-        imf = br.readByte(21, 21) == 1;
-        boolean cprFormat = br.readByte(22, 22) == 1;
+        imf = br.readBoolean(21);
+        boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
 

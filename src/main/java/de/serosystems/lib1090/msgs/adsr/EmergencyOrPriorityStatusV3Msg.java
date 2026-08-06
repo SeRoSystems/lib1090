@@ -89,14 +89,14 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
         emergencyState = b.readByte(9, 11);
         modeACode = b.readShort(12, 24);
 
-        unmanned = b.readByte(25, 25) != 0;
+        unmanned = b.readBoolean(25);
         meanEdrEncoded = b.readByte(26, 32);
         peakEdrEncoded = b.readByte(33, 39);
         peakEdrOffsetEncoded = b.readByte(40, 42);
         waterVaporEncoded = b.readShort(43, 54);
 
         // ME bit 56 is redefined as the IMF flag for ADS-R
-        imf = b.readByte(56, 56) == 1;
+        imf = b.readBoolean(56);
     }
 
     @Override

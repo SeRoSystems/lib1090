@@ -92,19 +92,19 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
             throw new UnspecifiedFormatError("Target state and status message subtype " + subtypeCode + " reserved.");
 
         verticalDataAvailableAndSourceIndicator = b.readByte(8, 9);
-        targetAltitudeType = b.readByte(10, 10) == 1;
+        targetAltitudeType = b.readBoolean(10);
         targetAltitudeCapability = b.readByte(12, 13);
         verticalModeIndicator = b.readByte(14, 15);
         targetAltitude = b.readInt(16, 25);
         horizontalDataAvailableAndSourceIndicator = b.readByte(26, 27);
         targetHeadingTrackAngle = b.readShort(28, 36);
-        targetHeadingTrackIndicator = b.readByte(37, 37) == 1;
+        targetHeadingTrackIndicator = b.readBoolean(37);
         horizontalModeIndicator = b.readByte(38, 39);
         nacP = b.readByte(40, 43);
-        nicBaro = b.readByte(44, 44) == 1;
+        nicBaro = b.readBoolean(44);
         sil = b.readByte(45, 46);
-        capabilityNotTcas = b.readByte(52, 52) == 1;
-        capabilityTcasRaActive = b.readByte(53, 53) == 1;
+        capabilityNotTcas = b.readBoolean(52);
+        capabilityTcasRaActive = b.readBoolean(53);
         emergencyPriorityStatus = b.readByte(54, 56);
     }
 

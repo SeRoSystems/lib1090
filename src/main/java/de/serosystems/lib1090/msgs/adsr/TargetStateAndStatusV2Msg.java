@@ -98,34 +98,34 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
         // message with ME bit 11 set to 1 should be discarded, but only for ADS-R v0 transmitters
         // ModeSDecoder class takes care of that as ADS-R version is unknown at this place
 
-        silSupplement = b.readByte(8, 8) == 1;
-        selectedAltitudeType = b.readByte(9, 9) == 1;
+        silSupplement = b.readBoolean(8);
+        selectedAltitudeType = b.readBoolean(9);
 
         selectedAltitude = b.readShort(10, 20);
 
         barometricPressureSetting = b.readShort(21, 29);
 
-        selectedHeadingStatus = b.readByte(30, 30) == 1;
-        selectedHeadingSign = b.readByte(31, 31) == 1;
+        selectedHeadingStatus = b.readBoolean(30);
+        selectedHeadingSign = b.readBoolean(31);
         selectedHeading = b.readShort(32, 39);
         nacP = b.readByte(40, 43);
 
-        nicBaro = b.readByte(44, 44) == 1;
+        nicBaro = b.readBoolean(44);
         sil = b.readByte(45, 46);
 
-        mcpFcuStatus = b.readByte(47, 47) == 1;
+        mcpFcuStatus = b.readBoolean(47);
 
         // the following are only valid if mcpFcuStatus is true
-        autopilotEngaged = b.readByte(48, 48) == 1;
-        vnavModeEngaged = b.readByte(49, 49) == 1;
-        altitudeHoldMode = b.readByte(50, 50) == 1;
+        autopilotEngaged = b.readBoolean(48);
+        vnavModeEngaged = b.readBoolean(49);
+        altitudeHoldMode = b.readBoolean(50);
         // ME bit 51 is redefined as the IMF flag for ADS-R
-        imf = b.readByte(51, 51) == 1;
-        approachMode = b.readByte(52, 52) == 1;
-        lnavModeEngaged = b.readByte(54, 54) == 1;
+        imf = b.readBoolean(51);
+        approachMode = b.readBoolean(52);
+        lnavModeEngaged = b.readBoolean(54);
 
         // this is always set and valid
-        operationalTcas = b.readByte(53, 53) == 1;
+        operationalTcas = b.readBoolean(53);
 
         // DO-260B 2.2.3.2.7.1.3.19
         if (b.readByte(55, 56) != 0)

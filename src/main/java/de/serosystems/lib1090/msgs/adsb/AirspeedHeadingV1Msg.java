@@ -87,21 +87,21 @@ public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializab
         if (messageSubtype != 3 && messageSubtype != 4)
             throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
 
-        intentChange = br.readByte(9, 9) == 1;
-        ifrCapability = br.readByte(10, 10) == 1;
+        intentChange = br.readBoolean(9);
+        ifrCapability = br.readBoolean(10);
         navigationAccuracyCategoryEncoded = br.readByte(11, 13);
 
-        headingStatusBit = br.readByte(14, 14) == 1;
+        headingStatusBit = br.readBoolean(14);
         headingEncoded = br.readShort(15, 24);
 
-        trueAirspeed = br.readByte(25, 25) == 1;
+        trueAirspeed = br.readBoolean(25);
         airspeedEncoded = br.readShort(26, 35);
 
-        verticalSource = br.readByte(36, 36) == 1;
-        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalSource = br.readBoolean(36);
+        verticalRateDown = br.readBoolean(37);
         verticalRateEncoded = br.readShort(38, 46);
 
-        diffBaroAltNegative = br.readByte(49, 49) == 1;
+        diffBaroAltNegative = br.readBoolean(49);
         diffBaroAltEncoded = br.readByte(50, 56);
     }
 

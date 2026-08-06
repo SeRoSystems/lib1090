@@ -100,28 +100,28 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
         if (messageSubtype != 3 && messageSubtype != 4)
             throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
 
-        imf = br.readByte(9, 9) == 1;
+        imf = br.readBoolean(9);
         nacp = br.readByte(10, 13);
 
-        headingStatusBit = br.readByte(14, 14) == 1;
+        headingStatusBit = br.readBoolean(14);
         headingEncoded = br.readShort(15, 24);
 
-        trueAirspeed = br.readByte(25, 25) == 1;
+        trueAirspeed = br.readBoolean(25);
         airspeedEncoded = br.readShort(26, 35);
 
         // 0 = no geo data available, 1 = geo data available
-        geoFlag = br.readByte(36, 36) == 1;
+        geoFlag = br.readBoolean(36);
 
-        verticalRateDown = br.readByte(37, 37) == 1;
+        verticalRateDown = br.readBoolean(37);
         verticalRateEncoded = br.readShort(38, 46);
 
         if (geoFlag) {
-            diffBaroAltNegative = br.readByte(49, 49) == 1;
+            diffBaroAltNegative = br.readBoolean(49);
             diffBaroAltEncoded = br.readByte(50, 56);
         } else {
             nacv = br.readByte(48, 50);
             sil = br.readByte(51, 52);
-            magneticHeading = br.readByte(55, 55) == 1;
+            magneticHeading = br.readBoolean(55);
         }
     }
 
