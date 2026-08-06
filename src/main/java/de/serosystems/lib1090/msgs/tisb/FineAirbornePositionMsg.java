@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * Decoder for TIS-B fine airborne position (DO-260B, 2.2.17.3.1).
  */
-public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, IMFMsg {
+public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, IMFMsg, TISBMsg {
 
     private static final long serialVersionUID = -5506126020860066506L;
 

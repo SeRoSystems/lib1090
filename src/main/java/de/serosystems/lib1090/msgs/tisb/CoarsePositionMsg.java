@@ -37,7 +37,7 @@ import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 /**
  * Decoder for TIS-B coarse position (DO-260B, 2.2.17.3.5).
  */
-public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg {
+public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg, TISBMsg {
 
     private static final long serialVersionUID = 6920442725399745427L;
 

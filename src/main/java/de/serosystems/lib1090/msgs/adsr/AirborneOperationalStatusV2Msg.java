@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with
  * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, NICSupplementBMsg {
+public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, NICSupplementBMsg, ADSRMsg {
 
     private static final long serialVersionUID = 2841937650192837465L;
 

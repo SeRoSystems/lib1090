@@ -33,7 +33,7 @@ import java.io.Serializable;
  * <p>
  * See DO-260B 2.2.3.2.7.8.2
  */
-public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable {
+public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 2288992169091753527L;
 

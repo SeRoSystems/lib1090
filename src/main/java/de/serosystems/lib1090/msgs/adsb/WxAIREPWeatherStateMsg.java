@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for the weather state subtype (1) of the ADS-B Wx AIREP message, introduced in ADS-B version 3.
  */
-public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializable, WxAIREPWeatherMsg {
+public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializable, WxAIREPWeatherMsg, ADSBMsg {
 
     private static final long serialVersionUID = 4198327560981723649L;
 

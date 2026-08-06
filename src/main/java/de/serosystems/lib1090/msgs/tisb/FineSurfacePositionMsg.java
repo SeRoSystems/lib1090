@@ -41,7 +41,7 @@ import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
 /**
  * Decoder for TIS-B fine surface position (DO-260B, 2.2.17.3.2).
  */
-public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg {
+public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
 
     private static final long serialVersionUID = -8306226295512272609L;
 

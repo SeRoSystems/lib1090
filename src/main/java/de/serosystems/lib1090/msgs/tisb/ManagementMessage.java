@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B/ADS-R Management Message (DO-260B, 2.2.17.3.6).
  */
-public class ManagementMessage extends ExtendedSquitter implements Serializable {
+public class ManagementMessage extends ExtendedSquitter implements Serializable, TISBMsg {
 
     private static final long serialVersionUID = 6266047064873866100L;
 

@@ -31,7 +31,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg {
+public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = -4899716425365685001L;
 

@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B operational status message as specified in DO-260 (ADS-B version 0).
  */
-public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg {
+public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg, ADSBMsg {
 
     private static final long serialVersionUID = 4280693148589377648L;
 

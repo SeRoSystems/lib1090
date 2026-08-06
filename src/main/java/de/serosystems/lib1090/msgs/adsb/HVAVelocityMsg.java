@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Decoder for the velocity subtype (1) of the ADS-B High Velocity and/or Altitude (HVA) message,
  * introduced with typecode 25 in ADS-B version 3.
  */
-public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HVAMsg {
+public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
 
     private static final long serialVersionUID = -1934875602817346095L;
 

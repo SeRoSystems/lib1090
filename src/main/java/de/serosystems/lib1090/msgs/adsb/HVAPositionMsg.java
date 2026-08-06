@@ -28,7 +28,7 @@ import java.io.Serializable;
 /**
  * Decoder for the position subtype of the ADS-B High Velocity and/or Altitude (HVA) message.
  */
-public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HVAMsg {
+public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
 
     private static final long serialVersionUID = 7256103984719305218L;
 

@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-R surface position messages version 2.
  */
-public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg {
+public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 7058731502891153722L;
 

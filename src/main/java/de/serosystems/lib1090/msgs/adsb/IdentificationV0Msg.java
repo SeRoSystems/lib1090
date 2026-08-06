@@ -30,7 +30,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 0 identification messages
  */
-public class IdentificationV0Msg extends ExtendedSquitter implements Serializable, IdentificationMsg {
+public class IdentificationV0Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSBMsg {
 
     private static final long serialVersionUID = 3475444849066416732L;
 

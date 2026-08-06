@@ -28,7 +28,7 @@ import java.io.Serializable;
 /**
  * Decoder for 1090ES UAS/RPAS Contingency Messages.
  */
-public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializable {
+public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 4187522897452638491L;
 

@@ -28,7 +28,7 @@ import java.io.Serializable;
 /**
  * Decoder for 1090ES CAS Operational Coordination Messages.
  */
-public class CASOperationalCoordinationMsg extends ExtendedSquitter implements Serializable {
+public class CASOperationalCoordinationMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = -3269481672107864825L;
 
