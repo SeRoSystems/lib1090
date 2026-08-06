@@ -169,8 +169,4 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_CAS_OPERATIONAL_COORDINATION;
-    }
 }

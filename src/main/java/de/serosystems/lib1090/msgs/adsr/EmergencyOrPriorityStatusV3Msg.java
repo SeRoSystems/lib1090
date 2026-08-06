@@ -224,8 +224,4 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_EMERGENCY_V3;
-    }
 }

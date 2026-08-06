@@ -78,8 +78,4 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
         super(squitter);
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.MILITARY_EXTENDED_SQUITTER;
-    }
 }

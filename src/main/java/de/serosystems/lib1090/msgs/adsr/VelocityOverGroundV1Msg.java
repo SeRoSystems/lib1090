@@ -193,8 +193,4 @@ public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Seriali
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_VELOCITY_V1;
-    }
 }

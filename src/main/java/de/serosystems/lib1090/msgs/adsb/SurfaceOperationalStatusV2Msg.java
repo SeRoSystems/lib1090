@@ -283,8 +283,4 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_SURFACE_STATUS_V2;
-    }
 }

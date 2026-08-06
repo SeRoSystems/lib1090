@@ -171,8 +171,4 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_UAS_RPAS_CONTINGENCY;
-    }
 }

@@ -38,108 +38,6 @@ public class ModeSDownlinkMsg implements Serializable {
     private int parity; // 3 bytes
     private boolean noCRC;
 
-    /**
-     * Indicator set by all specializations of this class to tell
-     * users which message format is encapsulated in this Mode S message.
-     */
-    public enum subtype {
-        // Mode S downlink formats
-        MODES_REPLY, // unknown mode s reply
-        SHORT_ACAS,
-        ALTITUDE_REPLY,
-        IDENTIFY_REPLY,
-        ALL_CALL_REPLY,
-        LONG_ACAS,
-        EXTENDED_SQUITTER,
-        MILITARY_EXTENDED_SQUITTER,
-        COMM_B_ALTITUDE_REPLY,
-        COMM_B_IDENTIFY_REPLY,
-        COMM_D_ELM,
-
-        // ADS-B subtypes
-        ADSB_AIRBORN_POSITION_V0,
-        ADSB_AIRBORN_POSITION_V1,
-        ADSB_AIRBORN_POSITION_V2,
-        ADSB_AIRBORN_POSITION_V3,
-        ADSB_SURFACE_POSITION_V0,
-        ADSB_SURFACE_POSITION_V1,
-        ADSB_SURFACE_POSITION_V2,
-        ADSB_SURFACE_POSITION_V3,
-        ADSB_AIRSPEED_V0,
-        ADSB_AIRSPEED_V1,
-        ADSB_AIRSPEED_V2,
-        ADSB_MODE_A_CODE_V1,
-        ADSB_EMERGENCY_V0V1,
-        ADSB_EMERGENCY_V2,
-        ADSB_EMERGENCY_V3,
-        ADSB_TCAS,
-        ADSB_CAS_OPERATIONAL_COORDINATION,
-        ADSB_UAS_RPAS_CONTINGENCY,
-        ADSB_VELOCITY_V0,
-        ADSB_VELOCITY_V1,
-        ADSB_VELOCITY_V2,
-        ADSB_VELOCITY_V3,
-        ADSB_IDENTIFICATION_V0,
-        ADSB_IDENTIFICATION_V1,
-        ADSB_IDENTIFICATION_V2,
-        ADSB_IDENTIFICATION_V3,
-        ADSB_STATUS_V0,
-        ADSB_AIRBORN_STATUS_V1,
-        ADSB_SURFACE_STATUS_V1,
-        ADSB_AIRBORN_STATUS_V2,
-        ADSB_SURFACE_STATUS_V2,
-        ADSB_AIRBORN_STATUS_V3,
-        ADSB_SURFACE_STATUS_V3,
-        ADSB_TARGET_STATE_AND_STATUS_V1,
-        ADSB_TARGET_STATE_AND_STATUS_V2,
-        ADSB_TARGET_STATE_AND_STATUS_V3,
-        ADSB_HVA_POSITION,
-        ADSB_HVA_VELOCITY,
-        ADSB_WX_AIREP_AIRCRAFT_STATE,
-        ADSB_WX_AIREP_WEATHER_STATE,
-        ADSB_WX_AIREP_ALTERNATE_WEATHER_STATE,
-        SURFACE_SYSTEM_STATUS,
-
-        // TIS-B subtypes
-        TISB_FINE_AIRBORNE_POSITION,
-        TISB_FINE_SURFACE_POSITION,
-        TISB_IDENTIFICATION,
-        TISB_VELOCITY,
-        TISB_AIRSPEED,
-        TISB_COARSE_POSITION,
-        TISB_MANAGEMENT,
-
-        // ADS-R subtypes
-        ADSR_AIRBORN_POSITION_V1,
-        ADSR_AIRBORN_POSITION_V2,
-        ADSR_AIRBORN_POSITION_V3,
-        ADSR_SURFACE_POSITION_V1,
-        ADSR_SURFACE_POSITION_V2,
-        ADSR_SURFACE_POSITION_V3,
-        ADSR_AIRSPEED_V1,
-        ADSR_AIRSPEED_V2,
-        ADSR_EMERGENCY_V1,
-        ADSR_EMERGENCY_V2,
-        ADSR_EMERGENCY_V3,
-        ADSR_VELOCITY_V1,
-        ADSR_VELOCITY_V2,
-        ADSR_VELOCITY_V3,
-        ADSR_IDENTIFICATION_V1,
-        ADSR_IDENTIFICATION_V2,
-        ADSR_IDENTIFICATION_V3,
-        ADSR_AIRBORN_STATUS_V1,
-        ADSR_SURFACE_STATUS_V1,
-        ADSR_AIRBORN_STATUS_V2,
-        ADSR_SURFACE_STATUS_V2,
-        ADSR_AIRBORN_STATUS_V3,
-        ADSR_SURFACE_STATUS_V3,
-        ADSR_TARGET_STATE_AND_STATUS_V2,
-        ADSR_TARGET_STATE_AND_STATUS_V3,
-        ADSR_WX_AIREP_AIRCRAFT_STATE,
-        ADSR_WX_AIREP_WEATHER_STATE,
-        ADSR_WX_AIREP_ALTERNATE_WEATHER_STATE,
-    }
-
     private QualifiedAddress address;
 
     /*
@@ -481,12 +379,6 @@ public class ModeSDownlinkMsg implements Serializable {
         address = reply.address;
     }
 
-    /**
-     * @return the subtype
-     */
-    public subtype getType() {
-        return subtype.MODES_REPLY;
-    }
 
     /**
      * @return downlink format of the Mode S reply
@@ -642,7 +534,7 @@ public class ModeSDownlinkMsg implements Serializable {
                 ", first_field=" + first_field +
                 ", payload=" + Tools.toHexString(payload) +
                 ", noCRC=" + noCRC +
-                ", type=" + getType() +
+                ", class=" + getClass().getSimpleName() +
                 ", address=" + address.toString() +
                 '}';
     }

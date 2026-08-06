@@ -125,8 +125,4 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_STATUS_V0;
-    }
 }

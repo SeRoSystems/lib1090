@@ -107,8 +107,4 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_IDENTIFICATION;
-    }
 }

@@ -220,8 +220,4 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.IDENTIFY_REPLY;
-    }
 }

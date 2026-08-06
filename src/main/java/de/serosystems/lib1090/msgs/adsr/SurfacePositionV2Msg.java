@@ -243,8 +243,4 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_SURFACE_POSITION_V2;
-    }
 }

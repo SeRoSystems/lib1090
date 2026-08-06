@@ -267,8 +267,4 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_VELOCITY_V3;
-    }
 }

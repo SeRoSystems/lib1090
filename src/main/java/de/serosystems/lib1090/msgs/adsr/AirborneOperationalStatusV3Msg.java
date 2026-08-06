@@ -268,8 +268,4 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_AIRBORN_STATUS_V3;
-    }
 }

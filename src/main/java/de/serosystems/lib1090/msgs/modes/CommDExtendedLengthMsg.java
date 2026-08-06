@@ -111,8 +111,4 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.COMM_D_ELM;
-    }
 }

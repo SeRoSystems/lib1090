@@ -248,8 +248,4 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.LONG_ACAS;
-    }
 }

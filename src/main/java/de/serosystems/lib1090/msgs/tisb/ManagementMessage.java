@@ -77,8 +77,4 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable 
         return "ManagementMessage{" + super.toString() + '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_MANAGEMENT;
-    }
 }

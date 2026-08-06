@@ -189,8 +189,4 @@ public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializab
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_AIRSPEED_V1;
-    }
 }

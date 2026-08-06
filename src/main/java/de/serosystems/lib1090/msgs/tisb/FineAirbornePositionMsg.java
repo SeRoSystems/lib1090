@@ -194,8 +194,4 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_FINE_AIRBORNE_POSITION;
-    }
 }

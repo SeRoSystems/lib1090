@@ -234,8 +234,4 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.COMM_B_IDENTIFY_REPLY;
-    }
 }

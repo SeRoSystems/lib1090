@@ -234,8 +234,4 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_TCAS;
-    }
 }
