@@ -82,9 +82,9 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
         horizontalPositionAvailable = formatTypeCode != 0;
         BitReader br = BitReader.forBigEndian(getMessage());
         movement = br.readByte(6, 12);
-        headingStatus = br.readByte(13, 13) == 1;
+        headingStatus = br.readBoolean(13);
         groundTrack = br.readByte(14, 20);
-        timeFlag = br.readByte(21, 21) == 1;
+        timeFlag = br.readBoolean(21);
         position = SurfacePosition.extractCPREncodedPosition(br, movement, Objects.requireNonNull(timestamp, "timestamp"));
     }
 

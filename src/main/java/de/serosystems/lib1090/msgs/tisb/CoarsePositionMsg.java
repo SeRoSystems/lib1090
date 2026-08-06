@@ -93,15 +93,15 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        imf = br.readByte(1, 1) == 1;
+        imf = br.readBoolean(1);
         surveillanceStatus = br.readByte(2, 3);
         svid = br.readByte(4, 7);
         altitudeEncoded = br.readShort(8, 19);
-        groundTrackStatus = br.readByte(20, 20) == 1;
+        groundTrackStatus = br.readBoolean(20);
         groundTrackAngle = br.readByte(21, 25);
         groundSpeed = br.readByte(26, 31);
 
-        boolean cprFormat = br.readByte(32, 32) == 1;
+        boolean cprFormat = br.readBoolean(32);
         short cprEncodedLat = br.readShort(33, 44);
         short cprEncodedLon = br.readShort(45, 56);
 

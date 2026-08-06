@@ -80,7 +80,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
             throw new BadFormatException("UAS/RPAS contingency reports have subtype 4.");
 
         contingencyPlan = b.readByte(9, 12);
-        currentOrNext = b.readByte(13, 13) != 0;
+        currentOrNext = b.readBoolean(13);
         tcpAltitudeEncoded = b.readShort(14, 22);
         tcpLatitudeEncoded = b.readInt(23, 39);
         tcpLongitudeEncoded = b.readInt(40, 56);

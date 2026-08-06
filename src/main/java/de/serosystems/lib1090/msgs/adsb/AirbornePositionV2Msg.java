@@ -84,10 +84,10 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
         horizontalPositionAvailable = formatTypeCode != 0;
         BitReader br = BitReader.forBigEndian(getMessage());
         surveillanceStatus = br.readByte(6, 7);
-        nicSupplementB = br.readByte(8, 8) == 1;
+        nicSupplementB = br.readBoolean(8);
         altitudeEncoded = br.readShort(9, 20);
         altitudeAvailable = altitudeEncoded != 0;
-        timeFlag = br.readByte(21, 21) == 1;
+        timeFlag = br.readBoolean(21);
         position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
 

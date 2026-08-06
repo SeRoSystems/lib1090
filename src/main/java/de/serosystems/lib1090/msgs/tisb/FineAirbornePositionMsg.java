@@ -93,10 +93,10 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
         BitReader br = BitReader.forBigEndian(getMessage());
 
         surveillanceStatus = br.readByte(6, 7);
-        imf = br.readByte(8, 8) == 1;
+        imf = br.readBoolean(8);
         altitudeEncoded = br.readShort(9, 20);
 
-        boolean cprFormat = br.readByte(22, 22) == 1;
+        boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
 

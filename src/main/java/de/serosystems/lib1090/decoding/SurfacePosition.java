@@ -53,7 +53,7 @@ public final class SurfacePosition {
      */
     public static CPREncodedPosition extractCPREncodedPosition(BitReader br, byte movement, Instant timestamp) {
         Objects.requireNonNull(timestamp, "timestamp");
-        boolean cprFormat = br.readByte(22, 22) == 1;
+        boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
         boolean highGroundSpeed = movement == 0 || movement > 49;

@@ -105,14 +105,14 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         if ((operationalModeCode & 0xC000) != 0)
             throw new BadFormatException("Unknown operational mode code!");
 
-        nicSupplementA = b.readByte(44, 44) == 1;
+        nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
         gva = b.readByte(49, 50);
         sil = b.readByte(51, 52);
-        nicBaro = b.readByte(53, 53) == 1;
-        hrd = b.readByte(54, 54) == 1;
+        nicBaro = b.readBoolean(53);
+        hrd = b.readBoolean(54);
 
-        silSupplement = b.readByte(55, 55) == 1;
+        silSupplement = b.readBoolean(55);
     }
 
     @Override

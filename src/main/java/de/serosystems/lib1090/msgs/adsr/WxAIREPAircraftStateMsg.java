@@ -87,7 +87,7 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
         grossWeightEncoded = br.readShort(36, 47);
         wingspanEncoded = br.readShort(48, 55);
         // ME bit 56 is redefined as the IMF flag for ADS-R
-        imf = br.readByte(56, 56) == 1;
+        imf = br.readBoolean(56);
     }
 
     @Override

@@ -89,12 +89,12 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
         windQualityIndicatorEncoded = br.readByte(13, 15);
         windSpeedEncoded = br.readShort(16, 23);
         windDirectionEncoded = br.readShort(24, 33);
-        airTemperatureType = br.readByte(36, 36) == 1;
+        airTemperatureType = br.readBoolean(36);
         airTemperatureEncoded = br.readShort(37, 44);
-        airspeedType = br.readByte(45, 45) == 1;
+        airspeedType = br.readBoolean(45);
         airspeedEncoded = br.readShort(46, 55);
         // ME bit 56 is redefined as the IMF flag for ADS-R
-        imf = br.readByte(56, 56) == 1;
+        imf = br.readBoolean(56);
     }
 
     @Override

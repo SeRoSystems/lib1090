@@ -102,6 +102,19 @@ class BitReaderTest {
     }
 
     @Test
+    @DisplayName("Read single-bit flags using readBoolean")
+    void testReadBoolean() {
+        // 0b1101_0000 (0xD0)
+        byte[] data = {(byte) 0xD0};
+        BitReader reader = BitReader.forBigEndian(data);
+
+        assertEquals(true, reader.readBoolean(1));  // Bit 1 is set
+        assertEquals(true, reader.readBoolean(2));  // Bit 2 is set
+        assertEquals(false, reader.readBoolean(3)); // Bit 3 is unset
+        assertEquals(false, reader.readBoolean(5)); // Bit 5 is unset
+    }
+
+    @Test
     @DisplayName("Read typed values using readLong")
     void testReadLong() {
         // 0x01 0x23 0x45 0x67 0x89 0xAB 0xCD 0xEF

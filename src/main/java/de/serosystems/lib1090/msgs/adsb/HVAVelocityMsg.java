@@ -83,11 +83,11 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
             throw new UnspecifiedFormatError("HVA velocity message must have subtype 1, got " + messageSubtype + ".");
 
         positionIntegrityCategory = br.readByte(18, 21);
-        eastWestDirectionBit = br.readByte(22, 22) == 1;
+        eastWestDirectionBit = br.readBoolean(22);
         hvaEastWestVelocityEncoded = br.readShort(23, 33);
-        northSouthDirectionBit = br.readByte(34, 34) == 1;
+        northSouthDirectionBit = br.readBoolean(34);
         hvaNorthSouthVelocityEncoded = br.readShort(35, 45);
-        verticalRateSignBit = br.readByte(46, 46) == 1;
+        verticalRateSignBit = br.readBoolean(46);
         hvaVerticalRateEncoded = br.readShort(47, 56);
     }
 

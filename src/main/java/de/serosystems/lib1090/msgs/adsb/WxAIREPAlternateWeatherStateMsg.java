@@ -85,11 +85,11 @@ public class WxAIREPAlternateWeatherStateMsg extends ExtendedSquitter implements
 
         icingStatusEncoded = br.readByte(8, 12);
         rollAngleEncoded = br.readShort(13, 22);
-        headingType = br.readByte(23, 23) == 1;
+        headingType = br.readBoolean(23);
         headingEncoded = br.readShort(24, 35);
-        airTemperatureType = br.readByte(36, 36) == 1;
+        airTemperatureType = br.readBoolean(36);
         airTemperatureEncoded = br.readShort(37, 44);
-        airspeedType = br.readByte(45, 45) == 1;
+        airspeedType = br.readBoolean(45);
         airspeedEncoded = br.readShort(46, 55);
     }
 
