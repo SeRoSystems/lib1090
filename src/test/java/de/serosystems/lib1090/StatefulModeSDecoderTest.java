@@ -22,6 +22,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
+import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,9 +44,9 @@ public class StatefulModeSDecoderTest {
         // decoder assumes ADS-B v0 and should not decode TSS
         final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
-        assertEquals(ModeSDownlinkMsg.subtype.EXTENDED_SQUITTER, reply.getType());
-        assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
-        assertNotEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V2, reply.getType());
+        assertEquals(ExtendedSquitter.class, reply.getClass());
+        assertFalse(reply instanceof TargetStateAndStatusV1Msg);
+        assertFalse(reply instanceof TargetStateAndStatusV2Msg);
     }
 
     @Test
@@ -56,7 +57,7 @@ public class StatefulModeSDecoderTest {
         // decode message with ME bit 11 set
         final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
-        assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V2, reply.getType());
+        assertInstanceOf(TargetStateAndStatusV2Msg.class, reply);
 
         TargetStateAndStatusV2Msg tss = (TargetStateAndStatusV2Msg) reply;
 
@@ -71,8 +72,6 @@ public class StatefulModeSDecoderTest {
 
         final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV1MsgTest.TSS_V1, Instant.EPOCH);
 
-        assertEquals(ModeSDownlinkMsg.subtype.ADSB_TARGET_STATE_AND_STATUS_V1, reply.getType());
-
         assertInstanceOf(TargetStateAndStatusV1Msg.class, reply);
 
         TargetStateAndStatusV1Msg tss = (TargetStateAndStatusV1Msg) reply;
@@ -86,7 +85,6 @@ public class StatefulModeSDecoderTest {
 
         final ModeSDownlinkMsg reply = decoder.decode(ModeACodeV1MsgTest.MODE_A_CODE_V1, Instant.EPOCH);
 
-        assertEquals(ModeSDownlinkMsg.subtype.ADSB_MODE_A_CODE_V1, reply.getType());
         assertInstanceOf(ModeACodeV1Msg.class, reply);
         assertEquals("6513", ((ModeACodeV1Msg) reply).getIdentity());
     }

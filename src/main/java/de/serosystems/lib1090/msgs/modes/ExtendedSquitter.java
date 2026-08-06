@@ -117,8 +117,4 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.EXTENDED_SQUITTER;
-    }
 }

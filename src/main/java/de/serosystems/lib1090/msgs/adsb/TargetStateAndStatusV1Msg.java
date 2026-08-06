@@ -200,8 +200,4 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_TARGET_STATE_AND_STATUS_V1;
-    }
 }

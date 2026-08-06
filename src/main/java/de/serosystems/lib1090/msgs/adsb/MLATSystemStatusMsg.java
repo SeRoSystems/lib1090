@@ -87,8 +87,4 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.SURFACE_SYSTEM_STATUS;
-    }
 }

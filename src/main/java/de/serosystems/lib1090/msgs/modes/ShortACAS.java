@@ -235,8 +235,4 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.SHORT_ACAS;
-    }
 }

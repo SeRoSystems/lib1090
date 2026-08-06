@@ -288,8 +288,4 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_HVA_VELOCITY;
-    }
 }

@@ -206,8 +206,4 @@ public class WxAIREPAlternateWeatherStateMsg extends ExtendedSquitter implements
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_WX_AIREP_ALTERNATE_WEATHER_STATE;
-    }
 }

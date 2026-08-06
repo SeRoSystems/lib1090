@@ -202,8 +202,4 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_FINE_SURFACE_POSITION;
-    }
 }

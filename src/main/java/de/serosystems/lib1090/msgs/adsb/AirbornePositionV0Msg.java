@@ -161,8 +161,4 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_AIRBORN_POSITION_V0;
-    }
 }

@@ -101,8 +101,4 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_MODE_A_CODE_V1;
-    }
 }

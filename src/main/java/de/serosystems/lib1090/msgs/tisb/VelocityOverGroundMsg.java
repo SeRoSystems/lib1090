@@ -252,8 +252,4 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_VELOCITY;
-    }
 }

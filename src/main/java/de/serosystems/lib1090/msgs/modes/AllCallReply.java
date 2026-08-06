@@ -183,8 +183,4 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ALL_CALL_REPLY;
-    }
 }

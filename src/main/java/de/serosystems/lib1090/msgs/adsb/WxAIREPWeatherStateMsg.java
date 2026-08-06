@@ -194,8 +194,4 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_WX_AIREP_WEATHER_STATE;
-    }
 }

@@ -205,8 +205,4 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSR_WX_AIREP_AIRCRAFT_STATE;
-    }
 }

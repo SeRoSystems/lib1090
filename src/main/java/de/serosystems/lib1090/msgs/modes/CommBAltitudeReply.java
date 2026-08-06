@@ -235,8 +235,4 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.COMM_B_ALTITUDE_REPLY;
-    }
 }

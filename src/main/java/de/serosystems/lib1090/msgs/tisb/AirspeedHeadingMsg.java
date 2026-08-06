@@ -252,8 +252,4 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_AIRSPEED;
-    }
 }

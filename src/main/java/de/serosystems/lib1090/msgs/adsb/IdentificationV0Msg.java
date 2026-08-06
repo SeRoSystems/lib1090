@@ -100,8 +100,4 @@ public class IdentificationV0Msg extends ExtendedSquitter implements Serializabl
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ADSB_IDENTIFICATION_V0;
-    }
 }

@@ -221,8 +221,4 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.ALTITUDE_REPLY;
-    }
 }

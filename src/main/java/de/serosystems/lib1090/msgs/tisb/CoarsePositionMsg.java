@@ -226,8 +226,4 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
                 '}';
     }
 
-    @Override
-    public subtype getType() {
-        return subtype.TISB_COARSE_POSITION;
-    }
 }
