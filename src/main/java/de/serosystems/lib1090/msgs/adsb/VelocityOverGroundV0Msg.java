@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 0 velocity-over-ground messages
  */
-public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV0Msg {
+public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV0Msg, ADSBMsg {
 
     private static final long serialVersionUID = 5541128909472392197L;
 

@@ -30,7 +30,7 @@ import java.util.Arrays;
 /**
  * Decoder for Surface System Status messages (2.2.3.2.7.4)
  */
-public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable {
+public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 4597102504845213202L;
 

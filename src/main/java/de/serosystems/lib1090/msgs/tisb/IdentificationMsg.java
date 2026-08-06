@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
  */
-public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg {
+public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg, TISBMsg {
 
     private static final long serialVersionUID = 6991597271679287771L;
 

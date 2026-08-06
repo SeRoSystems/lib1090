@@ -30,7 +30,7 @@ import java.io.Serializable;
 /**
  * Decoder for the aircraft state subtype (0) of the ADS-B Wx AIREP message, introduced in ADS-B version 3.
  */
-public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Serializable, WxAIREPMsg {
+public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Serializable, WxAIREPMsg, ADSBMsg {
 
     private static final long serialVersionUID = -8264790351706421573L;
 

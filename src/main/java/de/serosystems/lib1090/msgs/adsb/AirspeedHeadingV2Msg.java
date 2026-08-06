@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 2 airspeed and heading messages
  */
-public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, AirborneVelocityV2Msg {
+public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, AirborneVelocityV2Msg, ADSBMsg {
 
     private static final long serialVersionUID = 6248301957402681193L;
 

@@ -30,7 +30,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B emergency and priority status messages (ADS-B version 2)
  */
-public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg {
+public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg, ADSBMsg {
 
     private static final long serialVersionUID = 3560754083142828235L;
 

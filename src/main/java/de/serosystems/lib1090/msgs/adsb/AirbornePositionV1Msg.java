@@ -32,7 +32,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg {
+public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg {
 
     private static final long serialVersionUID = 7082589986335644703L;
 

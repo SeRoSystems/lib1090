@@ -31,7 +31,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-R version 2 airspeed and heading messages
  */
-public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, IMFMsg, NACvMsg {
+public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, IMFMsg, NACvMsg, ADSRMsg {
 
     private static final long serialVersionUID = -3439568191943485753L;
 

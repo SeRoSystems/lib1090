@@ -32,7 +32,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-R version 1 velocity-over-ground messages
  */
-public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, IFRCapabilityMsg, IMFMsg, NACvMsg {
+public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, IFRCapabilityMsg, IMFMsg, NACvMsg, ADSRMsg {
 
     private static final long serialVersionUID = -9156338816917340761L;
 

@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 1 Mode A code messages.
  */
-public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, ModeACodeMsg {
+public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, ModeACodeMsg, ADSBMsg {
 
     private static final long serialVersionUID = 5076521250730290369L;
 

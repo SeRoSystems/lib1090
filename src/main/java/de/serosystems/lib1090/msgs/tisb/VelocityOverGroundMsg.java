@@ -30,7 +30,7 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B velocity message (DO-260B, 2.2.17.3.4).
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg {
+public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg {
 
     private static final long serialVersionUID = -2121820203874488709L;
 

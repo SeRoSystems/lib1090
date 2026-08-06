@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Decoder for ADS-B operational status message as specified in DO-260A (ADS-B version 1) with
  * subtype 1 (surface)
  */
-public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg {
+public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg, ADSBMsg {
 
     private static final long serialVersionUID = 8147881968690095670L;
 

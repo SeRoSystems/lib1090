@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-R airborne position messages version 1 (DO-260A)
  */
-public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg {
+public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 2487388116642019598L;
 

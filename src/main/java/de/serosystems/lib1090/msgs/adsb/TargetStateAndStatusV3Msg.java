@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 3 target state and status message as specified in DO-260C §2.2.3.2.7.1
  */
-public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg {
+public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, ADSBMsg {
 
     private static final long serialVersionUID = -684357046039958595L;
 
