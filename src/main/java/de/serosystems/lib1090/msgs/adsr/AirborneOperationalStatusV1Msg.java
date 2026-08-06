@@ -24,6 +24,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
+import de.serosystems.lib1090.msgs.squitter.NICSupplementBMsg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
 
 import java.io.Serializable;
@@ -32,7 +33,7 @@ import java.io.Serializable;
  * Decoder for ADS-R operational status message as specified in DO-260A (ADS-R version 1) with
  * subtype 0 (airborne)
  */
-public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, OperationalStatusV1Msg, IMFMsg {
+public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, OperationalStatusV1Msg, IMFMsg, NICSupplementBMsg {
 
     private static final long serialVersionUID = -4917283654012938471L;
 
@@ -151,6 +152,7 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
      *
      * @return NIC supplement B (ME bit 20)
      */
+    @Override
     public boolean hasNICSupplementB() {
         return (capabilityClassCode & 0x10) != 0;
     }

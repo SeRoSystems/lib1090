@@ -25,12 +25,13 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.NICSupplementBMsg;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg {
+public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, NICSupplementBMsg {
 
     private static final long serialVersionUID = -7146583920415678231L;
 
@@ -87,6 +88,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
         position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
+    @Override
     public boolean hasNICSupplementB() {
         return nicSupplementB;
     }
