@@ -5,7 +5,7 @@ This is a Mode S, ADS-B, TIS-B and ADS-R decoding library for Java. It was forke
 
 It is based on these two references:
 * ICAO Aeronautical Telecommunications Annex 10 Volume 4 (Surveillance Radar and Collision Avoidance Systems)
-* RTCA DO-260B "Minimum Operational Performance Standards (MOPS) for 1090ES"
+* RTCA DO-260C / Eurocae ED-102B "Minimum Operational Performance Standards (MOPS) for 1090ES"
 
 It supports the following Mode S downlink formats:
 * DF 0: Short air-air ACAS
@@ -27,9 +27,16 @@ The following ADS-B formats are supported:
 * BDS 6,1: Aircraft status reports (emergency/priority, TCAS RA)
 * BDS 6,2: Target state and status messages
 * BDS 6,5: Operational status reports (airborne and surface)
+* BDS 6,8: ADS-B Wx AIREP (Subtype=0 "Aircraft State")
+* BDS 6,9: ADS-B Wx AIREP (Subtype=1 "Weather State")
+* BDS 6,A: ADS-B Wx AIREP (Subtype=2 "Alternate Weather State")
+* BDS 6,E: High Velocity and/or Altitude (Subtype=0 “HVA Position”)
+* BDS 6,F: High Velocity and/or Altitude (Subtype=1 “HVA Velocity”)
 
-The formats are implemented according to RTCA DO-260B, i.e. ADS-B Version 2. The decoder properly takes care of older versions.
+Note: BDS 6,B through BDS 6,D (ADS-B PIREP) messages are not implemented yet.
 
+The formats are implemented according to RTCA DO-260B (ADS-B Version 2) and DO-260C (ADS-B Version 3).
+The decoder properly takes care of older versions and defaults to v3 for unspecified/newer versions.
 
 Basic support for the following Comm-B registers is implemented:
 * BDS 1,0: Data link capability
