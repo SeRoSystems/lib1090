@@ -18,19 +18,28 @@
 
 package de.serosystems.lib1090;
 
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.constraints.IntRange;
-import net.jqwik.api.constraints.Positive;
 import org.junit.jupiter.api.Test;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ToolsTest {
 
-    @Property
-    void toHexString_shouldMatchStringFormat(@ForAll @Positive int input, @ForAll @IntRange(min = 1, max = 256) int minDigits) {
-        assertEquals(String.format("%0" + minDigits + "x", input), Tools.toHexString(input, minDigits));
+    @Test
+    void toHexString_shouldMatchStringFormat() {
+        int[] inputs = {1, 2, 15, 16, 255, 4096, 123456789, Integer.MAX_VALUE};
+        int[] minDigitsValues = {1, 2, 8, 32, 256};
+        for (int input : inputs)
+            for (int minDigits : minDigitsValues)
+                assertEquals(String.format("%0" + minDigits + "x", input), Tools.toHexString(input, minDigits));
+
+        Random random = new Random(42);
+        for (int i = 0; i < 1000; i++) {
+            int input = 1 + random.nextInt(Integer.MAX_VALUE - 1);
+            int minDigits = 1 + random.nextInt(256);
+            assertEquals(String.format("%0" + minDigits + "x", input), Tools.toHexString(input, minDigits));
+        }
     }
 
     @Test
