@@ -78,6 +78,12 @@ public class StatefulPositionDecoder implements PositionDecoder {
         if (cpr.isOddFormat()) lastOdd = cpr;
         else lastEven = cpr;
 
+        // discard the complementary message if it's not compatible for global decoding (e.g. surface/airborne
+        // transition or a change in the number of bits); decodeGlobal()/decodePosition() require this to hold
+        // and throw otherwise, so this needs to be checked before calling them
+        if (lastOther != null && (lastOther.getNBits() != cpr.getNBits() || lastOther.isSurface() != cpr.isSurface()))
+            lastOther = null;
+
         // only use receiver as reference for surface positions (might be too far away for airborne)
         Position refPos = lastPosition != null ? lastPosition : (cpr.isSurface() ? receiver : null);
 

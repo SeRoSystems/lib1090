@@ -78,7 +78,7 @@ public final class CPREncodedPosition {
      * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
      * @param yz                 Y coordinate within CPR zone, i.e. encoded latitude as in position message
      * @param xz                 X coordinate within CPR zone, i.e. encoded longitude as in position message
-     * @param timestamp          timestamp of position message
+     * @param timestamp          timestamp of position message, must not be null
      */
     private CPREncodedPosition(int nBits,
                                boolean isOdd,
@@ -164,13 +164,42 @@ public final class CPREncodedPosition {
     }
 
     /**
-     * Get maximum time gap between messages, based on their type.
-     * This is only applicable if messages are of different CPR format (even/odd).
+     * Test if both CPR encoded coordinates are all zeros.
+     * This is meant to be used to implement §2.2.10.3.1 of ED-102B.
      *
-     * @param other other message, see constraints above
+     * @return true if XZ and YZ coordinates are both all zeros, false otherwise
+     */
+    public boolean allZero() {
+        return yz == 0 && xz == 0;
+    }
+
+    /**
+     * Test if two CPR positions are close by checking if the absolute difference in each coordinate is below 1000.
+     * This only works under certain conditions and <b>shall only be used to implement §2.2.10.3.1 of ED-102B</b>.
+     *
+     * @param other other CPR encoded position (of same format), must not be null
+     * @return true if the encoded difference in XZ and YZ is below 1000, false otherwise
+     * @throws IllegalArgumentException if any sanity check fails
+     */
+    public boolean isClose(CPREncodedPosition other) {
+        Objects.requireNonNull(other, "other must not be null");
+        if (other.nBits != nBits) throw new IllegalArgumentException("Number of bits must match");
+        if (isOdd != other.isOdd) throw new IllegalArgumentException("Messages must be of same CPR format");
+        if (isSurface != other.isSurface) throw new IllegalArgumentException("Airborne/Surface format must match");
+        return Math.abs(yz - other.yz) < 1000 && Math.abs(xz - other.xz) < 1000;
+    }
+
+    /**
+     * Get maximum time gap between messages for global decoding, based on their type.
+     * See §2.2.10.3.1 and §2.2.10.3.2 of ED-102A.
+     * For ED-102B, this functions is still applicable to surface position messages.
+     * For airborne position messages, it may be used, but it is stricter than the standard, see §2.2.10.3.1.
+     *
+     * @param other other message, must not be null
      * @return maximum duration between messages
      */
     public Duration maxGap(CPREncodedPosition other) {
+        Objects.requireNonNull(other, "other must not be null");
         if (isSurface && other.isSurface) {
             if (isHighSurfaceSpeed || other.isHighSurfaceSpeed)
                 return Duration.ofMillis(25_000L);
@@ -195,21 +224,51 @@ public final class CPREncodedPosition {
     }
 
     /**
-     * Compact Position Reporting: Global decoding.
-     * Can only be used if another position report with a different format (even/odd) is available.
+     * Compact Position Reporting: Global decoding with check on timestamps.
      *
      * @param other     position message of the other format (even/odd). Note that the time between those message must not exceed {@link #maxGap(CPREncodedPosition)}
      * @param reference reference (e.g. receiver's) position to determine the correct surface position; use arbitrary (or null) for airborne (will be ignored)
-     * @return globally unambiguously decoded position or empty if the two encoded positions cannot be combined or if the position is otherwise unavailable or invalid
+     * @return globally unambiguously decoded position or null if the two encoded positions cannot be combined or if the position is otherwise unavailable or invalid
+     * @see #decodeGlobal(CPREncodedPosition, Position, boolean) with {@code timeCheck=true}
      */
     public Position decodeGlobal(CPREncodedPosition other, Position reference) {
+        return decodeGlobal(other, reference, true);
+    }
+
+    /**
+     * Compact Position Reporting: Global decoding.
+     * Can only be used if another position report with a different format (even/odd) is available.
+     * This and the {@code other} position must fulfil the following constraints:
+     * <ul>
+     *     <li>Number of bits must match</li>
+     *     <li>Exactly one must be even and exactly one must be odd</li>
+     *     <li>Both must have the same format (airborne or surface)</li>
+     *     <li>If the {@code timeCheck} is enabled, their absolute time difference must be within {@link #maxGap(CPREncodedPosition)}</li>
+     * </ul>
+     * Apart from those sanity checks, global CPR can fail if
+     * <ul>
+     *     <li>The two positions cannot be combined (because they are close to a latitude zone boundary)</li>
+     *     <li>One of the messages encodes an invalid position, e.g. {@code |latitude| > 90}</li>
+     * </ul>
+     *
+     * @param other     position message of the other format (even/odd)
+     * @param reference reference (e.g. receiver's) position to determine the correct surface position; use arbitrary (or null) for airborne (will be ignored)
+     * @param timeCheck if true, the timestamps between the two positions will be checked according to {@link #maxGap(CPREncodedPosition)}; see also that function for notes
+     * @return globally unambiguously decoded position or null if the two encoded positions cannot be combined or if the position is otherwise unavailable or invalid
+     * @throws IllegalArgumentException if any sanity check fails
+     */
+    public Position decodeGlobal(CPREncodedPosition other, Position reference, boolean timeCheck) {
         /* early sanity checks */
-        if (other.nBits != nBits) return null;
-        if (isOdd == other.isOdd) return null;
-        if (isSurface != other.isSurface) return null;
-        if (isSurface && reference == null) return null;
-        Duration gap = Duration.between(timestamp, other.timestamp).abs();
-        if (gap.compareTo(maxGap(other)) > 0) return null;
+        Objects.requireNonNull(other, "other must not be null");
+        if (other.nBits != nBits) throw new IllegalArgumentException("Number of bits must match");
+        if (isOdd == other.isOdd) throw new IllegalArgumentException("Even/Odd pair required");
+        if (isSurface != other.isSurface) throw new IllegalArgumentException("Airborne/Surface format must match");
+        if (isSurface && reference == null)
+            throw new IllegalArgumentException("Reference must not be null for surface positions");
+        if (timeCheck) {
+            Duration gap = Duration.between(timestamp, other.timestamp).abs();
+            if (gap.compareTo(maxGap(other)) > 0) return null;
+        }
 
         final CPREncodedPosition even = isOdd ? other : this;
         final CPREncodedPosition odd = isOdd ? this : other;
@@ -221,19 +280,20 @@ public final class CPREncodedPosition {
 
         // global latitudes
         final double refLat = reference == null ? 0. : reference.getLatitude();
-        final L0Latitude Rlat0L = L0Latitude.ofGlobal(even, j, refLat);
-        final L0Latitude Rlat1L = L0Latitude.ofGlobal(odd, j, refLat);
+        final L0Latitude RlatEven = L0Latitude.ofGlobal(even, j, refLat);
+        final L0Latitude RlatOdd = L0Latitude.ofGlobal(odd, j, refLat);
 
         // additional check against invalid latitudes
-        if (!Rlat0L.isValid() || !Rlat1L.isValid())
+        if (!RlatEven.isValid() || !RlatOdd.isValid())
             return null;
 
         // require that the number of longitude zones are equal
-        final int nLon = Rlat0L.NL();
-        if (nLon != Rlat1L.NL()) return null; // straddling position
+        final int nLon = RlatEven.NL();
+        if (nLon != RlatOdd.NL()) // straddling position, cannot decode this pair
+            return null;
 
         // reconstruct latitude
-        final double Rlat = isOdd ? Rlat1L.toDegrees() : Rlat0L.toDegrees();
+        final double Rlat = isOdd ? RlatOdd.toDegrees() : RlatEven.toDegrees();
 
         // reconstruct longitude
         double Rlon;
@@ -241,8 +301,8 @@ public final class CPREncodedPosition {
             // longitude index
             int m = zoneIndex(nLon, even.xz, odd.xz);
             // global longitude
-            int n_helper = nLon - (isOdd ? 1 : 0);
-            Rlon = reconstructGlobal(angle, n_helper, m, xz);
+            int ni = nLon - (isOdd ? 1 : 0);
+            Rlon = reconstructGlobal(angle, ni, m, xz);
         } else {
             Rlon = angle * (xz / scale);
         }
@@ -333,6 +393,9 @@ public final class CPREncodedPosition {
     /**
      * This method decodes this position using the global or local CPR decoding. If possible, runs a couple of
      * reasonableness tests.
+     * Those tests are the library's own set of tests. They are inspired by §A.1.7.10.2 of ED-102B but deviate from the
+     * rules given there.
+     * The function also doesn't help on target acquisition based on §2.2.10.3 of ED-102B.
      *
      * @param other     the other CPR encoded position in complementary format (even/odd). Also surface positions can
      *                  only be combined with other surface positions. Use null for local decoding only.
@@ -361,7 +424,7 @@ public final class CPREncodedPosition {
         if (globalPos != null) {
             Position localThis = decodeLocal(globalPos);
 
-            // check local/global dist of new message
+            // check local/global distance of new message
             if (globalPos.haversine(localThis) > mu)
                 reasonable = false;
 

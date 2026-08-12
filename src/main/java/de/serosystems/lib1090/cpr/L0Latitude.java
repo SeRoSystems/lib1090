@@ -140,7 +140,7 @@ class L0Latitude {
 
     /**
      * Compute NL(toDegrees()), i.e. the number of longitude zones for this latitude.
-     * See DO-260B §A.1.7.2 for reference.
+     * See ED-102B §A.1.7.2 for reference.
      *
      * @return number of longitude zones for this latitude.
      */

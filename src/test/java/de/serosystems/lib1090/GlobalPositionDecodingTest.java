@@ -136,23 +136,29 @@ public class GlobalPositionDecodingTest {
         // Test same format (both even)
         CPREncodedPosition cprEven1 = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
         CPREncodedPosition cprEven2 = CPREncodedPosition.ofAirborne(17, false, 0x04706, 0x04D58, Instant.EPOCH);
-        assertNull(cprEven1.decodeGlobal(cprEven2, null));
+        assertThrows(IllegalArgumentException.class, () -> cprEven1.decodeGlobal(cprEven2, null));
 
         // Test same format (both odd)
         CPREncodedPosition cprOdd1 = CPREncodedPosition.ofAirborne(17, true, 0x06AF1, 0x09C16, Instant.EPOCH);
         CPREncodedPosition cprOdd2 = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, Instant.EPOCH);
-        assertNull(cprOdd1.decodeGlobal(cprOdd2, null));
+        assertThrows(IllegalArgumentException.class, () -> cprOdd1.decodeGlobal(cprOdd2, null));
 
         // Test mixing airborne and surface positions
         CPREncodedPosition cprAirborne = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
         CPREncodedPosition cprSurface = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, Instant.EPOCH);
-        assertNull(cprAirborne.decodeGlobal(cprSurface, null));
-        assertNull(cprSurface.decodeGlobal(cprAirborne, null));
+        assertThrows(IllegalArgumentException.class, () -> cprAirborne.decodeGlobal(cprSurface, null));
+        assertThrows(IllegalArgumentException.class, () -> cprSurface.decodeGlobal(cprAirborne, null));
+
+        // Test mismatching number of bits
+        CPREncodedPosition cpr14 = CPREncodedPosition.ofAirborne(14, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cpr17 = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, Instant.EPOCH);
+        assertThrows(IllegalArgumentException.class, () -> cpr14.decodeGlobal(cpr17, null));
+        assertThrows(IllegalArgumentException.class, () -> cpr17.decodeGlobal(cpr14, null));
 
         // Test surface position without reference position
         CPREncodedPosition cprSurfaceEven = CPREncodedPosition.ofSurface(17, false, false, 0x1ABC2, 0x07058, Instant.EPOCH);
         CPREncodedPosition cprSurfaceOdd = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560, Instant.EPOCH);
-        assertNull(cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
+        assertThrows(IllegalArgumentException.class, () -> cprSurfaceEven.decodeGlobal(cprSurfaceOdd, null));
     }
 
     @Test
@@ -162,6 +168,8 @@ public class GlobalPositionDecodingTest {
 
         assertEquals(Duration.ofMillis(10_000L), cprEven.maxGap(cprOdd));
         assertEquals(Duration.ofMillis(10_000L), cprOdd.maxGap(cprEven));
+
+        assertThrows(NullPointerException.class, () -> cprEven.maxGap(null));
     }
 
     private static void testAirborneTiming(Instant t1, Instant t2, boolean expectSuccess) {
@@ -234,6 +242,73 @@ public class GlobalPositionDecodingTest {
         testSurfaceTiming(Instant.EPOCH, false, Instant.EPOCH.plusMillis(25_001), true, false);
         testSurfaceTiming(Instant.EPOCH.plusMillis(25_0001), false, Instant.EPOCH, true, false);
         testSurfaceTiming(Instant.EPOCH.plusMillis(25_0001), true, Instant.EPOCH, false, false);
+    }
+
+    @Test
+    void testDecodeGlobalNullOther() {
+        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        assertThrows(NullPointerException.class, () -> cprEven.decodeGlobal(null, null));
+        assertThrows(NullPointerException.class, () -> cprEven.decodeGlobal(null, null, true));
+    }
+
+    @Test
+    void testDecodeGlobalTimeCheckDisabled() {
+        // exceeding the max gap fails with timeCheck (default/true), but succeeds with timeCheck=false
+        CPREncodedPosition cprEven = CPREncodedPosition.ofAirborne(17, false, 0x06AF1, 0x09C16, Instant.EPOCH);
+        CPREncodedPosition cprOdd = CPREncodedPosition.ofAirborne(17, true, 0x04706, 0x04D58, Instant.EPOCH.plusMillis(10_001));
+
+        assertNull(cprEven.decodeGlobal(cprOdd, null));
+        assertNull(cprEven.decodeGlobal(cprOdd, null, true));
+        assertNotNull(cprEven.decodeGlobal(cprOdd, null, false));
+    }
+
+    @Test
+    void testAllZero() {
+        CPREncodedPosition zero = CPREncodedPosition.ofAirborne(17, false, 0x00000, 0x00000, Instant.EPOCH);
+        assertTrue(zero.allZero());
+
+        CPREncodedPosition nonZeroY = CPREncodedPosition.ofAirborne(17, false, 0x00001, 0x00000, Instant.EPOCH);
+        assertFalse(nonZeroY.allZero());
+
+        CPREncodedPosition nonZeroX = CPREncodedPosition.ofAirborne(17, false, 0x00000, 0x00001, Instant.EPOCH);
+        assertFalse(nonZeroX.allZero());
+    }
+
+    @Test
+    void testIsClose() {
+        CPREncodedPosition base = CPREncodedPosition.ofAirborne(17, false, 50_000, 50_000, Instant.EPOCH);
+
+        // within bound in both coordinates
+        CPREncodedPosition close = CPREncodedPosition.ofAirborne(17, false, 50_500, 49_500, Instant.EPOCH);
+        assertTrue(base.isClose(close));
+        assertTrue(close.isClose(base));
+
+        // exactly at the boundary is not bound (strict <)
+        CPREncodedPosition atBoundaryY = CPREncodedPosition.ofAirborne(17, false, 51_000, 50_000, Instant.EPOCH);
+        assertFalse(base.isClose(atBoundaryY));
+
+        // just inside the boundary is close
+        CPREncodedPosition justInsideY = CPREncodedPosition.ofAirborne(17, false, 50_999, 50_000, Instant.EPOCH);
+        assertTrue(base.isClose(justInsideY));
+
+        // far away in longitude only
+        CPREncodedPosition farX = CPREncodedPosition.ofAirborne(17, false, 50_000, 52_000, Instant.EPOCH);
+        assertFalse(base.isClose(farX));
+
+        // different number of bits -> sanity check failure
+        CPREncodedPosition differentBits = CPREncodedPosition.ofAirborne(14, false, 50_500, 49_500, Instant.EPOCH);
+        assertThrows(IllegalArgumentException.class, () -> base.isClose(differentBits));
+
+        // different odd/even format -> sanity check failure
+        CPREncodedPosition differentFormat = CPREncodedPosition.ofAirborne(17, true, 50_500, 49_500, Instant.EPOCH);
+        assertThrows(IllegalArgumentException.class, () -> base.isClose(differentFormat));
+
+        // different surface/airborne -> sanity check failure
+        CPREncodedPosition surface = CPREncodedPosition.ofSurface(17, false, false, 50_500, 49_500, Instant.EPOCH);
+        assertThrows(IllegalArgumentException.class, () -> base.isClose(surface));
+
+        // null other
+        assertThrows(NullPointerException.class, () -> base.isClose(null));
     }
 
 }
