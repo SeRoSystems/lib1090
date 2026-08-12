@@ -162,23 +162,23 @@ public class StatefulModeSDecoder {
                 // airborne
                 switch (dd.adsbVersion) {
                     case 1:
-                        // TODO: store NIC supplement B as well
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg s1 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg(es1090);
                         dd.nicSupplA = s1.hasNICSupplementA();
+                        dd.nicSupplB = s1.hasNICSupplementB();
                         return s1;
                     case 2:
-                        // TODO: store NIC supplement B as well
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
                         dd.nicSupplA = s2.hasNICSupplementA();
+                        dd.nicSupplB = s2.hasNICSupplementB();
                         return s2;
                     case 3:
                     default:
-                        // TODO: store NIC supplement B as well
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg s3 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg(es1090);
                         dd.nicSupplA = s3.hasNICSupplementA();
+                        dd.nicSupplB = s3.hasNICSupplementB();
                         return s3;
                 }
             } else if (subtype == 1) {
@@ -262,9 +262,8 @@ public class StatefulModeSDecoder {
                     return a2;
                 case 3:
                 default:
-                    // TODO: store and pass NIC supplement B as well
                     return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV3Msg.WithNICSupplements(
-                            es1090, timestamp, dd.nicSupplA, false, dd.nicSupplD);
+                            es1090, timestamp, dd.nicSupplA, dd.nicSupplB, dd.nicSupplD);
             }
         }
 
@@ -729,6 +728,7 @@ public class StatefulModeSDecoder {
     private static class DecoderData {
         byte adsbVersion;
         boolean nicSupplA;
+        boolean nicSupplB;
         boolean nicSupplC;
         byte nicSupplD;
         Double geoMinusBaro;
