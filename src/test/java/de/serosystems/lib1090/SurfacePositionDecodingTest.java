@@ -54,6 +54,7 @@ public class SurfacePositionDecodingTest {
             json = (JSONArray) new JSONParser().parse(reader);
         }
 
+        boolean any = false;
         // decode
         for (Object dedup : json) {
             JSONObject reply = (JSONObject) ((JSONArray) ((JSONObject) dedup).get("reply")).get(0);
@@ -70,9 +71,12 @@ public class SurfacePositionDecodingTest {
                     assertEquals(0., pos.getAltitude(), 0.);
                     assertEquals(38.85, pos.getLatitude(), 0.005);
                     assertEquals(-77.038, pos.getLongitude(), 0.0003);
+                    any = true;
                 }
             }
         }
+        // assert that at least one surface position was actually tested in the loop
+        assertTrue(any);
     }
 
 }
