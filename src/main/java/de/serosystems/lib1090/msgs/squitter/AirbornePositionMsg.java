@@ -126,12 +126,17 @@ public interface AirbornePositionMsg extends PositionMsg {
     /**
      * Decode the altitude from the raw encoded altitude field.
      *
-     * @return decoded altitude in feet, or null if altitude is not available
+     * @return decoded altitude in feet, or null if altitude is not available or has an invalid encoding
      */
     @Override
     default Integer getAltitude() {
         if (!hasValidAltitude()) return null;
         return Altitude.decode12BitAltitude(getAltitudeEncoded());
+    }
+
+    @Override
+    default boolean hasValidAltitude() {
+        return Altitude.valid12BitAltitude(getAltitudeEncoded());
     }
 
     /**
@@ -140,7 +145,7 @@ public interface AirbornePositionMsg extends PositionMsg {
      * @return decoded Q bit, or null if altitude is not available
      */
     default Boolean hasQBit() {
-        if (!hasValidAltitude()) return null;
+        if (getAltitudeEncoded() == 0) return null;
         return Altitude.decode12BitQBit(getAltitudeEncoded());
     }
 
