@@ -41,7 +41,6 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
     private static final long serialVersionUID = 2487388116642019598L;
 
     private boolean horizontalPositionAvailable;
-    private boolean altitudeAvailable;
     private byte surveillanceStatus;
     private boolean imf;
     private short altitudeEncoded;
@@ -92,7 +91,6 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
         surveillanceStatus = br.readByte(6, 7);
         imf = br.readBoolean(8);
         altitudeEncoded = br.readShort(9, 20);
-        altitudeAvailable = altitudeEncoded != 0;
         timeFlag = br.readBoolean(21);
         position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
@@ -173,11 +171,6 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public boolean hasValidAltitude() {
-        return altitudeAvailable;
-    }
-
-    @Override
     public short getAltitudeEncoded() {
         return altitudeEncoded;
     }
@@ -186,7 +179,6 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
     public String toString() {
         return "AirbornePositionV1Msg{" + super.toString() +
                 ", horizontalPositionAvailable=" + horizontalPositionAvailable +
-                ", altitudeAvailable=" + altitudeAvailable +
                 ", surveillanceStatus=" + surveillanceStatus +
                 ", imf=" + imf +
                 ", altitudeEncoded=" + altitudeEncoded +
