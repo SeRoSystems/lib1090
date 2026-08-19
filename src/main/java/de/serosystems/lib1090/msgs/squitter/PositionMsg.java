@@ -39,7 +39,7 @@ public interface PositionMsg {
     CPREncodedPosition getCPREncodedPosition();
 
     /**
-     * @return whether altitude information is available
+     * @return whether altitude is available and has a valid encoding
      */
     boolean hasValidAltitude();
 
