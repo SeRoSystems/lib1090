@@ -171,17 +171,12 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
 
     @Override
     public boolean hasValidPosition() {
-        return getFormatTypeCode() >= 9;
+        return getFormatTypeCode() != 0;
     }
 
     @Override
     public CPREncodedPosition getCPREncodedPosition() {
         return position;
-    }
-
-    @Override
-    public boolean hasValidAltitude() {
-        return getFormatTypeCode() >= 9;
     }
 
     @Override
