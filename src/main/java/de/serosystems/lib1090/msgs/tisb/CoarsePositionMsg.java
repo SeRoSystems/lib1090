@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -30,9 +31,6 @@ import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
-
-import static de.serosystems.lib1090.decoding.Altitude.decode12BitAltitude;
-import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 
 /**
  * Decoder for TIS-B coarse position, formerly ED-102A §2.2.17.3.5. This TIS-B message format has been removed from ED-102B.
@@ -177,7 +175,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
     @Override
     public boolean hasValidPosition() {
-        return getFormatTypeCode() >= 9;
+        return true;
     }
 
     @Override
@@ -187,13 +185,12 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
     @Override
     public boolean hasValidAltitude() {
-        return getFormatTypeCode() >= 9;
+        return Altitude.valid12BitAltitude(altitudeEncoded);
     }
 
     @Override
     public Integer getAltitude() {
-        if (!hasValidAltitude()) return null;
-        return decode12BitAltitude(altitudeEncoded);
+        return Altitude.decode12BitAltitude(altitudeEncoded);
     }
 
     @Override
@@ -207,8 +204,8 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @return value of the Q bit or null if message does not contain a valid altitude
      */
     public Boolean hasQBit() {
-        if (!hasValidAltitude()) return null;
-        return decode12BitQBit(altitudeEncoded);
+        if (altitudeEncoded == 0) return null;
+        return Altitude.decode12BitQBit(altitudeEncoded);
     }
 
     @Override
