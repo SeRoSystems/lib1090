@@ -48,7 +48,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw short air-air acas reply as hex string
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — short air-air ACAS replies (DF=0) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.2
      */
     public ShortACAS(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -58,7 +58,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw short air-air acas reply as byte array
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — short air-air ACAS replies (DF=0) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.2
      */
     public ShortACAS(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -120,7 +120,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      *     <li>code 4: On-board TCAS with vertical and horizontal resolution capability</li>
      * </ul>
      *
-     * @return the air-to-air reply information according to 3.1.2.8.2.2
+     * @return the air-to-air reply information according to ICAO Annex 10 Volume IV §3.1.2.8.2.2
      * @see #getMaximumAirspeed()
      * @see #hasOperatingACAS()
      * @see #hasHorizontalResolutionCapability()
@@ -139,7 +139,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return the maximum airspeed in kn as specified in ICAO Annex 10V4 3.1.2.8.2.2<br>
+     * @return the maximum airspeed in kn as specified in ICAO Annex 10 Volume IV §3.1.2.8.2.2<br>
      * null if unknown<br>Integer.MAX_VALUE if unbound
      */
     public Integer getMaximumAirspeed() {
@@ -202,7 +202,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The 13 bits altitude code (see ICAO Annex 10 V4)
+     * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
     public short getAltitudeCode() {
         return altitude_code;
@@ -216,7 +216,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
+     * Decode Q bit for the altitude according to ICAO Annex 10 Volume IV §3.1.2.6.5.4
      *
      * @return value of the Q bit, null if altitude is not available or M bit is set
      */

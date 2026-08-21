@@ -20,6 +20,10 @@ package de.serosystems.lib1090.msgs.adsb;
 
 /**
  * Common API for messages that expose the Navigation Uncertainty Category for velocity (NUCr).
+ * NUCr is not defined in current ED-102B, where it is superseded by NACV, ED-102B
+ * §2.2.3.2.6.1.5 TABLE 2-18. It is retained for ADS-B Version Zero (0) backward compatibility
+ * per ED-102B §N.2.3.8, which attributes the field's original definition to the
+ * former standard DO-260/ED-102 §2.2.3.2.6.1.5.
  */
 public interface NUCrMsg {
 

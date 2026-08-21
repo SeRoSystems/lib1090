@@ -19,14 +19,14 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the single-antenna flag.
+ * Common API for messages that expose the single-antenna flag, ED-102B §2.2.3.2.7.2.4.5.
  */
 public interface SingleAntennaMsg {
 
     /**
      * Whether the transmitting system uses a single antenna.
      *
-     * @return true if the transmitting system uses a single antenna
+     * @return true if the transmitting system uses a single antenna, ED-102B §2.2.3.2.7.2.4.5
      */
     boolean hasSingleAntenna();
 }

@@ -46,7 +46,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw all-call reply as hex string
      * @throws BadFormatException     if message is not all-call reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the all-call
+     *                                reply (downlink format 11) is not covered by ED-102B; see ICAO Annex 10
+     *                                Volume IV §3.1.2.5.2.2
      */
     public AllCallReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -56,7 +58,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw all-call reply as byte array
      * @throws BadFormatException     if message is not all-call reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the all-call
+     *                                reply (downlink format 11) is not covered by ED-102B; see ICAO Annex 10
+     *                                Volume IV §3.1.2.5.2.2
      */
     public AllCallReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -83,7 +87,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The emitter's capabilities (see ICAO Annex 10 V4, 3.1.2.5.2.2.1)
+     * @return The emitter's capabilities, see ICAO Annex 10 Volume IV §3.1.2.5.2.2.1
      */
     public byte getCapabilities() {
         return capabilities;
@@ -156,20 +160,21 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * Note: this can be used as an accurate check whether the all call reply
      * has been received correctly without knowing the interrogator in advance.
      *
-     * @return true if the interrogator ID is conformant with Annex 10 V4
+     * @return true if the interrogator ID is conformant with ICAO Annex 10 Volume IV
+     * §3.1.2.3.3.2 and §3.1.2.5.2.1.3
      */
     public boolean hasValidInterrogatorCode() {
-        // 3.1.2.3.3.2
+        // ICAO Annex 10 Volume IV §3.1.2.3.3.2
         // the first 17 bits have to be zero
         if (parity_interrogator > 127) return false;
 
         // Note: seems to be used by ACAS
         //int ii = interrogator[2] & 0xF;
-        // 3.1.2.5.2.1.2.4
+        // ICAO Annex 10 Volume IV §3.1.2.5.2.1.2.4
         // surveillance identifier of 0 shall never be used
         //if (cl > 0 && ii == 0) return false;
 
-        // 3.1.2.5.2.1.3
+        // ICAO Annex 10 Volume IV §3.1.2.5.2.1.3
         // code label is only defined for 0-4
         return code_label <= 4;
     }

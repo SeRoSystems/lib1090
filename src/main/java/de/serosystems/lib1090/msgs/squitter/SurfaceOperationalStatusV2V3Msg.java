@@ -34,8 +34,8 @@ public interface SurfaceOperationalStatusV2V3Msg extends SurfaceOperationalStatu
     boolean hasNICSupplementC();
 
     /**
-     * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft
-     * (see Table 2-66 and 2-67, RTCA DO-260B)
+     * @return encoded longitudinal and lateral distance of the GPS Antenna from the NOSE of the aircraft,
+     * ED-102B §2.2.3.2.7.2.4.7 TABLE 2-59 and TABLE 2-60
      */
     byte getGPSAntennaOffsetEncoded();
 

@@ -26,7 +26,12 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S extended squitters
+ * Decoder for Mode S extended squitters, the DF=17/18/19 envelope defined in
+ * ICAO Annex 10 Volume IV §3.1.2.8.6 (DF=17), §3.1.2.8.7 (DF=18) and §3.1.2.8.8 (DF=19).
+ * The format type code decoded here is the "TC"/"Subtype" subfield defined in ED-102B
+ * §2.2.3.2.2 TABLE 2-9 (DF=17/18 ADS-B/TIS-B/ADS-R); payload content is specified per
+ * format type code in ED-102B §2.2.3.2.3 through §2.2.3.2.7, or, for DF=19 military
+ * extended squitters, by ICAO Annex 10 Volume IV §3.1.2.8.8.2.
  */
 public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
 
@@ -45,7 +50,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw extended squitter as hex string
      * @throws BadFormatException     if message is not extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the "TC"/"Subtype" subfield is defined in ED-102B §2.2.3.2.2 TABLE 2-9 with its per-type payload content in ED-102B §2.2.3.2.3 through §2.2.3.2.7 for DF=17/18 ADS-B/TIS-B/ADS-R content, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -55,7 +60,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw extended squitter as byte array
      * @throws BadFormatException     if message is not extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the "TC"/"Subtype" subfield is defined in ED-102B §2.2.3.2.2 TABLE 2-9 with its per-type payload content in ED-102B §2.2.3.2.3 through §2.2.3.2.7 for DF=17/18 ADS-B/TIS-B/ADS-R content, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -96,7 +101,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The message's format type code (see ICAO Annex 10 V4)
+     * @return The message's format type code, see ICAO Annex 10 Volume IV §3.1.2.8.6
      */
     public byte getFormatTypeCode() {
         return format_type_code;

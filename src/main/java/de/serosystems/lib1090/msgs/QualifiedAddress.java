@@ -22,7 +22,10 @@ import de.serosystems.lib1090.Tools;
 
 public class QualifiedAddress {
     /**
-     * Different types of addresses in the AA field (see Table 2-11 in DO-260B)
+     * Different types of addresses in the AA field, see ED-102B §2.2.3.2.1.3 TABLE 2-7,
+     * "CF" Field Code Definitions in DF=18 ADS-B and TIS-B Messages. Reserved values (DF=19
+     * with AF&gt;0) are military-use codings not specified by ED-102B; see ICAO Annex 10
+     * Volume IV §3.1.2.8.8.2.
      */
     public enum Type {
         // ICAO 24-bit address

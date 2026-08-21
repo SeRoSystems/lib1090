@@ -20,7 +20,10 @@ package de.serosystems.lib1090.decoding;
 
 /**
  * Decoding helpers for fields encoded as consecutive 6-bit International Alphabet No. 5 (IA5)
- * digits, as used e.g. by ADS-B identification and aircraft type fields.
+ * digits, as used e.g. by ADS-B identification and aircraft type fields. The digit set and
+ * 6-bit encoding are per ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8; ED-102B §2.2.3.2.5.3
+ * defines the ADS-B "Ident Character" subfield by reference to that same section and table
+ * rather than defining its own table.
  */
 public final class InternationalAlphabet5 {
 

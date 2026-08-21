@@ -54,7 +54,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-B aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1 Figure 2-20
      */
     public EmergencyOrPriorityStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -63,7 +63,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-B aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1 Figure 2-20
      */
     public EmergencyOrPriorityStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -134,8 +134,8 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     }
 
     /**
-     * @return the upper bound of the mean eddy dissipation rate (EDR) in m^(2/3)/s
-     * (0.850 denotes 0.850 or larger), or null if no mean EDR is available (see {@link #hasMeanEdr()})
+     * @return the upper bound of the mean eddy dissipation rate (EDR) in m^(2/3)/s;
+     * 0.850 denotes 0.850 or larger; or null if no mean EDR is available (see {@link #hasMeanEdr()})
      */
     public Double getMeanEdr() {
         return hasMeanEdr() ? EmergencyOrPriorityStatus.decodeEdr(meanEdrEncoded) : null;
@@ -156,8 +156,8 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     }
 
     /**
-     * @return the upper bound of the peak eddy dissipation rate (EDR) in m^(2/3)/s
-     * (0.850 denotes 0.850 or larger), or null if no peak EDR is available (see {@link #hasPeakEdr()})
+     * @return the upper bound of the peak eddy dissipation rate (EDR) in m^(2/3)/s;
+     * 0.850 denotes 0.850 or larger; or null if no peak EDR is available (see {@link #hasPeakEdr()})
      */
     public Double getPeakEdr() {
         return hasPeakEdr() ? EmergencyOrPriorityStatus.decodeEdr(peakEdrEncoded) : null;

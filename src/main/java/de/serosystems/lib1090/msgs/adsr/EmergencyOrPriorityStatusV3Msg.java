@@ -56,7 +56,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-R aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
      */
     public EmergencyOrPriorityStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +65,7 @@ public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-R aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
      */
     public EmergencyOrPriorityStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

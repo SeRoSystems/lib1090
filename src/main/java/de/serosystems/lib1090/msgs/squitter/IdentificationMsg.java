@@ -21,10 +21,14 @@ package de.serosystems.lib1090.msgs.squitter;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 
+/**
+ * Common API for ADS-B Aircraft Identification and Category messages, ED-102B §2.2.3.2.5.
+ */
 public interface IdentificationMsg {
 
     /**
-     * The four sets of emitter categories, as distinguished by the message's format type code.
+     * The four sets of emitter categories, as distinguished by the message's format type code,
+     * ED-102B §2.2.3.2.5.2.
      */
     enum CategorySet {
         A, B, C, D
@@ -36,7 +40,7 @@ public interface IdentificationMsg {
     byte getFormatTypeCode();
 
     /**
-     * @return the emitter's category (numerical)
+     * @return the emitter's category (numerical), ED-102B §2.2.3.2.5.2
      */
     byte getEmitterCategoryEncoded();
 
@@ -55,7 +59,8 @@ public interface IdentificationMsg {
     }
 
     /**
-     * @return the raw 48-bit identification field (bits 9-56 of the message), as encoded
+     * @return the raw 48-bit identification field (bits 9-56 of the message), as encoded,
+     * ED-102B §2.2.3.2.5.3
      */
     long getIdentificationEncoded();
 

@@ -59,7 +59,7 @@ public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-R velocity-over-ground message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.4 Figure 2-59
      */
     public VelocityOverGroundV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -68,7 +68,7 @@ public class VelocityOverGroundV1Msg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-R velocity-over-ground message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.4 Figure 2-59
      */
     public VelocityOverGroundV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

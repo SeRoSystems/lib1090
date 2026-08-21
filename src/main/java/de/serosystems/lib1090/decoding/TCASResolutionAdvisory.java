@@ -22,30 +22,49 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
 
 /**
- * Decoding helpers for TCAS/ACAS resolution advisory payloads.
+ * Decoding helpers for TCAS/ACAS resolution advisory payloads, ICAO Annex 10 Volume IV
+ * §4.3.8.4.2.2.
  */
 public class TCASResolutionAdvisory {
 
+    /**
+     * TID (threat identity data, Mode S address case), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.
+     */
     public static int decodeThreatIdentity(BitReader reader) {
         return reader.readInt(31, 56);
     }
 
+    /**
+     * TTI (threat type indicator), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.5.
+     */
     public static byte decodeThreatType(BitReader reader) {
         return reader.readByte(29, 30);
     }
 
+    /**
+     * MTE (multiple threat encounter), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.4.
+     */
     public static boolean decodeMultiThreatEncounter(BitReader reader) {
         return reader.readBoolean(28);
     }
 
+    /**
+     * RAT (RA terminated), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.3.
+     */
     public static boolean decodeRaTerminated(BitReader reader) {
         return reader.readBoolean(27);
     }
 
+    /**
+     * RAC (resolution advisory complements record), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.2.
+     */
     public static byte decodeRacRecord(BitReader reader) {
         return reader.readByte(23, 26);
     }
 
+    /**
+     * ARA (active resolution advisories), ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.1.
+     */
     public static short decodeActiveRa(BitReader reader) {
         return reader.readShort(9, 22);
     }

@@ -24,7 +24,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface OperationalStatusV2Msg extends OperationalStatusV2V3Msg {
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north,
+     * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */
     boolean getHorizontalReferenceDirection();
 }

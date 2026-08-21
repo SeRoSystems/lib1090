@@ -26,7 +26,11 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for 1090ES CAS Operational Coordination Messages.
+ * Decoder for 1090ES CAS Operational Coordination Messages: Extended Squitter Aircraft Status
+ * Message, TYPE=28 Subtype=3, ED-102B §2.2.3.2.8.1.2 Figure 2-22. ED-102B reserves Subtype=3 to
+ * provide coordination data to other CAS or DAA systems but states "these MOPS do not permit the
+ * broadcast of the Operational Coordination Message"; the format is defined for a future version
+ * of the MOPS, with content intended to be filled from transponder Registers 33(hex)-37(hex).
  */
 public class CASOperationalCoordinationMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
@@ -52,7 +56,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
     /**
      * @param rawMessage raw ADS-B aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.2 Figure 2-22
      */
     public CASOperationalCoordinationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -61,7 +65,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
     /**
      * @param rawMessage raw ADS-B aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.2 Figure 2-22
      */
     public CASOperationalCoordinationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

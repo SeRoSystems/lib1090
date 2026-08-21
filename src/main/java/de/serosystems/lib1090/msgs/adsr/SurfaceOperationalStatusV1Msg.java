@@ -29,8 +29,7 @@ import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260A (ADS-R version 1) with
- * subtype 1 (surface)
+ * Decoder for ADS-R operational status message as specified in DO-260A (ADS-R version 1) with subtype 1 (surface)
  */
 public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg, IMFMsg, ADSRMsg {
 
@@ -55,7 +54,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -64,7 +63,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -75,7 +74,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version or is not a surface
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -164,7 +163,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
      */
     public boolean hasReceivingATCServices() {
         return (operationalModeCode & 0x800) != 0;

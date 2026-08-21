@@ -30,8 +30,7 @@ import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusV2V3Msg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with
- * subtype 1 (surface)
+ * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with subtype 1 (surface)
  */
 public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
 
@@ -58,7 +57,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -67,7 +66,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -78,7 +77,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version or is not a surface
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -143,7 +142,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public boolean hasPositionOffsetApplied() {
-        // Note: using definition of ED-129B, which is a bit more explicit than DO-260B
+        // Position offset applied, per ED-129B; see ED-102B §2.2.3.2.7.2.4.7 for the encoded offset field
         return getGPSAntennaOffsetEncoded() == 0x1;
     }
 
@@ -169,7 +168,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
      */
     @Override
     public boolean hasReceivingATCServices() {
@@ -246,9 +245,9 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * For interpretation see Table 2-65 in DO-260B
+     * For interpretation see ED-102B §2.2.3.2.7.2.4.6 TABLE 2-58.
      *
-     * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+     * @return system design assurance; see ED-102B §A.1.4.10.14
      */
     @Override
     public byte getSDAEncoded() {
@@ -261,7 +260,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * DO-260B 2.2.3.2.7.2.14
+     * ED-102B §2.2.3.2.7.2.14
      *
      * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
      * it's based on "per hour".

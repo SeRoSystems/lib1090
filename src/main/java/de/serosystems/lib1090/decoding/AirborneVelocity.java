@@ -25,9 +25,9 @@ public final class AirborneVelocity {
 
     /**
      * The 95% accuracy for horizontal velocity. We interpret the coding according to
-     * DO-260B Table 2-22 for all ADS-B family airborne velocity messages.
+     * ED-102B §2.2.3.2.6.1.5 TABLE 2-18 for all ADS-B family airborne velocity messages.
      *
-     * @return Navigation Accuracy Category for velocity according to RTCA DO-260B 2.2.3.2.6.1.5 in m/s, -1 means
+     * @return Navigation Accuracy Category for velocity according to ED-102B §2.2.3.2.6.1.5 in m/s, -1 means
      * "unknown" or &gt;10m
      */
     public static float decodeAccuracyBound(byte navigationAccuracyCategory) {

@@ -19,7 +19,8 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B operational status version 1 messages.
+ * Common API for ADS-B operational status version 1 messages. The Version One (1) Aircraft
+ * Operational Status Message format is documented in ED-102B §N.5.2 Figure N-15.
  */
 public interface OperationalStatusV1Msg extends OperationalStatusMsg {
 
@@ -29,17 +30,19 @@ public interface OperationalStatusV1Msg extends OperationalStatusMsg {
     byte getSubtypeCode();
 
     /**
-     * @return the NIC supplement A to the format type code of position messages
+     * @return the NIC supplement A to the format type code of position messages, ED-102B
+     * §2.2.3.2.7.2.6
      */
     boolean hasNICSupplementA();
 
     /**
-     * @return the navigation accuracy for position messages; rather use getPositionUncertainty
+     * @return the navigation accuracy for position messages; rather use getPositionUncertainty,
+     * ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACpEncoded();
 
     /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value.
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, ED-102B §2.2.3.2.7.2.7 TABLE 2-68.
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
@@ -55,27 +58,31 @@ public interface OperationalStatusV1Msg extends OperationalStatusMsg {
      * </ul>
      *
      * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius (see table A-15 in RCTA DO-260B)
+     * the NIC containment radius, ED-102B §2.2.3.2.7.2.9 TABLE 2-70; not to be confused with
+     * the "SIL Supplement" TABLE A-15
      */
     byte getSILEncoded();
 
     /**
-     * @return whether TCAS Resolution Advisory (RA) is active
+     * @return whether TCAS Resolution Advisory (RA) is active, ED-102B §2.2.3.2.7.2.4.2
      */
     boolean hasTCASResolutionAdvisory();
 
     /**
-     * @return whether the IDENT switch is active
+     * @return whether the IDENT switch is active, ED-102B §2.2.3.2.7.2.4.3
      */
     boolean hasActiveIDENTSwitch();
 
     /**
-     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services. ADS-B version 1
+     * systems define "ME" bit 29 (Message bit 61) as "Receiving ATC Services", ED-102B Appendix N
+     * §N.3.3. Note that this field was removed for ADS-B version 3, ED-102B §2.2.3.2.7.2.4.4.
      */
     boolean hasReceivingATCServices();
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north,
+     * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */
     boolean getHorizontalReferenceDirection();
 }

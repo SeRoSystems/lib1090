@@ -21,7 +21,12 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
 
 /**
- * Marker interface for ADS-B version 2 airborne velocity messages.
+ * Marker interface for ADS-B version 2 airborne velocity messages. Implemented both by the
+ * ground-speed variant (Subtypes 1 and 2, DO-260B §2.2.3.2.6.1/§2.2.3.2.6.2) and by the
+ * airspeed-and-heading variant (Subtypes 3 and 4, DO-260B §2.2.3.2.6.3/§2.2.3.2.6.4); the latter
+ * pair is reserved and no longer specified in current ED-102B (§2.2.3.2.6.5). Each subtype's
+ * Navigation Accuracy Category for Velocity (NAC_V) subfield, DO-260B §2.2.3.2.6.1.5/§2.2.3.2.6.2.5
+ * (ground speed) and §2.2.3.2.6.3.5/§2.2.3.2.6.4.5 (airspeed/heading), is grounded by {@link NACvMsg}.
  */
 public interface AirborneVelocityV2Msg extends AirborneVelocityMsg, IntentChangeMsg, NACvMsg {
 }

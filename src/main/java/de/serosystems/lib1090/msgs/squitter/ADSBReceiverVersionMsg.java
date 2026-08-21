@@ -19,7 +19,10 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the ADS-B Receiver Version (see DO-260C).
+ * Common API for messages that expose the "ADS-B Receiver Version" subfield ("ME" bits 13-14 of
+ * the Aircraft Operational Status Message), which indicates the highest ADS-B version number the
+ * receiving subsystem is capable of using for advisory applications, per ED-102B §2.2.3.2.7.2.3.13,
+ * TABLE 2.2.3.2.7.2.3.13.
  */
 public interface ADSBReceiverVersionMsg {
 

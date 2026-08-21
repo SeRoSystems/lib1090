@@ -28,7 +28,9 @@ import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 2 identification messages
+ * Decoder for ADS-B version 2 identification messages. Individual callsign characters are
+ * decoded by {@link Identification#identificationDigits(long)}, whose 6-bit IA-5 alphabet
+ * is cited in ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8.
  */
 public class IdentificationV2Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSBMsg {
 
@@ -46,7 +48,7 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
      */
     public IdentificationV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -55,7 +57,7 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message as byte array
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
      */
     public IdentificationV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

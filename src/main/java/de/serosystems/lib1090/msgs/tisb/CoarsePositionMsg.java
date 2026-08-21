@@ -35,7 +35,9 @@ import static de.serosystems.lib1090.decoding.Altitude.decode12BitAltitude;
 import static de.serosystems.lib1090.decoding.Altitude.decode12BitQBit;
 
 /**
- * Decoder for TIS-B coarse position (DO-260B, 2.2.17.3.5).
+ * Decoder for TIS-B coarse position, formerly DO-260B §2.2.17.3.5. This TIS-B message format
+ * has been removed from ED-102B: ED-102B §2.2.17.2 TABLE 2-184 defines only Fine TIS-B
+ * position messages and lists CF value 3 as Reserved.
  */
 public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg, TISBMsg {
 
@@ -60,7 +62,9 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @param rawMessage raw TIS-B coarse position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError declared for API compatibility only, per ED-102B §2.2.17.2 TABLE 2-184
+     *                                 (CF value 3 Reserved): this constructor never actually throws it; the
+     *                                 fields below follow the former DO-260B §2.2.17.3.5
      */
     public CoarsePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -70,7 +74,9 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @param rawMessage raw TIS-B coarse position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError declared for API compatibility only, per ED-102B §2.2.17.2 TABLE 2-184
+     *                                 (CF value 3 Reserved): this constructor never actually throws it; the
+     *                                 fields below follow the former DO-260B §2.2.17.3.5
      */
     public CoarsePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -87,7 +93,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
         if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
 
-        // Table 2-13
+        // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 3)
             throw new BadFormatException("Coarse TIS-B messages must have CF value 3.");
 
@@ -126,7 +132,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * This is a function of the surveillance status field in the position
      * message.
      *
-     * @return surveillance status description as defines in DO-260B
+     * @return surveillance status description as defined in ED-102B §2.2.3.2.3.2 TABLE 2-12
      */
     public String getSurveillanceStatusDescription() {
         String[] desc = {
@@ -203,7 +209,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     }
 
     /**
-     * Decode Q bit for the altitude according to DO-260B 2.2.3.2.3.4.3
+     * Decode Q bit for the altitude according to ED-102B §2.2.3.2.3.4.3
      *
      * @return value of the Q bit or null if message does not contain a valid altitude
      */

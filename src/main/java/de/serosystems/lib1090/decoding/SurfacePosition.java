@@ -33,7 +33,9 @@ public final class SurfacePosition {
     }
 
     /**
-     * Validate whether the given format type code denotes a surface position message.
+     * Validate whether the given format type code denotes a surface position message, per the
+     * ADS-B message type determination in ED-102B §2.2.3.2.2 TABLE 2-9: type code 0 or 5-8
+     * identifies a Surface Position Message, defined in ED-102B §2.2.3.2.4.
      *
      * @throws BadFormatException if the format type code is not a surface position type
      */
@@ -115,14 +117,16 @@ public final class SurfacePosition {
     }
 
     /**
-     * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to DO-260B Table N-4.
+     * @return Navigation integrity category. A NIC of 0 means "unknown". Values according to
+     * ED-102B §2.2.3.2.7.2.6 TABLE 2-67 ("PIC to NIC, PPM Type Code and NIC Supplement Mapping").
      */
     public static byte decodeNIC(byte formatTypeCode) {
         return decodeNIC(formatTypeCode, false);
     }
 
     /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see table N-7 in RCTA DO-260B.
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see ED-102B
+     * §N.2.3.7 TABLE N-9 (Type Code to NACP Mapping), "Position Error (95%)" column.
      * <p>
      * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
      * is reflected by this method.
@@ -147,7 +151,8 @@ public final class SurfacePosition {
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position. Values according to DO-260B Table N-4.
+     * The position error, i.e., 95% accuracy for the horizontal position. Values according to ED-102B
+     * §N.2.2.2 TABLE N-4 (Version Zero (0) Format Type Code Mapping to Navigation Source Characteristics).
      * <p>
      * The horizontal containment radius is also known as "horizontal protection level".
      *
@@ -168,7 +173,8 @@ public final class SurfacePosition {
     }
 
     /**
-     * Values according to DO-260B Table N-11
+     * Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67 ("PIC to NIC, PPM Type Code and NIC
+     * Supplement Mapping").
      *
      * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-B version 1+,
      * set NIC supplement A from Operational Status Message for better precision.
@@ -189,7 +195,8 @@ public final class SurfacePosition {
 
     /**
      * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-     * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to DO-260B Table N-11.
+     * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67
+     * ("PIC to NIC, PPM Type Code and NIC Supplement Mapping").
      * <p>
      * The horizontal containment radius is also known as "horizontal protection level".
      *
@@ -214,7 +221,7 @@ public final class SurfacePosition {
     }
 
     /**
-     * According to DO-260B Table 2-14.
+     * According to ED-102B §2.2.3.2.7.2.6 TABLE 2-67 ("PIC to NIC, PPM Type Code and NIC Supplement Mapping").
      */
     public static byte decodeNIC(byte formatTypeCode, boolean nicSupplementA, boolean nicSupplementC) {
         switch (formatTypeCode) {
@@ -236,7 +243,8 @@ public final class SurfacePosition {
     }
 
     /**
-     * Horizontal containment radius limit according to DO-260B Table 2-14.
+     * Horizontal containment radius limit according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67 ("PIC to
+     * NIC, PPM Type Code and NIC Supplement Mapping").
      */
     public static double decodeHCR(byte formatTypeCode, boolean nicSupplementA, boolean nicSupplementC) {
         switch (formatTypeCode) {

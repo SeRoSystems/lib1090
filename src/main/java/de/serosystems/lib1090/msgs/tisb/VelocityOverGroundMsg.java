@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B velocity message (DO-260B, 2.2.17.3.4).
+ * Decoder for TIS-B velocity message, ED-102B §2.2.17.3.4.
  */
 public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg {
 
@@ -60,7 +60,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw TIS-B velocity message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.4 Figure 2-55
      */
     public VelocityOverGroundMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -69,7 +69,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw TIS-B velocity message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.4 Figure 2-55
      */
     public VelocityOverGroundMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -88,7 +88,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         if (this.getFormatTypeCode() != 19)
             throw new BadFormatException("Velocity messages must have typecode 19.");
 
-        // Table 2-13
+        // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
@@ -206,7 +206,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
+     * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
      * in the operational status message. For version 0 it is derived from the format type code.
      *
      * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
@@ -217,7 +217,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
+     * Source/Surveillance Integrity Level (SIL) according to ED-102B §N.2.3.9 TABLE N-10.
      * <p>
      * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
      * is reflected by this method.

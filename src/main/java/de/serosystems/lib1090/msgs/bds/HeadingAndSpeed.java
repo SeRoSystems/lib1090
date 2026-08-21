@@ -21,7 +21,8 @@ package de.serosystems.lib1090.msgs.bds;
 import java.io.Serializable;
 
 /**
- * Decoder for heading and speed (BDS 6,0)
+ * Decoder for heading and speed (BDS 6,0), ICAO Doc 9871 (First Edition, AN/464)
+ * §A.2 TABLE A-2-96, p. 97
  */
 @SuppressWarnings("unused")
 public class HeadingAndSpeed extends BDSRegister implements Serializable {

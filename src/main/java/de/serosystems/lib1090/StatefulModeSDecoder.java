@@ -77,7 +77,7 @@ public class StatefulModeSDecoder {
      * @param modes     the incompletely decoded Mode S message
      * @param timestamp time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError if format is not specified
+     * @throws UnspecifiedFormatError declared for signature consistency with the other decode() overloads; the format of {@code modes} has already been validated by its own ModeSDownlinkMsg constructor by the time it reaches this method, per ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters, and ED-102B §2.2.3.2.2 TABLE 2-9 for the DF=17/18/19 ADS-B/TIS-B/ADS-R sub-dispatch performed here
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -101,9 +101,11 @@ public class StatefulModeSDecoder {
             case 17:
             case 18:
             case 19:
-                // check whether this is an ADS-B message (see Figure 2-2, RTCA DO-260C)
+                // check whether this is an ADS-B message, see ED-102B §2.2.3.2.1 Figure 2-3
                 // note: per DO-260C/DO-181D, DF=19/AF=0 shall no longer be assumed to be ADS-B,
-                // so it is only decoded as such if explicitly enabled (see Builder#decodeDf19Adsb)
+                // so it is only decoded as such if explicitly enabled (see Builder#decodeDf19Adsb) --
+                // DF=19 (Military Extended Squitter) is outside ED-102B's scope (ADS-B/TIS-B on
+                // DF=17/18 only), so this caveat still cites DO-260C/DO-181D, not ED-102B
                 if (modes.getDownlinkFormat() == 17 ||
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() < 2 ||
                         modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0 && decodeDf19Adsb) {
@@ -137,13 +139,17 @@ public class StatefulModeSDecoder {
         }
     }
 
+    // dispatches on FTC per the same message-type table ADS-B rebroadcast uses, ED-102B
+    // §2.2.3.2.2 TABLE 2-9, as required for ADS-R Message Processing, ED-102B §2.2.18.4;
+    // UnspecifiedFormatError is declared for signature consistency, no combination reachable
+    // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
     private ExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as ADS-R
         ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
         // ADS-R has not been specified for version 0 at all; version 2 and any
         // higher (not yet defined) version is decoded as version 2, since, per
-        // DO-260B, §2.2.7.1, newer versions are expected to be backwards compatible
+        // ED-102B §2.2.7.1, newer versions are expected to be backwards compatible
         // with version 2
 
         // we need stateful decoding, because ADS-R version > 0 can only be assumed
@@ -321,7 +327,7 @@ public class StatefulModeSDecoder {
 
         if (ftc == 29) {
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
-            // DO-260B 2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
+            // ED-102B §2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
             boolean hasMe11Bit = (es1090.getMessage()[1] & 0x20) != 0;
 
             if (subtype == 1 && (dd.adsbVersion > 0 || !hasMe11Bit)) {
@@ -385,13 +391,16 @@ public class StatefulModeSDecoder {
         return es1090;
     }
 
+    // dispatches on FTC per ED-102B §2.2.3.2.2 TABLE 2-9 (message-type determination table);
+    // UnspecifiedFormatError is declared for signature consistency, no combination reachable
+    // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
     private ExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as standard ADS-B
         ExtendedSquitter es1090 = new ExtendedSquitter(modes);
 
         // only (assumed or confirmed) version 0 is decoded as such; version 3 and any
         // higher (not yet defined) version is decoded as version 3, since, per
-        // DO-260C, §2.2.7.1, newer versions are expected to be backwards compatible
+        // ED-102B §2.2.7.1, newer versions are expected to be backwards compatible
         // with version 3
 
         // we need stateful decoding, because ADS-B version > 0 can only be assumed
@@ -604,7 +613,7 @@ public class StatefulModeSDecoder {
      * @param rawMessage the Mode S message as byte array
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError if format is not specified
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -616,7 +625,7 @@ public class StatefulModeSDecoder {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError if format is not specified
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(byte[] rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -627,7 +636,7 @@ public class StatefulModeSDecoder {
      * @param rawMessage the Mode S message in hex representation
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError if format is not specified
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -639,7 +648,7 @@ public class StatefulModeSDecoder {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError if format is not specified
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(String rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -797,7 +806,7 @@ public class StatefulModeSDecoder {
         /**
          * Enables TIS-B version 2 compatibility mode.
          * <p>
-         * Per DO-260C, CF=3 (coarse TIS-B airborne position) and velocity message subtypes 3/4
+         * Per ED-102B, CF=3 (coarse TIS-B airborne position) and velocity message subtypes 3/4
          * (airspeed and heading) are reserved and no longer used. In compatibility mode, they are
          * still decoded as such, as a fallback for TIS-B services that have not yet transitioned
          * away from them. TIS-B itself does not distinguish versions, so this is a purely

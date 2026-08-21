@@ -29,8 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class L0LatitudeTest {
 
     /**
-     * DO-260B §A.1.7.2 defines NL(87°) = 2 explicitly. Only strictly above 87°
-     * does NL drop to 1.
+     * ED-102B §A.1.7.2 defines NL(87°) = 2 explicitly. Only strictly above 87° does NL drop to 1.
      */
     @Test
     public void nlAtPolarBoundaryIsTwo() {

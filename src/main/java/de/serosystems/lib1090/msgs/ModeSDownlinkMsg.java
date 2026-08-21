@@ -54,11 +54,11 @@ public class ModeSDownlinkMsg implements Serializable {
     public static final byte[] CRC_polynomial = {
             (byte) 0xFF,
             (byte) 0xF4,
-            (byte) 0x09 // according to Annex 10 V4
+            (byte) 0x09 // according to ICAO Annex 10 Volume IV
     };
 
     /**
-     * CRC Polynomial as of Annex 10 V4, without leading coefficient.
+     * CRC Polynomial as of ICAO Annex 10 Volume IV, without leading coefficient.
      */
     public static final int CRC_POLYNOMIAL = 0xfff409;
 
@@ -66,7 +66,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * Precomputed CRC table.
      * For an element CRC_TABLE[i]=j, interpret the bits (MSB = leading coefficient)
      * of index i as coefficients of a polynomial in group F2[X] and multiply it by X^24.
-     * Then j is the remainder when dividing this polynomial by the generator polynomial defined by Annex 10 V4.
+     * Then j is the remainder when dividing this polynomial by the generator polynomial defined by ICAO Annex 10 Volume IV.
      */
     private static final int[] CRC_TABLE = new int[]{
             0x000000, 0xfff409, 0x001c1b, 0xffe812, 0x003836, 0xffcc3f, 0x00242d, 0xffd024,
@@ -105,7 +105,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
     /**
      * Interpret a given message as coefficients of a polynomial of group F2[X], multiplied by X^24.
-     * Then compute the remainder when dividing that polynomial by the CRC generator polynomial defined by Annex 10 V4.<br>
+     * Then compute the remainder when dividing that polynomial by the CRC generator polynomial defined by ICAO Annex 10 Volume IV.<br>
      * Note: multiplying the polynomial with X^24 has the same effect as appending 24 zero bits (i.e. zero 3 bytes) to the message.
      * The payload given into this function does not include the parity, thus this is exactly what we want here.<br>
      * We used a LUT optimized implementation of<br>
@@ -203,7 +203,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param reply the bytes of the reply
      * @param noCRC indicates whether the CRC has been subtracted from the parity field
      * @throws BadFormatException     if message has invalid length or downlink format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ModeSDownlinkMsg(byte[] reply, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
         // check format invariants
@@ -218,7 +218,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
         // DF 24 is a special case
         if (downlink_format > 23) {
-            // verify that the third most significant bit is 1
+            // verify that the third most significant bit is 0 (DF=24 is 11000)
             if ((downlink_format & 0b00000100) != 0) {
                 throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 1");
             }
@@ -275,7 +275,8 @@ public class ModeSDownlinkMsg implements Serializable {
                         String.format("Invalid downlink format %d detected.", downlink_format));
         }
 
-        // determine address type according to table 2-11 of DO-260B
+        // determine address type according to ED-102B §2.2.3.2.1.3 TABLE 2-7, "CF" Field Code
+        // Definitions in DF=18 ADS-B and TIS-B Messages
         if (downlink_format == 18) {
             // check CF
             switch (first_field) {
@@ -332,7 +333,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param rawMessage Mode S message as byte array
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ModeSDownlinkMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(rawMessage, false);
@@ -345,7 +346,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param rawMessage Mode S message in hex representation
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ModeSDownlinkMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(Tools.hexStringToByteArray(rawMessage), false);
@@ -359,7 +360,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
      */
     public ModeSDownlinkMsg(String rawMessage, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
         this(Tools.hexStringToByteArray(rawMessage), noCRC);

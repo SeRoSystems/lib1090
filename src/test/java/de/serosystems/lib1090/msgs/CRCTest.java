@@ -101,7 +101,7 @@ class CRCTest {
     public static final byte[] CRC_polynomial = {
             (byte) 0xFF,
             (byte) 0xF4,
-            (byte) 0x09 // according to Annex 10 V4
+            (byte) 0x09 // according to ICAO Annex 10 Volume IV
     };
 
     /**

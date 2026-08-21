@@ -21,7 +21,8 @@ package de.serosystems.lib1090.msgs.bds;
 import java.io.Serializable;
 
 /**
- * Decoder for Datalink Capability Report (BDS 1,0) based on DO-181F Table B- B-3-16a
+ * Decoder for Datalink Capability Report (BDS 1,0), ICAO Doc 9871 (First Edition, AN/464)
+ * §A.2 TABLE A-2-16, p. 68
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
@@ -160,7 +161,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
      *     <li> 0 signifies Mode-S subnetwork not available
      *     <li> 1 signifies ICAO Doc 9688 (1996) </li>
      *     <li> 2 signifies ICAO Doc 9688 (1998) </li>
-     *     <li> 3 signifies ICAO Annex 10, Vol III, Amendment 77 </li>
+     *     <li> 3 signifies ICAO Annex 10, Volume III, Amendment 77 </li>
      *     <li> 4 signifies ICAO Doc 9871, Edition 1 </li>
      *     <li> 5 signifies ICAO Doc 9871, Edition 2 </li>
      *     <li> 6-127 Reserved </li>

@@ -19,12 +19,14 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the ICAO Mode A Flag (IMF).
+ * Common API for messages that expose the ICAO/Mode A Flag (IMF). This bit only exists in ADS-R
+ * messages, where it takes over a bit position that carries different information (or is
+ * reserved) in the corresponding ADS-B message, ED-102B §2.2.18.4.
  */
 public interface IMFMsg {
 
     /**
-     * @return the ICAO Mode A Flag used for address type determination
+     * @return the ICAO/Mode A Flag used for address type determination, ED-102B §2.2.18.4
      */
     boolean getIMF();
 }

@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B Identification and Category Message (DO-260B, 2.2.17.3.3).
+ * Decoder for TIS-B Identification and Category Message, ED-102B §2.2.17.3.3.
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg, TISBMsg {
 
@@ -45,7 +45,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identification and category message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.3 Figure 2-54
      */
     public IdentificationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,7 +54,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identity and category message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.3 Figure 2-54
      */
     public IdentificationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -73,7 +73,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
             throw new BadFormatException("Identification messages must have typecode of 1-4.");
 
-        // Table 2-13
+        // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 

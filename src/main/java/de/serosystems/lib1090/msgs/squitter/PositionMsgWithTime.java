@@ -18,12 +18,20 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
+/**
+ * Common API for ADS-B position messages that carry a "TIME" (T) UTC-synchronization flag. This
+ * flag only exists in ADS-B version 0 and version 1 Airborne and Surface Position Messages,
+ * ED-102B §N.2.2.4 (version 0) resp. §N.3.2.4 (version 1); it has been removed from
+ * ADS-B version 2/3 messages, where the Report Time of Applicability is instead always taken to
+ * be the time of message receipt.
+ */
 public interface PositionMsgWithTime extends PositionMsg {
 
     /**
      * @return flag which will indicate whether the Time of Applicability of the message
      * is synchronized with UTC time. False will denote that the time is not synchronized
      * to UTC. True will denote that Time of Applicability is synchronized to UTC time.
+     * ED-102B §N.2.2.4 (version 0) resp. §N.3.2.4 (version 1)
      */
     boolean hasTimeFlag();
 

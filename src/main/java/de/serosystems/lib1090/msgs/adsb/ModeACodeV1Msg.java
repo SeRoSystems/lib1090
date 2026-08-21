@@ -27,7 +27,12 @@ import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 1 Mode A code messages.
+ * Decoder for ADS-B version 1 Mode A code messages. The standards-defined Mode A Code field
+ * lives in the Extended Squitter Aircraft Status Message, TYPE=28 Subtype=1 (Emergency/Priority
+ * Status Message), ED-102B §2.2.3.2.7.8.1 Figure 2-20; the "Mode A Code" subfield itself is
+ * specified in §2.2.3.2.7.8.1.2. See the constructors below for why this class instead decodes
+ * an out-of-specification TYPE=23 Subtype=7 field. (ED-102B §2.2.19 "Traffic Uplink Management
+ * Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover this field.)
  */
 public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, ModeACodeMsg, ADSBMsg {
 
@@ -45,7 +50,13 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
     /**
      * @param rawMessage raw ADS-B Mode A code message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if the underlying squitter format is not further specified -- ED-102B
+     *      §2.2.3.2.3.1 TABLE 2-11 marks TYPE=23 Subtype 1-7 Reserved, and the former standard DO-260B
+     *      §2.2.3.2.3.1 TABLE 2-14 reserves the identical TYPE=23 Subtype 1-7 range, so this TYPE=23
+     *      Subtype=7 "Mode A Code" encoding was never formally specified by any edition of the DO-260/ED-102
+     *      series; this class decodes an out-of-specification field observed in the field. The
+     *      standards-defined Mode A Code field is instead carried in the Aircraft Status Message TYPE=28
+     *      Subtype=1, ED-102B §2.2.3.2.7.8.1.2 Figure 2-20
      */
     public ModeACodeV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,7 +65,13 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
     /**
      * @param rawMessage raw ADS-B Mode A code message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if the underlying squitter format is not further specified -- ED-102B
+     *      §2.2.3.2.3.1 TABLE 2-11 marks TYPE=23 Subtype 1-7 Reserved, and the former standard DO-260B
+     *      §2.2.3.2.3.1 TABLE 2-14 reserves the identical TYPE=23 Subtype 1-7 range, so this TYPE=23
+     *      Subtype=7 "Mode A Code" encoding was never formally specified by any edition of the DO-260/ED-102
+     *      series; this class decodes an out-of-specification field observed in the field. The
+     *      standards-defined Mode A Code field is instead carried in the Aircraft Status Message TYPE=28
+     *      Subtype=1, ED-102B §2.2.3.2.7.8.1.2 Figure 2-20
      */
     public ModeACodeV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

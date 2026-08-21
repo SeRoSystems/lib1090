@@ -53,7 +53,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -62,7 +62,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -73,7 +73,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not a surface
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public SurfaceOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -159,7 +159,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether ADS-B Transmitting Subsystem< is receiving ATC services.
+     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
      */
     public boolean hasReceivingATCServices() {
         return (operationalModeCode & 0x800) != 0;
@@ -183,6 +183,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         return nicSupplement;
     }
 
+    /**
+     * @return the raw encoded Navigation Accuracy Category for Position (NACP), ED-102B §2.2.3.2.7.2.7 TABLE 2-68
+     */
     @Override
     public byte getNACpEncoded() {
         return nacP;
@@ -193,6 +196,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         return SurfaceOperationalStatusMsg.super.getPositionUncertainty();
     }
 
+    /**
+     * @return the raw encoded Source Integrity Level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70
+     */
     @Override
     public byte getSILEncoded() {
         return sil;

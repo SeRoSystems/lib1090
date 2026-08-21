@@ -20,14 +20,14 @@ package de.serosystems.lib1090.msgs.squitter;
 
 /**
  * Common API for messages that expose the NIC supplement B bit. For ADS-B, this is carried by
- * airborne position messages themselves (version 2 and up); for ADS-R, airborne position messages
- * lose this bit to the IMF flag, so it is instead carried by the airborne operational status
- * message.
+ * airborne position messages themselves (version 2 and up), ED-102B §2.2.3.2.3.3; for ADS-R,
+ * airborne position messages lose this bit to the IMF flag, so it is instead carried by the
+ * airborne operational status message, ED-102B §2.2.18.4.7.
  */
 public interface NICSupplementBMsg {
 
     /**
-     * @return NIC supplement B
+     * @return NIC supplement B, ED-102B §2.2.3.2.3.3
      */
     boolean hasNICSupplementB();
 }

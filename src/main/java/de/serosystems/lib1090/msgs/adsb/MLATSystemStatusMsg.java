@@ -28,7 +28,14 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Decoder for Surface System Status messages (2.2.3.2.7.4)
+ * Decoder for Surface System Status messages, ED-102B §2.2.3.2.7.4: TYPE Code=24, Subtype=1
+ * ("Surface System Status (Allocated for national use)", ED-102B §2.2.3.2.7.4.2 TABLE 2-74). The
+ * standard reserves this message for exclusive use by surface surveillance systems and states
+ * "there is no provision in these MOPS to transmit or receive" it (ED-102B §2.2.3.2.7.4.3); the
+ * class name reflects the field-observed use of TC=24/ST=1 by multilateration (MLAT) systems
+ * rather than any ED-102B terminology for the message. (ED-102B §2.2.19 "Traffic Uplink
+ * Management Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover
+ * this message; it is not TYPE=28 in any subtype.)
  */
 public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
@@ -45,7 +52,7 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the MLAT system status message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.4.3 Figure 2-14
      */
     public MLATSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,14 +61,14 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the MLAT system status message as byte array
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.4.3 Figure 2-14
      */
     public MLATSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
     /**
-     * @param squitter extended squitter which contains this identification msg
+     * @param squitter extended squitter which contains this MLAT/Surface System Status msg
      * @throws BadFormatException if message has the wrong typecode
      */
     public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {

@@ -19,25 +19,26 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for the weather-related ADS-B/ADS-R Wx AIREP subtypes: the weather state subtype (1)
- * and the alternate weather state subtype (2). Further fields shared by these two subtypes will
- * be added here as they are decoded.
+ * Common API for the weather-related ADS-B/ADS-R Wx AIREP subtypes: the weather state subtype (1),
+ * ED-102B §2.2.3.2.7.6.4, and the alternate weather state subtype (2), ED-102B §2.2.3.2.7.6.5.
+ * Further fields shared by these two subtypes will be added here as they are decoded.
  */
 public interface WxAIREPWeatherMsg extends WxAIREPMsg {
 
     /**
-     * @return the raw encoded icing status field
+     * @return the raw encoded icing status field, ED-102B §2.2.3.2.7.6.4.2 TABLE 2-86 (weather
+     * state) resp. §2.2.3.2.7.6.5.2 (alternate weather state, same encoding)
      */
     byte getIcingStatusEncoded();
 
     /**
      * @return the raw air temperature type bit: {@code false} means "total air temperature",
-     * {@code true} means "static air temperature"
+     * {@code true} means "static air temperature", ED-102B §2.2.3.2.7.6.4.6 TABLE 2-90
      */
     boolean getAirTemperatureType();
 
     /**
-     * @return the raw encoded air temperature field
+     * @return the raw encoded air temperature field, ED-102B §2.2.3.2.7.6.4.7 TABLE 2-91
      */
     short getAirTemperatureEncoded();
 
@@ -62,12 +63,12 @@ public interface WxAIREPWeatherMsg extends WxAIREPMsg {
 
     /**
      * @return the raw airspeed type bit: {@code false} means Indicated Airspeed (IAS),
-     * {@code true} means True Airspeed (TAS)
+     * {@code true} means True Airspeed (TAS), ED-102B §2.2.3.2.7.6.4.8 TABLE 2-92
      */
     boolean getAirspeedType();
 
     /**
-     * @return the raw encoded airspeed field
+     * @return the raw encoded airspeed field, ED-102B §2.2.3.2.7.6.4.9 TABLE 2-93
      */
     short getAirspeedEncoded();
 
