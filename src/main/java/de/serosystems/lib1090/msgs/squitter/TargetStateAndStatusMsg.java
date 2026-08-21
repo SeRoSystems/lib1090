@@ -26,7 +26,7 @@ import de.serosystems.lib1090.decoding.OperationalStatus;
 public interface TargetStateAndStatusMsg {
 
     /**
-     * @return whether selected altitude is available
+     * @return whether selected altitude is available, ED-102B §2.2.3.2.7.1.3.2
      */
     boolean hasSelectedAltitude();
 
@@ -40,41 +40,42 @@ public interface TargetStateAndStatusMsg {
      * <br>
      * Note: the interpretation is different in V1 and V2+.
      *
-     * @return the encoded selected altitude field value
+     * @return the encoded selected altitude field value, ED-102B §2.2.3.2.7.1.3.3
      */
     int getSelectedAltitudeEncoded();
 
     /**
-     * @return whether selected heading is available
+     * @return whether selected heading is available, ED-102B §2.2.3.2.7.1.3.5
      */
     boolean hasSelectedHeading();
 
     /**
-     * The selected heading according to DO-260B 2.2.3.2.7.1.3.7
+     * The selected heading according to ED-102B §2.2.3.2.7.1.3.7
      * <p>
      * Look at {@link SurfaceOperationalStatusMsg#getHorizontalReferenceDirection()} resp.
      * {@link AirborneOperationalStatusV1V2Msg#getHorizontalReferenceDirection()} to determine whether this heading
      * is referring to true north or magnetic north.
      * If not available, assume magnetic north as the de-facto standard.
      *
-     * @return the selected heading in decimal degrees ([0, 360]) clockwise, or {@code null} if unavailable
+     * @return the selected heading in decimal degrees ([0, 360)) clockwise, or {@code null} if unavailable
      */
     Float getSelectedHeading();
 
     /**
      * Get encoded selected heading including sign bit.
      *
-     * @return the encoded selected heading (named target heading track in V1) field value including sign bit
+     * @return the encoded selected heading (named target heading track in V1) field value
+     * including sign bit, ED-102B §2.2.3.2.7.1.3.6 (sign) and §2.2.3.2.7.1.3.7 (magnitude)
      */
     int getSelectedHeadingEncoded();
 
     /**
-     * @return the navigation accuracy category for position
+     * @return the navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8
      */
     byte getNACp();
 
     /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, see table A-13 in RCTA DO-260B
+     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */
@@ -83,17 +84,20 @@ public interface TargetStateAndStatusMsg {
     }
 
     /**
-     * @return the barometric altitude integrity code indicating whether barometric altitude was cross-checked
+     * @return the barometric altitude integrity code (NIC_BARO) indicating whether barometric
+     * altitude was cross-checked. This subfield is no longer specified in ED-102B §2.2.3.2.7.1.3.9,
+     * which used to define it, is now a "Reserved Section...removed and no longer applicable".
+     * The governing former-standard reference is DO-260B §2.2.3.2.7.1.3.9.
      */
     boolean getBarometricAltitudeIntegrityCode();
 
     /**
-     * @return the surveillance/source integrity level
+     * @return the surveillance/source integrity level, ED-102B §2.2.3.2.7.1.3.10
      */
     byte getSIL();
 
     /**
-     * @return true if TCAS is operational, false otherwise
+     * @return true if TCAS is operational, false otherwise, ED-102B §2.2.3.2.7.1.3.17 TABLE 2-44
      */
     boolean hasOperationalTCAS();
 }

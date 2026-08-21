@@ -26,7 +26,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for 1090ES UAS/RPAS Contingency Messages.
+ * Decoder for 1090ES UAS/RPAS Contingency Messages: Extended Squitter Aircraft Status Message,
+ * TYPE=28 Subtype=4 (Optional), ED-102B §2.2.3.2.8.1.3 Figure 2-23.
  */
 public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 
@@ -49,7 +50,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.3 Figure 2-23
      */
     public UASRPASContingencyMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -58,7 +59,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.3 Figure 2-23
      */
     public UASRPASContingencyMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

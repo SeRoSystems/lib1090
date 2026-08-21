@@ -24,7 +24,8 @@ public final class Identity {
     }
 
     /**
-     * @return The identity/Mode A code (see ICAO Annex 10 V4).
+     * @return The identity/Mode A code, ICAO Annex 10 Volume IV §3.1.2.6.7.1, pulse pattern per
+     * ICAO Annex 10 Volume IV §3.1.1.6.2.
      * Special codes are<br>
      * <ul>
      * <li> 7700 indicates emergency<br>

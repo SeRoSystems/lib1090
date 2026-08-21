@@ -50,7 +50,7 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-R Wx AIREP message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.6.3 Figure 2-17
      */
     public WxAIREPAircraftStateMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -59,7 +59,7 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-R Wx AIREP message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260C
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.6.3 Figure 2-17
      */
     public WxAIREPAircraftStateMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -68,7 +68,7 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
     /**
      * @param squitter extended squitter which contains this Wx AIREP aircraft state message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 0 (aircraft state)
+     * @throws UnspecifiedFormatError if message has a subtype other than 0 (aircraft state); see ED-102B §2.2.3.2.7.6.3 Figure 2-17
      */
     public WxAIREPAircraftStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

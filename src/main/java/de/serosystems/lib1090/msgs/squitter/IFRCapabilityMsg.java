@@ -19,7 +19,13 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for messages that expose the IFR capability flag.
+ * Common API for messages that expose the IFR capability flag. This flag is "ME" bit 10 of the
+ * Version Zero and Version One Airborne Velocity Message, originally defined in the former
+ * standards DO-260 and DO-260A respectively. It is not defined in current ED-102B: ED-102B
+ * §2.2.3.2.6.1.4 marks this bit position as a removed, reserved subfield in the current main-body
+ * message format. The flag is retained for backward compatibility in ED-102B Appendix N: the
+ * Version Zero encoding is ED-102B §N.5.1 Figure N-4, and the Version One encoding is ED-102B
+ * §N.5.2 Figure N-12.
  */
 public interface IFRCapabilityMsg {
 

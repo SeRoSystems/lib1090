@@ -27,7 +27,10 @@ import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 3 airborne velocity messages
+ * Decoder for ADS-B version 3 airborne velocity messages. Only the ground-speed variant
+ * (Subtypes 1 and 2, DO-260B §2.2.3.2.6.1/§2.2.3.2.6.2) remains valid in ADS-B version 3; the
+ * airspeed-and-heading variant (Subtypes 3 and 4) is reserved and no longer specified starting
+ * with ED-102B §2.2.3.2.6.5, having last been specified by DO-260B §2.2.3.2.6.3/§2.2.3.2.6.4.
  */
 public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, NACvMsg, ADSBMsg {
 
@@ -56,7 +59,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
      */
     public AirborneVelocityV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +68,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
      */
     public AirborneVelocityV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

@@ -59,7 +59,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.4.1 TABLE 2-11
      */
     public SurfacePositionV2Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -69,7 +69,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.4.1 TABLE 2-11
      */
     public SurfacePositionV2Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -127,7 +127,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
 
     /**
      * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-     * (NACp) see {@link AirborneOperationalStatusV2Msg}. Values according to DO-260B Table 2-14.
+     * (NACp) see {@link AirborneOperationalStatusV2Msg}. Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67.
      * <p>
      * The horizontal containment radius is also known as "horizontal protection level".
      *
@@ -161,7 +161,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * Values according to DO-260B Table 2-14
+     * Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67
      *
      * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-R version 1+, set
      * NIC supplement A from Operational Status Message for better precision. For version 2 set NIC supplement C

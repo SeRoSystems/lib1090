@@ -21,12 +21,17 @@ package de.serosystems.lib1090.msgs.squitter;
 import de.serosystems.lib1090.decoding.Identity;
 
 /**
- * Common API for ADS-B messages that expose a Mode A code.
+ * Common API for ADS-B messages that expose a Mode A code. The standards-defined home for this
+ * field is the Extended Squitter Aircraft Status Message, TYPE=28 Subtype=1 (Emergency/Priority
+ * Status Message), ED-102B §2.2.3.2.7.8.1 Figure 2-20; the "Mode A Code" subfield itself is
+ * specified in §2.2.3.2.7.8.1.2. (ED-102B §2.2.19 "Traffic Uplink Management Message" is a
+ * distinct DF=18/CF=4 ground-uplink advisory service and does not cover this field; it is not
+ * TYPE=28 in any subtype.)
  */
 public interface ModeACodeMsg {
 
     /**
-     * @return the four-digit Mode A (4096) code
+     * @return the four-digit Mode A (4096) code, ED-102B §2.2.3.2.7.8.1.2
      */
     short getModeACode();
 

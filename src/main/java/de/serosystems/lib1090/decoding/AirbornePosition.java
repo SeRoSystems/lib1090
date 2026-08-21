@@ -31,7 +31,9 @@ public final class AirbornePosition {
     }
 
     /**
-     * Validate whether the given format type code denotes an airborne position message.
+     * Validate whether the given format type code denotes an airborne position message, per the
+     * ADS-B message type determination in ED-102B §2.2.3.2.2 TABLE 2-9: type code 0, 9-18 or
+     * 20-22 identifies an Airborne Position Message, defined in ED-102B §2.2.3.2.3.
      *
      * @throws BadFormatException if the format type code is not an airborne position type
      */
@@ -59,7 +61,8 @@ public final class AirbornePosition {
     }
 
     /**
-     * Values according to DO-260B Table N-11
+     * Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67 (PIC to NIC, PPM Type Code and NIC
+     * Supplement Mapping), using only the NIC Supplement-A column.
      *
      * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
@@ -92,7 +95,8 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table 2-14.
+     * According to ED-102B §2.2.3.2.7.2.6 TABLE 2-67 (PIC to NIC, PPM Type Code and NIC Supplement
+     * Mapping).
      *
      * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
@@ -164,7 +168,8 @@ public final class AirbornePosition {
 
     /**
      * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-     * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to DO-260B Table N-11.
+     * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67
+     * (PIC to NIC, PPM Type Code and NIC Supplement Mapping), Radius of Containment column.
      * <p>
      * The horizontal containment radius is also known as "horizontal protection level".
      *
@@ -272,7 +277,8 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table N-4
+     * According to ED-102B §N.2.2.2 TABLE N-4 (Version Zero (0) Format Type Code Mapping to
+     * Navigation Source Characteristics).
      *
      * @param formatTypeCode the messages' format type code
      * @return the derived HCR
@@ -306,7 +312,7 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table N-7
+     * According to ED-102B §N.2.3.7 TABLE N-9 (Type Code to NACP Mapping).
      *
      * @param formatTypeCode the messages' format type code
      * @return the derived NACp
@@ -339,7 +345,8 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table N-7
+     * According to ED-102B §N.2.3.7 TABLE N-9 (Type Code to NACP Mapping), "Position Error
+     * (95%)" column.
      *
      * @param formatTypeCode the messages' format type code
      * @return the derived position uncertainty in meters
@@ -371,7 +378,8 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table 2-200.
+     * According to ED-102B §N.2.2.2 TABLE N-4 (Version Zero (0) Format Type Code Mapping to
+     * Navigation Source Characteristics), "Reported NIC" column.
      *
      * @param formatTypeCode the messages' format type code
      * @return the derived NIC
@@ -406,7 +414,7 @@ public final class AirbornePosition {
     }
 
     /**
-     * According to DO-260B Table N-8.
+     * According to ED-102B §N.2.3.9 TABLE N-10 (SIL Reporting).
      *
      * @param formatTypeCode the messages' format type code
      * @return the derived SIL

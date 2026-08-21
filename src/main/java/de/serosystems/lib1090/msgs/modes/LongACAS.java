@@ -52,7 +52,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw long air-to-air ACAS reply as hex string
      * @throws BadFormatException     if message is not long air-to-air ACAS reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.3
      */
     public LongACAS(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -62,7 +62,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw long air-to-air ACAS reply as byte array
      * @throws BadFormatException     if message is not long air-to-air ACAS reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.3
      */
     public LongACAS(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -86,7 +86,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
         reply_information = (byte) ((payload[0] & 0x7) << 1 | (payload[1] >>> 7) & 0x1);
         altitude_code = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
 
-        // extract MV/air-air coordination info; see Annex 10 Vol 4: 4.3.8.4.2.4
+        // extract MV/air-air coordination info; see ICAO Annex 10 Volume IV §4.3.8.4.2.4
         valid_rac = payload[3] == 0x30;
         active_resolution_advisories = (short) ((payload[4] << 6 | (payload[5] >>> 2) & 0x3F) & 0x3FFF);
         racs_record = (byte) ((payload[5] << 2 | (payload[6] >>> 6) & 0x3) & 0xF);
@@ -109,7 +109,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 
     /**
      * @return the binary encoded information about active
-     * resolution advisories (see Annex 10V4; 4.3.8.4.2.2.1.1)
+     * resolution advisories, see ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.1
      */
     public short getActiveResolutionAdvisories() {
         return active_resolution_advisories;
@@ -186,7 +186,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * This field is used to report the aircraft's maximum cruising
      * true airspeed capability and type of reply to interrogating aircraft
      *
-     * @return the air-to-air reply information according to 3.1.2.8.2.2
+     * @return the air-to-air reply information according to ICAO Annex 10 Volume IV §3.1.2.8.2.2
      * @see #getMaximumAirspeed()
      * @see #hasOperatingACAS()
      */
@@ -203,7 +203,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return the maximum airspeed in kt as specified in ICAO Annex 10V4 3.1.2.8.2.2<br>
+     * @return the maximum airspeed in kt as specified in ICAO Annex 10 Volume IV §3.1.2.8.2.2<br>
      * null if unknown<br>Integer.MAX_VALUE if unbound
      */
     public Integer getMaximumAirspeed() {
@@ -211,7 +211,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The 13 bits altitude code (see ICAO Annex 10 V4)
+     * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
     public short getAltitudeCode() {
         return altitude_code;
@@ -225,7 +225,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
+     * Decode Q bit for the altitude according to ICAO Annex 10 Volume IV §3.1.2.6.5.4
      *
      * @return value of the Q bit, null if altitude is not available or M bit is set
      */

@@ -29,12 +29,12 @@ public interface EmergencyOrPriorityStatusMsg {
     byte getSubtype();
 
     /**
-     * @return the emergency state code (see DO-260B, Appendix A, Page A-83)
+     * @return the emergency state code, ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
      */
     byte getEmergencyStateCode();
 
     /**
-     * @return the human readable emergency state (see DO-260B, Appendix A, Page A-83)
+     * @return the human readable emergency state, ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
      */
     default String getEmergencyStateText() {
         switch (getEmergencyStateCode()) {

@@ -27,6 +27,10 @@ public final class Identification {
     }
 
     /**
+     * Each of the 8 "Ident Character" subfields is encoded as a 6-bit subset of the
+     * International Alphabet Number 5 (IA-5), ED-102B §2.2.3.2.5.3, which in turn cites ICAO
+     * Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8 for the character coding.
+     *
      * @param identificationEncoded the raw 48-bit identification field
      * @return the 8 encoded (6-bit) identification digits, in order
      */
@@ -38,14 +42,15 @@ public final class Identification {
      * @param typeCode        format type code of identification message
      * @param emitterCategory reported emitter category
      * @param version         ADS-B version of the reporting aircraft
-     * @return a textual description of the emitter's category according to DO-260B
+     * @return a textual description of the emitter's category according to ED-102B §2.2.3.2.5.2 TABLE 2-16
      * @throws IllegalArgumentException if version is greater than 7
      */
     public static String categoryDescription(byte typeCode, byte emitterCategory, int version) {
         if (version < 0 || version > 7)
             throw new IllegalArgumentException("Unsupported ADS-B version: " + version);
 
-        // versions above 3 are decoded like version 3, per DO-260C, §2.2.7.1
+        // versions above 3 are decoded like version 3, per ED-102B §2.2.7.1 and ED-102B §N.3.3.1
+        // VN field itself specified at ED-102B §2.2.3.2.7.2.5 TABLE 2-66
         int effectiveVersion = Math.min(version, 3);
 
         // category descriptions according
@@ -89,7 +94,7 @@ public final class Identification {
         }};
 
         if (effectiveVersion == 0 && typeCode == 2) {
-            // version 0 exceptions to the version 2 table for category set C
+            // version 0 exceptions to the version 2 mapping for category set C
             if (emitterCategory == 3)
                 return "Fixed Ground or Tethered Obstruction";
             if (emitterCategory >= 4 && emitterCategory <= 7) return "Reserved";
@@ -97,7 +102,7 @@ public final class Identification {
 
         if (effectiveVersion == 3) {
             if (typeCode == 4) {
-                // version 3 exceptions to the version 2 table for category set A
+                // version 3 exceptions to the version 2 mapping for category set A
                 switch (emitterCategory) {
                     case 1:
                         return "MTOW < 15500 lbs";
@@ -112,7 +117,7 @@ public final class Identification {
                         return "MTOW >= 300000 lbs";
                 }
             } else if (typeCode == 3 && (emitterCategory == 3 || emitterCategory == 6 || emitterCategory == 7)) {
-                // version 3 exceptions to the version 2 table for category set B
+                // version 3 exceptions to the version 2 mapping for category set B
                 return "Reserved";
             }
         }

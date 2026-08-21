@@ -4,7 +4,7 @@ lib1090 [![Maven Central](https://img.shields.io/maven-central/v/de.sero-systems
 This is a Mode S, ADS-B, TIS-B and ADS-R decoding library for Java. It was forked from the OpenSky Network's (http://www.opensky-network.org) java-adsb library and refactored entirely to accommodate TIS-B and ADS-R.
 
 It is based on these two references:
-* ICAO Aeronautical Telecommunications Annex 10 Volume 4 (Surveillance Radar and Collision Avoidance Systems)
+* ICAO Aeronautical Telecommunications Annex 10 Volume IV (Surveillance Radar and Collision Avoidance Systems)
 * RTCA DO-260C / Eurocae ED-102B "Minimum Operational Performance Standards (MOPS) for 1090ES"
 
 It supports the following Mode S downlink formats:

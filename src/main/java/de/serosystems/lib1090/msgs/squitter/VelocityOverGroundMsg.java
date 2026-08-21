@@ -19,7 +19,9 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B velocity-over-ground messages across message versions.
+ * Common API for ADS-B velocity-over-ground messages across message versions. These are the
+ * Airborne Velocity Message subtypes 1 (subsonic) and 2 (supersonic), ED-102B §2.2.3.2.6.1
+ * resp. §2.2.3.2.6.2.
  */
 public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
 
@@ -75,22 +77,26 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return the raw encoded velocity from west to east field
+     * @return the raw encoded velocity from west to east field, ED-102B §2.2.3.2.6.1.7 (subsonic)
+     * resp. §2.2.3.2.6.2.7 (supersonic)
      */
     short getWestToEastVelocityEncoded();
 
     /**
-     * @return the raw encoded velocity from south to north field
+     * @return the raw encoded velocity from south to north field, ED-102B §2.2.3.2.6.1.9 (subsonic)
+     * resp. §2.2.3.2.6.2.9 (supersonic)
      */
     short getSouthToNorthVelocityEncoded();
 
     /**
-     * @return true if the velocity from west to east is negative
+     * @return true if the velocity from west to east is negative, ED-102B §2.2.3.2.6.1.6 (subsonic)
+     * resp. §2.2.3.2.6.2.6 (supersonic)
      */
     boolean isVelocityToEastNegative();
 
     /**
-     * @return true if the velocity from south to north is negative
+     * @return true if the velocity from south to north is negative, ED-102B §2.2.3.2.6.1.8
+     * (subsonic) resp. §2.2.3.2.6.2.8 (supersonic)
      */
     boolean isVelocityToNorthNegative();
 }

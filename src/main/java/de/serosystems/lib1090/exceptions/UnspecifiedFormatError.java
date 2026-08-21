@@ -22,6 +22,12 @@ package de.serosystems.lib1090.exceptions;
  * Exception which is thrown when a raw message is passed to the wrong
  * decoder. E.g. when the format type code in the raw message does not
  * correspond to the message type.
+ * <p>
+ * The applicable table or paragraph depends on the throwing decoder; the most common are
+ * ED-102B §2.2.3.2.2 TABLE 2-9 for ADS-B message type determination, ED-102B §2.2.3.2.2
+ * TABLE 2-10 for TIS-B/Traffic Uplink Management message type determination, ED-102B
+ * §2.2.17.2 TABLE 2-184 for DF=18 CF code definitions and, for Mode S downlink formats
+ * outside ED-102B's scope, ICAO Annex 10 Volume IV §3.1.2.
  */
 public class UnspecifiedFormatError extends Exception {
     private static final long serialVersionUID = 6482688479919911669L;

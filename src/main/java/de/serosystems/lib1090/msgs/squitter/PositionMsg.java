@@ -21,6 +21,10 @@ package de.serosystems.lib1090.msgs.squitter;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 
+/**
+ * Common API for ADS-B position messages, ED-102B §2.2.3.2.3 (airborne position) resp.
+ * §2.2.3.2.4 (surface position).
+ */
 public interface PositionMsg {
 
     /**

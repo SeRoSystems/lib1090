@@ -21,7 +21,8 @@ package de.serosystems.lib1090.msgs.bds;
 import java.io.Serializable;
 
 /**
- * Decoder for selected vertical intention (BDS 4,0)
+ * Decoder for selected vertical intention (BDS 4,0), ICAO Doc 9871 (First Edition, AN/464)
+ * §A.2 TABLE A-2-64, p. 84
  */
 @SuppressWarnings("unused")
 public class SelectedVerticalIntention extends BDSRegister implements Serializable {
