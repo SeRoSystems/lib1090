@@ -24,7 +24,7 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface AirborneOperationalStatusV2V3Msg extends AirborneOperationalStatusMsg {
 
     /**
-     * @return the encoded geometric vertical accuracy (see DO-260B 2.2.3.2.7.2.8)
+     * @return the encoded geometric vertical accuracy, ED-102B §2.2.3.2.7.2.8 TABLE 2-69
      */
     byte getGVAEncoded();
 

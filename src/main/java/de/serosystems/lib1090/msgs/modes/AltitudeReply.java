@@ -48,7 +48,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as hex string
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance altitude reply (DF=4) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.5
      */
     public AltitudeReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -58,7 +58,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as byte array
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance altitude reply (DF=4) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.5
      */
     public AltitudeReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -147,7 +147,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * <li>6 reserved for ACAS</li>
      * <li>7 reserved for ACAS</li>
      * <li>8-15 not assigned</li>
-     * <li>16-31 see downlink ELM protocol (3.1.2.7.7.1)</li>
+     * <li>16-31 see downlink ELM protocol, ICAO Annex 10 Volume IV §3.1.2.7.7.1</li>
      * </ul>
      */
     public byte getDownlinkRequest() {
@@ -155,7 +155,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The 6 bits utility message (see ICAO Annex 10 V4)
+     * @return The 6 bits utility message, see ICAO Annex 10 Volume IV §3.1.2.6.5.3
      */
     public byte getUtilityMsg() {
         return utility_msg;
@@ -189,7 +189,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return The 13 bits altitude code (see ICAO Annex 10 V4)
+     * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
     public short getAltitudeCode() {
         return altitude_code;
@@ -203,7 +203,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Decode Q bit for the altitude according to Annex 10 V4 3.1.2.6.5.4
+     * Decode Q bit for the altitude according to ICAO Annex 10 Volume IV §3.1.2.6.5.4
      *
      * @return value of the Q bit, null if altitude is not available or M bit is set
      */

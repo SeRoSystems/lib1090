@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 3 target state and status message as specified in DO-260C §2.2.3.2.7.1
+ * Decoder for ADS-R version 3 target state and status message as specified in ED-102B §2.2.3.2.7.1
  */
 public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg, ADSRMsg {
 
@@ -61,7 +61,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.1.2 TABLE 2-31
      */
     public TargetStateAndStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -70,7 +70,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.1.2 TABLE 2-31
      */
     public TargetStateAndStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -79,7 +79,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     /**
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException     if message has the wrong typecode or if reserved bits are set
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.1.2 TABLE 2-31
      */
     public TargetStateAndStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -123,13 +123,13 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
         // this is always set and valid
         collisionAvoidanceOperational = b.readBoolean(53);
 
-        // DO-260B 2.2.3.2.7.1.3.19
+        // ED-102B §2.2.3.2.7.1.3.19
         if (b.readByte(55, 56) != 0)
             throw new BadFormatException("Target state and status message reserved bits must be 0.");
     }
 
     /**
-     * DO-260B 2.2.3.2.7.1.3.1
+     * ED-102B §2.2.3.2.7.1.3.1
      *
      * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
      * it's based on "per hour".
@@ -154,7 +154,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * Source for selected altitude according to DO-260B 2.2.3.2.7.1.3.2
+     * Source for selected altitude according to ED-102B §2.2.3.2.7.1.3.2
      *
      * @return true is the value of {@link #getSelectedAltitude()} is derived from the Flight Management System (FMS),
      * false if it is derived from the Control Panel/Flight Control Unit (MCP/FCU)
@@ -164,7 +164,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * DO-260B 2.2.3.2.7.1.3.4
+     * ED-102B §2.2.3.2.7.1.3.4
      *
      * @return whether the Barometric Pressure Setting is available, i.e. {@link #getBarometricPressureSetting()}
      * returns a non-null value
@@ -174,7 +174,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * The barometric pressure setting (minus 800 millibars) according to DO-260B 2.2.3.2.7.1.3.4
+     * The barometric pressure setting (minus 800 millibars) according to ED-102B §2.2.3.2.7.1.3.4
      * <p>
      * Availability of this information can also be checked with {@link #hasBarometricPressureSetting()}.
      *
@@ -222,7 +222,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * MCP/FCU mode status bit according to DO-260B 2.2.3.2.7.1.3.11
+     * MCP/FCU mode status bit according to ED-102B §2.2.3.2.7.1.3.11
      * <p>
      * A value of false indicates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
      * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
@@ -234,7 +234,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * Auto pilot engaged flag according to DO-260B 2.2.3.2.7.1.3.12
+     * Auto pilot engaged flag according to ED-102B §2.2.3.2.7.1.3.12
      * <p>
      * Information is only available if {@link #hasMode()} is true.
      *
@@ -246,7 +246,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * VNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.13
+     * VNAV Mode Engaged flag according to ED-102B §2.2.3.2.7.1.3.13
      * <p>
      * Information is only available if {@link #hasMode()} is true.
      *
@@ -258,7 +258,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * Altitude Hold Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.14
+     * Altitude Hold Mode Engaged flag according to ED-102B §2.2.3.2.7.1.3.14
      * <p>
      * Information is only available if {@link #hasMode()} is true.
      *
@@ -270,7 +270,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * Approach Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.16
+     * Approach Mode Engaged flag according to ED-102B §2.2.3.2.7.1.3.16
      * <p>
      * Information is only available if {@link #hasMode()} is true.
      *
@@ -287,7 +287,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
     }
 
     /**
-     * LNAV Mode Engaged flag according to DO-260B 2.2.3.2.7.1.3.18
+     * LNAV Mode Engaged flag according to ED-102B §2.2.3.2.7.1.3.18
      * <p>
      * Information is only available if {@link #hasMode()} is true.
      *

@@ -24,7 +24,9 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import java.io.Serializable;
 
 /**
- * Decoded threat identity info according to Annex 10 V4 4.3.8.4.2.2.1.6
+ * Decoded threat identity info according to ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6; the
+ * THREAT IDENTITY DATA subfield's register layout is also given in ICAO Doc 9871 (First
+ * Edition, AN/464) §A.2 TABLE A-2-48, p. 83 (BDS code 3,0 — ACAS active resolution advisory)
  */
 @SuppressWarnings("unused")
 public class ThreatIdentityData implements Serializable {
@@ -142,7 +144,7 @@ public class ThreatIdentityData implements Serializable {
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
      * <p>
-     * See Annex 10 V4 4.3.8.4.2.2.1.6.2
+     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2
      *
      * @return null if the target is identified by its 24 bit address or the range estimate is not available;
      * 0.05 if the estimate is less than 0.05NM, or the actual estimated range (shortest estimate) in NM
@@ -165,7 +167,7 @@ public class ThreatIdentityData implements Serializable {
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
      * <p>
-     * See Annex 10 V4 4.3.8.4.2.2.1.6.3
+     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3
      *
      * @return null if the target is identified by its 24 bit address or the bearing estimate is not available;
      * an array with two elements defining the estimated lower and upper bound for the bearing estimate in

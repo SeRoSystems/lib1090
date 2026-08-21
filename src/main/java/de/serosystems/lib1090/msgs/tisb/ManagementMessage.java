@@ -25,7 +25,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B/ADS-R Management Message (DO-260B, 2.2.17.3.6).
+ * Decoder for TIS-B/ADS-R Management Message, ED-102B §2.2.19.2.3.
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable, TISBMsg {
 
@@ -40,7 +40,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identification and category message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a Management Message Bit Field value not covered by ED-102B §2.2.19.2.3 TABLE 2-187
      */
     public ManagementMessage(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -49,7 +49,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identity and category message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a Management Message Bit Field value not covered by ED-102B §2.2.19.2.3 TABLE 2-187
      */
     public ManagementMessage(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +65,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
         if (getDownlinkFormat() != 18)
             throw new BadFormatException("TIS-B messages must have downlink format 18.");
 
-        // Table 2-13
+        // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 4)
             throw new BadFormatException("TIS-B management messages must have CF value 6.");
 

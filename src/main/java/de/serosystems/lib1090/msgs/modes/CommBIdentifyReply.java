@@ -50,7 +50,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as hex string
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B identity reply (DF=21) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.8
      */
     public CommBIdentifyReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -60,7 +60,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as byte array
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B identity reply (DF=21) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.8
      */
     public CommBIdentifyReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -153,7 +153,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * <li>6 reserved for ACAS</li>
      * <li>7 reserved for ACAS</li>
      * <li>8-15 not assigned</li>
-     * <li>16-31 see downlink ELM protocol (3.1.2.7.7.1)</li>
+     * <li>16-31 see downlink ELM protocol, ICAO Annex 10 Volume IV §3.1.2.7.7.1</li>
      * </ul>
      */
     public byte getDownlinkRequest() {
@@ -161,7 +161,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
     }
 
     /**
-     * @return The 6 bits utility message (see ICAO Annex 10 V4)
+     * @return The 6 bits utility message, see ICAO Annex 10 Volume IV §3.1.2.6.5.3
      */
     public byte getUtilityMsg() {
         return utility_msg;
@@ -196,21 +196,23 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
     }
 
     /**
-     * @return The 13 bits identity code (Mode A code; see ICAO Annex 10 V4)
+     * @return The 13 bits identity code (Mode A code), see ICAO Annex 10 Volume IV §3.1.2.6.7.1
      */
     public short getIdentityCode() {
         return identity;
     }
 
     /**
-     * @return the 7-byte Comm-B message (BDS register)
+     * @return the 7-byte Comm-B message (BDS register; register numbering and content per
+     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation, p. 22 — individual
+     * registers are decoded in package de.serosystems.lib1090.msgs.bds)
      */
     public byte[] getMessage() {
         return message;
     }
 
     /**
-     * @return The identity/Mode A code (see ICAO Annex 10 V4).
+     * @return The identity/Mode A code, see ICAO Annex 10 Volume IV §3.1.2.6.7.1.
      * Special codes are<br>
      * <ul>
      * <li> 7700 indicates emergency<br>

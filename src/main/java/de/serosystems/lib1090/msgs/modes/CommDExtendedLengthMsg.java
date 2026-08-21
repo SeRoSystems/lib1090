@@ -47,7 +47,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
      * @param rawMessage raw comm-d extended len msg as hex string
      * @throws BadFormatException     if message is not extended len msg or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.7.3
      */
     public CommDExtendedLengthMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -57,7 +57,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
      * @param rawMessage raw comm-d extended len msg as byte array
      * @throws BadFormatException     if message is not extended len msg or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.7.3
      */
     public CommDExtendedLengthMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

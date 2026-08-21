@@ -24,7 +24,8 @@ import java.util.Objects;
  * A stateless utility for extracting bits from byte arrays using absolute bit ranges.
  * <p>
  * <b>Indexing Convention:</b> This class uses <b>1-based indexing</b> to match
- * technical specifications like ICAO Annex 10.
+ * technical specifications like ICAO Annex 10 Volume IV §3.1.2.2.5 Figure 3-6 (Mode S reply bit
+ * numbering).
  * <ul>
  * <li>Bit 1: The Most Significant Bit (MSB) of the first byte.</li>
  * <li>Bit 8: The Least Significant Bit (LSB) of the first byte.</li>

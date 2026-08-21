@@ -28,7 +28,11 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B airspeed+heading message (DO-260B, 2.2.17.3.4).
+ * Decoder for TIS-B airspeed+heading message (subtype 3/4). ED-102B §2.2.3.2.2 TABLE 2-10 reserves
+ * these subtype codes for backward compatibility only and no longer defines their content — ED-102B
+ * §2.2.3.2.6.5 states the corresponding ADS-B subtypes are "not specified for Subtypes 3, 4, 5, 6 or 7".
+ * This format is therefore no longer specified in ED-102B; the applicable reference is the former
+ * DO-260B §2.2.17.3.4 Figure 2-30.
  */
 public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, TISBMsg {
 
@@ -62,7 +66,8 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     /**
      * @param rawMessage raw TIS-B velocity message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in the former DO-260B §2.2.17.3.4 Figure 2-30 —
+     *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -71,7 +76,8 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     /**
      * @param rawMessage raw TIS-B velocity message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in the former DO-260B §2.2.17.3.4 Figure 2-30 —
+     *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -90,7 +96,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
         if (this.getFormatTypeCode() != 19)
             throw new BadFormatException("Velocity messages must have typecode 19.");
 
-        // Table 2-13
+        // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
             throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
 
@@ -196,7 +202,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     /**
-     * Navigation accuracy category according to DO-260B Table N-7. In ADS-B version 1+ this information is contained
+     * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
      * in the operational status message. For version 0 it is derived from the format type code.
      *
      * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
@@ -207,7 +213,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     /**
-     * Source/Surveillance Integrity Level (SIL) according to DO-260B Table N-8.
+     * Source/Surveillance Integrity Level (SIL) according to ED-102B §N.2.3.9 TABLE N-10.
      * <p>
      * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
      * is reflected by this method.
@@ -223,7 +229,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     /**
-     * According to DO-260B, 2.2.3.2.7.2.13
+     * According to ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      *
      * @return true if horizontal reference direction is magnet north; false if true north; null if info not available
      */

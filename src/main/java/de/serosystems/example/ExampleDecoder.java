@@ -82,6 +82,10 @@ public class ExampleDecoder {
             System.out.println("Malformed message! Skipping it. Message: " + e.getMessage());
             return;
         } catch (UnspecifiedFormatError e) {
+            // raised by StatefulModeSDecoder#decode for an ADS-B format type code not covered by
+            // ED-102B §2.2.3.2.2 TABLE 2-9, a DF=18 TIS-B/ADS-R management frame not covered by
+            // ED-102B §2.2.17.2 TABLE 2-184, or a DF=19 military extended squitter per ICAO Annex
+            // 10 Volume IV §3.1.2.8 — see StatefulModeSDecoder and ModeSDownlinkMsg
             System.out.println("Unspecified message! Skipping it...");
             return;
         }

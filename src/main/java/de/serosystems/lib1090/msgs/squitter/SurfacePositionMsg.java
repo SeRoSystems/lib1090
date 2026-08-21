@@ -32,9 +32,10 @@ public interface SurfacePositionMsg extends PositionMsg {
      * Navigation accuracy category.
      * <p>
      * In ADS-B version 0 this is derived from the format type code. For version 1+ aircraft,
-     * it is typically provided by the corresponding operational status message.
+     * it is typically provided by the corresponding operational status message, ED-102B
+     * §2.2.3.2.7.2.7 TABLE 2-68.
      *
-     * @return navigation accuracy category according to DO-260B
+     * @return navigation accuracy category, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACp();
 
@@ -47,9 +48,11 @@ public interface SurfacePositionMsg extends PositionMsg {
 
     /**
      * Navigation integrity category. The default implementation assumes no supplements,
-     * which may not be accurate for ADS-B version 1 and 2 aircraft that set them.
+     * which may not be accurate for ADS-B version 1 and 2 aircraft that set them. The base NIC
+     * value is derived from the format type code, ED-102B §2.2.3.2.2 TABLE 2-11; NIC
+     * Supplement-A comes from the aircraft operational status message, ED-102B §2.2.3.2.7.2.6.
      *
-     * @return navigation integrity category according to DO-260B
+     * @return navigation integrity category, ED-102B §2.2.3.2.2 TABLE 2-11
      */
     byte getNIC();
 

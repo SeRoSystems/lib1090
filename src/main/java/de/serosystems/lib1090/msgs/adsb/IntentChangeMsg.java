@@ -19,7 +19,15 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 /**
- * Common API for messages that expose the intent change flag (ICF).
+ * Common API for messages that expose the intent change flag (ICF), "ME" bit 9 of the Airborne
+ * Velocity Message (TYPE=19). The "Intent Change Flag" subfield was specified in
+ * DO-260B §2.2.3.2.6.1.3 (Subtype=1), §2.2.3.2.6.2.3 (Subtype=2), §2.2.3.2.6.3.3 (Subtype=3) and
+ * §2.2.3.2.6.4.3 (Subtype=4); ED-102B removes those subparagraphs ("This section has been
+ * removed and is no longer applicable", §2.2.3.2.6.1.3/.1.4) and repurposes "ME" bit 9 as part of
+ * the "Extended Difference From Barometric Altitude" subfield (ED-102B §2.2.3.2.6.1.15). The flag
+ * remains part of the legacy Version Zero (0) message format for backward compatibility, ED-102B
+ * Appendix N, Figure N-4. (ED-102B §2.2.19 "Traffic Uplink Management Message" is a distinct
+ * DF=18/CF=4 ground-uplink advisory service and does not cover this flag.)
  */
 public interface IntentChangeMsg {
 

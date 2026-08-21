@@ -30,8 +30,7 @@ import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2V3Msg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B operational status message as specified in DO-260C (ADS-B version 3) with
- * subtype 0 (airborne)
+ * Decoder for ADS-B operational status message as specified in DO-260C (ADS-B version 3) with subtype 0 (airborne)
  */
 public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg, ADSBReceiverVersionMsg, ADSBMsg {
 
@@ -55,7 +54,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -64,7 +63,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -75,7 +74,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version or is not an airborne
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -131,7 +130,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
      *
-     * @return the encoded transponder side indication (ME bits 15-16, see DO-260C)
+     * @return the encoded transponder side indication (ME bits 15-16); see ED-102B §2.2.3.2.7.2.3.4 TABLE 2-50
      */
     public byte getTransponderSideIndicationEncoded() {
         return (byte) ((capabilityClassCode & 0x300) >>> 8);
@@ -140,7 +139,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
      *
-     * @return the encoded transmit power (ME bits 17-18, see DO-260C)
+     * @return the encoded transmit power (ME bits 17-18); see ED-102B §2.2.3.2.7.2.3.6 TABLE 2-51
      */
     public byte getTxPowerEncoded() {
         return (byte) ((capabilityClassCode & 0xC0) >>> 6);
@@ -149,7 +148,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
      *
-     * @return the encoded Reduced Capability Equipment (RCE) capability (ME bits 21-22, see DO-260C)
+     * @return the encoded Reduced Capability Equipment (RCE) capability (ME bits 21-22); see ED-102B §2.2.3.2.7.2.3.11 TABLE 2-53
      */
     public byte getReducedCapabilityEquipmentEncoded() {
         return (byte) ((capabilityClassCode & 0xC) >>> 2);
@@ -158,7 +157,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     /**
      * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
      *
-     * @return the encoded Detect and Avoid (DAA) capability (ME bits 23-24, see DO-260C)
+     * @return the encoded Detect and Avoid (DAA) capability (ME bits 23-24); see ED-102B §2.2.3.2.7.2.3.12 TABLE 2-54
      */
     public byte getDetectAndAvoidEncoded() {
         return (byte) (capabilityClassCode & 0x3);
@@ -194,6 +193,9 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
         return nicSupplementA;
     }
 
+    /**
+     * @return the raw encoded Navigation Accuracy Category for Position (NACP), ED-102B §2.2.3.2.7.2.7 TABLE 2-68
+     */
     @Override
     public byte getNACpEncoded() {
         return nacP;
@@ -204,6 +206,9 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
         return AirborneOperationalStatusV2V3Msg.super.getPositionUncertainty();
     }
 
+    /**
+     * @return the raw encoded Source Integrity Level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70
+     */
     @Override
     public byte getSILEncoded() {
         return sil;

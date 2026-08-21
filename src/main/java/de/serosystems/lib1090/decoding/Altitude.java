@@ -38,7 +38,9 @@ public final class Altitude {
     }
 
     /**
-     * Decode altitude code according to Annex 10 V4 3.1.2.6.5.4
+     * Decode altitude code according to ICAO Annex 10 Volume IV §3.1.2.6.5.4, Gillham pulse
+     * assignment per ICAO Annex 10 Volume IV Appendix to Chapter 3 (SSR Automatic Pressure-Altitude
+     * Transmission Code)
      *
      * @param altitude_code as provided in most Mode S replies (13 bits)
      * @return altitude in feet
@@ -83,7 +85,9 @@ public final class Altitude {
     }
 
     /**
-     * Decode Q bit for altitude code according to Annex 10 V4 3.1.2.6.5.4
+     * Decode Q bit for altitude code according to ICAO Annex 10 Volume IV §3.1.2.6.5.4, Gillham
+     * pulse assignment per ICAO Annex 10 Volume IV Appendix to Chapter 3 (SSR Automatic
+     * Pressure-Altitude Transmission Code)
      *
      * @param altitude_code as provided in most Mode S replies (13 bits)
      * @return value of the Q bit, null if MBit is set or altitude is not available
@@ -94,7 +98,7 @@ public final class Altitude {
     }
 
     /**
-     * Decode altitude according to DO-260B 2.2.3.2.3.4.3 <br>
+     * Decode altitude according to ED-102B §2.2.3.2.3.4.3 Figure 2-5 <br>
      *
      * @param altitude_encoded 12 bit encoded altitude
      * @return altitude in feet
@@ -135,7 +139,7 @@ public final class Altitude {
     }
 
     /**
-     * Decode the Q bit for an altitude provided according to DO-260B 2.2.3.2.3.4.3 <br>
+     * Decode the Q bit for an altitude provided according to ED-102B §2.2.3.2.3.4.3 Figure 2-5 <br>
      *
      * @param altitude_encoded 12 bit encoded altitude
      * @return value of the Q bit

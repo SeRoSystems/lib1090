@@ -19,7 +19,8 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B/ADS-R Wx AIREP messages, introduced in ADS-B version 3.
+ * Common API for ADS-B/ADS-R Wx AIREP messages, introduced in ADS-B version 3, ED-102B
+ * §2.2.3.2.7.6.
  * <p>
  * The aircraft state, weather state and alternate weather state subtypes share no fields at this
  * level, so this interface currently serves only to mark all three subtypes as members of the
@@ -28,8 +29,9 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface WxAIREPMsg {
 
     /**
-     * @return the raw encoded message subtype (0 for the aircraft state subtype, 1 for the
-     * weather state subtype, 2 for the alternate weather state subtype)
+     * @return the raw encoded message subtype (0 for the aircraft state subtype, ED-102B
+     * §2.2.3.2.7.6.3; 1 for the weather state subtype, ED-102B §2.2.3.2.7.6.4; 2 for the
+     * alternate weather state subtype, ED-102B §2.2.3.2.7.6.5)
      */
     byte getMessageSubtype();
 }

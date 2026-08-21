@@ -24,8 +24,11 @@ public final class EmergencyOrPriorityStatus {
     }
 
     /**
-     * Decodes the upper bound of an eddy dissipation rate (EDR) value in m^(2/3)/s
-     * (0.850 denotes 0.850 or larger).
+     * Decodes the upper bound of an eddy dissipation rate (EDR) value in m^(2/3)/s;
+     * the top range is unbounded, so 0.850 denotes an EDR of 0.850 or larger.
+     * Shared by both the "Mean EDR" subfield, coded per ED-102B §2.2.3.2.7.8.1.4 TABLE 2-100,
+     * and the "Peak EDR" subfield, coded per ED-102B §2.2.3.2.7.8.1.5 TABLE 2-101 — the two use
+     * the same coding and resolution.
      *
      * @param n the encoded EDR value; must not be 0 (i.e. only call when EDR is available)
      * @return the upper bound of the eddy dissipation rate (EDR) in m^(2/3)/s

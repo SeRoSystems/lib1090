@@ -56,7 +56,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
      */
     public VelocityOverGroundV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +65,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in DO-260B
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
      */
     public VelocityOverGroundV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -122,6 +122,14 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
         return ifrCapability;
     }
 
+    /**
+     * Navigation Uncertainty Category - Velocity (NUC_R) subfield in this Version Zero (0) Airborne
+     * Velocity Message, Subtype 1 or 2; originally defined in DO-260/ED-102 §2.2.3.2.6.1.5 (see
+     * DO-260B §N.4.1 Figure N-4, p. N-36). Maps one-for-one to the current-standard Navigation
+     * Accuracy Category for Velocity (NAC_V) field, ED-102B §2.2.3.2.6.1.5 TABLE 2-18 (DO-260B §N.2.3.8).
+     *
+     * @return the raw encoded Navigation Uncertainty Category for Velocity (NUC_R)
+     */
     @Override
     public byte getNUCr() {
         return navigationAccuracyCategory;

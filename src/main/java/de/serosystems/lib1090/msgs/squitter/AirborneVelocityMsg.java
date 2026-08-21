@@ -19,7 +19,8 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 /**
- * Common API for ADS-B airborne velocity messages across message subtypes.
+ * Common API for ADS-B airborne velocity messages across message subtypes, ED-102B §2.2.3.2.6:
+ * subtype=1, subsonic, ED-102B §2.2.3.2.6.1; subtype=2, supersonic, ED-102B §2.2.3.2.6.2.
  */
 public interface AirborneVelocityMsg {
 
@@ -36,7 +37,8 @@ public interface AirborneVelocityMsg {
     }
 
     /**
-     * @return the raw encoded vertical rate field
+     * @return the raw encoded vertical rate field, ED-102B §2.2.3.2.6.1.12 (subsonic) resp.
+     * §2.2.3.2.6.2.12 (supersonic)
      */
     short getVerticalRateEncoded();
 
@@ -67,7 +69,7 @@ public interface AirborneVelocityMsg {
     }
 
     /**
-     * @return the raw encoded Difference from Barometric Altitude field
+     * @return the raw encoded Difference from Barometric Altitude field, ED-102B §2.2.3.2.6.1.15
      */
     short getDiffBaroAltEncoded();
 

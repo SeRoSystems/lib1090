@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Decoder for Common usage GICB capability report (BDS 1,7)
+ * Decoder for Common usage GICB capability report (BDS 1,7), ICAO Doc 9871 (First Edition,
+ * AN/464) §A.2 TABLE A-2-23, p. 70
  */
 @SuppressWarnings("unused")
 public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {

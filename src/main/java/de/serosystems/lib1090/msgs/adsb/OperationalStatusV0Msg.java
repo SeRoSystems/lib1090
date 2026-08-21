@@ -44,7 +44,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
      */
     public OperationalStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -53,7 +53,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
      */
     public OperationalStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -63,7 +63,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version or enroute capabilities
      *                                are invalid
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
      */
     public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
@@ -87,7 +87,10 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     }
 
     /**
-     * DO-260 2.2.3.2.7.3.3.1
+     * En-Route Operational Capabilities Encoding (TCAS/CDTI control codes) for the Version Zero
+     * Operational Status Message, originally DO-260 §2.2.3.2.7.3.3.1; carried forward as DO-260B
+     * §N.2.3.5 TABLE N-6 and, with no successor in the normative ED-102B §2.2.3.2.7.x numbering,
+     * as ED-102B §N.2.3.5 TABLE N-8, En Route Operational Capabilities Encoding.
      *
      * @return true if TCAS is operational or unknown, false if TCAS is not operational.
      */
@@ -96,7 +99,10 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     }
 
     /**
-     * DO-260 2.2.3.2.7.3.3.1
+     * En-Route Operational Capabilities Encoding (TCAS/CDTI control codes) for the Version Zero
+     * Operational Status Message, originally DO-260 §2.2.3.2.7.3.3.1; carried forward as DO-260B
+     * §N.2.3.5 TABLE N-6 and, with no successor in the normative ED-102B §2.2.3.2.7.x numbering,
+     * as ED-102B §N.2.3.5 TABLE N-8, En Route Operational Capabilities Encoding.
      *
      * @return true if CDTI is operational or unknown, false if CDTI is not operational.
      */

@@ -27,8 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.*;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with
- * subtype 0 (airborne)
+ * Decoder for ADS-R operational status message as specified in DO-260B (ADS-R version 2) with subtype 0 (airborne)
  */
 public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, NICSupplementBMsg, ADSRMsg {
 
@@ -55,7 +54,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -64,7 +63,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -75,7 +74,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version or is not an airborne
      *                                operational status message or the capability class code or operational mode
      *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype
+     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
      */
     public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

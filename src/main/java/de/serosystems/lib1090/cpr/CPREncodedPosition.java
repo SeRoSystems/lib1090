@@ -165,7 +165,7 @@ public final class CPREncodedPosition {
 
     /**
      * Test if both CPR encoded coordinates are all zeros.
-     * This is meant to be used to implement §2.2.10.3.1 of ED-102B.
+     * This is meant to be used to implement ED-102B §2.2.10.3.1.
      *
      * @return true if XZ and YZ coordinates are both all zeros, false otherwise
      */
@@ -175,7 +175,7 @@ public final class CPREncodedPosition {
 
     /**
      * Test if two CPR positions are close by checking if the absolute difference in each coordinate is below 1000.
-     * This only works under certain conditions and <b>shall only be used to implement §2.2.10.3.1 of ED-102B</b>.
+     * This only works under certain conditions and <b>shall only be used to implement ED-102B §2.2.10.3.1</b>.
      *
      * @param other other CPR encoded position (of same format), must not be null
      * @return true if the encoded difference in XZ and YZ is below 1000, false otherwise
@@ -191,9 +191,9 @@ public final class CPREncodedPosition {
 
     /**
      * Get maximum time gap between messages for global decoding, based on their type.
-     * See §2.2.10.3.1 and §2.2.10.3.2 of ED-102A.
-     * For ED-102B, this functions is still applicable to surface position messages.
-     * For airborne position messages, it may be used, but it is stricter than the standard, see §2.2.10.3.1.
+     * See ED-102B §2.2.10.3.1 and ED-102B §2.2.10.3.2.
+     * This function is still applicable to surface position messages.
+     * For airborne position messages, it may be used, but it is stricter than the standard, see ED-102B §2.2.10.3.1.
      *
      * @param other other message, must not be null
      * @return maximum duration between messages
@@ -393,9 +393,9 @@ public final class CPREncodedPosition {
     /**
      * This method decodes this position using the global or local CPR decoding. If possible, runs a couple of
      * reasonableness tests.
-     * Those tests are the library's own set of tests. They are inspired by §A.1.7.10.2 of ED-102B but deviate from the
+     * Those tests are the library's own set of tests. They are inspired by ED-102B §A.1.7.10.2 but deviate from the
      * rules given there.
-     * The function also doesn't help on target acquisition based on §2.2.10.3 of ED-102B.
+     * The function also doesn't help on target acquisition based on ED-102B §2.2.10.3.
      *
      * @param other     the other CPR encoded position in complementary format (even/odd). Also surface positions can
      *                  only be combined with other surface positions. Use null for local decoding only.
@@ -411,7 +411,7 @@ public final class CPREncodedPosition {
         Position localPos = reference != null ? decodeLocal(reference) : null;
 
         //////// Reasonableness Test //////////
-        // see A.1.7.10.2 of DO-260B
+        // see ED-102B §A.1.7.10.2
 
         boolean reasonable = true; // be positive :-)
         double mu = 5.0; // 5 meters is a random small distance

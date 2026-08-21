@@ -24,12 +24,16 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface AirborneOperationalStatusV1V2Msg extends AirborneOperationalStatusMsg {
 
     /**
-     * @return the barometric altitude integrity code which indicates whether barometric altitude was cross-checked
+     * @return the barometric altitude integrity code (NIC_BARO) which indicates whether
+     * barometric altitude was cross-checked. This subfield is no longer specified in ED-102B:
+     * §2.2.3.2.7.2.10, which used to define it, is now a "Reserved Section...removed and no
+     * longer applicable". The governing former-standard reference is DO-260B §2.2.3.2.7.2.10.
      */
     boolean getBarometricAltitudeIntegrityCode();
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north,
+     * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */
     boolean getHorizontalReferenceDirection();
 
