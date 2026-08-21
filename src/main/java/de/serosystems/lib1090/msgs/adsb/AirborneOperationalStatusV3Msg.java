@@ -190,8 +190,20 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
         return (operationalModeCode & 0x1000) != 0;
     }
 
+    /**
+     * For ADS-B Version 3, ME bit 29 no longer indicates whether the transponder is receiving ATC services.
+     *
+     * @return always false, as this flag is not defined for ADS-B Version 3
+     */
     @Override
     public boolean hasReceivingATCServices() {
+        return false;
+    }
+
+    /**
+     * @return whether the transponder has activated the Mode S reply rate limiting mechanism
+     */
+    public boolean hasModeSReplyRateLimiting() {
         return (operationalModeCode & 0x800) != 0;
     }
 
@@ -268,6 +280,23 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
         return silSupplement;
     }
 
+    /**
+     * operationalModeCode covers ME bits 25-40, i.e. bit m of the ME is bit (40-m) of this field.
+     *
+     * @return the encoded Collision Avoidance Coordination Capability Bits (CCCB, ME bits 33-39, see DO-260C)
+     */
+    public byte getCollisionAvoidanceCoordinationCapabilityBitsEncoded() {
+        return (byte) ((operationalModeCode & 0xFE) >>> 1);
+    }
+
+    /**
+     * @return whether the Detect and Avoid (DAA) system has commanded the aircraft to Remain Well Clear,
+     * i.e. the RWC Active flag (ME bit 40, see DO-260C)
+     */
+    public boolean hasRemainWellClearActive() {
+        return (operationalModeCode & 0x1) != 0;
+    }
+
     @Override
     public String toString() {
         return "AirborneOperationalStatusV3Msg{" + super.toString() +
@@ -283,6 +312,9 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
                 ", daa=" + getDetectAndAvoidEncoded() +
                 ", geometricVerticalAccuracy=" + gva +
                 ", silSupplement=" + silSupplement +
+                ", cccb=" + getCollisionAvoidanceCoordinationCapabilityBitsEncoded() +
+                ", remainWellClearActive=" + hasRemainWellClearActive() +
+                ", modeSReplyRateLimiting=" + hasModeSReplyRateLimiting() +
                 '}';
     }
 
