@@ -27,7 +27,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Decoder for Mode S surveillance altitude replies with Comm-B message (DF 20)
+ * Decoder for the Mode S surveillance altitude reply with Comm-B message (DF=20),
+ * as defined in ICAO Annex 10 Volume IV §3.1.2.6.6.
  */
 @SuppressWarnings("unused")
 public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable {
@@ -50,7 +51,7 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b altitude reply as hex string
      * @throws BadFormatException     if message is not comm-b altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B altitude reply (DF=20) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.6
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B altitude reply (DF=20) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.6
      */
     public CommBAltitudeReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -60,7 +61,7 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b altitude reply as byte array
      * @throws BadFormatException     if message is not comm-b altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B altitude reply (DF=20) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.6
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B altitude reply (DF=20) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.6
      */
     public CommBAltitudeReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -219,7 +220,7 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
 
     /**
      * @return the 7-byte Comm-B message (BDS register; register numbering and content per
-     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation, p. 22 — individual
+     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation — individual
      * registers are decoded in package de.serosystems.lib1090.msgs.bds)
      */
     public byte[] getMessage() {

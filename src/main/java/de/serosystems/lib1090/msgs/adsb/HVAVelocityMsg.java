@@ -27,7 +27,8 @@ import java.io.Serializable;
 
 /**
  * Decoder for the velocity subtype (1) of the ADS-B High Velocity and/or Altitude (HVA) message,
- * introduced with typecode 25 in ADS-B version 3.
+ * introduced with typecode 25 in ADS-B version 3, as defined in ED-102B §2.2.3.2.7.5.4
+ * Figure 2-16.
  */
 public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
 
@@ -50,7 +51,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 (p. 129) Figure 2-16 (p. 130)
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 Figure 2-16
      */
     public HVAVelocityMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -59,7 +60,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 (p. 129) Figure 2-16 (p. 130)
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 Figure 2-16
      */
     public HVAVelocityMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -68,7 +69,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param squitter extended squitter which contains this HVA velocity message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 1 (velocity), ED-102B §2.2.3.2.7.5.4 (p. 129) Figure 2-16 (p. 130)
+     * @throws UnspecifiedFormatError if message has a subtype other than 1 (velocity), ED-102B §2.2.3.2.7.5.4 Figure 2-16
      */
     public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

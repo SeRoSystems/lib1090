@@ -30,11 +30,11 @@ import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 1 airspeed and heading messages.
- * Airborne Velocity Subtypes 3 and 4 (Airspeed/Heading) are no longer specified in the
- * main body of ED-102B; see ED-102B §2.2.3.2.6.5, "reserved for future expansion".
- * The format is retained only for backward compatibility in ED-102B §N.5.2 Figure N-12
- * (Version One Airborne Velocity Message Subtypes 3 &amp; 4).
+ * Decoder for ADS-R version 1 airspeed and heading messages, as defined in ED-102B §N.5.2 Figure N-12
+ * (Version One Airborne Velocity Message Subtypes 3 &amp; 4). Airborne Velocity Subtypes 3 and 4
+ * (Airspeed/Heading) are no longer specified in the main body of ED-102B; see ED-102B §2.2.3.2.6.5,
+ * "reserved for future expansion". The format is retained only for backward compatibility at the
+ * Appendix N location cited above.
  */
 public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, IFRCapabilityMsg, IMFMsg, NACvMsg, ADSRMsg {
 

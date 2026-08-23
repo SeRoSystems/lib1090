@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.*;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260C (ADS-R version 3) with subtype 1 (surface)
+ * Decoder for the ADS-R surface operational status message (subtype 1), as defined in ED-102B (ADS-R version 3).
  */
 public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg, ADSBReceiverVersionMsg, IMFMsg, ADSRMsg {
 
@@ -126,11 +126,17 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         return SUBTYPE_CODE;
     }
 
+    /**
+     * @return the encoded 1090ES IN capability flag (ME bit 12); see ED-102B §2.2.3.2.7.2.3.3 TABLE 2-49
+     */
     @Override
     public boolean has1090ESIn() {
         return (capabilityClassCode & 0x100) != 0;
     }
 
+    /**
+     * @return the encoded "B2 Low" flag (ME bit 15); see ED-102B §2.2.3.2.7.2.3.7
+     */
     @Override
     public boolean hasLowTxPower() {
         return (capabilityClassCode & 0x20) != 0;
@@ -148,7 +154,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether TCAS Resolution Advisory (RA) is active
+     * @return whether TCAS Resolution Advisory (RA) is active (ME bit 27); see ED-102B §2.2.3.2.7.2.4.2
      */
     @Override
     public boolean hasTCASResolutionAdvisory() {
@@ -156,7 +162,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether the IDENT switch is active
+     * @return whether the IDENT switch is active (ME bit 28); see ED-102B §2.2.3.2.7.2.4.3
      */
     @Override
     public boolean hasActiveIDENTSwitch() {
@@ -171,16 +177,25 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         return (operationalModeCode & 0x800) != 0;
     }
 
+    /**
+     * @return the raw encoded ADS-B Version Number (MOPS version); see ED-102B §2.2.3.2.7.2.5 TABLE 2-66
+     */
     @Override
     public byte getMOPSVersion() {
         return mopsVersion;
     }
 
+    /**
+     * @return NIC supplement A (ME bit 44); see ED-102B §2.2.3.2.7.2.6
+     */
     @Override
     public boolean hasNICSupplementA() {
         return nicSupplementA;
     }
 
+    /**
+     * @return the raw encoded Navigation Accuracy Category for Position (NACP); see ED-102B §2.2.3.2.7.2.7 TABLE 2-68
+     */
     @Override
     public byte getNACpEncoded() {
         return nacP;
@@ -191,6 +206,9 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         return SurfaceOperationalStatusV2V3Msg.super.getPositionUncertainty();
     }
 
+    /**
+     * @return the raw encoded Source Integrity Level (SIL); see ED-102B §2.2.3.2.7.2.9 TABLE 2-70
+     */
     @Override
     public byte getSILEncoded() {
         return sil;
@@ -215,18 +233,24 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether aircraft has an UAT receiver
+     * @return whether aircraft has an UAT receiver (ME bit 16); see ED-102B §2.2.3.2.7.2.3.9 TABLE 2-52
      */
     @Override
     public boolean hasUATIn() {
         return (capabilityClassCode & 0x10) != 0;
     }
 
+    /**
+     * @return the Navigation Accuracy Category for Velocity (NACV, ME bits 17-19); see ED-102B §2.2.3.2.7.2.3.8
+     */
     @Override
     public byte getNACv() {
         return (byte) ((capabilityClassCode & 0xE) >>> 1);
     }
 
+    /**
+     * @return NIC supplement C (ME bit 20); see ED-102B §2.2.3.2.7.2.3.10
+     */
     @Override
     public boolean hasNICSupplementC() {
         return (capabilityClassCode & 0x1) != 0;
@@ -238,7 +262,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return whether aircraft uses a single antenna or two
+     * @return whether aircraft uses a single antenna or two (ME bit 30); see ED-102B §2.2.3.2.7.2.4.5
      */
     @Override
     public boolean hasSingleAntenna() {

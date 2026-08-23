@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.WxAIREPWeatherMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for the weather state subtype (1) of the ADS-B Wx AIREP message, introduced in ADS-B version 3.
+ * Decoder for the weather state subtype (1) of the ADS-B Wx AIREP message, as defined in ED-102B §2.2.3.2.7.6.4 Figure 2-18, introduced in ADS-B version 3.
  */
 public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializable, WxAIREPWeatherMsg, ADSBMsg {
 

@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B velocity message, ED-102B §2.2.17.3.4.
+ * Decoder for TIS-B velocity message, as defined in ED-102B §2.2.17.3.4.
  */
 public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg {
 

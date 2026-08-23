@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 1 identification messages
+ * Decoder for ADS-R version 1 identification messages, as defined in ED-102B §2.2.18.4.3 Figure 2-7.
  */
 public class IdentificationV1Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
 
@@ -46,7 +46,7 @@ public class IdentificationV1Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.3 Figure 2-7
      */
     public IdentificationV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -55,7 +55,7 @@ public class IdentificationV1Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message as byte array
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.3 Figure 2-7
      */
     public IdentificationV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

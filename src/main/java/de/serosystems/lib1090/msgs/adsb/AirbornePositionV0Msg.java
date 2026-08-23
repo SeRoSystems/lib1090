@@ -32,6 +32,9 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
+/**
+ * Decoder for ADS-B airborne position messages (version 0), as defined in ED-102B §2.2.3.2.3.1 TABLE 2-11.
+ */
 @SuppressWarnings("unused")
 public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg {
 

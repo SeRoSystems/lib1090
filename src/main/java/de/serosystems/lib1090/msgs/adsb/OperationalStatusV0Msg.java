@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.OperationalStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B operational status message as specified in DO-260 (ADS-B version 0).
+ * Decoder for the ADS-B operational status message, as defined in ED-102 (ADS-B version 0).
  */
 public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg, ADSBMsg {
 

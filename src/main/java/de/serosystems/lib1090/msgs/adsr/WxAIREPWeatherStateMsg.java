@@ -28,7 +28,8 @@ import de.serosystems.lib1090.msgs.squitter.WxAIREPWeatherMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for the weather state subtype (1) of the ADS-R Wx AIREP message, introduced in ADS-B version 3.
+ * Decoder for the weather state subtype (1) of the ADS-R Wx AIREP message, as defined in
+ * ED-102B §2.2.18.4.8 Figure 2-65 (introduced in ADS-B version 3).
  */
 public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializable, WxAIREPWeatherMsg, IMFMsg, ADSRMsg {
 
@@ -53,7 +54,7 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage raw ADS-R Wx AIREP message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.6.4 Figure 2-18
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.8 Figure 2-65
      */
     public WxAIREPWeatherStateMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -62,7 +63,7 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage raw ADS-R Wx AIREP message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.6.4 Figure 2-18
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.8 Figure 2-65
      */
     public WxAIREPWeatherStateMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -71,7 +72,7 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
     /**
      * @param squitter extended squitter which contains this Wx AIREP weather state message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 1 (weather state); see ED-102B §2.2.3.2.7.6.4 Figure 2-18
+     * @throws UnspecifiedFormatError if message has a subtype other than 1 (weather state); see ED-102B §2.2.18.4.8 Figure 2-65
      */
     public WxAIREPWeatherStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

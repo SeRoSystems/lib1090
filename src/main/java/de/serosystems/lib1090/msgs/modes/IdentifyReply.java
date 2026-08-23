@@ -26,7 +26,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S surveillance identify replies (DF 5)
+ * Decoder for the Mode S surveillance identity reply (DF=5), as defined in
+ * ICAO Annex 10 Volume IV §3.1.2.6.7.
  */
 @SuppressWarnings("unused")
 public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
@@ -48,7 +49,7 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw identify reply as hex string
      * @throws BadFormatException     if message is not identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance identity reply (DF=5) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.7
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance identity reply (DF=5) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.7
      */
     public IdentifyReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -58,7 +59,7 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw identify reply as byte array
      * @throws BadFormatException     if message is not identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance identity reply (DF=5) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.7
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance identity reply (DF=5) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.7
      */
     public IdentifyReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Decoder for Surface System Status messages, ED-102B §2.2.3.2.7.4: TYPE Code=24, Subtype=1
+ * Decoder for Surface System Status messages, as defined in ED-102B §2.2.3.2.7.4: TYPE Code=24, Subtype=1
  * ("Surface System Status (Allocated for national use)", ED-102B §2.2.3.2.7.4.2 TABLE 2-74). The
  * standard reserves this message for exclusive use by surface surveillance systems and states
  * "there is no provision in these MOPS to transmit or receive" it (ED-102B §2.2.3.2.7.4.3); the

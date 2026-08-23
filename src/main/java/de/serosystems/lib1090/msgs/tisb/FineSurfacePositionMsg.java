@@ -39,7 +39,7 @@ import static de.serosystems.lib1090.decoding.SurfacePosition.decodeEPU;
 import static de.serosystems.lib1090.decoding.SurfacePosition.decodeHCR;
 
 /**
- * Decoder for TIS-B fine surface position, ED-102B §2.2.17.3.2.
+ * Decoder for TIS-B fine surface position, as defined in ED-102B §2.2.17.3.2.
  */
 public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
 

@@ -21,8 +21,8 @@ package de.serosystems.lib1090.msgs.bds;
 import java.io.Serializable;
 
 /**
- * Decoder for heading and speed (BDS 6,0), ICAO Doc 9871 (First Edition, AN/464)
- * §A.2 TABLE A-2-96, p. 97
+ * Decoder for the heading and speed report (BDS 6,0), as defined in ICAO Doc 9871 (First
+ * Edition, AN/464) §A.2 TABLE A-2-96.
  */
 @SuppressWarnings("unused")
 public class HeadingAndSpeed extends BDSRegister implements Serializable {
@@ -152,7 +152,7 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     }
 
     static short extractBarometricAltitudeRateValue(byte[] message) {
-        // FIXME Junzi p 132
+        // FIXME Junzi
         return (short) ((((message[4] & 0x0F) << 5) | ((message[5] >>> 3) & 0x1F)) & 0x1FF);
     }
 

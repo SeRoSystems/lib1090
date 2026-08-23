@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 2 velocity-over-ground messages
+ * Decoder for ADS-B version 2 velocity-over-ground messages, as defined in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9.
  */
 public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV2Msg, ADSBMsg {
 

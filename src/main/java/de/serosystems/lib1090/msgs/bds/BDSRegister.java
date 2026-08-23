@@ -19,9 +19,9 @@
 package de.serosystems.lib1090.msgs.bds;
 
 /**
- * Decoder for BDS register, ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation,
- * p. 22, for the register-numbering scheme (register TABLE A-2-X where X is the decimal
- * equivalent of the BDS1,BDS2 code pair).
+ * Base class for BDS (Comm-B Data Selector) register decoders, as defined in ICAO Doc 9871
+ * (First Edition, AN/464) §A.2.1 Register Allocation, for the register-numbering scheme
+ * (register TABLE A-2-X where X is the decimal equivalent of the BDS1,BDS2 code pair).
  */
 @SuppressWarnings("unused")
 public class BDSRegister {

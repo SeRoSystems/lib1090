@@ -87,7 +87,7 @@ public interface TargetStateAndStatusMsg {
      * @return the barometric altitude integrity code (NIC_BARO) indicating whether barometric
      * altitude was cross-checked. This subfield is no longer specified in ED-102B §2.2.3.2.7.1.3.9,
      * which used to define it, is now a "Reserved Section...removed and no longer applicable".
-     * The governing former-standard reference is DO-260B §2.2.3.2.7.1.3.9.
+     * The governing former-standard reference is ED-102A §2.2.3.2.7.1.3.9.
      */
     boolean getBarometricAltitudeIntegrityCode();
 

@@ -21,6 +21,9 @@ package de.serosystems.lib1090.msgs.squitter;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 
+/**
+ * Common API for ADS-B surface position messages.
+ */
 public interface SurfacePositionMsg extends PositionMsg {
 
     /**
