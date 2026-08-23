@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.squitter.WxAIREPMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for the aircraft state subtype (0) of the ADS-B Wx AIREP message, introduced in ADS-B version 3.
+ * Decoder for the aircraft state subtype (0) of the ADS-B Wx AIREP message, as defined in ED-102B §2.2.3.2.7.6.3 Figure 2-17, introduced in ADS-B version 3.
  */
 public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Serializable, WxAIREPMsg, ADSBMsg {
 

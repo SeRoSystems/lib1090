@@ -31,6 +31,9 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
+/**
+ * Decoder for ADS-R airborne position messages (version 3), as defined in ED-102B §2.2.18.4.1 Figure 2-57.
+ */
 public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = -7146583920415678231L;
@@ -52,7 +55,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
      * @param rawMessage raw ADS-B airborne position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.3.1 TABLE 2-11
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.1 Figure 2-57
      */
     public AirbornePositionV3Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -62,7 +65,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
      * @param rawMessage raw ADS-B airborne position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.3.1 TABLE 2-11
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.1 Figure 2-57
      */
     public AirbornePositionV3Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -211,7 +214,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
          * @param nicSupplementB NIC supplement B bit for this aircraft
          * @param nicSupplementD NIC supplement D (2-bit value) for this aircraft
          * @throws BadFormatException     if message has wrong format
-         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.3.1 TABLE 2-11
+         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.1 Figure 2-57
          */
         public WithNICSupplements(String rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementB, byte nicSupplementD) throws BadFormatException, UnspecifiedFormatError {
             this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementB, nicSupplementD);
@@ -224,7 +227,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
          * @param nicSupplementB NIC supplement B bit for this aircraft
          * @param nicSupplementD NIC supplement D (2-bit value) for this aircraft
          * @throws BadFormatException     if message has wrong format
-         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.3.1 TABLE 2-11
+         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.1 Figure 2-57
          */
         public WithNICSupplements(byte[] rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementB, byte nicSupplementD) throws BadFormatException, UnspecifiedFormatError {
             this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementB, nicSupplementD);

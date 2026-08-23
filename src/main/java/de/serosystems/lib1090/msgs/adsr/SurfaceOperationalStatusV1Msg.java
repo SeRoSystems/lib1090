@@ -29,7 +29,7 @@ import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R operational status message as specified in DO-260A (ADS-R version 1) with subtype 1 (surface)
+ * Decoder for the ADS-R surface operational status message (subtype 1), as defined in DO-260A (ADS-R version 1).
  */
 public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg, IMFMsg, ADSRMsg {
 

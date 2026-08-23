@@ -26,7 +26,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S long air-air ACAS replies (DF 0)
+ * Decoder for the Mode S long air-air ACAS reply (DF=16), as defined in
+ * ICAO Annex 10 Volume IV §3.1.2.8.3.
  */
 public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 
@@ -52,7 +53,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw long air-to-air ACAS reply as hex string
      * @throws BadFormatException     if message is not long air-to-air ACAS reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.3
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are defined in ICAO Annex 10 Volume IV §3.1.2.8.3
      */
     public LongACAS(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -62,7 +63,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw long air-to-air ACAS reply as byte array
      * @throws BadFormatException     if message is not long air-to-air ACAS reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.8.3
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — long air-air ACAS replies (DF=16) are defined in ICAO Annex 10 Volume IV §3.1.2.8.3
      */
     public LongACAS(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

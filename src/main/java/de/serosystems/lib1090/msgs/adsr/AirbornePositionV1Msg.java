@@ -34,7 +34,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for ADS-R airborne position messages version 1, DO-260A.
+ * Decoder for ADS-R airborne position messages (version 1), as defined in DO-260A.
  */
 public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg, ADSRMsg {
 

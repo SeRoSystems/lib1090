@@ -101,11 +101,12 @@ public class StatefulModeSDecoder {
             case 17:
             case 18:
             case 19:
-                // check whether this is an ADS-B message, see ED-102B §2.2.3.2.1 Figure 2-3
-                // note: per DO-260C/DO-181D, DF=19/AF=0 shall no longer be assumed to be ADS-B,
-                // so it is only decoded as such if explicitly enabled (see Builder#decodeDf19Adsb) --
-                // DF=19 (Military Extended Squitter) is outside ED-102B's scope (ADS-B/TIS-B on
-                // DF=17/18 only), so this caveat still cites DO-260C/DO-181D, not ED-102B
+                // check whether this is an ADS-B message, see ED-102B §2.2.3.2 Figure 2-3
+                // note: ED-102B §2.2.3.2 itself (citing RTCA DO-181F §2.2.14.5 / EUROCAE ED-73F
+                // §3.18.5) states that non-military ADS-B receivers shall not accept DF=19 messages,
+                // and its accompanying NOTE records that DF=19/AF=0 was previously accepted but is
+                // no longer guaranteed to conform to the ADS-B format; so it is only decoded as such
+                // if explicitly enabled (see Builder#decodeDf19Adsb)
                 if (modes.getDownlinkFormat() == 17 ||
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() < 2 ||
                         modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0 && decodeDf19Adsb) {
@@ -114,7 +115,7 @@ public class StatefulModeSDecoder {
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
                     return decodeTISB(modes, timestamp);
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 3) {
-                    // CF=3 (coarse TIS-B airborne position) is reserved as of DO-260C; still
+                    // CF=3 (coarse TIS-B airborne position) is reserved per ED-102B; still
                     // decoded as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                     ExtendedSquitter es1090 = new ExtendedSquitter(modes);
                     if (tisbV2CompatibilityMode) return new CoarsePositionMsg(es1090, timestamp);
@@ -376,7 +377,7 @@ public class StatefulModeSDecoder {
                     dd.geoMinusBaro = vog.getDiffBaroAlt();
                 return vog;
             } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
-                // subtypes 3/4 (airspeed & heading) are reserved as of DO-260C; still decoded
+                // subtypes 3/4 (airspeed & heading) are reserved per ED-102B; still decoded
                 // as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                 de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
@@ -790,7 +791,7 @@ public class StatefulModeSDecoder {
         /**
          * Enables decoding of downlink format 19 with application field 0 as ADS-B.
          * <p>
-         * Per DO-260C, this combination shall no longer be used for ADS-B, since we cannot be
+         * Per ED-102B, this combination shall no longer be used for ADS-B, since we cannot be
          * sure that it actually contains an ADS-B message. Note that even under DO-260B, processing
          * of this message was also only optional.
          * Defaults to false; enable only if you rely on this legacy behavior.

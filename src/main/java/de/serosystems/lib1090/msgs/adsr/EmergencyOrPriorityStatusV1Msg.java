@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 1 emergency and priority status messages
+ * Decoder for ADS-R version 1 emergency and priority status messages, as defined in ED-102B §2.2.18.4.5 Figure 2-60.
  */
 public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, IMFMsg, ADSRMsg {
 
@@ -48,7 +48,7 @@ public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-R aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.5 Figure 2-60
      */
     public EmergencyOrPriorityStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -57,7 +57,7 @@ public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements 
     /**
      * @param rawMessage raw ADS-R aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.5 Figure 2-60
      */
     public EmergencyOrPriorityStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

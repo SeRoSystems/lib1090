@@ -27,7 +27,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S identify replies with Comm-B message (DF 21)
+ * Decoder for the Mode S surveillance identity reply with Comm-B message (DF=21),
+ * as defined in ICAO Annex 10 Volume IV §3.1.2.6.8.
  */
 @SuppressWarnings("unused")
 public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable {
@@ -50,7 +51,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as hex string
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B identity reply (DF=21) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.8
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B identity reply (DF=21) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.8
      */
     public CommBIdentifyReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -60,7 +61,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as byte array
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-B identity reply (DF=21) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.8
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B identity reply (DF=21) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.8
      */
     public CommBIdentifyReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -204,7 +205,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
 
     /**
      * @return the 7-byte Comm-B message (BDS register; register numbering and content per
-     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation, p. 22 — individual
+     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation — individual
      * registers are decoded in package de.serosystems.lib1090.msgs.bds)
      */
     public byte[] getMessage() {

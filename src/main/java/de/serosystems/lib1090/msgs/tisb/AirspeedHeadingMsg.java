@@ -32,7 +32,8 @@ import java.io.Serializable;
  * these subtype codes for backward compatibility only and no longer defines their content — ED-102B
  * §2.2.3.2.6.5 states the corresponding ADS-B subtypes are "not specified for Subtypes 3, 4, 5, 6 or 7".
  * This format is therefore no longer specified in ED-102B; the applicable reference is the former
- * DO-260B §2.2.17.3.4 Figure 2-30.
+ * DO-260B §2.2.17.3.4 Figure 2-30 (TIS-B Velocity Message, Subtypes 3 &amp; 4) — Figure 2-29 in the
+ * same section instead covers Subtypes 1 &amp; 2 (Velocity Over Ground).
  */
 public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, TISBMsg {
 

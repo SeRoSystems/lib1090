@@ -23,8 +23,8 @@ import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
 
 /**
  * Marker interface for ADS-B version 0 airborne velocity messages. Implemented both by the
- * ground-speed variant (Subtypes 1 and 2, DO-260B §2.2.3.2.6.1/§2.2.3.2.6.2) and by the
- * airspeed-and-heading variant (Subtypes 3 and 4, DO-260B §2.2.3.2.6.3/§2.2.3.2.6.4); the latter
+ * ground-speed variant (Subtypes 1 and 2, ED-102A §2.2.3.2.6.1/§2.2.3.2.6.2) and by the
+ * airspeed-and-heading variant (Subtypes 3 and 4, ED-102A §2.2.3.2.6.3/§2.2.3.2.6.4); the latter
  * pair is reserved and no longer specified in current ED-102B (§2.2.3.2.6.5). The
  * velocity-uncertainty field common to both variants is grounded by {@link NUCrMsg}.
  */
