@@ -20,10 +20,15 @@ package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.Tools;
 
+/**
+ * Represents a qualified 24-bit address (an address value together with its {@link Type}), as
+ * defined in ED-102B §2.2.3.2.1.5 TABLE 2-8.
+ */
 public class QualifiedAddress {
     /**
-     * Different types of addresses in the AA field, see ED-102B §2.2.3.2.1.3 TABLE 2-7,
-     * "CF" Field Code Definitions in DF=18 ADS-B and TIS-B Messages. Reserved values (DF=19
+     * Different types of addresses in the AA field, see ED-102B §2.2.3.2.1.5 TABLE 2-8,
+     * "Determining the Type of Address in the AA Field" (the CF field itself, which this
+     * table keys on for DF=18, is coded per §2.2.3.2.1.3 TABLE 2-7). Reserved values (DF=19
      * with AF&gt;0) are military-use codings not specified by ED-102B; see ICAO Annex 10
      * Volume IV §3.1.2.8.8.2.
      */

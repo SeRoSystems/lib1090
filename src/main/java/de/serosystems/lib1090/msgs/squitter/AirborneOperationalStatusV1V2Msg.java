@@ -27,7 +27,7 @@ public interface AirborneOperationalStatusV1V2Msg extends AirborneOperationalSta
      * @return the barometric altitude integrity code (NIC_BARO) which indicates whether
      * barometric altitude was cross-checked. This subfield is no longer specified in ED-102B:
      * §2.2.3.2.7.2.10, which used to define it, is now a "Reserved Section...removed and no
-     * longer applicable". The governing former-standard reference is DO-260B §2.2.3.2.7.2.10.
+     * longer applicable". The governing former-standard reference is ED-102A §2.2.3.2.7.2.10.
      */
     boolean getBarometricAltitudeIntegrityCode();
 

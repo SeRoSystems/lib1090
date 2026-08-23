@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Decoder for Mode S replies
+ * Decoder for Mode S replies, as defined in ICAO Annex 10 Volume IV §3.1.2 (Mode S).
  */
 public class ModeSDownlinkMsg implements Serializable {
 

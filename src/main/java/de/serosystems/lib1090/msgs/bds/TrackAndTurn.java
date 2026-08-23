@@ -21,8 +21,8 @@ package de.serosystems.lib1090.msgs.bds;
 import java.io.Serializable;
 
 /**
- * Decoder for track and turn (BDS 5,0), ICAO Doc 9871 (First Edition, AN/464)
- * §A.2 TABLE A-2-80, p. 91
+ * Decoder for the track and turn report (BDS 5,0), as defined in ICAO Doc 9871 (First Edition,
+ * AN/464) §A.2 TABLE A-2-80.
  */
 @SuppressWarnings("unused")
 public class TrackAndTurn extends BDSRegister implements Serializable {

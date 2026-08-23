@@ -33,7 +33,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for ADS-R surface position messages version 2.
+ * Decoder for ADS-R surface position messages (version 2), as defined in ED-102B §2.2.18.4.2 Figure 2-58.
  */
 public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, ADSRMsg {
 
@@ -59,7 +59,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.4.1 TABLE 2-11
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
      */
     public SurfacePositionV2Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -69,7 +69,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.4.1 TABLE 2-11
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
      */
     public SurfacePositionV2Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);

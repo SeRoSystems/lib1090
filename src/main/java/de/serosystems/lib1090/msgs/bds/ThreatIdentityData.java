@@ -24,9 +24,10 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import java.io.Serializable;
 
 /**
- * Decoded threat identity info according to ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6; the
- * THREAT IDENTITY DATA subfield's register layout is also given in ICAO Doc 9871 (First
- * Edition, AN/464) §A.2 TABLE A-2-48, p. 83 (BDS code 3,0 — ACAS active resolution advisory)
+ * Represents the decoded threat identity data, as defined in ICAO Annex 10 Volume IV
+ * §4.3.8.4.2.2.1.6; the THREAT IDENTITY DATA subfield's register layout is also given in ICAO
+ * Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-48 — BDS code 3,0, ACAS
+ * active resolution advisory.
  */
 @SuppressWarnings("unused")
 public class ThreatIdentityData implements Serializable {

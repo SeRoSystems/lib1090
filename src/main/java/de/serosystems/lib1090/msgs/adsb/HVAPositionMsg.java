@@ -26,7 +26,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for the position subtype of the ADS-B High Velocity and/or Altitude (HVA) message.
+ * Decoder for the position subtype of the ADS-B High Velocity and/or Altitude (HVA) message, as defined in ED-102B §2.2.3.2.7.5.3 Figure 2-15.
  */
 public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
 
@@ -45,7 +45,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 (p. 126) Figure 2-15 (p. 126)
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 Figure 2-15
      */
     public HVAPositionMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,7 +54,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 (p. 126) Figure 2-15 (p. 126)
+     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 Figure 2-15
      */
     public HVAPositionMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -63,7 +63,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param squitter extended squitter which contains this HVA position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 0 (position), ED-102B §2.2.3.2.7.5.3 (p. 126) Figure 2-15 (p. 126)
+     * @throws UnspecifiedFormatError if message has a subtype other than 0 (position), ED-102B §2.2.3.2.7.5.3 Figure 2-15
      */
     public HVAPositionMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

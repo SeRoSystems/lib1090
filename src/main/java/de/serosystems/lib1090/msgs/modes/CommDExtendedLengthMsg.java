@@ -26,7 +26,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S surveillance Extended Length Messages (Comm-D ELM) (DF 24)
+ * Decoder for the Mode S Comm-D Extended Length Message (DF=24), as defined in
+ * ICAO Annex 10 Volume IV §3.1.2.7.3.
  */
 @SuppressWarnings("unused")
 public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializable {
@@ -47,7 +48,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
      * @param rawMessage raw comm-d extended len msg as hex string
      * @throws BadFormatException     if message is not extended len msg or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.7.3
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are defined in ICAO Annex 10 Volume IV §3.1.2.7.3
      */
     public CommDExtendedLengthMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -57,7 +58,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
      * @param rawMessage raw comm-d extended len msg as byte array
      * @throws BadFormatException     if message is not extended len msg or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.7.3
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — Comm-D Extended Length Messages (DF=24) are defined in ICAO Annex 10 Volume IV §3.1.2.7.3
      */
     public CommDExtendedLengthMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

@@ -26,8 +26,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for 1090ES UAS/RPAS Contingency Messages: Extended Squitter Aircraft Status Message,
- * TYPE=28 Subtype=4 (Optional), ED-102B §2.2.3.2.8.1.3 Figure 2-23.
+ * Decoder for 1090ES UAS/RPAS Contingency Messages (Extended Squitter Aircraft Status Message,
+ * TYPE=28 Subtype=4, Optional), as defined in ED-102B §2.2.3.2.8.1.3 Figure 2-23.
  */
 public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 

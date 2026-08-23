@@ -26,8 +26,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Decoder for aircraft identification (BDS 2,0), ICAO Doc 9871 (First Edition, AN/464)
- * §A.2 TABLE A-2-32, p. 79. Individual callsign characters are decoded by
+ * Decoder for aircraft identification (BDS 2,0), as defined in ICAO Doc 9871 (First Edition,
+ * AN/464) §A.2 TABLE A-2-32. Individual callsign characters are decoded by
  * {@link Identification#identificationDigits(long)}, whose 6-bit IA-5 alphabet is cited in
  * ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8.
  */

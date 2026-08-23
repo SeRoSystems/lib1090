@@ -28,7 +28,7 @@ import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 2 target state and status message as specified in ED-102B §2.2.3.2.7.1
+ * Decoder for ADS-R version 2 target state and status message, as defined in ED-102B §2.2.18.4.6 Figure 2-61.
  */
 public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg, ADSRMsg {
 

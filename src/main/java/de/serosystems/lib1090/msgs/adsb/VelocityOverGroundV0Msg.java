@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 0 velocity-over-ground messages
+ * Decoder for ADS-B version 0 velocity-over-ground messages, as defined in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9.
  */
 public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV0Msg, ADSBMsg {
 
@@ -125,8 +125,8 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
     /**
      * Navigation Uncertainty Category - Velocity (NUC_R) subfield in this Version Zero (0) Airborne
      * Velocity Message, Subtype 1 or 2; originally defined in DO-260/ED-102 §2.2.3.2.6.1.5 (see
-     * DO-260B §N.4.1 Figure N-4, p. N-36). Maps one-for-one to the current-standard Navigation
-     * Accuracy Category for Velocity (NAC_V) field, ED-102B §2.2.3.2.6.1.5 TABLE 2-18 (DO-260B §N.2.3.8).
+     * ED-102B §N.5.1 Figure N-4). Maps one-for-one to the current-standard Navigation
+     * Accuracy Category for Velocity (NAC_V) field, ED-102B §2.2.3.2.6.1.5 TABLE 2-18 (ED-102B §N.2.3.8).
      *
      * @return the raw encoded Navigation Uncertainty Category for Velocity (NUC_R)
      */

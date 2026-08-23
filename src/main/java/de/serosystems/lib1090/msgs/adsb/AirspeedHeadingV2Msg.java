@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 2 airspeed and heading messages
+ * Decoder for ADS-B version 2 airspeed and heading messages, as defined in ED-102B Appendix N §N.5.3 Figure N-20 (legacy format retained for backward compatibility).
  */
 public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, AirborneVelocityV2Msg, ADSBMsg {
 

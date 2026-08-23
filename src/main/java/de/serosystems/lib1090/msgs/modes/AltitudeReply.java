@@ -26,7 +26,8 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S surveillance altitude replies (DF 4)
+ * Decoder for the Mode S surveillance altitude reply (DF=4), as defined in
+ * ICAO Annex 10 Volume IV §3.1.2.6.5.
  */
 @SuppressWarnings("unused")
 public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
@@ -48,7 +49,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as hex string
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance altitude reply (DF=4) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.5
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance altitude reply (DF=4) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.5
      */
     public AltitudeReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -58,7 +59,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as byte array
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — surveillance altitude reply (DF=4) is not covered by ED-102B; see ICAO Annex 10 Volume IV §3.1.2.6.5
+     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance altitude reply (DF=4) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.5
      */
     public AltitudeReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

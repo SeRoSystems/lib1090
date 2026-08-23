@@ -26,7 +26,7 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for Mode S extended squitters, the DF=17/18/19 envelope defined in
+ * Decoder for the Mode S extended squitter envelope (DF=17/18/19), as defined in
  * ICAO Annex 10 Volume IV §3.1.2.8.6 (DF=17), §3.1.2.8.7 (DF=18) and §3.1.2.8.8 (DF=19).
  * The format type code decoded here is the "TC"/"Subtype" subfield defined in ED-102B
  * §2.2.3.2.2 TABLE 2-9 (DF=17/18 ADS-B/TIS-B/ADS-R); payload content is specified per

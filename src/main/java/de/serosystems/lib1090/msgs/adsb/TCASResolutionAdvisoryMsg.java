@@ -28,10 +28,8 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for 1090ES TCAS Resolution Advisory Messages.<br>
+ * Decoder for 1090ES TCAS Resolution Advisory Messages, as defined in ED-102B §2.2.3.2.8.1.1.<br>
  * Note: This format only exists in ADS-B versions &gt;= 2
- * <p>
- * See ED-102B §2.2.3.2.8.1.1
  */
 public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
 

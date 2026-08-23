@@ -27,7 +27,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B Identification and Category Message, ED-102B §2.2.17.3.3.
+ * Decoder for TIS-B Identification and Category Message, as defined in ED-102B §2.2.17.3.3.
  */
 public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg, TISBMsg {
 
