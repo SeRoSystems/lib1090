@@ -45,7 +45,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 Figure 2-15
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAPositionMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,7 +54,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.3 Figure 2-15
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAPositionMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -62,8 +62,7 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
 
     /**
      * @param squitter extended squitter which contains this HVA position message
-     * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 0 (position), ED-102B §2.2.3.2.7.5.3 Figure 2-15
+     * @throws BadFormatException if message has wrong format
      */
     public HVAPositionMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

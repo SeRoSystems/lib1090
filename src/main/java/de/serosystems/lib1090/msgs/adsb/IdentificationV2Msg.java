@@ -48,7 +48,7 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -57,7 +57,7 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the identification message as byte array
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.5 Figure 2-7
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

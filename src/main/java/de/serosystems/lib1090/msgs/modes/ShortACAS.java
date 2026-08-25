@@ -49,7 +49,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw short air-air acas reply as hex string
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — short air-air ACAS replies (DF=0) are defined in ICAO Annex 10 Volume IV §3.1.2.8.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ShortACAS(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -59,7 +59,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw short air-air acas reply as byte array
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — short air-air ACAS replies (DF=0) are defined in ICAO Annex 10 Volume IV §3.1.2.8.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ShortACAS(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

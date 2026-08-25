@@ -25,8 +25,7 @@ import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for the Mode S all-call reply (DF=11), as defined in
- * ICAO Annex 10 Volume IV §3.1.2.5.2.2.
+ * Decoder for the Mode S all-call reply (DF=11), as defined in ICAO Annex 10 Volume IV §3.1.2.5.2.2.
  */
 @SuppressWarnings("unused")
 public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
@@ -47,9 +46,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw all-call reply as hex string
      * @throws BadFormatException     if message is not all-call reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the all-call
-     *                                reply (DF=11) format is defined in ICAO Annex 10
-     *                                Volume IV §3.1.2.5.2.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AllCallReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -59,9 +56,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw all-call reply as byte array
      * @throws BadFormatException     if message is not all-call reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the all-call
-     *                                reply (DF=11) format is defined in ICAO Annex 10
-     *                                Volume IV §3.1.2.5.2.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AllCallReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

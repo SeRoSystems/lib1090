@@ -77,7 +77,7 @@ public class StatefulModeSDecoder {
      * @param modes     the incompletely decoded Mode S message
      * @param timestamp time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError declared for signature consistency with the other decode() overloads; the format of {@code modes} has already been validated by its own ModeSDownlinkMsg constructor by the time it reaches this method, per ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters, and ED-102B §2.2.3.2.2 TABLE 2-9 for the DF=17/18/19 ADS-B/TIS-B/ADS-R sub-dispatch performed here
+     * @throws UnspecifiedFormatError declared for signature consistency with the other decode() overloads; the format of {@code modes} has already been validated by its own ModeSDownlinkMsg constructor by the time it reaches this method
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -614,7 +614,7 @@ public class StatefulModeSDecoder {
      * @param rawMessage the Mode S message as byte array
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -626,7 +626,7 @@ public class StatefulModeSDecoder {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(byte[] rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -637,7 +637,7 @@ public class StatefulModeSDecoder {
      * @param rawMessage the Mode S message in hex representation
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
@@ -649,7 +649,7 @@ public class StatefulModeSDecoder {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor: ED-102B §2.2.17.2 TABLE 2-184 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
     public ModeSDownlinkMsg decode(String rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {

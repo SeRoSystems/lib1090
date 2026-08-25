@@ -40,10 +40,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identification and category message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if the underlying extended squitter has a format that is not further
-     *                                 specified (see {@link ExtendedSquitter#ExtendedSquitter(String)}); the
-     *                                 Management Message Bit Field itself is fully enumerated by ED-102B
-     *                                 §2.2.19.2.3 TABLE 2-187, with values 8-31 coded as reserved for future service
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ManagementMessage(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -52,10 +49,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identity and category message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if the underlying extended squitter has a format that is not further
-     *                                 specified (see {@link ExtendedSquitter#ExtendedSquitter(byte[])}); the
-     *                                 Management Message Bit Field itself is fully enumerated by ED-102B
-     *                                 §2.2.19.2.3 TABLE 2-187, with values 8-31 coded as reserved for future service
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ManagementMessage(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

@@ -62,9 +62,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @param rawMessage raw TIS-B coarse position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError declared for API compatibility only, per ED-102B §2.2.17.2 TABLE 2-184
-     *                                 (CF value 3 Reserved): this constructor never actually throws it; the
-     *                                 fields below follow the former DO-260B §2.2.17.3.5
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CoarsePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -74,9 +72,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
      * @param rawMessage raw TIS-B coarse position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError declared for API compatibility only, per ED-102B §2.2.17.2 TABLE 2-184
-     *                                 (CF value 3 Reserved): this constructor never actually throws it; the
-     *                                 fields below follow the former DO-260B §2.2.17.3.5
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CoarsePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
