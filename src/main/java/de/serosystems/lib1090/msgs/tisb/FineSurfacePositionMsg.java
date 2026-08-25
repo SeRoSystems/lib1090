@@ -86,14 +86,14 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
         super(squitter);
 
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
-
-        if (getFormatTypeCode() < 5 || getFormatTypeCode() > 8)
-            throw new BadFormatException("Invalid format type code (" + getFormatTypeCode() + ") for surface positions.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
 
         // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
-            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+            throw new BadFormatException("TIS-B messages must have CF value 2 or 5");
+
+        if (getFormatTypeCode() < 5 || getFormatTypeCode() > 8)
+            throw new BadFormatException("Wrong format type code for TIS-B Fine Surface Position message");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
@@ -134,7 +134,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      */
     @Override
     public byte getNACp() {
-        return this.getNIC();
+        return getNIC();
     }
 
     /**

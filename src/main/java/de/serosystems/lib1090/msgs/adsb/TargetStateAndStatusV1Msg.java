@@ -82,18 +82,18 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException if message has the wrong typecode
      */
-    public TargetStateAndStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public TargetStateAndStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 29) {
-            throw new BadFormatException("Target state and status messages must have typecode 29.");
+            throw new BadFormatException("Target state and status messages must have typecode 29");
         }
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         byte subtypeCode = b.readByte(6, 7);
         if (subtypeCode != 0)
-            throw new UnspecifiedFormatError("Target state and status message subtype " + subtypeCode + " reserved.");
+            throw new BadFormatException("Target state and status messages must have subtype 0");
 
         verticalDataAvailableAndSourceIndicator = b.readByte(8, 9);
         targetAltitudeType = b.readBoolean(10);

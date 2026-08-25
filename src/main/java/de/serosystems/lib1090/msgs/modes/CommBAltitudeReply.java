@@ -75,9 +75,8 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
     public CommBAltitudeReply(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 20) {
-            throw new BadFormatException("Message is not an altitude reply!");
-        }
+        if (getDownlinkFormat() != 20)
+            throw new BadFormatException("Message is not an altitude reply");
 
         byte[] payload = getPayload();
         flight_status = getFirstField();

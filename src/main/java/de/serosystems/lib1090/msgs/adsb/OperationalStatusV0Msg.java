@@ -64,24 +64,24 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
      * @throws BadFormatException if message has the wrong typecode or ADS-B version or enroute capabilities
      *                            are invalid
      */
-    public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 31)
-            throw new BadFormatException("Operational status messages must have typecode 31.");
+            throw new BadFormatException("Operational status messages must have typecode 31");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         if (b.readByte(41, 43) != 0)
-            throw new BadFormatException("Not a DO-260/version 0 status message.");
+            throw new BadFormatException("Not a DO-260/version 0 status message");
 
         byte subtypeCode = b.readByte(6, 8);
         if (subtypeCode > 0) // all others are reserved
-            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
+            throw new BadFormatException("Operational status message subtype " + subtypeCode + " reserved");
 
         enrouteCapabilities = b.readByte(9, 16);
         if (b.readByte(9, 10) != 0)
-            throw new BadFormatException("Unknown enroute capabilities code!");
+            throw new BadFormatException("Unknown enroute capabilities code");
         // All other capability fields are "TBD" in standard
     }
 

@@ -77,7 +77,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
         if (getDownlinkFormat() < 17 || getDownlinkFormat() > 19 ||
                 getDownlinkFormat() == 18 && (getFirstField() == 4 || getFirstField() == 7) ||
                 getDownlinkFormat() == 19 && getFirstField() > 0)
-            throw new BadFormatException("Message is not an extended squitter!");
+            throw new BadFormatException("Message is not an extended squitter");
 
         byte[] payload = getPayload();
 

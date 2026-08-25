@@ -75,14 +75,14 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
         super(squitter);
 
         if (getFormatTypeCode() != 24)
-            throw new BadFormatException("MLAT system status messages must have typecode of 24.");
+            throw new BadFormatException("MLAT system status messages must have typecode of 24");
 
         byte[] msg = getMessage();
         BitReader b = BitReader.forBigEndian(msg);
 
         int messageSubtype = b.readByte(6, 8);
         if (messageSubtype != 1)
-            throw new BadFormatException("Surface system status messages have subtype 1.");
+            throw new BadFormatException("Surface System Status messages must have subtype 1");
 
         systemStatus = Arrays.copyOfRange(msg, 1, msg.length);
     }

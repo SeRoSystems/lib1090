@@ -77,14 +77,14 @@ public class AirspeedHeadingV2Msg extends ExtendedSquitter implements Serializab
     public AirspeedHeadingV2Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 19)
-            throw new BadFormatException("Airspeed and heading messages must have typecode 19.");
+        if (getFormatTypeCode() != 19)
+            throw new BadFormatException("Airborne Velocity messages must have typecode 19");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
         if (messageSubtype != 3 && messageSubtype != 4)
-            throw new BadFormatException("Airspeed and heading messages have subtype 3 or 4.");
+            throw new BadFormatException("Airspeed And Heading messages must have subtype 3 or 4");
 
         intentChange = br.readBoolean(9);
         navigationAccuracyCategoryEncoded = br.readByte(11, 13);

@@ -41,7 +41,7 @@ public final class AirbornePosition {
         if (!(formatTypeCode == 0 ||
                 (formatTypeCode >= 9 && formatTypeCode <= 18) ||
                 (formatTypeCode >= 20 && formatTypeCode <= 22))) {
-            throw new BadFormatException("This is not a position message! Wrong format type code (" + formatTypeCode + ").");
+            throw new BadFormatException("Wrong typecode for Airborne Position message");
         }
     }
 

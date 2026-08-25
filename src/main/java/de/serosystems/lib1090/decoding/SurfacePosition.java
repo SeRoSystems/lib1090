@@ -40,9 +40,8 @@ public final class SurfacePosition {
      * @throws BadFormatException if the format type code is not a surface position type
      */
     public static void validateSurfacePositionFormat(byte formatTypeCode) throws BadFormatException {
-        if (!(formatTypeCode == 0 || (formatTypeCode >= 5 && formatTypeCode <= 8))) {
-            throw new BadFormatException("This is not a position message! Wrong format type code (" + formatTypeCode + ").");
-        }
+        if (!(formatTypeCode == 0 || (formatTypeCode >= 5 && formatTypeCode <= 8)))
+            throw new BadFormatException("Wrong typecode for Surface Position message");
     }
 
     /**

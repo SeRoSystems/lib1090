@@ -64,17 +64,16 @@ public class HVAPositionMsg extends ExtendedSquitter implements Serializable, HV
      * @param squitter extended squitter which contains this HVA position message
      * @throws BadFormatException if message has wrong format
      */
-    public HVAPositionMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public HVAPositionMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 25)
-            throw new BadFormatException("HVA messages must have typecode 25.");
+            throw new BadFormatException("HVA messages must have typecode 25");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        byte messageSubtype = br.readByte(6, 7);
-        if (messageSubtype != 0)
-            throw new UnspecifiedFormatError("HVA position message must have subtype 0, got " + messageSubtype + ".");
+        if (br.readByte(6, 7) != 0)
+            throw new BadFormatException("HVA position message must have subtype 0");
 
         hvaGeometricAltitudeEncoded = br.readShort(8, 19);
         hvaLatitudeEncoded = br.readInt(20, 37);

@@ -77,12 +77,12 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
         super(squitter);
 
         if (getFormatTypeCode() != 28)
-            throw new BadFormatException("TCAS RA reports must have typecode 28.");
+            throw new BadFormatException("TCAS RA reports must have typecode 28");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         if (b.readByte(6, 8) != SUBTYPE)
-            throw new BadFormatException("TCAS RA reports have subtype 2.");
+            throw new BadFormatException("TCAS RA reports have subtype 2");
 
         activeRa = TCASResolutionAdvisory.decodeActiveRa(b);
         racRecord = TCASResolutionAdvisory.decodeRacRecord(b);

@@ -78,13 +78,12 @@ public class WxAIREPAlternateWeatherStateMsg extends ExtendedSquitter implements
         super(squitter);
 
         if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26.");
+            throw new BadFormatException("Wx AIREP messages must have typecode 26");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        byte messageSubtype = br.readByte(6, 7);
-        if (messageSubtype != 2)
-            throw new UnspecifiedFormatError("Wx AIREP alternate weather state message must have subtype 2, got " + messageSubtype + ".");
+        if (br.readByte(6, 7) != 2)
+            throw new BadFormatException("Wx AIREP alternate weather state message must have subtype 2");
 
         icingStatusEncoded = br.readByte(8, 12);
         rollAngleEncoded = br.readShort(13, 22);

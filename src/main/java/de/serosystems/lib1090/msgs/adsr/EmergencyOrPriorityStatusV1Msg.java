@@ -70,13 +70,13 @@ public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements 
     public EmergencyOrPriorityStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 28)
-            throw new BadFormatException("Emergency and Priority Status messages must have typecode 28.");
+        if (getFormatTypeCode() != 28)
+            throw new BadFormatException("Emergency and Priority Status messages must have typecode 28");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         if (b.readByte(6, 8) != SUBTYPE)
-            throw new BadFormatException("Emergency and priority status reports have subtype 1.");
+            throw new BadFormatException("Emergency And Priority Status messages must have subtype 1");
 
         emergencyState = b.readByte(9, 11);
         // ME bit 56 is redefined as the IMF flag for ADS-R

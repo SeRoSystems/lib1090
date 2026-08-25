@@ -83,21 +83,20 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         super(squitter);
 
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
-
-        if (this.getFormatTypeCode() != 19)
-            throw new BadFormatException("Velocity messages must have typecode 19.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
 
         // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
-            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+            throw new BadFormatException("TIS-B messages must have CF value 2 or 5");
+
+        if (getFormatTypeCode() != 19)
+            throw new BadFormatException("TIS-B Airborne Velocity messages must have typecode 19");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
-        if (messageSubtype != 1 && messageSubtype != 2) {
-            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
-        }
+        if (messageSubtype != 1 && messageSubtype != 2)
+            throw new BadFormatException("Vecloity Over Ground speed messages must have subtype 1 or 2");
 
         imf = br.readBoolean(9);
         nacp = br.readByte(10, 13);

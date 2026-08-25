@@ -73,9 +73,8 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     public ShortACAS(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 0) {
-            throw new BadFormatException("Message is not a short ACAS (air-air) message!");
-        }
+        if (getDownlinkFormat() != 0)
+            throw new BadFormatException("Message is not a short ACAS (air-air) message");
 
         byte[] payload = getPayload();
         airborne = (getFirstField() & 0x4) == 0;

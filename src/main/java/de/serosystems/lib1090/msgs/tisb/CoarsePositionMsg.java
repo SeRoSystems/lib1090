@@ -86,9 +86,9 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
 
         // ED-102A §2.2.17.2 Figure 2-25 and TABLE 2-110
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
         if (getFirstField() != 3)
-            throw new BadFormatException("Coarse TIS-B messages must have CF value 3.");
+            throw new BadFormatException("TIS-B Coarse Position messages must have CF value 3");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 

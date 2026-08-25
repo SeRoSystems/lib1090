@@ -68,14 +68,14 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
         super(squitter);
 
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
-            throw new BadFormatException("Identification messages must have typecode of 1-4.");
+            throw new BadFormatException("TIS-B Identification messages must have typecode of 1-4");
 
         // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
-            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5");
 
         BitReader b = BitReader.forBigEndian(getMessage());
         emitterCategory = b.readByte(6, 8);
