@@ -49,7 +49,7 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw identify reply as hex string
      * @throws BadFormatException     if message is not identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance identity reply (DF=5) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.7
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentifyReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -59,7 +59,7 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw identify reply as byte array
      * @throws BadFormatException     if message is not identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance identity reply (DF=5) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.7
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentifyReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

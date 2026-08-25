@@ -49,7 +49,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as hex string
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance altitude reply (DF=4) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.5
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AltitudeReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -59,7 +59,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw altitude reply as byte array
      * @throws BadFormatException     if message is not altitude reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the surveillance altitude reply (DF=4) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.5
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AltitudeReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

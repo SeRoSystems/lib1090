@@ -152,7 +152,7 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
     }
 
     static short extractBarometricAltitudeRateValue(byte[] message) {
-        // FIXME Junzi
+        // FIXME Junzi p 132
         return (short) ((((message[4] & 0x0F) << 5) | ((message[5] >>> 3) & 0x1F)) & 0x1FF);
     }
 

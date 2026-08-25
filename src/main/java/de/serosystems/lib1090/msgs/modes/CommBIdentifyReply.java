@@ -51,7 +51,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as hex string
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B identity reply (DF=21) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.8
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CommBIdentifyReply(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -61,7 +61,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @param rawMessage raw comm-b identify reply as byte array
      * @throws BadFormatException     if message is not comm-b identify reply or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the Comm-B identity reply (DF=21) format is defined in ICAO Annex 10 Volume IV §3.1.2.6.8
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CommBIdentifyReply(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

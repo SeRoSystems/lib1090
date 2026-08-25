@@ -56,7 +56,7 @@ public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializab
     /**
      * @param rawMessage raw ADS-B airspeed and heading message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has an airspeed/heading subtype that is no longer specified in ED-102B: Airborne Velocity Subtypes 3 and 4 are reserved per ED-102B §2.2.3.2.6.5 and were last specified by DO-260B §2.2.3.2.6.3 and §2.2.3.2.6.4; the Version One legacy format is preserved for backward compatibility in ED-102B §N.5.2 Figure N-12
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirspeedHeadingV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +65,7 @@ public class AirspeedHeadingV1Msg extends ExtendedSquitter implements Serializab
     /**
      * @param rawMessage raw ADS-B airspeed and heading message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has an airspeed/heading subtype that is no longer specified in ED-102B: Airborne Velocity Subtypes 3 and 4 are reserved per ED-102B §2.2.3.2.6.5 and were last specified by DO-260B §2.2.3.2.6.3 and §2.2.3.2.6.4; the Version One legacy format is preserved for backward compatibility in ED-102B §N.5.2 Figure N-12
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirspeedHeadingV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

@@ -49,7 +49,7 @@ public final class Identification {
         if (version < 0 || version > 7)
             throw new IllegalArgumentException("Unsupported ADS-B version: " + version);
 
-        // versions above 3 are decoded like version 3, per ED-102B §2.2.7.1 and ED-102B §N.3.3.1
+        // versions above 3 are decoded like version 3, per ED-102B §2.2.7.1
         // VN field itself specified at ED-102B §2.2.3.2.7.2.5 TABLE 2-66
         int effectiveVersion = Math.min(version, 3);
 

@@ -56,7 +56,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
     /**
      * @param rawMessage raw ADS-B aircraft status message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.2 Figure 2-22
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CASOperationalCoordinationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -65,7 +65,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
     /**
      * @param rawMessage raw ADS-B aircraft status message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.8.1.2 Figure 2-22
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CASOperationalCoordinationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

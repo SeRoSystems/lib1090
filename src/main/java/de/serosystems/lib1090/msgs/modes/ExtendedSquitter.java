@@ -50,7 +50,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw extended squitter as hex string
      * @throws BadFormatException     if message is not extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the "TC"/"Subtype" subfield is defined in ED-102B §2.2.3.2.2 TABLE 2-9 with its per-type payload content in ED-102B §2.2.3.2.3 through §2.2.3.2.7 for DF=17/18 ADS-B/TIS-B/ADS-R content, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -60,7 +60,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      * @param rawMessage raw extended squitter as byte array
      * @throws BadFormatException     if message is not extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — the "TC"/"Subtype" subfield is defined in ED-102B §2.2.3.2.2 TABLE 2-9 with its per-type payload content in ED-102B §2.2.3.2.3 through §2.2.3.2.7 for DF=17/18 ADS-B/TIS-B/ADS-R content, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
