@@ -18,10 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
-
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

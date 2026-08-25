@@ -21,8 +21,7 @@ package de.serosystems.lib1090.decoding;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BitReaderTest {
 
@@ -108,10 +107,10 @@ class BitReaderTest {
         byte[] data = {(byte) 0xD0};
         BitReader reader = BitReader.forBigEndian(data);
 
-        assertEquals(true, reader.readBoolean(1));  // Bit 1 is set
-        assertEquals(true, reader.readBoolean(2));  // Bit 2 is set
-        assertEquals(false, reader.readBoolean(3)); // Bit 3 is unset
-        assertEquals(false, reader.readBoolean(5)); // Bit 5 is unset
+        assertTrue(reader.readBoolean(1));  // Bit 1 is set
+        assertTrue(reader.readBoolean(2));  // Bit 2 is set
+        assertFalse(reader.readBoolean(3)); // Bit 3 is unset
+        assertFalse(reader.readBoolean(5)); // Bit 5 is unset
     }
 
     @Test
