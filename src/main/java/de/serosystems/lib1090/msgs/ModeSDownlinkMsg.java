@@ -203,7 +203,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param reply the bytes of the reply
      * @param noCRC indicates whether the CRC has been subtracted from the parity field
      * @throws BadFormatException     if message has invalid length or downlink format
-     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(byte[] reply, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
         // check format invariants
@@ -333,7 +333,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param rawMessage Mode S message as byte array
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(rawMessage, false);
@@ -346,7 +346,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param rawMessage Mode S message in hex representation
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(Tools.hexStringToByteArray(rawMessage), false);
@@ -360,7 +360,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
      * @throws BadFormatException     if message has invalid length or payload does
      *                                not match specification or parity has invalid length
-     * @throws UnspecifiedFormatError if message has a format that is not further specified: ED-102B §2.2.3.2.1.3 TABLE 2-7 for DF=18 TIS-B/ADS-R management frames, or ICAO Annex 10 Volume IV §3.1.2.8.8.2 for DF=19 military extended squitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(String rawMessage, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
         this(Tools.hexStringToByteArray(rawMessage), noCRC);

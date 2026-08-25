@@ -58,7 +58,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV1Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -68,7 +68,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-R surface position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV1Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);

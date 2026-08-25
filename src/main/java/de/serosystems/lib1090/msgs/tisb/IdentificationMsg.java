@@ -45,7 +45,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identification and category message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.3 Figure 2-54
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -54,7 +54,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
     /**
      * @param rawMessage raw TIS-B identity and category message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.3 Figure 2-54
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

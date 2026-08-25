@@ -67,7 +67,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     /**
      * @param rawMessage raw TIS-B velocity message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in the former DO-260B §2.2.17.3.4 Figure 2-30 —
+     * @throws UnspecifiedFormatError if message format is not further specified
      *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
@@ -77,7 +77,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     /**
      * @param rawMessage raw TIS-B velocity message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in the former DO-260B §2.2.17.3.4 Figure 2-30 —
+     * @throws UnspecifiedFormatError if message format is not further specified
      *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {

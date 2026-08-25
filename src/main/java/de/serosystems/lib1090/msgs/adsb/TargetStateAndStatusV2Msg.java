@@ -60,7 +60,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.1.2 TABLE 2-31
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -69,7 +69,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.1.2 TABLE 2-31
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -77,8 +77,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException     if message has the wrong typecode or if reserved bits are set
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §2.2.3.2.7.1.2 TABLE 2-31
+     * @throws BadFormatException if message has the wrong typecode or if reserved bits are set
      */
     public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

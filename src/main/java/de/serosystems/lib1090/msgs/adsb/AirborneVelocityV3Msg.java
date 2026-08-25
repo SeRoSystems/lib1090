@@ -59,7 +59,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneVelocityV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -68,7 +68,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
     /**
      * @param rawMessage raw ADS-B velocity-over-ground message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.6.1 Figure 2-9 and ED-102B §2.2.3.2.6.2 Figure 2-9
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneVelocityV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
