@@ -18,10 +18,9 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
-
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

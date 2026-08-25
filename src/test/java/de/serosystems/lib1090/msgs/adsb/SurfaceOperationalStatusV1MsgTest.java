@@ -18,10 +18,9 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
-
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

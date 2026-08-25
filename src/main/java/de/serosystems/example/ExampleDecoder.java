@@ -18,21 +18,6 @@
 
 package de.serosystems.example;
 
-import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
-import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
-import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
-import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
-import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV2V3Msg;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusV2V3Msg;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2V3Msg;
-import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
-import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
-
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
@@ -41,6 +26,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
+import de.serosystems.lib1090.msgs.squitter.*;
 
 import java.time.Instant;
 import java.util.Scanner;

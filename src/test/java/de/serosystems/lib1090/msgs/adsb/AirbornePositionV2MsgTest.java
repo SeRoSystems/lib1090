@@ -18,11 +18,10 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
-
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
