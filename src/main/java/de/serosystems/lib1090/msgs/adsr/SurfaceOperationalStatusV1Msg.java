@@ -54,7 +54,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfaceOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -63,7 +63,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-R version
-     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfaceOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -71,10 +71,9 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException     if message has the wrong typecode or ADS-R version or is not a surface
-     *                                operational status message or the capability class code or operational mode
-     *                                code is invalid.
-     * @throws UnspecifiedFormatError if message has the wrong subtype; see ED-102B §2.2.3.2.7.2.2 TABLE 2-46
+     * @throws BadFormatException if message has the wrong typecode or ADS-R version or is not a surface
+     *                            operational status message or the capability class code or operational mode
+     *                            code is invalid.
      */
     public SurfaceOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

@@ -55,7 +55,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      * @param rawMessage raw TIS-B fine airborne position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.1 Figure 2-52
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineAirbornePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -65,7 +65,7 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      * @param rawMessage raw TIS-B fine airborne position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.1 Figure 2-52
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineAirbornePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);

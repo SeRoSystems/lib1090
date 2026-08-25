@@ -52,7 +52,7 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the MLAT system status message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.4.3 Figure 2-14
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MLATSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -61,7 +61,7 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
     /**
      * @param rawMessage the MLAT system status message as byte array
      * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.4.3 Figure 2-14
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MLATSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));

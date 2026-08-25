@@ -44,7 +44,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public OperationalStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -53,7 +53,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public OperationalStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -61,9 +61,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException     if message has the wrong typecode or ADS-B version or enroute capabilities
-     *                                are invalid
-     * @throws UnspecifiedFormatError if message has the wrong subtype, ED-102B §N.1.3 TABLE N-1 — Version Zero TYPE=31 defines only Subtype 0
+     * @throws BadFormatException if message has the wrong typecode or ADS-B version or enroute capabilities
+     *                            are invalid
      */
     public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

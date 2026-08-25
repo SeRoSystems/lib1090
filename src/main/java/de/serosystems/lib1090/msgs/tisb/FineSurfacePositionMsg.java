@@ -61,7 +61,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @param rawMessage raw TIS-B fine surface position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.2 Figure 2-53
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineSurfacePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -71,7 +71,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @param rawMessage raw TIS-B fine surface position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.17.3.2 Figure 2-53
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineSurfacePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);

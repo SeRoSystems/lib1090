@@ -55,7 +55,7 @@ public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-B surface position message as hex string
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV3Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -65,7 +65,7 @@ public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializab
      * @param rawMessage raw ADS-B surface position message as byte array
      * @param timestamp  timestamp for this position message
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV3Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage), timestamp);
@@ -184,7 +184,7 @@ public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializab
          * @param nicSupplementA NIC supplement A bit for this aircraft
          * @param nicSupplementC NIC supplement C bit for this aircraft
          * @throws BadFormatException     if message has wrong format
-         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+         * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(String rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementC) throws BadFormatException, UnspecifiedFormatError {
             this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementC);
@@ -196,7 +196,7 @@ public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializab
          * @param nicSupplementA NIC supplement A bit for this aircraft
          * @param nicSupplementC NIC supplement C bit for this aircraft
          * @throws BadFormatException     if message has wrong format
-         * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.18.4.2 Figure 2-58
+         * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(byte[] rawMessage, Instant timestamp, boolean nicSupplementA, boolean nicSupplementC) throws BadFormatException, UnspecifiedFormatError {
             this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA, nicSupplementC);

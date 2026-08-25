@@ -47,9 +47,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
      * @param rawMessage raw military extended squitter as hex string
      * @throws BadFormatException     if message is not military extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — DF=19 military
-     *                                extended squitters (a growth option for military applications) are
-     *                                defined in ICAO Annex 10 Volume IV §3.1.2.8.8.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MilitaryExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
@@ -59,9 +57,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
      * @param rawMessage raw military extended squitter as byte array
      * @throws BadFormatException     if message is not military extended squitter or
      *                                contains wrong values.
-     * @throws UnspecifiedFormatError if message has a format that is not further specified — DF=19 military
-     *                                extended squitters (a growth option for military applications) are
-     *                                defined in ICAO Annex 10 Volume IV §3.1.2.8.8.2
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MilitaryExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));

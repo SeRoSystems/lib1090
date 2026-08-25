@@ -63,13 +63,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message in hex representation
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype -- ED-102B §2.2.3.2.7.1.2 TABLE 2-31
-     *      reserves Subtype Code ZERO and requires Subtype Code ONE (1) for compliant Transmitting
-     *      Subsystems; this Subtype=0 encoding is no longer specified in ED-102B and is documented only
-     *      for backward compatibility with the former standard, DO-260A: DO-260B §2.2.3.2.7.1.2
-     *      TABLE 2-40 attributes TYPE=29 Subtype=0 to DO-260A, whose Version One Target State and
-     *      Status Message is reproduced in DO-260B §N.4.2 Figure N-16 and decoded here only for
-     *      backward compatibility with legacy transmitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -78,13 +72,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
     /**
      * @param rawMessage The full Mode S message as byte array
      * @throws BadFormatException     if message has the wrong typecode or ADS-B version
-     * @throws UnspecifiedFormatError if message has the wrong subtype -- ED-102B §2.2.3.2.7.1.2 TABLE 2-31
-     *      reserves Subtype Code ZERO and requires Subtype Code ONE (1) for compliant Transmitting
-     *      Subsystems; this Subtype=0 encoding is no longer specified in ED-102B and is documented only
-     *      for backward compatibility with the former standard, DO-260A: DO-260B §2.2.3.2.7.1.2
-     *      TABLE 2-40 attributes TYPE=29 Subtype=0 to DO-260A, whose Version One Target State and
-     *      Status Message is reproduced in DO-260B §N.4.2 Figure N-16 and decoded here only for
-     *      backward compatibility with legacy transmitters
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -92,14 +80,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException     if message has the wrong typecode
-     * @throws UnspecifiedFormatError if message has the wrong subtype -- ED-102B §2.2.3.2.7.1.2 TABLE 2-31
-     *      reserves Subtype Code ZERO and requires Subtype Code ONE (1) for compliant Transmitting
-     *      Subsystems; this Subtype=0 encoding is no longer specified in ED-102B and is documented only
-     *      for backward compatibility with the former standard, DO-260A: DO-260B §2.2.3.2.7.1.2
-     *      TABLE 2-40 attributes TYPE=29 Subtype=0 to DO-260A, whose Version One Target State and
-     *      Status Message is reproduced in DO-260B §N.4.2 Figure N-16 and decoded here only for
-     *      backward compatibility with legacy transmitters
+     * @throws BadFormatException if message has the wrong typecode
      */
     public TargetStateAndStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);

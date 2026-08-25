@@ -51,7 +51,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as hex string
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 Figure 2-16
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAVelocityMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -60,7 +60,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @param rawMessage raw ADS-B HVA message as byte array
      * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has format that is not further specified in ED-102B §2.2.3.2.7.5.4 Figure 2-16
+     * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAVelocityMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
@@ -68,8 +68,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
 
     /**
      * @param squitter extended squitter which contains this HVA velocity message
-     * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message has a subtype other than 1 (velocity), ED-102B §2.2.3.2.7.5.4 Figure 2-16
+     * @throws BadFormatException if message has wrong format
      */
     public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
