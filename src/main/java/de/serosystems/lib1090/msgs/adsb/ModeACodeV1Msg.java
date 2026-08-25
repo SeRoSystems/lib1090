@@ -72,13 +72,13 @@ public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, Mo
     public ModeACodeV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 23)
-            throw new BadFormatException("Mode A code messages must have typecode 23.");
+        if (getFormatTypeCode() != 23)
+            throw new BadFormatException("Mode A code messages must have typecode 23");
 
-        BitReader reader = BitReader.forBigEndian(this.getMessage());
+        BitReader reader = BitReader.forBigEndian(getMessage());
         messageSubtype = reader.readByte(6, 8);
         if (messageSubtype != 7)
-            throw new BadFormatException("Mode A code messages must have subtype 7.");
+            throw new BadFormatException("Mode A code messages must have subtype 7");
 
         modeACode = reader.readShort(9, 21);
     }

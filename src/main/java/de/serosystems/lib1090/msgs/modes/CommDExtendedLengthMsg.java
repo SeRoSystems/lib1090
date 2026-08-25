@@ -72,9 +72,8 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
     public CommDExtendedLengthMsg(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 24) {
-            throw new BadFormatException("Message is not an extended length message!");
-        }
+        if (getDownlinkFormat() != 24)
+            throw new BadFormatException("Message is not an extended length message");
 
         // extract Comm-D extended length message
         message = getPayload();

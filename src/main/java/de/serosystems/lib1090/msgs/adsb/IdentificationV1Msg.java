@@ -71,7 +71,7 @@ public class IdentificationV1Msg extends ExtendedSquitter implements Serializabl
         super(squitter);
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
-            throw new BadFormatException("Identification messages must have typecode of 1-4.");
+            throw new BadFormatException("Identification messages must have typecode of 1-4");
 
         BitReader b = BitReader.forBigEndian(getMessage());
         emitterCategory = b.readByte(6, 8);

@@ -63,11 +63,11 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
         super(squitter);
 
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
 
         // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 4)
-            throw new BadFormatException("TIS-B management messages must have CF value 6.");
+            throw new BadFormatException("TIS-B management messages must have CF value 4");
 
         // not specified further
     }

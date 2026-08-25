@@ -73,17 +73,16 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
      * @param squitter extended squitter which contains this Wx AIREP weather state message
      * @throws BadFormatException if message has wrong format
      */
-    public WxAIREPWeatherStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public WxAIREPWeatherStateMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26.");
+            throw new BadFormatException("Wx AIREP messages must have typecode 26");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        byte messageSubtype = br.readByte(6, 7);
-        if (messageSubtype != 1)
-            throw new UnspecifiedFormatError("Wx AIREP weather state message must have subtype 1, got " + messageSubtype + ".");
+        if (br.readByte(6, 7) != 1)
+            throw new BadFormatException("Wx AIREP weather state message must have subtype 1");
 
         icingStatusEncoded = br.readByte(8, 12);
         windQualityIndicatorEncoded = br.readByte(13, 15);

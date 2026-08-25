@@ -71,7 +71,7 @@ public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serial
         super(reply);
 
         if (getDownlinkFormat() != 19)
-            throw new BadFormatException("Message is not a military extended squitter!");
+            throw new BadFormatException("Message is not a military extended squitter");
     }
 
     /**

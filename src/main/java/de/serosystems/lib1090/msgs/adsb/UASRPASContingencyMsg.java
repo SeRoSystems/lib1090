@@ -73,12 +73,12 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
         super(squitter);
 
         if (getFormatTypeCode() != 28)
-            throw new BadFormatException("UAS/RPAS contingency reports must have typecode 28.");
+            throw new BadFormatException("UAS/RPAS contingency reports must have typecode 28");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         if (b.readByte(6, 8) != SUBTYPE)
-            throw new BadFormatException("UAS/RPAS contingency reports have subtype 4.");
+            throw new BadFormatException("UAS/RPAS contingency reports have subtype 4");
 
         contingencyPlan = b.readByte(9, 12);
         currentOrNext = b.readBoolean(13);

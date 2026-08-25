@@ -41,7 +41,7 @@ public final class InternationalAlphabet5 {
      */
     public static byte[] toDigits(long encoded, int numDigits) {
         if (numDigits < 1 || numDigits > 8)
-            throw new IllegalArgumentException("numDigits must be in range 1-8, got " + numDigits + ".");
+            throw new IllegalArgumentException("numDigits must be in range 1-8, got " + numDigits);
 
         byte[] digits = new byte[numDigits];
 

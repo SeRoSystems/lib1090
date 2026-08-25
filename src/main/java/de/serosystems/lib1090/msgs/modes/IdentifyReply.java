@@ -73,9 +73,8 @@ public class IdentifyReply extends ModeSDownlinkMsg implements Serializable {
     public IdentifyReply(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 5) {
-            throw new BadFormatException("Message is not an identify reply!");
-        }
+        if (getDownlinkFormat() != 5)
+            throw new BadFormatException("Message is not an identify reply");
 
         byte[] payload = getPayload();
         flight_status = getFirstField();

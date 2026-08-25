@@ -80,15 +80,15 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
         super(squitter);
 
         if (getDownlinkFormat() != 18)
-            throw new BadFormatException("TIS-B messages must have downlink format 18.");
-
-        if (!((getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
-                (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
-            throw new BadFormatException("This is not a TIS-B position message! Wrong format type code.");
+            throw new BadFormatException("TIS-B messages must have downlink format 18");
 
         // ED-102B §2.2.17.2 TABLE 2-184
         if (getFirstField() != 2 && getFirstField() != 5)
-            throw new BadFormatException("Fine TIS-B messages must have CF value 2 or 5.");
+            throw new BadFormatException("TIS-B messages must have CF value 2 or 5");
+
+        if (!((getFormatTypeCode() >= 9 && getFormatTypeCode() <= 18) ||
+                (getFormatTypeCode() >= 20 && getFormatTypeCode() <= 22)))
+            throw new BadFormatException("Wrong format type code for TIS-B Fine Airborne Position message");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 

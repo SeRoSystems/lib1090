@@ -70,17 +70,16 @@ public class WxAIREPAircraftStateMsg extends ExtendedSquitter implements Seriali
      * @param squitter extended squitter which contains this Wx AIREP aircraft state message
      * @throws BadFormatException if message has wrong format
      */
-    public WxAIREPAircraftStateMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public WxAIREPAircraftStateMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26.");
+            throw new BadFormatException("Wx AIREP messages must have typecode 26");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        byte messageSubtype = br.readByte(6, 7);
-        if (messageSubtype != 0)
-            throw new UnspecifiedFormatError("Wx AIREP aircraft state message must have subtype 0, got " + messageSubtype + ".");
+        if (br.readByte(6, 7) != 0)
+            throw new BadFormatException("Wx AIREP aircraft state message must have subtype 0");
 
         aircraftConfigurationEncoded = br.readByte(8, 11);
         aircraftTypeEncoded = br.readInt(12, 35);

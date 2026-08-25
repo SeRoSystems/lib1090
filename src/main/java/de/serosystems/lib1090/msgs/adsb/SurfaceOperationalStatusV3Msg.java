@@ -77,21 +77,16 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
      *                            operational status message or the capability class code or operational mode
      *                            code is invalid.
      */
-    public SurfaceOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (getFormatTypeCode() != 31) {
-            throw new BadFormatException("Operational status messages must have typecode 31.");
-        }
+        if (getFormatTypeCode() != 31)
+            throw new BadFormatException("Operational status messages must have typecode 31");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
-        byte subtypeCode = b.readByte(6, 8);
-        if (subtypeCode > 1) { // currently only 0 and 1 specified, 2-7 are reserved
-            throw new UnspecifiedFormatError("Operational status message subtype " + subtypeCode + " reserved.");
-        } else if (subtypeCode != SUBTYPE_CODE) {
+        if (b.readByte(6, 8) != SUBTYPE_CODE)
             throw new BadFormatException("Not surface operational status message");
-        }
 
         capabilityClassCode = b.readInt(9, 20);
         airplaneLenWidth = b.readByte(21, 24);
@@ -102,9 +97,9 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
         if ((capabilityClassCode & 0xC00) != 0)
-            throw new BadFormatException("Unknown capability class code!");
+            throw new BadFormatException("Unknown capability class code");
         if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code!");
+            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);

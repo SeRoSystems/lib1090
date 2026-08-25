@@ -94,27 +94,22 @@ public class BitReader {
      * @return The extracted value as a long.
      */
     private long readRange(int from, int to, int maxBits) {
-        if (from < 1) {
-            throw new IllegalArgumentException("Start bit must be >= 1.");
-        }
+        if (from < 1)
+            throw new IllegalArgumentException("Start bit must be >= 1");
 
-        if (to < from) {
-            throw new IllegalArgumentException("End bit < start bit.");
-        }
+        if (to < from)
+            throw new IllegalArgumentException("End bit < start bit");
 
         int numBits = (to - from) + 1;
-        if (numBits > maxBits) {
-            throw new IllegalArgumentException("Range exceeds type capacity.");
-        }
-        if (to > data.length * 8) {
-            throw new IndexOutOfBoundsException("End of buffer.");
-        }
+        if (numBits > maxBits)
+            throw new IllegalArgumentException("Range exceeds type capacity");
+        if (to > data.length * 8)
+            throw new IndexOutOfBoundsException("End of buffer");
 
-        if (bigEndian) {
+        if (bigEndian)
             return readBigEndian(from, to, numBits);
-        } else {
+        else
             return readLittleEndian(from, to);
-        }
     }
 
     /**

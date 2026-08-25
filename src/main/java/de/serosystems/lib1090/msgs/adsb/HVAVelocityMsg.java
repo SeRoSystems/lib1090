@@ -70,17 +70,16 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
      * @param squitter extended squitter which contains this HVA velocity message
      * @throws BadFormatException if message has wrong format
      */
-    public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 25)
-            throw new BadFormatException("HVA messages must have typecode 25.");
+            throw new BadFormatException("HVA messages must have typecode 25");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
-        byte messageSubtype = br.readByte(6, 7);
-        if (messageSubtype != 1)
-            throw new UnspecifiedFormatError("HVA velocity message must have subtype 1, got " + messageSubtype + ".");
+        if (br.readByte(6, 7) != 1)
+            throw new BadFormatException("HVA velocity message must have subtype 1");
 
         positionIntegrityCategory = br.readByte(18, 21);
         eastWestDirectionBit = br.readBoolean(22);

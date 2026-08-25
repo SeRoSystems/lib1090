@@ -72,7 +72,7 @@ public class IdentificationV3Msg extends ExtendedSquitter implements Serializabl
 
         // type code 1 is no longer defined for identification messages in version 3
         if (getFormatTypeCode() < 2 || getFormatTypeCode() > 4)
-            throw new BadFormatException("Version 3 identification messages must have typecode of 2-4.");
+            throw new BadFormatException("Version 3 identification messages must have typecode of 2-4");
 
         BitReader b = BitReader.forBigEndian(getMessage());
         emitterCategory = b.readByte(6, 8);

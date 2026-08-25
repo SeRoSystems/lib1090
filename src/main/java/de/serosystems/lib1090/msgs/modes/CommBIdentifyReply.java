@@ -75,9 +75,8 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
     public CommBIdentifyReply(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 21) {
-            throw new BadFormatException("Message is not a comm-b identify reply!");
-        }
+        if (getDownlinkFormat() != 21)
+            throw new BadFormatException("Message is not a comm-b identify reply");
 
         byte[] payload = getPayload();
         flight_status = getFirstField();

@@ -228,7 +228,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
         if (reply.length != getExpectedLength(downlink_format)) {
             throw new BadFormatException(
-                    String.format("Downlink format %d has length %d, but only %d bytes provided.",
+                    String.format("Downlink format %d has length %d, but only %d bytes provided",
                             downlink_format, getExpectedLength(downlink_format), reply.length));
         }
 
@@ -261,11 +261,11 @@ public class ModeSDownlinkMsg implements Serializable {
                 addr = rawAPToInt(raw_address);
 
                 if (downlink_format == 18 && first_field == 4)
-                    throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented.");
+                    throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented");
                 else if (downlink_format == 18 && first_field == 7)
-                    throw new UnspecifiedFormatError("Got invalid (reserved) format.");
+                    throw new UnspecifiedFormatError("Got invalid (reserved) format");
                 else if (downlink_format == 19 && first_field != 0)
-                    throw new UnspecifiedFormatError("Military frame not implemented.");
+                    throw new UnspecifiedFormatError("Military frame not implemented");
 
                 break;
 
@@ -440,7 +440,7 @@ public class ModeSDownlinkMsg implements Serializable {
      */
     private static int rawAPToInt(byte[] raw) {
         if (raw.length != 3)
-            throw new RuntimeException("AP can only have 3 bytes!");
+            throw new RuntimeException("AP can only have 3 bytes");
 
         return (raw[0] & 0xff) << 16 | (raw[1] & 0xff) << 8 | (raw[2] & 0xff);
     }

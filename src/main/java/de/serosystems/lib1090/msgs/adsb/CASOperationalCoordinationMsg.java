@@ -79,12 +79,12 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
         super(squitter);
 
         if (getFormatTypeCode() != 28)
-            throw new BadFormatException("CAS operational coordination reports must have typecode 28.");
+            throw new BadFormatException("CAS Operational Coordination messages must have typecode 28");
 
         BitReader b = BitReader.forBigEndian(getMessage());
 
         if (b.readByte(6, 8) != SUBTYPE)
-            throw new BadFormatException("CAS operational coordination reports have subtype 3.");
+            throw new BadFormatException("CAS Operational Coordination messages must have subtype 3");
 
         multipleThreatBit = b.readBoolean(10);
         cancelVerticalRaComplementEncoded = b.readByte(11, 12);

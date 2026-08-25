@@ -77,14 +77,14 @@ public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Seriali
     public VelocityOverGroundV2Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (this.getFormatTypeCode() != 19)
-            throw new BadFormatException("Velocity messages must have typecode 19.");
+        if (getFormatTypeCode() != 19)
+            throw new BadFormatException("Airborne Velocity messages must have typecode 19");
 
         BitReader br = BitReader.forBigEndian(getMessage());
 
         messageSubtype = br.readByte(6, 8);
         if (messageSubtype != 1 && messageSubtype != 2)
-            throw new BadFormatException("Ground speed messages have subtype 1 or 2.");
+            throw new BadFormatException("Velocity Over Ground messages must have subtype 1 or 2");
 
         intentChange = br.readBoolean(9);
         navigationAccuracyCategoryEncoded = br.readByte(11, 13);

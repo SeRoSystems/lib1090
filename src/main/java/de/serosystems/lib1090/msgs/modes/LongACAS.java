@@ -77,9 +77,8 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     public LongACAS(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() != 16) {
-            throw new BadFormatException("Message is not a long ACAS (air-air) message!");
-        }
+        if (getDownlinkFormat() != 16)
+            throw new BadFormatException("Message is not a long ACAS (air-air) message");
 
         byte[] payload = getPayload();
         airborne = (getFirstField() & 0x4) == 0;
