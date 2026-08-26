@@ -24,7 +24,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 {
 
     /**
-     * The encoded longitudinal and lateral distance of the GPS antenna from the nose of the aircraft,
+     * The encoded longitudinal and lateral distance of the GPS (Global Positioning System) antenna from
+     * the nose of the aircraft,
      * ED-102B §2.2.3.2.7.2.4.7 TABLE 2-59 and TABLE 2-60.
      *
      * <b>Returned as an {@code int}, not a {@code byte}</b>: the subfield is a full 8 bits, so a signed

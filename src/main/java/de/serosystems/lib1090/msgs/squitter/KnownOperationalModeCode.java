@@ -29,7 +29,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface KnownOperationalModeCode extends OperationalModeCode {
 
     /**
-     * Whether a TCAS/ACAS resolution advisory is active, ED-102B §2.2.3.2.7.2.4.2. Called "CA RA Active"
+     * Whether a TCAS/ACAS (Traffic Alert and Collision Avoidance System / Airborne Collision Avoidance
+     * System) resolution advisory is active, ED-102B §2.2.3.2.7.2.4.2. Called "CA RA Active"
      * in ADS-B version 3.
      * <p>
      * Every layout but one transmits this at ME bit 27. The ADS-B version 3 surface format {@code 1}

@@ -40,7 +40,8 @@ public interface SurfaceCapabilityClassCodeV2V3 extends SurfaceCapabilityClassCo
     }
 
     /**
-     * NIC supplement C, which qualifies the Navigation Integrity Category of surface position messages.
+     * NIC (Navigation Integrity Category) supplement C, which qualifies the Navigation Integrity Category
+     * of surface position messages.
      *
      * @return the NIC supplement C bit, ME bit 20
      */

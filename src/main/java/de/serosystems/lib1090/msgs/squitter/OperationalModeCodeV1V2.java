@@ -25,7 +25,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface OperationalModeCodeV1V2 extends KnownOperationalModeCode {
 
     /**
-     * Whether the ADS-B transmitting subsystem is receiving ATC services, ED-102B §N.3.3. Version 3
+     * Whether the ADS-B transmitting subsystem is receiving ATC (Air Traffic Control) services,
+     * ED-102B §N.3.3. Version 3
      * redefines the same bit as Mode S reply rate limiting status, ED-102B §2.2.3.2.7.2.4.4.
      *
      * @return true if ATC services are being received, ME bit 29

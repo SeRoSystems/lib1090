@@ -25,7 +25,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface CapabilityClassCodeV2V3 extends CapabilityClassCode {
 
     /**
-     * Whether the aircraft has ADS-B UAT receive capability ("UAT IN"), ED-102B §2.2.3.2.7.2.3.9.
+     * Whether the aircraft has ADS-B UAT (Universal Access Transceiver) receive capability — "UAT IN",
+     * ED-102B §2.2.3.2.7.2.3.9.
      * <p>
      * Declared here rather than implemented, because this is the one subfield whose ME bit differs
      * between subtypes: ME 19 airborne, ME 16 surface. See

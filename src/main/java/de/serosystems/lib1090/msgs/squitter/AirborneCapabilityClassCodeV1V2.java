@@ -25,7 +25,7 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClassCode {
 
     /**
-     * Whether the aircraft can send messages supporting Air-Referenced Velocity reports — "ARV Report
+     * Whether the aircraft can send messages supporting Air-Referenced Velocity (ARV) reports — "ARV Report
      * Capability".
      *
      * @return true if ARV reports are supported, ME bit 15
@@ -35,7 +35,8 @@ public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClass
     }
 
     /**
-     * Whether the aircraft can send messages supporting Target State reports — "TS Report Capability".
+     * Whether the aircraft can send messages supporting Target State (TS) reports — "TS Report
+     * Capability".
      *
      * @return true if TS reports are supported, ME bit 16
      */

@@ -94,7 +94,7 @@ public class AirborneCapabilityClassCodeV0 extends AbstractMEField
     }
 
     /**
-     * Whether the Cockpit Display of Traffic Information is operational, under the name version 0 gives
+     * Whether the CDTI (Cockpit Display of Traffic Information) is operational, under the name version 0 gives
      * the subfield: <b>"CDTI Traffic Display"</b>. Renamed to "1090ES IN" from version 1 onwards, which
      * is what {@link #has1090ESIn()} reports.
      *

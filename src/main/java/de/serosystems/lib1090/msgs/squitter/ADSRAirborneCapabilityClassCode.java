@@ -27,7 +27,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface ADSRAirborneCapabilityClassCode extends AirborneCapabilityClassCode {
 
     /**
-     * NIC supplement B, which qualifies the Navigation Integrity Category of airborne position messages.
+     * NIC (Navigation Integrity Category) supplement B, which qualifies the Navigation Integrity Category
+     * of airborne position messages.
      *
      * @return the NIC supplement B bit, ME bit 20
      */

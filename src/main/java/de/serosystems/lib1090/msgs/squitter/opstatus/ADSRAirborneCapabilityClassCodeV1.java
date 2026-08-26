@@ -95,7 +95,7 @@ public class ADSRAirborneCapabilityClassCodeV1 extends AbstractMEField
     }
 
     /**
-     * Whether the Cockpit Display of Traffic Information is operational, under the name ADS-B version 1
+     * Whether the CDTI (Cockpit Display of Traffic Information) is operational, under the name ADS-B version 1
      * gives the subfield: <b>"CDTI Traffic Display"</b>. Renamed to "1090ES IN" from version 2 onwards,
      * which is what {@link #has1090ESIn()} reports.
      *
