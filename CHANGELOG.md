@@ -30,6 +30,15 @@ and CPR decoding made since v4.1.3.
   package `msgs.squitter.opstatus` for the layouts and factories; the interfaces live in `msgs.squitter`)
 - `getGPSAntennaOffsetEncoded()` now returns `int` rather than `byte`: the subfield is a full 8 bits, so a signed byte
   read an all-ones offset as `-1` instead of `255`
+- Renamed operational status accessors so the prefix says what the value asserts: `is…` for a current state with the
+  predicate word spelling out what `true` means, `supports…` for a reporting capability, `has…` only for a fixed
+  property of the installation. `hasOperationalTCAS` → `isCollisionAvoidanceOperational`, `hasActiveIDENTSwitch` →
+  `isIDENTSwitchActive`, `hasTCASResolutionAdvisory` → `isTCASResolutionAdvisoryActive`, `hasModeSReplyRateLimiting` →
+  `isModeSReplyRateLimitingActive`, `hasRemainWellClearActive` → `isRemainWellClearActive`, `hasPositionOffsetApplied`
+  → `isPositionOffsetApplied`, `hasReceivingATCServices` → `isReceivingATCServices`, `hasAirReferencedVelocity` →
+  `supportsARVReport`, `hasTargetStateReport` → `supportsTSReport`, `hasLowTxPower` → `isB2Low` (the standard calls the
+  subfield "B2 Low", and it is neither unconditional nor static), and
+  `getTargetChangeReportCapabilityEncoded` → `getTCReportCapabilityLevelEncoded`
 
 ### New Features
 - Added support for ADS-B v3, including new v3-only message types: HVA Position/Velocity, Wx AIREP (aircraft state,

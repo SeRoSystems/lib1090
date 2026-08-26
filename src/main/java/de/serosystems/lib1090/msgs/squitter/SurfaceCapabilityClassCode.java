@@ -32,7 +32,7 @@ public interface SurfaceCapabilityClassCode extends KnownCapabilityClassCode {
      *
      * @return true if a Class B2 ground vehicle transmits below 70 W, ME bit 15
      */
-    default boolean hasLowTxPower() {
+    default boolean isB2Low() {
         return getMEBit(15);
     }
 }

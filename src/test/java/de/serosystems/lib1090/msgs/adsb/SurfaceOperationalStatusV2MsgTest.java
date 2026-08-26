@@ -104,8 +104,8 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
 
     @Test
     void testHasPositionOffsetApplied() throws Exception {
-        assertTrue(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0001).getOperationalMode()).hasPositionOffsetApplied());
-        assertFalse(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0002).getOperationalMode()).hasPositionOffsetApplied());
+        assertTrue(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0001).getOperationalMode()).isPositionOffsetApplied());
+        assertFalse(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0002).getOperationalMode()).isPositionOffsetApplied());
     }
 
     @Test

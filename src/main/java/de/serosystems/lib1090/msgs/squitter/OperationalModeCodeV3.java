@@ -30,7 +30,7 @@ public interface OperationalModeCodeV3 extends OperationalModeCodeV2V3 {
      *
      * @return true if Mode S reply rate limiting is active, ME bit 29
      */
-    default boolean hasModeSReplyRateLimiting() {
+    default boolean isModeSReplyRateLimitingActive() {
         return getMEBit(29);
     }
 }

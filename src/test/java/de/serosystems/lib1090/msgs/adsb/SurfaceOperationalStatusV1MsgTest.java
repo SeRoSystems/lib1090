@@ -71,8 +71,8 @@ class SurfaceOperationalStatusV1MsgTest extends SurfaceOperationalStatusMsgTest 
     @Test
     void testHasPositionOffsetApplied() throws Exception {
         SurfaceCapabilityClassCodeV1 positionOffsetApplied = (SurfaceCapabilityClassCodeV1) withCapabilityClassCode(0x200);
-        assertTrue(positionOffsetApplied.hasPositionOffsetApplied());
+        assertTrue(positionOffsetApplied.isPositionOffsetApplied());
         assertFalse(positionOffsetApplied.has1090ESIn());
-        assertFalse(positionOffsetApplied.hasLowTxPower());
+        assertFalse(positionOffsetApplied.isB2Low());
     }
 }

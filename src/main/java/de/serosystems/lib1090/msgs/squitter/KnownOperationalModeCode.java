@@ -40,7 +40,7 @@ public interface KnownOperationalModeCode extends OperationalModeCode {
      *
      * @return true if a resolution advisory is active, ME bit 27
      */
-    default boolean hasTCASResolutionAdvisory() {
+    default boolean isTCASResolutionAdvisoryActive() {
         return getMEBit(27);
     }
 
@@ -48,9 +48,9 @@ public interface KnownOperationalModeCode extends OperationalModeCode {
      * Whether the IDENT switch is currently active, ED-102B §2.2.3.2.7.2.4.3.
      *
      * @return true if the IDENT switch is active, ME bit 28
-     * @see #hasTCASResolutionAdvisory() for the one layout that reports a constant instead
+     * @see #isTCASResolutionAdvisoryActive() for the one layout that reports a constant instead
      */
-    default boolean hasActiveIDENTSwitch() {
+    default boolean isIDENTSwitchActive() {
         return getMEBit(28);
     }
 }

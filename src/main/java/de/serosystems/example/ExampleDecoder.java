@@ -231,14 +231,14 @@ public class ExampleDecoder {
                             + ((AirborneCapabilityClassCode) cc).isCollisionAvoidanceOperational());
                 }
                 if (cc instanceof SurfaceCapabilityClassCode) {
-                    System.out.println("          Low (<70W) TX power: " + ((SurfaceCapabilityClassCode) cc).hasLowTxPower());
+                    System.out.println("          Low (<70W) TX power: " + ((SurfaceCapabilityClassCode) cc).isB2Low());
                 }
                 if (cc instanceof CapabilityClassCodeV2V3) {
                     System.out.println("          Has UAT in: " + ((CapabilityClassCodeV2V3) cc).hasUATIn());
                 }
                 if (cc instanceof AirborneCapabilityClassCodeV1V2) {
                     System.out.println("          Supports air-referenced velocity reports: "
-                            + ((AirborneCapabilityClassCodeV1V2) cc).hasAirReferencedVelocity());
+                            + ((AirborneCapabilityClassCodeV1V2) cc).supportsARVReport());
                 }
                 if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
                     SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
@@ -262,8 +262,8 @@ public class ExampleDecoder {
                 // defined layout answers
                 if (om instanceof KnownOperationalModeCode) {
                     KnownOperationalModeCode known = (KnownOperationalModeCode) om;
-                    System.out.println("          IDENT switch active: " + known.hasActiveIDENTSwitch());
-                    System.out.println("          Has TCAS resolution advisory: " + known.hasTCASResolutionAdvisory());
+                    System.out.println("          IDENT switch active: " + known.isIDENTSwitchActive());
+                    System.out.println("          Has TCAS resolution advisory: " + known.isTCASResolutionAdvisoryActive());
                 }
                 if (om instanceof OperationalModeCodeV2V3) {
                     OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;
@@ -276,7 +276,7 @@ public class ExampleDecoder {
                 }
                 if (om instanceof OperationalModeCodeV3) {
                     System.out.println("          Mode S reply rate limiting: "
-                            + ((OperationalModeCodeV3) om).hasModeSReplyRateLimiting());
+                            + ((OperationalModeCodeV3) om).isModeSReplyRateLimitingActive());
                 }
             } else if (msg instanceof TCASResolutionAdvisoryMsg) {
                 TCASResolutionAdvisoryMsg tcas = (TCASResolutionAdvisoryMsg) msg;
