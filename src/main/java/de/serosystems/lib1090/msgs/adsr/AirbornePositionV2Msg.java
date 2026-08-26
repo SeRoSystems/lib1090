@@ -106,7 +106,7 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
     /**
      * @return NIC supplement that was set before
      */
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -138,7 +138,7 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
             case 12:
                 return 370.4;
             case 13:
-                return hasNICSupplementA() ? 1111.2 : 555.6;
+                return getNICSupplementA() ? 1111.2 : 555.6;
             case 14:
                 return 1852;
             case 15:

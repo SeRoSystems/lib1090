@@ -118,10 +118,10 @@ public class ExampleDecoder {
                     System.out.println("          Surveillance Integrity Level (SIL): " + ap.getSIL());
                 } else if (msg instanceof AirbornePositionV2Msg) {
                     AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
-                    System.out.println("          NIC supplement B set: " + ap2.hasNICSupplementB());
+                    System.out.println("          NIC supplement B set: " + ap2.getNICSupplementB());
                 } else if (msg instanceof AirbornePositionV3Msg) {
                     AirbornePositionV3Msg ap3 = (AirbornePositionV3Msg) msg;
-                    System.out.println("          NIC supplement B set: " + ap3.hasNICSupplementB());
+                    System.out.println("          NIC supplement B set: " + ap3.getNICSupplementB());
                 }
             } else if (msg instanceof SurfacePositionMsg) {
                 SurfacePositionMsg surfacePosition = (SurfacePositionMsg) msg;
@@ -197,23 +197,23 @@ public class ExampleDecoder {
                     AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
                     System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
-                    System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
+                    System.out.println("          Has NIC supplement A: " + opstatA.getNICSupplementA());
                     System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
                 }
                 if (msg instanceof SurfaceOperationalStatusMsg) {
                     SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
-                    System.out.println("          Has NIC supplement A: " + opstatS.hasNICSupplementA());
+                    System.out.println("          Has NIC supplement A: " + opstatS.getNICSupplementA());
                     System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
                     System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
                     System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
-                    System.out.println("          Horizontal reference: " + (opstatS.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
+                    System.out.println("          Horizontal reference: " + (opstatS.isHeadingReferencedToMagneticNorth() ? "magnetic north" : "true north"));
                 }
                 if (msg instanceof AirborneOperationalStatusV2V3Msg) {
                     System.out.println("          Geometric vertical accuracy: " + ((AirborneOperationalStatusV2V3Msg) msg).getGeometricVerticalAccuracy() + "m");
                 }
                 if (msg instanceof OperationalStatusV2V3Msg) {
-                    System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).hasSILSupplement());
+                    System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).getSILSupplement());
                 }
 
                 // The capability class and operational mode fields each begin with a format selector
@@ -242,7 +242,7 @@ public class ExampleDecoder {
                 }
                 if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
                     SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
-                    System.out.println("          Has NIC supplement C: " + surface.hasNICSupplementC());
+                    System.out.println("          Has NIC supplement C: " + surface.getNICSupplementC());
                     System.out.println("          Navigation Accuracy Category for velocity (NACv): " + surface.getNACv());
                 }
                 if (cc instanceof AirborneCapabilityClassCodeV3) {
@@ -325,7 +325,7 @@ public class ExampleDecoder {
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
                     System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
                     System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
-                    System.out.println("          Has SIL supplement: " + tStatus.hasSILSupplement());
+                    System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
                     System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
 
                     System.out.printf("          Selected altitude is derived from %s\n", tStatus.isFMSSelectedAltitude() ? "FMS" : "MCP/FCU");

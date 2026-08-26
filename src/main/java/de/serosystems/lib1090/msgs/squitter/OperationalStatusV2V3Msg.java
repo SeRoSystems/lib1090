@@ -32,7 +32,7 @@ public interface OperationalStatusV2V3Msg extends OperationalStatusMsg {
      * @return the NIC supplement A to the format type code of position messages, ED-102B
      * §2.2.3.2.7.2.6
      */
-    boolean hasNICSupplementA();
+    boolean getNICSupplementA();
 
     /**
      * @return the navigation accuracy for position messages; rather use getPositionUncertainty,
@@ -58,5 +58,5 @@ public interface OperationalStatusV2V3Msg extends OperationalStatusMsg {
      * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
      * it's based on "per hour".
      */
-    boolean hasSILSupplement();
+    boolean getSILSupplement();
 }

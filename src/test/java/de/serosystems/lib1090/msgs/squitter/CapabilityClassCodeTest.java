@@ -136,7 +136,7 @@ class CapabilityClassCodeTest {
         SurfaceV3 cc = new SurfaceV3(0x20 | 0xE | 0x1);
         assertTrue(cc.isB2Low());
         assertEquals(7, cc.getNACv());
-        assertTrue(cc.hasNICSupplementC());
+        assertTrue(cc.getNICSupplementC());
     }
 
     @Test
@@ -156,8 +156,8 @@ class CapabilityClassCodeTest {
     @Test
     public void adsrAddsOnlyNICSupplementB() {
         ADSRAirborneV3 cc = new ADSRAirborneV3(0x10);
-        assertTrue(cc.hasNICSupplementB());
-        assertFalse(new ADSRAirborneV3(0x20).hasNICSupplementB());
+        assertTrue(cc.getNICSupplementB());
+        assertFalse(new ADSRAirborneV3(0x20).getNICSupplementB());
         // ADS-B airborne v3 has no such accessor at all; ME 20 is reserved there. Note that
         // `instanceof` does not even compile here - javac rejects it as statically impossible,
         // which is a stronger guarantee than this assertion.

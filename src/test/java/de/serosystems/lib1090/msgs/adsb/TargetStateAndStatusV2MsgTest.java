@@ -141,7 +141,7 @@ public class TargetStateAndStatusV2MsgTest {
         assertEquals(17, tss.getDownlinkFormat());
 
         assertEquals(29, tss.getFormatTypeCode());
-        assertFalse(tss.hasSILSupplement());
+        assertFalse(tss.getSILSupplement());
         assertFalse(tss.isFMSSelectedAltitude());
         assertTrue(tss.hasSelectedAltitude());
 
@@ -170,7 +170,7 @@ public class TargetStateAndStatusV2MsgTest {
         assertEquals(17, tss.getDownlinkFormat());
 
         assertEquals(29, tss.getFormatTypeCode());
-        assertFalse(tss.hasSILSupplement());
+        assertFalse(tss.getSILSupplement());
         assertFalse(tss.isFMSSelectedAltitude());
         assertTrue(tss.hasSelectedAltitude());
 
@@ -199,7 +199,7 @@ public class TargetStateAndStatusV2MsgTest {
         assertEquals(17, tss.getDownlinkFormat());
 
         assertEquals(29, tss.getFormatTypeCode());
-        assertFalse(tss.hasSILSupplement());
+        assertFalse(tss.getSILSupplement());
         assertFalse(tss.isFMSSelectedAltitude());
         assertTrue(tss.hasSelectedAltitude());
 

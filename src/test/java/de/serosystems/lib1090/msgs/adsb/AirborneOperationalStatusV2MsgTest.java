@@ -79,13 +79,13 @@ public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatu
 
         assertEquals(2, opstat.getMOPSVersion());
         assertFalse(((KnownCapabilityClassCode) opstat.getCapabilityClass()).has1090ESIn());
-        assertFalse(opstat.hasNICSupplementA());
+        assertFalse(opstat.getNICSupplementA());
         assertEquals(9, opstat.getNACpEncoded());
 
         assertEquals(2, opstat.getGVAEncoded());
         assertEquals(3, opstat.getSILEncoded());
         assertTrue(opstat.getBarometricAltitudeIntegrityCode());
-        assertFalse(opstat.getHorizontalReferenceDirection());
+        assertFalse(opstat.isHeadingReferencedToMagneticNorth());
     }
 
     @Test

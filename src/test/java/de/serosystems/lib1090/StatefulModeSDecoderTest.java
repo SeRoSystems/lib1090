@@ -61,7 +61,7 @@ public class StatefulModeSDecoderTest {
 
         TargetStateAndStatusV2Msg tss = (TargetStateAndStatusV2Msg) reply;
 
-        assertFalse(tss.hasSILSupplement());
+        assertFalse(tss.getSILSupplement());
         assertFalse(tss.isFMSSelectedAltitude());
         assertEquals((907 - 1) * 32, tss.getSelectedAltitude().intValue());
     }

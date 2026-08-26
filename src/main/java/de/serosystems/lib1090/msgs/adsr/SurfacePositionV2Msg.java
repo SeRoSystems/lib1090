@@ -98,7 +98,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
     /**
      * @return NIC supplement that was set before
      */
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -113,7 +113,7 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
     /**
      * @return NIC supplement that was set before
      */
-    public boolean hasNICSupplementC() {
+    public boolean getNICSupplementC() {
         return nicSupplementC;
     }
 
@@ -146,13 +146,13 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
             case 6:
                 return 25;
             case 7:
-                return (byte) (hasNICSupplementA() ? 75 : 185.2);
+                return (byte) (getNICSupplementA() ? 75 : 185.2);
             case 8:
-                if (hasNICSupplementC() && hasNICSupplementA())
+                if (getNICSupplementC() && getNICSupplementA())
                     return 370.4;
-                else if (hasNICSupplementC())
+                else if (getNICSupplementC())
                     return 1111.2;
-                else if (hasNICSupplementA())
+                else if (getNICSupplementA())
                     return 555.6;
                 return -1;
             default:
@@ -177,11 +177,11 @@ public class SurfacePositionV2Msg extends ExtendedSquitter implements Serializab
             case 6:
                 return 10;
             case 7:
-                return (byte) (hasNICSupplementA() ? 9 : 8);
+                return (byte) (getNICSupplementA() ? 9 : 8);
             case 8:
-                if (hasNICSupplementC() && hasNICSupplementA())
+                if (getNICSupplementC() && getNICSupplementA())
                     return 7;
-                else if (hasNICSupplementC() || hasNICSupplementA())
+                else if (getNICSupplementC() || getNICSupplementA())
                     return 6;
                 return 0;
             default:

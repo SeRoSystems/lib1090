@@ -62,8 +62,8 @@ class CapabilityClassLayoutsTest {
         assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).supportsTSReport(), "supportsTSReport ME 16");
         assertEquals(3, new ADSRAirborneCapabilityClassCodeV1(0xC0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
         assertEquals(0, new ADSRAirborneCapabilityClassCodeV1(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x10).hasNICSupplementB(), "hasNICSupplementB ME 20");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).hasNICSupplementB(), "hasNICSupplementB ME 20");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x10).getNICSupplementB(), "getNICSupplementB ME 20");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).getNICSupplementB(), "getNICSupplementB ME 20");
 
         assertThrows(IllegalArgumentException.class, () -> new ADSRAirborneCapabilityClassCodeV1(0x8000));
         assertThrows(IllegalArgumentException.class, () -> new ADSRAirborneCapabilityClassCodeV1(0x800));
@@ -128,8 +128,8 @@ class CapabilityClassLayoutsTest {
         assertEquals(0, new ADSRAirborneCapabilityClassCodeV2(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
         assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x20).hasUATIn(), "hasUATIn ME 19");
         assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 19");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x10).hasNICSupplementB(), "hasNICSupplementB ME 20");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).hasNICSupplementB(), "hasNICSupplementB ME 20");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x10).getNICSupplementB(), "getNICSupplementB ME 20");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).getNICSupplementB(), "getNICSupplementB ME 20");
 
         assertThrows(IllegalArgumentException.class, () -> new ADSRAirborneCapabilityClassCodeV2(0x8000));
     }
@@ -172,8 +172,8 @@ class CapabilityClassLayoutsTest {
         assertFalse(new SurfaceCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 16");
         assertEquals(7, new SurfaceCapabilityClassCodeV2(0xE).getNACv(), "getNACv ME 17–19");
         assertEquals(0, new SurfaceCapabilityClassCodeV2(0).getNACv(), "getNACv ME 17–19");
-        assertTrue(new SurfaceCapabilityClassCodeV2(0x1).hasNICSupplementC(), "hasNICSupplementC ME 20");
-        assertFalse(new SurfaceCapabilityClassCodeV2(0).hasNICSupplementC(), "hasNICSupplementC ME 20");
+        assertTrue(new SurfaceCapabilityClassCodeV2(0x1).getNICSupplementC(), "getNICSupplementC ME 20");
+        assertFalse(new SurfaceCapabilityClassCodeV2(0).getNICSupplementC(), "getNICSupplementC ME 20");
 
         assertThrows(IllegalArgumentException.class, () -> new SurfaceCapabilityClassCodeV2(0x800));
     }
@@ -197,8 +197,8 @@ class CapabilityClassLayoutsTest {
         assertEquals(0, new ADSRAirborneCapabilityClassCodeV3(0).getTxPowerEncoded(), "getTxPowerEncoded ME 17–18");
         assertTrue(new ADSRAirborneCapabilityClassCodeV3(0x20).hasUATIn(), "hasUATIn ME 19");
         assertFalse(new ADSRAirborneCapabilityClassCodeV3(0).hasUATIn(), "hasUATIn ME 19");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV3(0x10).hasNICSupplementB(), "hasNICSupplementB ME 20");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV3(0).hasNICSupplementB(), "hasNICSupplementB ME 20");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV3(0x10).getNICSupplementB(), "getNICSupplementB ME 20");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV3(0).getNICSupplementB(), "getNICSupplementB ME 20");
         assertEquals(3, new ADSRAirborneCapabilityClassCodeV3(0xC).getReducedCapabilityEquipmentEncoded(), "getReducedCapabilityEquipmentEncoded ME 21–22");
         assertEquals(0, new ADSRAirborneCapabilityClassCodeV3(0).getReducedCapabilityEquipmentEncoded(), "getReducedCapabilityEquipmentEncoded ME 21–22");
         assertEquals(3, new ADSRAirborneCapabilityClassCodeV3(0x3).getDetectAndAvoidEncoded(), "getDetectAndAvoidEncoded ME 23–24");
@@ -251,8 +251,8 @@ class CapabilityClassLayoutsTest {
         assertFalse(new SurfaceCapabilityClassCodeV3(0).hasUATIn(), "hasUATIn ME 16");
         assertEquals(7, new SurfaceCapabilityClassCodeV3(0xE).getNACv(), "getNACv ME 17–19");
         assertEquals(0, new SurfaceCapabilityClassCodeV3(0).getNACv(), "getNACv ME 17–19");
-        assertTrue(new SurfaceCapabilityClassCodeV3(0x1).hasNICSupplementC(), "hasNICSupplementC ME 20");
-        assertFalse(new SurfaceCapabilityClassCodeV3(0).hasNICSupplementC(), "hasNICSupplementC ME 20");
+        assertTrue(new SurfaceCapabilityClassCodeV3(0x1).getNICSupplementC(), "getNICSupplementC ME 20");
+        assertFalse(new SurfaceCapabilityClassCodeV3(0).getNICSupplementC(), "getNICSupplementC ME 20");
 
         assertThrows(IllegalArgumentException.class, () -> new SurfaceCapabilityClassCodeV3(0x800));
     }

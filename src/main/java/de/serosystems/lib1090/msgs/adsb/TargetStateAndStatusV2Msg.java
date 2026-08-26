@@ -128,7 +128,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
      * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
      * it's based on "per hour".
      */
-    public boolean hasSILSupplement() {
+    public boolean getSILSupplement() {
         return silSupplement;
     }
 

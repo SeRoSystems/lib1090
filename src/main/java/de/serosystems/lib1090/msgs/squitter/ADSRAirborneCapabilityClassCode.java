@@ -32,7 +32,7 @@ public interface ADSRAirborneCapabilityClassCode extends AirborneCapabilityClass
      *
      * @return the NIC supplement B bit, ME bit 20
      */
-    default boolean hasNICSupplementB() {
+    default boolean getNICSupplementB() {
         return getMEBit(20);
     }
 }

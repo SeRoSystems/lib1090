@@ -45,7 +45,7 @@ public interface SurfaceCapabilityClassCodeV2V3 extends SurfaceCapabilityClassCo
      *
      * @return the NIC supplement C bit, ME bit 20
      */
-    default boolean hasNICSupplementC() {
+    default boolean getNICSupplementC() {
         return getMEBit(20);
     }
 }

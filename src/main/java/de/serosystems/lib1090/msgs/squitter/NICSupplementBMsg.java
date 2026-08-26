@@ -29,5 +29,5 @@ public interface NICSupplementBMsg {
     /**
      * @return NIC supplement B, ED-102B §2.2.3.2.3.3
      */
-    boolean hasNICSupplementB();
+    boolean getNICSupplementB();
 }

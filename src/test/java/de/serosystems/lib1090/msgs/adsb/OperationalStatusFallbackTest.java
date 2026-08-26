@@ -58,7 +58,7 @@ class OperationalStatusFallbackTest {
         // everything outside the field decodes exactly as before: it is positionally fixed
         assertEquals(2, opstat.getMOPSVersion());
         assertEquals(9, opstat.getNACpEncoded());
-        assertFalse(opstat.hasNICSupplementA());
+        assertFalse(opstat.getNICSupplementA());
         assertInstanceOf(KnownOperationalModeCode.class, opstat.getOperationalMode());
     }
 

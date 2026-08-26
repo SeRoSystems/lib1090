@@ -123,7 +123,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -148,7 +148,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public boolean getHorizontalReferenceDirection() {
+    public boolean isHeadingReferencedToMagneticNorth() {
         return hrd;
     }
 
@@ -158,7 +158,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public boolean hasSILSupplement() {
+    public boolean getSILSupplement() {
         return silSupplement;
     }
 
