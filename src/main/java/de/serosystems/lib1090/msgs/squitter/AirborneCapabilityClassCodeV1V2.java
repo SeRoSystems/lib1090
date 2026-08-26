@@ -30,7 +30,7 @@ public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClass
      *
      * @return true if ARV reports are supported, ME bit 15
      */
-    default boolean hasAirReferencedVelocity() {
+    default boolean supportsARVReport() {
         return getMEBit(15);
     }
 
@@ -40,7 +40,7 @@ public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClass
      *
      * @return true if TS reports are supported, ME bit 16
      */
-    default boolean hasTargetStateReport() {
+    default boolean supportsTSReport() {
         return getMEBit(16);
     }
 
@@ -55,7 +55,7 @@ public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClass
      *
      * @return the TC report capability level, ME bits 17–18
      */
-    default byte getTargetChangeReportCapabilityEncoded() {
+    default byte getTCReportCapabilityLevelEncoded() {
         return (byte) getMEBits(17, 18);
     }
 
@@ -63,7 +63,7 @@ public interface AirborneCapabilityClassCodeV1V2 extends AirborneCapabilityClass
      * @return whether target change reports are supported at all
      */
     default boolean supportsTargetChangeReport() {
-        byte level = getTargetChangeReportCapabilityEncoded();
+        byte level = getTCReportCapabilityLevelEncoded();
         return level == 1 || level == 2;
     }
 }

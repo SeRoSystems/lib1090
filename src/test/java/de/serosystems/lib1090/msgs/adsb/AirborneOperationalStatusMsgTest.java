@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Shared tests for the capability class code and operational mode code fields, which are encoded
  * identically (same bit offsets, same reserved-bit validation) across ADS-B versions 1 and 2 for
- * airborne operational status messages. hasOperationalTCAS()'s polarity differs between versions
+ * airborne operational status messages. isCollisionAvoidanceOperational()'s polarity differs between versions
  * and is intentionally NOT covered here; it stays in the version-specific subclasses.
  */
 abstract class AirborneOperationalStatusMsgTest {
@@ -88,26 +88,26 @@ abstract class AirborneOperationalStatusMsgTest {
     void testCapabilityClassCodeFlags() throws Exception {
         AirborneCapabilityClassCodeV1V2 es1090In = withCapabilityClassCode(0x1000);
         assertTrue(es1090In.has1090ESIn());
-        assertFalse(es1090In.hasAirReferencedVelocity());
-        assertFalse(es1090In.hasTargetStateReport());
+        assertFalse(es1090In.supportsARVReport());
+        assertFalse(es1090In.supportsTSReport());
 
         AirborneCapabilityClassCodeV1V2 airReferencedVelocity = withCapabilityClassCode(0x0200);
         assertFalse(airReferencedVelocity.has1090ESIn());
-        assertTrue(airReferencedVelocity.hasAirReferencedVelocity());
-        assertFalse(airReferencedVelocity.hasTargetStateReport());
+        assertTrue(airReferencedVelocity.supportsARVReport());
+        assertFalse(airReferencedVelocity.supportsTSReport());
 
         AirborneCapabilityClassCodeV1V2 targetStateReport = withCapabilityClassCode(0x0100);
         assertFalse(targetStateReport.has1090ESIn());
-        assertFalse(targetStateReport.hasAirReferencedVelocity());
-        assertTrue(targetStateReport.hasTargetStateReport());
+        assertFalse(targetStateReport.supportsARVReport());
+        assertTrue(targetStateReport.supportsTSReport());
     }
 
     @Test
     void testTargetChangeReportCapability() throws Exception {
-        assertEquals(0, withCapabilityClassCode(0x00).getTargetChangeReportCapabilityEncoded());
-        assertEquals(1, withCapabilityClassCode(0x40).getTargetChangeReportCapabilityEncoded());
-        assertEquals(2, withCapabilityClassCode(0x80).getTargetChangeReportCapabilityEncoded());
-        assertEquals(3, withCapabilityClassCode(0xC0).getTargetChangeReportCapabilityEncoded());
+        assertEquals(0, withCapabilityClassCode(0x00).getTCReportCapabilityLevelEncoded());
+        assertEquals(1, withCapabilityClassCode(0x40).getTCReportCapabilityLevelEncoded());
+        assertEquals(2, withCapabilityClassCode(0x80).getTCReportCapabilityLevelEncoded());
+        assertEquals(3, withCapabilityClassCode(0xC0).getTCReportCapabilityLevelEncoded());
     }
 
     /**
@@ -138,19 +138,19 @@ abstract class AirborneOperationalStatusMsgTest {
     @Test
     void testOperationalModeCodeFlags() throws Exception {
         OperationalModeCodeV1V2 tcasResolutionAdvisory = withOperationalModeCode(0x2000);
-        assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
-        assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
-        assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
+        assertTrue(tcasResolutionAdvisory.isTCASResolutionAdvisoryActive());
+        assertFalse(tcasResolutionAdvisory.isIDENTSwitchActive());
+        assertFalse(tcasResolutionAdvisory.isReceivingATCServices());
 
         OperationalModeCodeV1V2 activeIdentSwitch = withOperationalModeCode(0x1000);
-        assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
-        assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
-        assertFalse(activeIdentSwitch.hasReceivingATCServices());
+        assertFalse(activeIdentSwitch.isTCASResolutionAdvisoryActive());
+        assertTrue(activeIdentSwitch.isIDENTSwitchActive());
+        assertFalse(activeIdentSwitch.isReceivingATCServices());
 
         OperationalModeCodeV1V2 receivingAtcServices = withOperationalModeCode(0x0800);
-        assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
-        assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
-        assertTrue(receivingAtcServices.hasReceivingATCServices());
+        assertFalse(receivingAtcServices.isTCASResolutionAdvisoryActive());
+        assertFalse(receivingAtcServices.isIDENTSwitchActive());
+        assertTrue(receivingAtcServices.isReceivingATCServices());
     }
 
 }

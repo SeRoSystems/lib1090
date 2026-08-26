@@ -84,7 +84,7 @@ public class SurfaceCapabilityClassCodeV1 extends AbstractMEField
      *
      * @return true if the position offset has been applied, ME bit 11
      */
-    public boolean hasPositionOffsetApplied() {
+    public boolean isPositionOffsetApplied() {
         return getMEBit(11);
     }
 

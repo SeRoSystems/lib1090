@@ -83,19 +83,19 @@ public class SurfaceOperationalModeCodeV3Format1 extends AbstractMEField
      * @return always false
      */
     @Override
-    public boolean hasTCASResolutionAdvisory() {
+    public boolean isTCASResolutionAdvisoryActive() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * Always false, for the same reason as {@link #hasTCASResolutionAdvisory()}.
+     * Always false, for the same reason as {@link #isTCASResolutionAdvisoryActive()}.
      *
      * @return always false
      */
     @Override
-    public boolean hasActiveIDENTSwitch() {
+    public boolean isIDENTSwitchActive() {
         return false;
     }
 }

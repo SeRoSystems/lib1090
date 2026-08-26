@@ -49,7 +49,7 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
      * </ul>
      *
      * @return the lateral offset in metres, or {@code null} for "no data"
-     * @see #hasPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
+     * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */
     default Integer getLateralAxisGPSAntennaOffset() {
@@ -69,7 +69,7 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
      * </ul>
      *
      * @return the longitudinal offset in metres, or {@code null} for "no data"
-     * @see #hasPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
+     * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */
     default Integer getLongitudinalAxisGPSAntennaOffset() {
@@ -84,7 +84,7 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
      *
      * @return true if the position offset has been applied, i.e. ME 33–40 read exactly 1
      */
-    default boolean hasPositionOffsetApplied() {
+    default boolean isPositionOffsetApplied() {
         return getMEBits(33, 40) == 1;
     }
 }

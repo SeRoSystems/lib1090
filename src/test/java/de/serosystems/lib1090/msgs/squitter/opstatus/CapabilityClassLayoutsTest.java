@@ -56,12 +56,12 @@ class CapabilityClassLayoutsTest {
         assertTrue(new ADSRAirborneCapabilityClassCodeV1(0).isCollisionAvoidanceOperational(), "isCollisionAvoidanceOperational ME 11 (inverted)");
         assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x1000).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x200).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x100).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertEquals(3, new ADSRAirborneCapabilityClassCodeV1(0xC0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
-        assertEquals(0, new ADSRAirborneCapabilityClassCodeV1(0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x200).supportsARVReport(), "supportsARVReport ME 15");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).supportsARVReport(), "supportsARVReport ME 15");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x100).supportsTSReport(), "supportsTSReport ME 16");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).supportsTSReport(), "supportsTSReport ME 16");
+        assertEquals(3, new ADSRAirborneCapabilityClassCodeV1(0xC0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
+        assertEquals(0, new ADSRAirborneCapabilityClassCodeV1(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
         assertTrue(new ADSRAirborneCapabilityClassCodeV1(0x10).hasNICSupplementB(), "hasNICSupplementB ME 20");
         assertFalse(new ADSRAirborneCapabilityClassCodeV1(0).hasNICSupplementB(), "hasNICSupplementB ME 20");
 
@@ -80,12 +80,12 @@ class CapabilityClassLayoutsTest {
         assertTrue(new AirborneCapabilityClassCodeV1(0).isCollisionAvoidanceOperational(), "isCollisionAvoidanceOperational ME 11 (inverted)");
         assertTrue(new AirborneCapabilityClassCodeV1(0x1000).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new AirborneCapabilityClassCodeV1(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new AirborneCapabilityClassCodeV1(0x200).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertFalse(new AirborneCapabilityClassCodeV1(0).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertTrue(new AirborneCapabilityClassCodeV1(0x100).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertFalse(new AirborneCapabilityClassCodeV1(0).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertEquals(3, new AirborneCapabilityClassCodeV1(0xC0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
-        assertEquals(0, new AirborneCapabilityClassCodeV1(0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
+        assertTrue(new AirborneCapabilityClassCodeV1(0x200).supportsARVReport(), "supportsARVReport ME 15");
+        assertFalse(new AirborneCapabilityClassCodeV1(0).supportsARVReport(), "supportsARVReport ME 15");
+        assertTrue(new AirborneCapabilityClassCodeV1(0x100).supportsTSReport(), "supportsTSReport ME 16");
+        assertFalse(new AirborneCapabilityClassCodeV1(0).supportsTSReport(), "supportsTSReport ME 16");
+        assertEquals(3, new AirborneCapabilityClassCodeV1(0xC0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
+        assertEquals(0, new AirborneCapabilityClassCodeV1(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
 
         assertThrows(IllegalArgumentException.class, () -> new AirborneCapabilityClassCodeV1(0x8000));
         assertThrows(IllegalArgumentException.class, () -> new AirborneCapabilityClassCodeV1(0x800));
@@ -98,12 +98,12 @@ class CapabilityClassLayoutsTest {
         assertEquals(20, new SurfaceCapabilityClassCodeV1(0).getLastMEBit());
         assertEquals(0, new SurfaceCapabilityClassCodeV1(0).getFormatSelector());
 
-        assertTrue(new SurfaceCapabilityClassCodeV1(0x200).hasPositionOffsetApplied(), "hasPositionOffsetApplied ME 11");
-        assertFalse(new SurfaceCapabilityClassCodeV1(0).hasPositionOffsetApplied(), "hasPositionOffsetApplied ME 11");
+        assertTrue(new SurfaceCapabilityClassCodeV1(0x200).isPositionOffsetApplied(), "isPositionOffsetApplied ME 11");
+        assertFalse(new SurfaceCapabilityClassCodeV1(0).isPositionOffsetApplied(), "isPositionOffsetApplied ME 11");
         assertTrue(new SurfaceCapabilityClassCodeV1(0x100).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new SurfaceCapabilityClassCodeV1(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new SurfaceCapabilityClassCodeV1(0x20).hasLowTxPower(), "hasLowTxPower ME 15");
-        assertFalse(new SurfaceCapabilityClassCodeV1(0).hasLowTxPower(), "hasLowTxPower ME 15");
+        assertTrue(new SurfaceCapabilityClassCodeV1(0x20).isB2Low(), "isB2Low ME 15");
+        assertFalse(new SurfaceCapabilityClassCodeV1(0).isB2Low(), "isB2Low ME 15");
 
         assertThrows(IllegalArgumentException.class, () -> new SurfaceCapabilityClassCodeV1(0x800));
         assertThrows(IllegalArgumentException.class, () -> new SurfaceCapabilityClassCodeV1(0x80));
@@ -120,12 +120,12 @@ class CapabilityClassLayoutsTest {
         assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).isCollisionAvoidanceOperational(), "isCollisionAvoidanceOperational ME 11");
         assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x1000).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x200).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x100).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertEquals(3, new ADSRAirborneCapabilityClassCodeV2(0xC0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
-        assertEquals(0, new ADSRAirborneCapabilityClassCodeV2(0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x200).supportsARVReport(), "supportsARVReport ME 15");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).supportsARVReport(), "supportsARVReport ME 15");
+        assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x100).supportsTSReport(), "supportsTSReport ME 16");
+        assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).supportsTSReport(), "supportsTSReport ME 16");
+        assertEquals(3, new ADSRAirborneCapabilityClassCodeV2(0xC0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
+        assertEquals(0, new ADSRAirborneCapabilityClassCodeV2(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
         assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x20).hasUATIn(), "hasUATIn ME 19");
         assertFalse(new ADSRAirborneCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 19");
         assertTrue(new ADSRAirborneCapabilityClassCodeV2(0x10).hasNICSupplementB(), "hasNICSupplementB ME 20");
@@ -145,12 +145,12 @@ class CapabilityClassLayoutsTest {
         assertFalse(new AirborneCapabilityClassCodeV2(0).isCollisionAvoidanceOperational(), "isCollisionAvoidanceOperational ME 11");
         assertTrue(new AirborneCapabilityClassCodeV2(0x1000).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new AirborneCapabilityClassCodeV2(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new AirborneCapabilityClassCodeV2(0x200).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertFalse(new AirborneCapabilityClassCodeV2(0).hasAirReferencedVelocity(), "hasAirReferencedVelocity ME 15");
-        assertTrue(new AirborneCapabilityClassCodeV2(0x100).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertFalse(new AirborneCapabilityClassCodeV2(0).hasTargetStateReport(), "hasTargetStateReport ME 16");
-        assertEquals(3, new AirborneCapabilityClassCodeV2(0xC0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
-        assertEquals(0, new AirborneCapabilityClassCodeV2(0).getTargetChangeReportCapabilityEncoded(), "getTargetChangeReportCapabilityEncoded ME 17–18");
+        assertTrue(new AirborneCapabilityClassCodeV2(0x200).supportsARVReport(), "supportsARVReport ME 15");
+        assertFalse(new AirborneCapabilityClassCodeV2(0).supportsARVReport(), "supportsARVReport ME 15");
+        assertTrue(new AirborneCapabilityClassCodeV2(0x100).supportsTSReport(), "supportsTSReport ME 16");
+        assertFalse(new AirborneCapabilityClassCodeV2(0).supportsTSReport(), "supportsTSReport ME 16");
+        assertEquals(3, new AirborneCapabilityClassCodeV2(0xC0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
+        assertEquals(0, new AirborneCapabilityClassCodeV2(0).getTCReportCapabilityLevelEncoded(), "getTCReportCapabilityLevelEncoded ME 17–18");
         assertTrue(new AirborneCapabilityClassCodeV2(0x20).hasUATIn(), "hasUATIn ME 19");
         assertFalse(new AirborneCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 19");
 
@@ -166,8 +166,8 @@ class CapabilityClassLayoutsTest {
 
         assertTrue(new SurfaceCapabilityClassCodeV2(0x100).has1090ESIn(), "has1090ESIn ME 12");
         assertFalse(new SurfaceCapabilityClassCodeV2(0).has1090ESIn(), "has1090ESIn ME 12");
-        assertTrue(new SurfaceCapabilityClassCodeV2(0x20).hasLowTxPower(), "hasLowTxPower ME 15");
-        assertFalse(new SurfaceCapabilityClassCodeV2(0).hasLowTxPower(), "hasLowTxPower ME 15");
+        assertTrue(new SurfaceCapabilityClassCodeV2(0x20).isB2Low(), "isB2Low ME 15");
+        assertFalse(new SurfaceCapabilityClassCodeV2(0).isB2Low(), "isB2Low ME 15");
         assertTrue(new SurfaceCapabilityClassCodeV2(0x10).hasUATIn(), "hasUATIn ME 16");
         assertFalse(new SurfaceCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 16");
         assertEquals(7, new SurfaceCapabilityClassCodeV2(0xE).getNACv(), "getNACv ME 17–19");
@@ -245,8 +245,8 @@ class CapabilityClassLayoutsTest {
         assertFalse(new SurfaceCapabilityClassCodeV3(0).has1090ESIn(), "has1090ESIn ME 12");
         assertEquals(3, new SurfaceCapabilityClassCodeV3(0xC0).getADSBReceiverVersionEncoded(), "getADSBReceiverVersionEncoded ME 13–14");
         assertEquals(0, new SurfaceCapabilityClassCodeV3(0).getADSBReceiverVersionEncoded(), "getADSBReceiverVersionEncoded ME 13–14");
-        assertTrue(new SurfaceCapabilityClassCodeV3(0x20).hasLowTxPower(), "hasLowTxPower ME 15");
-        assertFalse(new SurfaceCapabilityClassCodeV3(0).hasLowTxPower(), "hasLowTxPower ME 15");
+        assertTrue(new SurfaceCapabilityClassCodeV3(0x20).isB2Low(), "isB2Low ME 15");
+        assertFalse(new SurfaceCapabilityClassCodeV3(0).isB2Low(), "isB2Low ME 15");
         assertTrue(new SurfaceCapabilityClassCodeV3(0x10).hasUATIn(), "hasUATIn ME 16");
         assertFalse(new SurfaceCapabilityClassCodeV3(0).hasUATIn(), "hasUATIn ME 16");
         assertEquals(7, new SurfaceCapabilityClassCodeV3(0xE).getNACv(), "getNACv ME 17–19");

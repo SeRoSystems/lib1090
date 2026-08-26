@@ -81,7 +81,7 @@ public class AirborneOperationalModeCodeV3 extends AbstractMEField
      *
      * @return true if remain-well-clear is active, ME bit 40
      */
-    public boolean hasRemainWellClearActive() {
+    public boolean isRemainWellClearActive() {
         return getMEBit(40);
     }
 }

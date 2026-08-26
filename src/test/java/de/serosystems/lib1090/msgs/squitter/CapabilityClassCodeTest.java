@@ -134,7 +134,7 @@ class CapabilityClassCodeTest {
     @Test
     public void surfaceOnlySubfields() {
         SurfaceV3 cc = new SurfaceV3(0x20 | 0xE | 0x1);
-        assertTrue(cc.hasLowTxPower());
+        assertTrue(cc.isB2Low());
         assertEquals(7, cc.getNACv());
         assertTrue(cc.hasNICSupplementC());
     }
@@ -142,9 +142,9 @@ class CapabilityClassCodeTest {
     @Test
     public void v1AirborneSubfieldsAndSplitSelector() {
         AirborneV1 cc = new AirborneV1(0x200 | 0x100 | 0x80);
-        assertTrue(cc.hasAirReferencedVelocity());
-        assertTrue(cc.hasTargetStateReport());
-        assertEquals(2, cc.getTargetChangeReportCapabilityEncoded());
+        assertTrue(cc.supportsARVReport());
+        assertTrue(cc.supportsTSReport());
+        assertEquals(2, cc.getTCReportCapabilityLevelEncoded());
         assertTrue(cc.supportsTargetChangeReport());
         assertEquals(0, cc.getFormatSelector());
 

@@ -31,7 +31,7 @@ public interface OperationalModeCodeV1V2 extends KnownOperationalModeCode {
      *
      * @return true if ATC services are being received, ME bit 29
      */
-    default boolean hasReceivingATCServices() {
+    default boolean isReceivingATCServices() {
         return getMEBit(29);
     }
 }

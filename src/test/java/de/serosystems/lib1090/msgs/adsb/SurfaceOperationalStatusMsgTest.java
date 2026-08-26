@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Shared tests for the capability class code and operational mode code fields, which are encoded
  * identically (same bit offsets, same reserved-bit validation) across ADS-B versions 1 and 2 for
- * surface operational status messages. hasPositionOffsetApplied() is derived differently per
+ * surface operational status messages. isPositionOffsetApplied() is derived differently per
  * version (a capability class code bit in v1, the GPS antenna offset in v2) and is intentionally
  * NOT covered here; it stays in the version-specific subclasses.
  */
@@ -87,11 +87,11 @@ abstract class SurfaceOperationalStatusMsgTest {
     void testCapabilityClassCodeFlags() throws Exception {
         SurfaceCapabilityClassCode esIn = withCapabilityClassCode(0x100);
         assertTrue(esIn.has1090ESIn());
-        assertFalse(esIn.hasLowTxPower());
+        assertFalse(esIn.isB2Low());
 
         SurfaceCapabilityClassCode lowTxPower = withCapabilityClassCode(0x20);
         assertFalse(lowTxPower.has1090ESIn());
-        assertTrue(lowTxPower.hasLowTxPower());
+        assertTrue(lowTxPower.isB2Low());
     }
 
     /**
@@ -122,19 +122,19 @@ abstract class SurfaceOperationalStatusMsgTest {
     @Test
     void testOperationalModeCodeFlags() throws Exception {
         OperationalModeCodeV1V2 tcasResolutionAdvisory = withOperationalModeCode(0x2000);
-        assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
-        assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
-        assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
+        assertTrue(tcasResolutionAdvisory.isTCASResolutionAdvisoryActive());
+        assertFalse(tcasResolutionAdvisory.isIDENTSwitchActive());
+        assertFalse(tcasResolutionAdvisory.isReceivingATCServices());
 
         OperationalModeCodeV1V2 activeIdentSwitch = withOperationalModeCode(0x1000);
-        assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
-        assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
-        assertFalse(activeIdentSwitch.hasReceivingATCServices());
+        assertFalse(activeIdentSwitch.isTCASResolutionAdvisoryActive());
+        assertTrue(activeIdentSwitch.isIDENTSwitchActive());
+        assertFalse(activeIdentSwitch.isReceivingATCServices());
 
         OperationalModeCodeV1V2 receivingAtcServices = withOperationalModeCode(0x0800);
-        assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
-        assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
-        assertTrue(receivingAtcServices.hasReceivingATCServices());
+        assertFalse(receivingAtcServices.isTCASResolutionAdvisoryActive());
+        assertFalse(receivingAtcServices.isIDENTSwitchActive());
+        assertTrue(receivingAtcServices.isReceivingATCServices());
     }
 
 }
