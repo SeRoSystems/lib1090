@@ -64,23 +64,6 @@ public interface OperationalStatusV1Msg extends OperationalStatusMsg {
     byte getSILEncoded();
 
     /**
-     * @return whether TCAS Resolution Advisory (RA) is active, ED-102B §2.2.3.2.7.2.4.2
-     */
-    boolean hasTCASResolutionAdvisory();
-
-    /**
-     * @return whether the IDENT switch is active, ED-102B §2.2.3.2.7.2.4.3
-     */
-    boolean hasActiveIDENTSwitch();
-
-    /**
-     * @return whether ADS-B Transmitting Subsystem is receiving ATC services. ADS-B version 1
-     * systems define "ME" bit 29 (Message bit 61) as "Receiving ATC Services", ED-102B Appendix N
-     * §N.3.3. Note that this field was removed for ADS-B version 3, ED-102B §2.2.3.2.7.2.4.4.
-     */
-    boolean hasReceivingATCServices();
-
-    /**
      * @return 0 if horizontal reference direction is the true north, 1 if magnetic north,
      * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */

@@ -19,7 +19,17 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV1V2;
+import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV1V2;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,18 +47,35 @@ abstract class SurfaceOperationalStatusMsgTest {
 
     protected abstract SurfaceOperationalStatusMsg create(byte[] msg) throws Exception;
 
-    protected SurfaceOperationalStatusMsg withCapabilityClassCode(int capabilityClassCode) throws Exception {
+
+    protected SurfaceCapabilityClassCode withCapabilityClassCode(int capabilityClassCode) throws Exception {
         byte[] msg = baseMessage();
         msg[5] = (byte) (capabilityClassCode >>> 4);
         msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
-        return create(msg);
+        return (SurfaceCapabilityClassCode) create(msg).getCapabilityClass();
     }
 
-    protected SurfaceOperationalStatusMsg withOperationalModeCode(int operationalModeCode) throws Exception {
+    protected OperationalModeCodeV1V2 withOperationalModeCode(int operationalModeCode) throws Exception {
         byte[] msg = baseMessage();
         msg[7] = (byte) (operationalModeCode >>> 8);
         msg[8] = (byte) operationalModeCode;
-        return create(msg);
+        return (OperationalModeCodeV1V2) create(msg).getOperationalMode();
+    }
+
+
+    /** The undecoded field, for the layouts this library does not model. */
+    protected CapabilityClassCode rawCapabilityClass(int capabilityClassCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[5] = (byte) (capabilityClassCode >>> 4);
+        msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
+        return create(msg).getCapabilityClass();
+    }
+
+    protected OperationalModeCode rawOperationalMode(int operationalModeCode) throws Exception {
+        byte[] msg = baseMessage();
+        msg[7] = (byte) (operationalModeCode >>> 8);
+        msg[8] = (byte) operationalModeCode;
+        return create(msg).getOperationalMode();
     }
 
     @Test
@@ -58,46 +85,56 @@ abstract class SurfaceOperationalStatusMsgTest {
 
     @Test
     void testCapabilityClassCodeFlags() throws Exception {
-        SurfaceOperationalStatusMsg esIn = withCapabilityClassCode(0x100);
+        SurfaceCapabilityClassCode esIn = withCapabilityClassCode(0x100);
         assertTrue(esIn.has1090ESIn());
         assertFalse(esIn.hasLowTxPower());
 
-        SurfaceOperationalStatusMsg lowTxPower = withCapabilityClassCode(0x20);
+        SurfaceCapabilityClassCode lowTxPower = withCapabilityClassCode(0x20);
         assertFalse(lowTxPower.has1090ESIn());
         assertTrue(lowTxPower.hasLowTxPower());
     }
 
+    /**
+     * A selector this library does not model no longer costs the message. It used to throw
+     * {@link BadFormatException}, discarding a message whose remaining subfields — MOPS version, NIC
+     * supplement A, NACp, SIL — sit outside the field entirely and decode perfectly well.
+     */
     @Test
-    void testCapabilityClassCodeReservedBits() throws Exception {
-        assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x800));
-        assertThrows(BadFormatException.class, () -> withCapabilityClassCode(0x400));
+    void unknownCapabilityClassSelectorFallsBackInsteadOfThrowing() throws Exception {
+        for (int selector : new int[]{0x800, 0x400}) {
+            CapabilityClassCode cc = rawCapabilityClass(selector);
+            assertInstanceOf(UnknownCapabilityClassCode.class, cc);
+            assertFalse(KnownCapabilityClassCode.class.isInstance(cc));
+        }
+        assertInstanceOf(KnownCapabilityClassCode.class, rawCapabilityClass(0x200));
+    }
 
-        withCapabilityClassCode(0x200);
+    @Test
+    void unknownOperationalModeSelectorFallsBackInsteadOfThrowing() throws Exception {
+        for (int selector : new int[]{0x8000, 0x4000}) {
+            OperationalModeCode om = rawOperationalMode(selector);
+            assertInstanceOf(UnknownOperationalModeCode.class, om);
+            assertFalse(KnownOperationalModeCode.class.isInstance(om));
+        }
+        assertInstanceOf(KnownOperationalModeCode.class, rawOperationalMode(0x2000));
     }
 
     @Test
     void testOperationalModeCodeFlags() throws Exception {
-        SurfaceOperationalStatusMsg tcasResolutionAdvisory = withOperationalModeCode(0x2000);
+        OperationalModeCodeV1V2 tcasResolutionAdvisory = withOperationalModeCode(0x2000);
         assertTrue(tcasResolutionAdvisory.hasTCASResolutionAdvisory());
         assertFalse(tcasResolutionAdvisory.hasActiveIDENTSwitch());
         assertFalse(tcasResolutionAdvisory.hasReceivingATCServices());
 
-        SurfaceOperationalStatusMsg activeIdentSwitch = withOperationalModeCode(0x1000);
+        OperationalModeCodeV1V2 activeIdentSwitch = withOperationalModeCode(0x1000);
         assertFalse(activeIdentSwitch.hasTCASResolutionAdvisory());
         assertTrue(activeIdentSwitch.hasActiveIDENTSwitch());
         assertFalse(activeIdentSwitch.hasReceivingATCServices());
 
-        SurfaceOperationalStatusMsg receivingAtcServices = withOperationalModeCode(0x0800);
+        OperationalModeCodeV1V2 receivingAtcServices = withOperationalModeCode(0x0800);
         assertFalse(receivingAtcServices.hasTCASResolutionAdvisory());
         assertFalse(receivingAtcServices.hasActiveIDENTSwitch());
         assertTrue(receivingAtcServices.hasReceivingATCServices());
     }
 
-    @Test
-    void testOperationalModeCodeReservedBits() throws Exception {
-        assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x8000));
-        assertThrows(BadFormatException.class, () -> withOperationalModeCode(0x4000));
-
-        withOperationalModeCode(0x2000);
-    }
 }

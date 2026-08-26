@@ -35,31 +35,6 @@ public interface AirborneOperationalStatusMsg extends OperationalStatusMsg {
     }
 
     /**
-     * @return true if TCAS is operational or unknown, false if TCAS is not operational,
-     * ED-102B §2.2.3.2.7.2.3.2
-     */
-    boolean hasOperationalTCAS();
-
-    /**
-     * @return whether TCAS Resolution Advisory (RA) is active, ED-102B §2.2.3.2.7.2.4.2
-     */
-    boolean hasTCASResolutionAdvisory();
-
-    /**
-     * @return whether the IDENT switch is active, ED-102B §2.2.3.2.7.2.4.3
-     */
-    boolean hasActiveIDENTSwitch();
-
-    /**
-     * @return whether ADS-B Transmitting Subsystem is receiving ATC services. This bit ("ME" bit
-     * 29) is only defined for ADS-B version 1 systems, ED-102B §N.3.3 (Version One
-     * systems define "ME" Bit 29 as "Receiving ATC Services"). ADS-B version 3 systems do not
-     * define or report this field: the same bit position is redefined in the current main-body
-     * message format as "Mode S Reply Rate Limiting Status", ED-102B §2.2.3.2.7.2.4.4.
-     */
-    boolean hasReceivingATCServices();
-
-    /**
      * @return the NIC supplement A to the format type code of position messages, ED-102B
      * §2.2.3.2.7.2.6
      */

@@ -22,9 +22,12 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
-import de.serosystems.lib1090.msgs.squitter.NICSupplementBMsg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
 
 import java.io.Serializable;
@@ -32,7 +35,7 @@ import java.io.Serializable;
 /**
  * Decoder for the ADS-R airborne operational status message (subtype 0), as defined in DO-260A (ADS-R version 1).
  */
-public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, OperationalStatusV1Msg, IMFMsg, NICSupplementBMsg, ADSRMsg {
+public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, OperationalStatusV1Msg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = -4917283654012938471L;
 
@@ -94,10 +97,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         if (mopsVersion != 1)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-        if ((capabilityClassCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown capability class code");
-        if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplement = b.readBoolean(44);
         nacP = b.readByte(45, 48);
@@ -114,56 +113,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
     @Override
     public byte getSubtypeCode() {
         return SUBTYPE_CODE;
-    }
-
-    @Override
-    public boolean hasOperationalTCAS() {
-        return (capabilityClassCode & 0x2000) == 0;
-    }
-
-    @Override
-    public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x1000) != 0;
-    }
-
-    @Override
-    public boolean hasAirReferencedVelocity() {
-        return (capabilityClassCode & 0x0200) != 0;
-    }
-
-    @Override
-    public boolean hasTargetStateReport() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    @Override
-    public byte getTargetChangeReportCapabilityEncoded() {
-        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return NIC supplement B (ME bit 20)
-     */
-    @Override
-    public boolean hasNICSupplementB() {
-        return (capabilityClassCode & 0x10) != 0;
-    }
-
-    @Override
-    public boolean hasTCASResolutionAdvisory() {
-        return (operationalModeCode & 0x2000) != 0;
-    }
-
-    @Override
-    public boolean hasActiveIDENTSwitch() {
-        return (operationalModeCode & 0x1000) != 0;
-    }
-
-    @Override
-    public boolean hasReceivingATCServices() {
-        return (operationalModeCode & 0x800) != 0;
     }
 
     @Override
@@ -228,4 +177,23 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.adsrAirborneV1(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return OperationalModeCodes.v1(operationalModeCode);
+    }
 }

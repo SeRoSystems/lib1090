@@ -21,7 +21,11 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
-import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCodeV2V3;
+import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV2V3;
+import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalModeCodeV2V3;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,13 +49,12 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
     public void testDecodeSurfaceOpstat() throws Exception {
         final SurfaceOperationalStatusV2Msg opstat = new SurfaceOperationalStatusV2Msg(S_OPSTAT_V2);
         assertInstanceOf(OperationalStatusV2Msg.class, opstat);
-        assertInstanceOf(SingleAntennaMsg.class, opstat);
 
         assertEquals(2, opstat.getMOPSVersion());
-        assertFalse(opstat.has1090ESIn());
-        assertFalse(opstat.hasUATIn());
-        assertFalse(opstat.hasSingleAntenna());
-        assertEquals(0, opstat.getSDAEncoded());
+        assertFalse(((KnownCapabilityClassCode) opstat.getCapabilityClass()).has1090ESIn());
+        assertFalse(((CapabilityClassCodeV2V3) opstat.getCapabilityClass()).hasUATIn());
+        assertFalse(((OperationalModeCodeV2V3) opstat.getOperationalMode()).hasSingleAntenna());
+        assertEquals(0, ((OperationalModeCodeV2V3) opstat.getOperationalMode()).getSDAEncoded());
         assertFalse(opstat.hasSILSupplement());
     }
 
@@ -66,43 +69,43 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
     @Test
     public void testCapabilityClassCodeVersion2Fields() throws Exception {
         SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
-        assertTrue(uatIn.hasUATIn());
-        assertEquals(0, uatIn.getNACv());
-        assertFalse(uatIn.hasNICSupplementC());
+        assertTrue(((CapabilityClassCodeV2V3) uatIn.getCapabilityClass()).hasUATIn());
+        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNACv());
+        assertFalse(((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).hasNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
-        assertFalse(nacv.hasUATIn());
-        assertEquals(5, nacv.getNACv());
-        assertFalse(nacv.hasNICSupplementC());
+        assertFalse(((CapabilityClassCodeV2V3) nacv.getCapabilityClass()).hasUATIn());
+        assertEquals(5, ((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNACv());
+        assertFalse(((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).hasNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
-        assertFalse(nicSupplementC.hasUATIn());
-        assertEquals(0, nicSupplementC.getNACv());
-        assertTrue(nicSupplementC.hasNICSupplementC());
+        assertFalse(((CapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).hasUATIn());
+        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNACv());
+        assertTrue(((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).hasNICSupplementC());
     }
 
     @Test
     public void testOperationalModeCodeVersion2Fields() throws Exception {
         SurfaceOperationalStatusV2Msg singleAntenna = statusWithOperationalModeCode(0x0400);
-        assertTrue(singleAntenna.hasSingleAntenna());
-        assertEquals(0, singleAntenna.getSDAEncoded());
-        assertEquals(0, singleAntenna.getGPSAntennaOffsetEncoded());
+        assertTrue(((OperationalModeCodeV2V3) singleAntenna.getOperationalMode()).hasSingleAntenna());
+        assertEquals(0, ((OperationalModeCodeV2V3) singleAntenna.getOperationalMode()).getSDAEncoded());
+        assertEquals(0, ((SurfaceOperationalModeCodeV2V3) singleAntenna.getOperationalMode()).getGPSAntennaOffsetEncoded());
 
         SurfaceOperationalStatusV2Msg systemDesignAssurance = statusWithOperationalModeCode(0x0300);
-        assertFalse(systemDesignAssurance.hasSingleAntenna());
-        assertEquals(3, systemDesignAssurance.getSDAEncoded());
-        assertEquals(0, systemDesignAssurance.getGPSAntennaOffsetEncoded());
+        assertFalse(((OperationalModeCodeV2V3) systemDesignAssurance.getOperationalMode()).hasSingleAntenna());
+        assertEquals(3, ((OperationalModeCodeV2V3) systemDesignAssurance.getOperationalMode()).getSDAEncoded());
+        assertEquals(0, ((SurfaceOperationalModeCodeV2V3) systemDesignAssurance.getOperationalMode()).getGPSAntennaOffsetEncoded());
 
         SurfaceOperationalStatusV2Msg gpsAntennaOffset = statusWithOperationalModeCode(0x005A);
-        assertFalse(gpsAntennaOffset.hasSingleAntenna());
-        assertEquals(0, gpsAntennaOffset.getSDAEncoded());
-        assertEquals(0x5A, gpsAntennaOffset.getGPSAntennaOffsetEncoded());
+        assertFalse(((OperationalModeCodeV2V3) gpsAntennaOffset.getOperationalMode()).hasSingleAntenna());
+        assertEquals(0, ((OperationalModeCodeV2V3) gpsAntennaOffset.getOperationalMode()).getSDAEncoded());
+        assertEquals(0x5A, ((SurfaceOperationalModeCodeV2V3) gpsAntennaOffset.getOperationalMode()).getGPSAntennaOffsetEncoded());
     }
 
     @Test
     void testHasPositionOffsetApplied() throws Exception {
-        assertTrue(statusWithOperationalModeCode(0x0001).hasPositionOffsetApplied());
-        assertFalse(statusWithOperationalModeCode(0x0002).hasPositionOffsetApplied());
+        assertTrue(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0001).getOperationalMode()).hasPositionOffsetApplied());
+        assertFalse(((SurfaceOperationalModeCodeV2V3) statusWithOperationalModeCode(0x0002).getOperationalMode()).hasPositionOffsetApplied());
     }
 
     @Test

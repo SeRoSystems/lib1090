@@ -19,8 +19,14 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
-import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.AirborneCapabilityClassCodeV0;
+import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UndefinedOperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,14 +38,42 @@ class OperationalStatusV0MsgTest {
         byte[] msg = Tools.hexStringToByteArray("8D000000F8300000000000000000");
         OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
         assertInstanceOf(OperationalStatusMsg.class, status);
-        assertFalse(status.hasOperationalTCAS());
-        assertTrue(status.hasOperationalCDTI());
-        assertTrue(status.has1090ESIn());
+        assertFalse(((AirborneCapabilityClassCode) status.getCapabilityClass()).isCollisionAvoidanceOperational());
+        assertTrue(((AirborneCapabilityClassCodeV0) status.getCapabilityClass()).hasOperationalCDTI());
+        assertTrue(((KnownCapabilityClassCode) status.getCapabilityClass()).has1090ESIn());
     }
 
+    /**
+     * ME 9-10 outside the one layout version 0 defines used to reject the whole message. It now yields
+     * the fallback, leaving the MOPS version and the rest of the message readable.
+     */
     @Test
     public void testInvalidEnrouteCapabilitiesHighBits() throws Exception {
         byte[] msg = Tools.hexStringToByteArray("8D000000F8800000000000000000");
-        assertThrows(BadFormatException.class, () -> new OperationalStatusV0Msg(msg));
+        OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
+        assertEquals(0, status.getMOPSVersion());
+        assertInstanceOf(UnknownCapabilityClassCode.class, status.getCapabilityClass());
+        assertEquals(2, status.getCapabilityClass().getFormatSelector());
+    }
+
+    /**
+     * Version 0 defines no Operational Mode Code, but the accessor is on every operational status
+     * message: the absence is reported by the object rather than by a missing method.
+     */
+    @Test
+    public void testUndefinedOperationalMode() throws Exception {
+        byte[] msg = Tools.hexStringToByteArray("8D000000F8300000000000000000");
+        OperationalStatusV0Msg status = new OperationalStatusV0Msg(msg);
+
+        assertInstanceOf(UndefinedOperationalModeCode.class, status.getOperationalMode());
+        // distinct from "a selector I do not model" - here there is no selector at all
+        assertFalse(UnknownOperationalModeCode.class.isInstance(status.getOperationalMode()));
+        assertFalse(KnownOperationalModeCode.class.isInstance(status.getOperationalMode()));
+        assertEquals(UndefinedOperationalModeCode.NO_FORMAT_SELECTOR,
+                status.getOperationalMode().getFormatSelector());
+
+        // the reserved field is still readable, and zero from a conformant version 0 transmitter
+        assertEquals(0, status.getOperationalModeCodeEncoded());
+        assertEquals(0, status.getOperationalMode().getEncoded());
     }
 }
