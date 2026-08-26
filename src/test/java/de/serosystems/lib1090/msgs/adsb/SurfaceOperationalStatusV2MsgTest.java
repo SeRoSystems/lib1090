@@ -55,7 +55,7 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         assertFalse(((CapabilityClassCodeV2V3) opstat.getCapabilityClass()).hasUATIn());
         assertFalse(((OperationalModeCodeV2V3) opstat.getOperationalMode()).hasSingleAntenna());
         assertEquals(0, ((OperationalModeCodeV2V3) opstat.getOperationalMode()).getSDAEncoded());
-        assertFalse(opstat.hasSILSupplement());
+        assertFalse(opstat.getSILSupplement());
     }
 
     @Test
@@ -71,17 +71,17 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
         assertTrue(((CapabilityClassCodeV2V3) uatIn.getCapabilityClass()).hasUATIn());
         assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNACv());
-        assertFalse(((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).hasNICSupplementC());
+        assertFalse(((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
         assertFalse(((CapabilityClassCodeV2V3) nacv.getCapabilityClass()).hasUATIn());
         assertEquals(5, ((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNACv());
-        assertFalse(((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).hasNICSupplementC());
+        assertFalse(((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
         assertFalse(((CapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).hasUATIn());
         assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNACv());
-        assertTrue(((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).hasNICSupplementC());
+        assertTrue(((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNICSupplementC());
     }
 
     @Test
@@ -110,11 +110,11 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
 
     @Test
     public void testSILSupplement() throws Exception {
-        assertFalse(create(baseMessage()).hasSILSupplement());
+        assertFalse(create(baseMessage()).getSILSupplement());
 
         byte[] msg = baseMessage();
         msg[10] |= 0x02;
-        assertTrue(new SurfaceOperationalStatusV2Msg(msg).hasSILSupplement());
+        assertTrue(new SurfaceOperationalStatusV2Msg(msg).getSILSupplement());
     }
 
     private SurfaceOperationalStatusV2Msg statusWithCapabilityClassCode(int capabilityClassCode) throws Exception {

@@ -134,7 +134,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -154,10 +154,10 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north
+     * @return true if the horizontal reference direction is magnetic north, false if true north
      */
     @Override
-    public boolean getHorizontalReferenceDirection() {
+    public boolean isHeadingReferencedToMagneticNorth() {
         return horizontalReferenceDirection;
     }
 
@@ -178,7 +178,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
      * it's based on "per hour".
      */
     @Override
-    public boolean hasSILSupplement() {
+    public boolean getSILSupplement() {
         return silSupplement;
     }
 

@@ -126,7 +126,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
      * @return NIC supplement A (ME bit 44); see ED-102B §2.2.3.2.7.2.6
      */
     @Override
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -160,7 +160,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public boolean hasSILSupplement() {
+    public boolean getSILSupplement() {
         return silSupplement;
     }
 

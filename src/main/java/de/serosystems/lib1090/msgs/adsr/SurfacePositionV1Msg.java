@@ -97,7 +97,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     /**
      * @return NIC supplement that was set before
      */
-    public boolean hasNICSupplementA() {
+    public boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
@@ -121,7 +121,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      */
     @Override
     public double getHorizontalContainmentRadiusLimit() {
-        return SurfacePosition.decodeHCR(getFormatTypeCode(), hasNICSupplementA());
+        return SurfacePosition.decodeHCR(getFormatTypeCode(), getNICSupplementA());
     }
 
     /**
@@ -132,7 +132,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      */
     @Override
     public byte getNIC() {
-        return SurfacePosition.decodeNIC(getFormatTypeCode(), hasNICSupplementA());
+        return SurfacePosition.decodeNIC(getFormatTypeCode(), getNICSupplementA());
     }
 
     @Override

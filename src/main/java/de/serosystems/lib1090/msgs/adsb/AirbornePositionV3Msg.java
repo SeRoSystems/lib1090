@@ -90,7 +90,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public boolean hasNICSupplementB() {
+    public boolean getNICSupplementB() {
         return nicSupplementB;
     }
 

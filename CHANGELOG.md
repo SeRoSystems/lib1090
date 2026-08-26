@@ -39,6 +39,11 @@ and CPR decoding made since v4.1.3.
   `supportsARVReport`, `hasTargetStateReport` → `supportsTSReport`, `hasLowTxPower` → `isB2Low` (the standard calls the
   subfield "B2 Low", and it is neither unconditional nor static), and
   `getTargetChangeReportCapabilityEncoded` → `getTCReportCapabilityLevelEncoded`
+- Renamed three accessors library-wide, since the same members exist on position and target-state messages:
+  `hasNICSupplement{A,B,C}()` → `getNICSupplement{A,B,C}()` and `hasSILSupplement()` → `getSILSupplement()` (the bit is
+  the supplement value, not a predicate), and `getHorizontalReferenceDirection()` →
+  `isHeadingReferencedToMagneticNorth()` (a boolean that was named like a direction; `true` means magnetic north). The
+  `setNICSupplement{A,C}()` setters are unchanged
 
 ### New Features
 - Added support for ADS-B v3, including new v3-only message types: HVA Position/Velocity, Wx AIREP (aircraft state,

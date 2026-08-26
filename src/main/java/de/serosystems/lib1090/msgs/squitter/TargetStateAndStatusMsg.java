@@ -52,8 +52,8 @@ public interface TargetStateAndStatusMsg {
     /**
      * The selected heading according to ED-102B §2.2.3.2.7.1.3.7
      * <p>
-     * Look at {@link SurfaceOperationalStatusMsg#getHorizontalReferenceDirection()} resp.
-     * {@link AirborneOperationalStatusV1V2Msg#getHorizontalReferenceDirection()} to determine whether this heading
+     * Look at {@link SurfaceOperationalStatusMsg#isHeadingReferencedToMagneticNorth()} resp.
+     * {@link AirborneOperationalStatusV1V2Msg#isHeadingReferencedToMagneticNorth()} to determine whether this heading
      * is referring to true north or magnetic north.
      * If not available, assume magnetic north as the de-facto standard.
      *

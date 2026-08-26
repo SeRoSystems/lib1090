@@ -38,7 +38,7 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
      * @return the NIC supplement A to the format type code of position messages, ED-102B
      * §2.2.3.2.7.2.6
      */
-    boolean hasNICSupplementA();
+    boolean getNICSupplementA();
 
     /**
      * @return the navigation accuracy for position messages; rather use getPositionUncertainty,
@@ -91,8 +91,8 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
     boolean hasTrackHeading();
 
     /**
-     * @return 0 if horizontal reference direction is the true north, 1 if magnetic north,
+     * @return true if the horizontal reference direction is magnetic north, false if true north,
      * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */
-    boolean getHorizontalReferenceDirection();
+    boolean isHeadingReferencedToMagneticNorth();
 }
