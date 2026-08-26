@@ -22,6 +22,10 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.*;
 
 import java.io.Serializable;
@@ -29,7 +33,7 @@ import java.io.Serializable;
 /**
  * Decoder for the ADS-R airborne operational status message (subtype 0), as defined in ED-102B (ADS-R version 3).
  */
-public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg, ADSBReceiverVersionMsg, IMFMsg, NICSupplementBMsg, ADSRMsg {
+public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusMsg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2V3Msg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 6172938451029384756L;
 
@@ -92,11 +96,7 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
         if (mopsVersion < 3)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-        if ((capabilityClassCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown capability class code");
 
-        if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
@@ -112,101 +112,6 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     @Override
     public byte getSubtypeCode() {
         return AirborneOperationalStatusV2V3Msg.super.getSubtypeCode();
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded Collision Avoidance Operational flag (ME bit 11); see ED-102B §2.2.3.2.7.2.3.2 TABLE 2-44
-     */
-    @Override
-    public boolean hasOperationalTCAS() {
-        return (capabilityClassCode & 0x2000) != 0;
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded 1090ES IN capability flag (ME bit 12); see ED-102B §2.2.3.2.7.2.3.3 TABLE 2-49
-     */
-    @Override
-    public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x1000) != 0;
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded transponder side indication (ME bits 15-16); see ED-102B §2.2.3.2.7.2.3.4 TABLE 2-50
-     */
-    public byte getTransponderSideIndicationEncoded() {
-        return (byte) ((capabilityClassCode & 0x300) >>> 8);
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded transmit power (ME bits 17-18); see ED-102B §2.2.3.2.7.2.3.6 TABLE 2-51
-     */
-    public byte getTxPowerEncoded() {
-        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded Reduced Capability Equipment (RCE) capability (ME bits 21-22); see ED-102B §2.2.3.2.7.2.3.11 TABLE 2-53
-     */
-    public byte getReducedCapabilityEquipmentEncoded() {
-        return (byte) ((capabilityClassCode & 0xC) >>> 2);
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded Detect and Avoid (DAA) capability (ME bits 23-24); see ED-102B §2.2.3.2.7.2.3.12 TABLE 2-54
-     */
-    public byte getDetectAndAvoidEncoded() {
-        return (byte) (capabilityClassCode & 0x3);
-    }
-
-    @Override
-    public byte getADSBReceiverVersionEncoded() {
-        return (byte) ((capabilityClassCode & 0xC00) >>> 10);
-    }
-
-    /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     * Unlike plain ADS-B, where NIC Supplement-B is carried in the airborne position message, ADS-R
-     * airborne position messages lose that bit to the IMF flag, so ADS-R instead carries NIC
-     * Supplement-B here, in the operational status message; see ED-102B §2.2.18.4.7.
-     *
-     * @return NIC supplement B (ME bit 20); see ED-102B §2.2.18.4.7
-     */
-    @Override
-    public boolean hasNICSupplementB() {
-        return (capabilityClassCode & 0x10) != 0;
-    }
-
-    /**
-     * @return the encoded CA Resolution Advisory Active flag (ME bit 27); see ED-102B §2.2.3.2.7.2.4.2
-     */
-    @Override
-    public boolean hasTCASResolutionAdvisory() {
-        return (operationalModeCode & 0x2000) != 0;
-    }
-
-    /**
-     * @return the encoded IDENT Switch Active flag (ME bit 28); see ED-102B §2.2.3.2.7.2.4.3
-     */
-    @Override
-    public boolean hasActiveIDENTSwitch() {
-        return (operationalModeCode & 0x1000) != 0;
-    }
-
-    @Override
-    public boolean hasReceivingATCServices() {
-        return (operationalModeCode & 0x800) != 0;
     }
 
     /**
@@ -247,34 +152,11 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
     }
 
     /**
-     * capabilityClassCode covers ME bits 9-24, i.e. bit m of the ME is bit (24-m) of this field.
-     *
-     * @return the encoded UAT IN capability flag (ME bit 19); see ED-102B §2.2.3.2.7.2.3.9 TABLE 2-52
-     */
-    @Override
-    public boolean hasUATIn() {
-        return (capabilityClassCode & 0x20) != 0;
-    }
-
-    /**
-     * @return the encoded Single Antenna flag (ME bit 30); see ED-102B §2.2.3.2.7.2.4.5
-     */
-    @Override
-    public boolean hasSingleAntenna() {
-        return (operationalModeCode & 0x400) != 0;
-    }
-
-    /**
      * @return the raw encoded Geometric Vertical Accuracy (GVA); see ED-102B §2.2.3.2.7.2.8 TABLE 2-69
      */
     @Override
     public byte getGVAEncoded() {
         return gva;
-    }
-
-    @Override
-    public byte getSDAEncoded() {
-        return (byte) ((operationalModeCode & 0x300) >>> 8);
     }
 
     @Override
@@ -296,14 +178,29 @@ public class AirborneOperationalStatusV3Msg extends ExtendedSquitter implements 
                 ", nicSupplement=" + nicSupplementA +
                 ", nacP=" + nacP +
                 ", sil=" + sil +
-                ", transponderSideIndication=" + getTransponderSideIndicationEncoded() +
-                ", txPower=" + getTxPowerEncoded() +
-                ", rce=" + getReducedCapabilityEquipmentEncoded() +
-                ", daa=" + getDetectAndAvoidEncoded() +
                 ", geometricVerticalAccuracy=" + gva +
                 ", silSupplement=" + silSupplement +
                 ", imf=" + imf +
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.adsrAirborneV3(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return OperationalModeCodes.airborneV3(operationalModeCode);
+    }
 }

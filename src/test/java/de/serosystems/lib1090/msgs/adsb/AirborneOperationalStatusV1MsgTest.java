@@ -21,6 +21,8 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
+import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,10 +51,17 @@ class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTes
         assertEquals(1, status.getMOPSVersion());
     }
 
+    /**
+     * An operational mode selector outside the layouts this library models no longer rejects the
+     * message; the field decodes to the fallback and everything outside it stays readable.
+     */
     @Test
     public void testOperationalModeCodeWithHighByte() throws Exception {
         byte[] msg = Tools.hexStringToByteArray("8D000000F8000280492900000000");
-        assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV1Msg(msg));
+        AirborneOperationalStatusV1Msg status = new AirborneOperationalStatusV1Msg(msg);
+        assertEquals(1, status.getMOPSVersion());
+        assertInstanceOf(UnknownOperationalModeCode.class, status.getOperationalMode());
+        assertEquals(2, status.getOperationalMode().getFormatSelector());
     }
 
     @Test
@@ -75,7 +84,7 @@ class AirborneOperationalStatusV1MsgTest extends AirborneOperationalStatusMsgTes
     @Test
     void testHasOperationalTCAS() throws Exception {
         // In version 1, the bit means "TCAS NOT operational" -- unset (or unknown) means operational.
-        assertTrue(create(baseMessage()).hasOperationalTCAS());
-        assertFalse(withCapabilityClassCode(0x2000).hasOperationalTCAS());
+        assertTrue(((AirborneCapabilityClassCode) create(baseMessage()).getCapabilityClass()).isCollisionAvoidanceOperational());
+        assertFalse(withCapabilityClassCode(0x2000).isCollisionAvoidanceOperational());
     }
 }

@@ -20,6 +20,16 @@ and CPR decoding made since v4.1.3.
   serialized under earlier versions
 - `QualifiedAddress` is no longer a nested class of `ModeSDownlinkMsg`; it now lives at the package level
 - CPR local/global decoding now requires a timestamp (previously optional)
+- Operational status messages no longer expose Capability Class Code and Operational Mode Code subfields directly.
+  The actual information carried in these fields depend on a selector inside the field. In ADS-B v2 and before, only
+  a single selector has been used, so the carried information was always the same and could be embedded into the message
+  class. That changed with ADS-B v3 so the design was changed here. To get the raw value of the whole CC and OM field,
+  there are accessors `getCapabilityClassEncoded()` and `getOperationalModeEncoded()`. Additionally, there are accessors
+  `getCapabilityClass()` and `getOperationalMode()` that will return an object that gives access to the carried
+  information. You will need `instanceof` and cast to the interface carrying the subfield you want (new
+  package `msgs.squitter.opstatus` for the layouts and factories; the interfaces live in `msgs.squitter`)
+- `getGPSAntennaOffsetEncoded()` now returns `int` rather than `byte`: the subfield is a full 8 bits, so a signed byte
+  read an all-ones offset as `-1` instead of `255`
 
 ### New Features
 - Added support for ADS-B v3, including new v3-only message types: HVA Position/Velocity, Wx AIREP (aircraft state,
@@ -50,6 +60,18 @@ and CPR decoding made since v4.1.3.
 - Applied consistent legal headers across all Java sources
 
 ### Bug Fixes
+- Operational status messages with an unrecognized Capability Class or Operational Mode format selector are no longer
+  discarded. The selector governs one field; the rest of the message — MOPS version, NIC supplement A, NACp, SIL and
+  the rest — is positionally fixed and now decodes as normal, with the field itself reported as
+  `UnknownCapabilityClassCode`/`UnknownOperationalModeCode`. Previously this threw `BadFormatException` and lost the
+  message, including the NIC supplements that subsequent position decoding depends on
+- ADS-B v3 support for the second Operational Mode Code layout of surface messages (format selector 1), the first case
+  in the standard of one field having more than one layout
+- ADS-R v3 airborne operational status now reports Mode S reply rate limiting, the Collision Avoidance Coordination
+  Capability Bits and the remain-well-clear flag, which were missing; ADS-R and ADS-B now share one class per layout
+  wherever the standard defines them identically
+- ADS-B v3 surface operational status now reports Mode S reply rate limiting at ME 29 instead of Receiving ATC
+  Services, matching the airborne subtype of the same version
 - Fixed GPS antenna offset decoding in `SurfaceOperationalStatusV2Msg`
 - Identification messages with FTC=1 now fall back to an unparsed message under ADS-B v3, since FTC=1 is not
   defined for identification in that version

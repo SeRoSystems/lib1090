@@ -22,6 +22,10 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
 import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV2V3Msg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
@@ -94,11 +98,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         if (mopsVersion < 2)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-        if ((capabilityClassCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown capability class code");
 
-        if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
@@ -113,46 +113,6 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     @Override
     public byte getSubtypeCode() {
         return AirborneOperationalStatusV1V2Msg.super.getSubtypeCode();
-    }
-
-    @Override
-    public boolean hasOperationalTCAS() {
-        return (capabilityClassCode & 0x2000) != 0;
-    }
-
-    @Override
-    public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x1000) != 0;
-    }
-
-    @Override
-    public boolean hasAirReferencedVelocity() {
-        return (capabilityClassCode & 0x0200) != 0;
-    }
-
-    @Override
-    public boolean hasTargetStateReport() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    @Override
-    public byte getTargetChangeReportCapabilityEncoded() {
-        return (byte) ((capabilityClassCode & 0xC0) >>> 6);
-    }
-
-    @Override
-    public boolean hasTCASResolutionAdvisory() {
-        return (operationalModeCode & 0x2000) != 0;
-    }
-
-    @Override
-    public boolean hasActiveIDENTSwitch() {
-        return (operationalModeCode & 0x1000) != 0;
-    }
-
-    @Override
-    public boolean hasReceivingATCServices() {
-        return (operationalModeCode & 0x800) != 0;
     }
 
     @Override
@@ -197,23 +157,8 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public boolean hasUATIn() {
-        return (capabilityClassCode & 0x20) != 0;
-    }
-
-    @Override
-    public boolean hasSingleAntenna() {
-        return (operationalModeCode & 0x400) != 0;
-    }
-
-    @Override
     public byte getGVAEncoded() {
         return gva;
-    }
-
-    @Override
-    public byte getSDAEncoded() {
-        return (byte) ((operationalModeCode & 0x300) >>> 8);
     }
 
     @Override
@@ -237,4 +182,23 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.adsbAirborneV2(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return OperationalModeCodes.airborneV2(operationalModeCode);
+    }
 }

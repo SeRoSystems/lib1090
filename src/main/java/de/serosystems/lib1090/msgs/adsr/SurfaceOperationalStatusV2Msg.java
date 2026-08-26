@@ -22,17 +22,20 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusV2V3Msg;
 
 import java.io.Serializable;
 
 /**
  * Decoder for the ADS-R surface operational status message (subtype 1), as defined in ED-102A (ADS-R version 2).
  */
-public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, SurfaceOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
+public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 8102934857612039485L;
 
@@ -97,10 +100,6 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         if (mopsVersion < 2)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-        if ((capabilityClassCode & 0xC00) != 0)
-            throw new BadFormatException("Unknown capability class code");
-        if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
@@ -125,48 +124,8 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    @Override
-    public boolean hasLowTxPower() {
-        return (capabilityClassCode & 0x20) != 0;
-    }
-
-    @Override
-    public boolean hasPositionOffsetApplied() {
-        // Position offset applied, per ED-129B; see ED-102B §2.2.3.2.7.2.4.7 for the encoded offset field
-        return getGPSAntennaOffsetEncoded() == 0x1;
-    }
-
-    @Override
     public byte getAircraftVehicleLengthAndWidthEncoded() {
         return airplaneLenWidth;
-    }
-
-    /**
-     * @return whether TCAS Resolution Advisory (RA) is active
-     */
-    @Override
-    public boolean hasTCASResolutionAdvisory() {
-        return (operationalModeCode & 0x2000) != 0;
-    }
-
-    /**
-     * @return whether the IDENT switch is active
-     */
-    @Override
-    public boolean hasActiveIDENTSwitch() {
-        return (operationalModeCode & 0x1000) != 0;
-    }
-
-    /**
-     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
-     */
-    @Override
-    public boolean hasReceivingATCServices() {
-        return (operationalModeCode & 0x800) != 0;
     }
 
     @Override
@@ -186,7 +145,7 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
 
     @Override
     public double getPositionUncertainty() {
-        return SurfaceOperationalStatusV2V3Msg.super.getPositionUncertainty();
+        return SurfaceOperationalStatusMsg.super.getPositionUncertainty();
     }
 
     @Override
@@ -210,47 +169,6 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     @Override
     public boolean hasTrackHeading() {
         return trackHeading;
-    }
-
-    /**
-     * @return whether aircraft has an UAT receiver
-     */
-    @Override
-    public boolean hasUATIn() {
-        return (capabilityClassCode & 0x10) != 0;
-    }
-
-    @Override
-    public byte getNACv() {
-        return (byte) ((capabilityClassCode & 0xE) >>> 1);
-    }
-
-    @Override
-    public boolean hasNICSupplementC() {
-        return (capabilityClassCode & 0x1) != 0;
-    }
-
-    /**
-     * @return whether aircraft uses a single antenna or two
-     */
-    @Override
-    public boolean hasSingleAntenna() {
-        return (operationalModeCode & 0x400) != 0;
-    }
-
-    /**
-     * For interpretation see ED-102B §2.2.3.2.7.2.4.6 TABLE 2-58.
-     *
-     * @return system design assurance; see ED-102B §A.1.4.10.14
-     */
-    @Override
-    public byte getSDAEncoded() {
-        return (byte) ((operationalModeCode & 0x300) >>> 8);
-    }
-
-    @Override
-    public byte getGPSAntennaOffsetEncoded() {
-        return (byte) (operationalModeCode & 0xFF);
     }
 
     /**
@@ -286,4 +204,23 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.surfaceV2(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return OperationalModeCodes.surfaceV2(operationalModeCode);
+    }
 }

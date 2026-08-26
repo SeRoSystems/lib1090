@@ -20,7 +20,8 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.opstatus.SurfaceCapabilityClassCodeV1;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,15 +55,22 @@ class SurfaceOperationalStatusV1MsgTest extends SurfaceOperationalStatusMsgTest 
         assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
     }
 
+    /**
+     * An operational mode selector outside the layouts this library models no longer rejects the
+     * message; the field decodes to the fallback and everything outside it stays readable.
+     */
     @Test
     public void testOperationalModeCodeWithHighByte() throws Exception {
         byte[] msg = Tools.hexStringToByteArray("8D000000F9000080002000000000");
-        assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV1Msg(msg));
+        SurfaceOperationalStatusV1Msg status = new SurfaceOperationalStatusV1Msg(msg);
+        assertEquals(1, status.getMOPSVersion());
+        assertInstanceOf(UnknownOperationalModeCode.class, status.getOperationalMode());
+        assertEquals(2, status.getOperationalMode().getFormatSelector());
     }
 
     @Test
     void testHasPositionOffsetApplied() throws Exception {
-        SurfaceOperationalStatusMsg positionOffsetApplied = withCapabilityClassCode(0x200);
+        SurfaceCapabilityClassCodeV1 positionOffsetApplied = (SurfaceCapabilityClassCodeV1) withCapabilityClassCode(0x200);
         assertTrue(positionOffsetApplied.hasPositionOffsetApplied());
         assertFalse(positionOffsetApplied.has1090ESIn());
         assertFalse(positionOffsetApplied.hasLowTxPower());

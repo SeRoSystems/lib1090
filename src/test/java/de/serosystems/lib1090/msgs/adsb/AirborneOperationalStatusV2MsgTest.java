@@ -21,7 +21,9 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
-import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
+import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV2V3;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,14 +72,13 @@ public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatu
     public void testDecodeAirborneOpstat() throws Exception {
         final AirborneOperationalStatusV2Msg opstat = new AirborneOperationalStatusV2Msg(A_OPSTAT_V2);
         assertInstanceOf(OperationalStatusV2Msg.class, opstat);
-        assertInstanceOf(SingleAntennaMsg.class, opstat);
 
         assertEquals("4d0131", opstat.getAddress().getHexAddress());
         assertEquals(31, opstat.getFormatTypeCode());
-        assertFalse(opstat.hasSingleAntenna());
+        assertFalse(((OperationalModeCodeV2V3) opstat.getOperationalMode()).hasSingleAntenna());
 
         assertEquals(2, opstat.getMOPSVersion());
-        assertFalse(opstat.has1090ESIn());
+        assertFalse(((KnownCapabilityClassCode) opstat.getCapabilityClass()).has1090ESIn());
         assertFalse(opstat.hasNICSupplementA());
         assertEquals(9, opstat.getNACpEncoded());
 
@@ -98,7 +99,7 @@ public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatu
     @Test
     void testHasOperationalTCAS() throws Exception {
         // In version 2, the bit means "TCAS operational" directly -- the opposite polarity of version 1.
-        assertFalse(create(baseMessage()).hasOperationalTCAS());
-        assertTrue(withCapabilityClassCode(0x2000).hasOperationalTCAS());
+        assertFalse(((AirborneCapabilityClassCode) create(baseMessage()).getCapabilityClass()).isCollisionAvoidanceOperational());
+        assertTrue(withCapabilityClassCode(0x2000).isCollisionAvoidanceOperational());
     }
 }

@@ -22,6 +22,10 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
@@ -94,10 +98,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
         if (mopsVersion != 1)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-        if ((capabilityClassCode & 0xC00) != 0)
-            throw new BadFormatException("Unknown capability class code");
-        if ((operationalModeCode & 0xC000) != 0)
-            throw new BadFormatException("Unknown operational mode code");
 
         nicSupplement = b.readBoolean(44);
         nacP = b.readByte(45, 48);
@@ -118,51 +118,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
     @Override
     public byte getSubtypeCode() {
         return SUBTYPE_CODE;
-    }
-
-    /**
-     * @return whether 1090ES IN / CDTI is available
-     */
-    @Override
-    public boolean has1090ESIn() {
-        return (capabilityClassCode & 0x100) != 0;
-    }
-
-    /**
-     * @return whether transponder has less than 70 Watts transmit power
-     */
-    @Override
-    public boolean hasLowTxPower() {
-        return (capabilityClassCode & 0x20) != 0;
-    }
-
-    /**
-     * @return true if POA bit is 1.
-     */
-    @Override
-    public boolean hasPositionOffsetApplied() {
-        return (capabilityClassCode & 0x200) != 0;
-    }
-
-    /**
-     * @return whether TCAS Resolution Advisory (RA) is active
-     */
-    public boolean hasTCASResolutionAdvisory() {
-        return (operationalModeCode & 0x2000) != 0;
-    }
-
-    /**
-     * @return whether the IDENT switch is active
-     */
-    public boolean hasActiveIDENTSwitch() {
-        return (operationalModeCode & 0x1000) != 0;
-    }
-
-    /**
-     * @return whether ADS-B Transmitting Subsystem is receiving ATC services.
-     */
-    public boolean hasReceivingATCServices() {
-        return (operationalModeCode & 0x800) != 0;
     }
 
     /**
@@ -234,4 +189,23 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.surfaceV1(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return OperationalModeCodes.v1(operationalModeCode);
+    }
 }

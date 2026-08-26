@@ -18,6 +18,9 @@
 
 package de.serosystems.lib1090;
 
+import de.serosystems.lib1090.msgs.squitter.ADSRAirborneCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
 import de.serosystems.lib1090.exceptions.BadFormatException;
@@ -172,20 +175,20 @@ public class StatefulModeSDecoder {
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg s1 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg(es1090);
                         dd.nicSupplA = s1.hasNICSupplementA();
-                        dd.nicSupplB = s1.hasNICSupplementB();
+                        captureNICSupplements(dd, s1.getCapabilityClass());
                         return s1;
                     case 2:
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
                         dd.nicSupplA = s2.hasNICSupplementA();
-                        dd.nicSupplB = s2.hasNICSupplementB();
+                        captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg s3 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg(es1090);
                         dd.nicSupplA = s3.hasNICSupplementA();
-                        dd.nicSupplB = s3.hasNICSupplementB();
+                        captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
             } else if (subtype == 1) {
@@ -200,14 +203,14 @@ public class StatefulModeSDecoder {
                         de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg s2 =
                                 new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg(es1090);
                         dd.nicSupplA = s2.hasNICSupplementA();
-                        dd.nicSupplC = s2.hasNICSupplementC();
+                        captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV3Msg s3 =
                                 new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV3Msg(es1090);
                         dd.nicSupplA = s3.hasNICSupplementA();
-                        dd.nicSupplC = s3.hasNICSupplementC();
+                        captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
             }
@@ -595,13 +598,13 @@ public class StatefulModeSDecoder {
                     case 2:
                         SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
                         dd.nicSupplA = s2.hasNICSupplementA();
-                        dd.nicSupplC = s2.hasNICSupplementC();
+                        captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
                         dd.nicSupplA = s3.hasNICSupplementA();
-                        dd.nicSupplC = s3.hasNICSupplementC();
+                        captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
             }
@@ -828,5 +831,25 @@ public class StatefulModeSDecoder {
         public StatefulModeSDecoder build() {
             return new StatefulModeSDecoder(this);
         }
+    }
+
+    /**
+     * Take the NIC supplements a capability class layout supplies, if it supplies any.
+     * <p>
+     * NIC supplement B and C live inside the Capability Class Code, so which of them a message carries
+     * depends on the layout its format selector selects — supplement B only on the ADS-R airborne
+     * layouts, supplement C only on the version 2 and 3 surface layouts. A layout that carries neither,
+     * including the fallback for a selector this library does not model, leaves the decoder state
+     * untouched rather than overwriting it with a default.
+     * <p>
+     * That is deliberately the same behavior as before the operational status refactor: an
+     * unrecognized selector used to make the whole message throw, so the state was never updated. The
+     * difference is that the rest of the message now decodes.
+     */
+    private static void captureNICSupplements(DecoderData dd, CapabilityClassCode cc) {
+        if (cc instanceof ADSRAirborneCapabilityClassCode)
+            dd.nicSupplB = ((ADSRAirborneCapabilityClassCode) cc).hasNICSupplementB();
+        if (cc instanceof SurfaceCapabilityClassCodeV2V3)
+            dd.nicSupplC = ((SurfaceCapabilityClassCodeV2V3) cc).hasNICSupplementC();
     }
 }

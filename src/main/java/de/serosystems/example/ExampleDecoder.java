@@ -187,80 +187,96 @@ public class ExampleDecoder {
                 IdentificationMsg ident = (IdentificationMsg) msg;
                 System.out.println("[" + icao24 + "]: Callsign: " + new String(ident.getIdentification()));
                 System.out.println("          Category: " + ident.getEmitterCategory());
-            } else if (msg instanceof OperationalStatusV0Msg) {
-                OperationalStatusV0Msg opstat0 = (OperationalStatusV0Msg) msg;
-                System.out.println("[" + icao24 + "]: Using ADS-B version " + opstat0.getMOPSVersion());
-                System.out.println("          Has operational TCAS: " + opstat0.hasOperationalTCAS());
-                System.out.println("          Has operational CDTI: " + opstat0.hasOperationalCDTI());
-            } else if (msg instanceof AirborneOperationalStatusMsg) {
-                AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
-                System.out.println("[" + icao24 + "]: Using ADS-B version " + opstatA.getMOPSVersion());
-                System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
-                System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
-                System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
-                System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
-                System.out.println("          Has 1090 ES In: " + opstatA.has1090ESIn());
-                System.out.println("          IDENT switch active: " + opstatA.hasActiveIDENTSwitch());
-                System.out.println("          Has operational TCAS: " + opstatA.hasOperationalTCAS());
-                System.out.println("          Has TCAS resolution advisory: " + opstatA.hasTCASResolutionAdvisory());
+            } else if (msg instanceof OperationalStatusMsg) {
+                OperationalStatusMsg opstat = (OperationalStatusMsg) msg;
+                System.out.println("[" + icao24 + "]: Using ADS-B version " + opstat.getMOPSVersion());
 
-                if (msg instanceof AirborneOperationalStatusV1V2Msg) {
-                    AirborneOperationalStatusV1V2Msg opstatV1V2 = (AirborneOperationalStatusV1V2Msg) msg;
-                    System.out.println("          Barometric altitude cross-checked: " + opstatV1V2.getBarometricAltitudeIntegrityCode());
-                    System.out.println("          Horizontal reference: " + (opstatV1V2.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
-                    System.out.println("          Supports air-referenced velocity reports: " + opstatV1V2.hasAirReferencedVelocity());
+                // Subfields outside the capability class and operational mode fields sit on the message
+                // itself, since their position does not depend on any format selector.
+                if (msg instanceof AirborneOperationalStatusMsg) {
+                    AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
+                    System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
+                    System.out.println("          Has NIC supplement A: " + opstatA.hasNICSupplementA());
+                    System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
                 }
-
-                if (msg instanceof OperationalStatusV2V3Msg) {
-                    OperationalStatusV2V3Msg opstatV2V3 = (OperationalStatusV2V3Msg) msg;
-                    System.out.println("          System design assurance: " + opstatV2V3.getSDAEncoded());
-                    System.out.println("          Has UAT in: " + opstatV2V3.hasUATIn());
-                    System.out.println("          Has SIL supplement: " + opstatV2V3.hasSILSupplement());
-                    System.out.println("          Uses single antenna: " + opstatV2V3.hasSingleAntenna());
+                if (msg instanceof SurfaceOperationalStatusMsg) {
+                    SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
+                    System.out.println("          Has NIC supplement A: " + opstatS.hasNICSupplementA());
+                    System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
+                    System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
+                    System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
+                    System.out.println("          Horizontal reference: " + (opstatS.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
                 }
-
                 if (msg instanceof AirborneOperationalStatusV2V3Msg) {
                     System.out.println("          Geometric vertical accuracy: " + ((AirborneOperationalStatusV2V3Msg) msg).getGeometricVerticalAccuracy() + "m");
                 }
-
-                if (msg instanceof AirborneOperationalStatusV3Msg) {
-                    AirborneOperationalStatusV3Msg opstatV3 = (AirborneOperationalStatusV3Msg) msg;
-                    System.out.println("          Transponder side indication: " + opstatV3.getTransponderSideIndicationEncoded());
-                    System.out.println("          Tx power: " + opstatV3.getTxPowerEncoded());
-                    System.out.println("          Reduced Capability Equipment: " + opstatV3.getReducedCapabilityEquipmentEncoded());
-                    System.out.println("          Detect and Avoid: " + opstatV3.getDetectAndAvoidEncoded());
-                }
-            } else if (msg instanceof SurfaceOperationalStatusMsg) {
-                SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
-
-                System.out.println("[" + icao24 + "]: Using ADS-B version " + opstatS.getMOPSVersion());
-
-                System.out.println("          Horizontal reference: " + (opstatS.getHorizontalReferenceDirection() ? "magnetic north" : "true north"));
-                System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
-                System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getPositionUncertainty());
-                System.out.println("          Has NIC supplement A: " + opstatS.hasNICSupplementA());
-                System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS.getSILEncoded());
-                System.out.println("          Has 1090 ES In: " + opstatS.has1090ESIn());
-                System.out.println("          IDENT switch active: " + opstatS.hasActiveIDENTSwitch());
-                System.out.println("          Has TCAS resolution advisory: " + opstatS.hasTCASResolutionAdvisory());
-                System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
-                System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
-                System.out.println("          Low (<70W) TX power: " + opstatS.hasLowTxPower());
-                System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
-
-                if (msg instanceof SurfaceOperationalStatusV2V3Msg) {
-                    SurfaceOperationalStatusV2V3Msg opstatSV2V3 = (SurfaceOperationalStatusV2V3Msg) msg;
-                    System.out.println("          Has NIC supplement C: " + opstatSV2V3.hasNICSupplementC());
-                    System.out.println("          Navigation Accuracy Category for velocity (NACv): " + opstatSV2V3.getNACv());
-                    System.out.println("          Encoded GPS antenna offset: " + opstatSV2V3.getGPSAntennaOffsetEncoded());
-                }
-
                 if (msg instanceof OperationalStatusV2V3Msg) {
-                    OperationalStatusV2V3Msg opstatV2V3 = (OperationalStatusV2V3Msg) msg;
-                    System.out.println("          System design assurance: " + opstatV2V3.getSDAEncoded());
-                    System.out.println("          Has UAT in: " + opstatV2V3.hasUATIn());
-                    System.out.println("          Has SIL supplement: " + opstatV2V3.hasSILSupplement());
-                    System.out.println("          Uses single antenna: " + opstatV2V3.hasSingleAntenna());
+                    System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).hasSILSupplement());
+                }
+
+                // The capability class and operational mode fields each begin with a format selector
+                // that decides the layout of the rest of the field, so their subfields are reached
+                // through an object rather than off the message. Test it with instanceof and cast to
+                // whichever interfaces the layout you care about implements.
+                CapabilityClassCode cc = opstat.getCapabilityClass();
+                System.out.println("          Capability class code: 0x" + Integer.toHexString(cc.getEncoded())
+                        + " (format " + cc.getFormatSelector() + ")");
+                if (cc instanceof KnownCapabilityClassCode) {
+                    System.out.println("          Has 1090 ES In: " + ((KnownCapabilityClassCode) cc).has1090ESIn());
+                }
+                if (cc instanceof AirborneCapabilityClassCode) {
+                    System.out.println("          Collision avoidance operational: "
+                            + ((AirborneCapabilityClassCode) cc).isCollisionAvoidanceOperational());
+                }
+                if (cc instanceof SurfaceCapabilityClassCode) {
+                    System.out.println("          Low (<70W) TX power: " + ((SurfaceCapabilityClassCode) cc).hasLowTxPower());
+                }
+                if (cc instanceof CapabilityClassCodeV2V3) {
+                    System.out.println("          Has UAT in: " + ((CapabilityClassCodeV2V3) cc).hasUATIn());
+                }
+                if (cc instanceof AirborneCapabilityClassCodeV1V2) {
+                    System.out.println("          Supports air-referenced velocity reports: "
+                            + ((AirborneCapabilityClassCodeV1V2) cc).hasAirReferencedVelocity());
+                }
+                if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
+                    SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
+                    System.out.println("          Has NIC supplement C: " + surface.hasNICSupplementC());
+                    System.out.println("          Navigation Accuracy Category for velocity (NACv): " + surface.getNACv());
+                }
+                if (cc instanceof AirborneCapabilityClassCodeV3) {
+                    AirborneCapabilityClassCodeV3 v3 = (AirborneCapabilityClassCodeV3) cc;
+                    System.out.println("          Transponder side indication: " + v3.getTransponderSideIndicationEncoded());
+                    System.out.println("          Tx power: " + v3.getTxPowerEncoded());
+                    System.out.println("          Reduced Capability Equipment: " + v3.getReducedCapabilityEquipmentEncoded());
+                    System.out.println("          Detect and Avoid: " + v3.getDetectAndAvoidEncoded());
+                }
+
+                // Every operational status message has this field. Version 0 defines no layout for
+                // it, and says so through the object it returns rather than by lacking the accessor.
+                OperationalModeCode om = opstat.getOperationalMode();
+                System.out.println("          Operational mode code: 0x" + Integer.toHexString(om.getEncoded())
+                        + " (format " + om.getFormatSelector() + ")");
+                // one test for "did we understand this layout?", then the subfields every
+                // defined layout answers
+                if (om instanceof KnownOperationalModeCode) {
+                    KnownOperationalModeCode known = (KnownOperationalModeCode) om;
+                    System.out.println("          IDENT switch active: " + known.hasActiveIDENTSwitch());
+                    System.out.println("          Has TCAS resolution advisory: " + known.hasTCASResolutionAdvisory());
+                }
+                if (om instanceof OperationalModeCodeV2V3) {
+                    OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;
+                    System.out.println("          System design assurance: " + v2v3.getSDAEncoded());
+                    System.out.println("          Uses single antenna: " + v2v3.hasSingleAntenna());
+                }
+                if (om instanceof SurfaceOperationalModeCodeV2V3) {
+                    System.out.println("          Encoded GPS antenna offset: "
+                            + ((SurfaceOperationalModeCodeV2V3) om).getGPSAntennaOffsetEncoded());
+                }
+                if (om instanceof OperationalModeCodeV3) {
+                    System.out.println("          Mode S reply rate limiting: "
+                            + ((OperationalModeCodeV3) om).hasModeSReplyRateLimiting());
                 }
             } else if (msg instanceof TCASResolutionAdvisoryMsg) {
                 TCASResolutionAdvisoryMsg tcas = (TCASResolutionAdvisoryMsg) msg;

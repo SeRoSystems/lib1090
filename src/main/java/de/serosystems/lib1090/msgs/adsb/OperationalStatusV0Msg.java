@@ -22,7 +22,11 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.opstatus.UndefinedOperationalModeCode;
 
 import java.io.Serializable;
 
@@ -33,7 +37,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
 
     private static final long serialVersionUID = 4280693148589377648L;
 
-    private byte enrouteCapabilities;
+    private int capabilityClassCode; // "CC4", ME 9-12
+    private int operationalModeCode; // reserved in full for version 0, ME 25-40
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -79,43 +84,8 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
         if (subtypeCode > 0) // all others are reserved
             throw new BadFormatException("Operational status message subtype " + subtypeCode + " reserved");
 
-        enrouteCapabilities = b.readByte(9, 16);
-        if (b.readByte(9, 10) != 0)
-            throw new BadFormatException("Unknown enroute capabilities code");
-        // All other capability fields are "TBD" in standard
-    }
-
-    /**
-     * En-Route Operational Capabilities Encoding (TCAS/CDTI control codes) for the Version Zero
-     * Operational Status Message, originally DO-260 §2.2.3.2.7.3.3.1; carried forward as DO-260B
-     * §N.2.3.5 TABLE N-6 and, with no successor in the normative ED-102B §2.2.3.2.7.x numbering,
-     * as ED-102B §N.2.3.5 TABLE N-8, En Route Operational Capabilities Encoding.
-     *
-     * @return true if TCAS is operational or unknown, false if TCAS is not operational.
-     */
-    public boolean hasOperationalTCAS() {
-        return (enrouteCapabilities & 0x20) == 0;
-    }
-
-    /**
-     * En-Route Operational Capabilities Encoding (TCAS/CDTI control codes) for the Version Zero
-     * Operational Status Message, originally DO-260 §2.2.3.2.7.3.3.1; carried forward as DO-260B
-     * §N.2.3.5 TABLE N-6 and, with no successor in the normative ED-102B §2.2.3.2.7.x numbering,
-     * as ED-102B §N.2.3.5 TABLE N-8, En Route Operational Capabilities Encoding.
-     *
-     * @return true if CDTI is operational or unknown, false if CDTI is not operational.
-     */
-    public boolean hasOperationalCDTI() {
-        return (enrouteCapabilities & 0x10) != 0;
-    }
-
-    /**
-     * @return whether 1090ES IN is available
-     * @see #hasOperationalCDTI() alias: the field has been renamed in V1
-     */
-    @Override
-    public boolean has1090ESIn() {
-        return hasOperationalCDTI();
+        capabilityClassCode = b.readInt(9, 12);
+        operationalModeCode = b.readInt(25, 40);
     }
 
     @Override
@@ -126,8 +96,37 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
     @Override
     public String toString() {
         return "OperationalStatusV0Msg{" + super.toString() +
-                ", enrouteCapabilities=" + enrouteCapabilities +
+                ", capabilityClassCode=" + capabilityClassCode +
+                ", operationalModeCode=" + operationalModeCode +
                 '}';
     }
 
+    @Override
+    public int getCapabilityClassCodeEncoded() {
+        return capabilityClassCode;
+    }
+
+    @Override
+    public CapabilityClassCode getCapabilityClass() {
+        return CapabilityClassCodes.adsbAirborneV0(capabilityClassCode);
+    }
+
+    @Override
+    public int getOperationalModeCodeEncoded() {
+        return operationalModeCode;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Version 0 defines no Operational Mode Code: ME 25–40 holds four reserved "En Route Operational
+     * Capability Status" fields. There is therefore nothing to select a layout with, and no layout to
+     * select.
+     *
+     * @return always an {@link UndefinedOperationalModeCode} over the reserved field
+     */
+    @Override
+    public OperationalModeCode getOperationalMode() {
+        return new UndefinedOperationalModeCode(operationalModeCode);
+    }
 }
