@@ -29,7 +29,8 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface KnownCapabilityClassCode extends CapabilityClassCode {
 
     /**
-     * Whether the aircraft has ADS-B 1090ES receive capability — "1090ES IN" from ADS-B version 1
+     * Whether the aircraft has ADS-B 1090ES (1090 MHz Extended Squitter) receive capability — "1090ES IN"
+     * from ADS-B version 1
      * onwards, called "CDTI Traffic Display" in version 0.
      *
      * @return true if 1090ES IN is reported, ME bit 12
