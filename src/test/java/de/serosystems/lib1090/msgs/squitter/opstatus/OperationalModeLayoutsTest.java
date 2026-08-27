@@ -37,8 +37,8 @@ class OperationalModeLayoutsTest {
         assertEquals(40, new AirborneOperationalModeCodeV2(0x0).getLastMEBit());
         assertEquals(0, new AirborneOperationalModeCodeV2(0x0).getFormatSelector());
 
-        assertTrue(new AirborneOperationalModeCodeV2(0x2000).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
-        assertFalse(new AirborneOperationalModeCodeV2(0x0).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
+        assertTrue(new AirborneOperationalModeCodeV2(0x2000).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
+        assertFalse(new AirborneOperationalModeCodeV2(0x0).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
         assertTrue(new AirborneOperationalModeCodeV2(0x1000).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertFalse(new AirborneOperationalModeCodeV2(0x0).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertTrue(new AirborneOperationalModeCodeV2(0x800).isReceivingATCServices(), "isReceivingATCServices ME 29");
@@ -60,8 +60,8 @@ class OperationalModeLayoutsTest {
         assertEquals(40, new AirborneOperationalModeCodeV3(0x0).getLastMEBit());
         assertEquals(0, new AirborneOperationalModeCodeV3(0x0).getFormatSelector());
 
-        assertTrue(new AirborneOperationalModeCodeV3(0x2000).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
-        assertFalse(new AirborneOperationalModeCodeV3(0x0).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
+        assertTrue(new AirborneOperationalModeCodeV3(0x2000).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
+        assertFalse(new AirborneOperationalModeCodeV3(0x0).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
         assertTrue(new AirborneOperationalModeCodeV3(0x1000).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertFalse(new AirborneOperationalModeCodeV3(0x0).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertTrue(new AirborneOperationalModeCodeV3(0x800).isModeSReplyRateLimitingActive(), "isModeSReplyRateLimitingActive ME 29");
@@ -87,8 +87,8 @@ class OperationalModeLayoutsTest {
         assertEquals(40, new OperationalModeCodeV1(0x0).getLastMEBit());
         assertEquals(0, new OperationalModeCodeV1(0x0).getFormatSelector());
 
-        assertTrue(new OperationalModeCodeV1(0x2000).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
-        assertFalse(new OperationalModeCodeV1(0x0).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
+        assertTrue(new OperationalModeCodeV1(0x2000).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
+        assertFalse(new OperationalModeCodeV1(0x0).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
         assertTrue(new OperationalModeCodeV1(0x1000).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertFalse(new OperationalModeCodeV1(0x0).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertTrue(new OperationalModeCodeV1(0x800).isReceivingATCServices(), "isReceivingATCServices ME 29");
@@ -106,8 +106,8 @@ class OperationalModeLayoutsTest {
         assertEquals(40, new SurfaceOperationalModeCodeV2(0x0).getLastMEBit());
         assertEquals(0, new SurfaceOperationalModeCodeV2(0x0).getFormatSelector());
 
-        assertTrue(new SurfaceOperationalModeCodeV2(0x2000).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
-        assertFalse(new SurfaceOperationalModeCodeV2(0x0).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
+        assertTrue(new SurfaceOperationalModeCodeV2(0x2000).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
+        assertFalse(new SurfaceOperationalModeCodeV2(0x0).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
         assertTrue(new SurfaceOperationalModeCodeV2(0x1000).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertFalse(new SurfaceOperationalModeCodeV2(0x0).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertTrue(new SurfaceOperationalModeCodeV2(0x800).isReceivingATCServices(), "isReceivingATCServices ME 29");
@@ -131,8 +131,8 @@ class OperationalModeLayoutsTest {
         assertEquals(40, new SurfaceOperationalModeCodeV3(0x0).getLastMEBit());
         assertEquals(0, new SurfaceOperationalModeCodeV3(0x0).getFormatSelector());
 
-        assertTrue(new SurfaceOperationalModeCodeV3(0x2000).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
-        assertFalse(new SurfaceOperationalModeCodeV3(0x0).isTCASResolutionAdvisoryActive(), "isTCASResolutionAdvisoryActive ME 27");
+        assertTrue(new SurfaceOperationalModeCodeV3(0x2000).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
+        assertFalse(new SurfaceOperationalModeCodeV3(0x0).isCollisionAvoidanceResolutionAdvisoryActive(), "isCollisionAvoidanceResolutionAdvisoryActive ME 27");
         assertTrue(new SurfaceOperationalModeCodeV3(0x1000).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertFalse(new SurfaceOperationalModeCodeV3(0x0).isIDENTSwitchActive(), "isIDENTSwitchActive ME 28");
         assertTrue(new SurfaceOperationalModeCodeV3(0x800).isModeSReplyRateLimitingActive(), "isModeSReplyRateLimitingActive ME 29");
@@ -177,7 +177,7 @@ class OperationalModeLayoutsTest {
         for (int bits = 0; bits < 4; bits++) {
             SurfaceOperationalModeCodeV3Format1 om =
                     new SurfaceOperationalModeCodeV3Format1(0x4000 | bits << 12);
-            assertFalse(om.isTCASResolutionAdvisoryActive(), "bits=" + bits);
+            assertFalse(om.isCollisionAvoidanceResolutionAdvisoryActive(), "bits=" + bits);
             assertFalse(om.isIDENTSwitchActive(), "bits=" + bits);
         }
     }
