@@ -141,4 +141,47 @@ class FactoryTest {
         assertEquals(12, v0.getLastMEBit());
         assertEquals(2, v0.getFormatSelector());
     }
+
+    /**
+     * Both era accessors for the TCAS/collision-avoidance generalisation: the older standards name these
+     * bits for TCAS, version 3 for collision avoidance generally. Each layout answers under the name its
+     * own standard uses, and both names agree.
+     */
+    @Test
+    public void eraAccessorsAgreeWithTheUnifiedOnes() {
+        // capability class ME 11, "TCAS Operational" in DO-260B
+        for (int encoded : new int[]{0, 0x2000}) {
+            AirborneCapabilityClassCodeV2 adsb = new AirborneCapabilityClassCodeV2(encoded);
+            ADSRAirborneCapabilityClassCodeV2 adsr = new ADSRAirborneCapabilityClassCodeV2(encoded);
+            assertEquals(adsb.isTCASOperational(), adsb.isCollisionAvoidanceOperational());
+            assertEquals(adsr.isTCASOperational(), adsr.isCollisionAvoidanceOperational());
+            assertEquals(encoded != 0, adsb.isTCASOperational());
+        }
+
+        // operational mode ME 27, "CA RA Active" only from version 3
+        for (int encoded : new int[]{0, 0x2000}) {
+            OperationalModeCodeV1 v1 = new OperationalModeCodeV1(encoded);
+            AirborneOperationalModeCodeV2 v2 = new AirborneOperationalModeCodeV2(encoded);
+            assertEquals(v1.isTCASResolutionAdvisoryActive(), v1.isCollisionAvoidanceResolutionAdvisoryActive());
+            assertEquals(v2.isTCASResolutionAdvisoryActive(), v2.isCollisionAvoidanceResolutionAdvisoryActive());
+            assertEquals(encoded != 0, v1.isTCASResolutionAdvisoryActive());
+        }
+    }
+
+    /** The era names must not leak to versions whose standard renamed the subfield. */
+    @Test
+    public void eraAccessorsDoNotLeakToVersion3() throws Exception {
+        assertFalse(hasMethod(AirborneCapabilityClassCodeV3.class, "isTCASOperational"));
+        assertFalse(hasMethod(AirborneOperationalModeCodeV3.class, "isTCASResolutionAdvisoryActive"));
+        assertFalse(hasMethod(SurfaceOperationalModeCodeV3.class, "isTCASResolutionAdvisoryActive"));
+        // but version 3 still answers under the unified names
+        assertTrue(hasMethod(AirborneCapabilityClassCodeV3.class, "isCollisionAvoidanceOperational"));
+        assertTrue(hasMethod(AirborneOperationalModeCodeV3.class, "isCollisionAvoidanceResolutionAdvisoryActive"));
+    }
+
+    private static boolean hasMethod(Class<?> type, String name) {
+        for (java.lang.reflect.Method m : type.getMethods())
+            if (m.getName().equals(name)) return true;
+        return false;
+    }
 }

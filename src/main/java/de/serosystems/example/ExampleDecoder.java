@@ -263,7 +263,7 @@ public class ExampleDecoder {
                 if (om instanceof KnownOperationalModeCode) {
                     KnownOperationalModeCode known = (KnownOperationalModeCode) om;
                     System.out.println("          IDENT switch active: " + known.isIDENTSwitchActive());
-                    System.out.println("          Has TCAS resolution advisory: " + known.isTCASResolutionAdvisoryActive());
+                    System.out.println("          Has TCAS resolution advisory: " + known.isCollisionAvoidanceResolutionAdvisoryActive());
                 }
                 if (om instanceof OperationalModeCodeV2V3) {
                     OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;

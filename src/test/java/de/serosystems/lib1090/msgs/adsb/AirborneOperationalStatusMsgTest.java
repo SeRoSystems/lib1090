@@ -138,17 +138,17 @@ abstract class AirborneOperationalStatusMsgTest {
     @Test
     void testOperationalModeCodeFlags() throws Exception {
         OperationalModeCodeV1V2 tcasResolutionAdvisory = withOperationalModeCode(0x2000);
-        assertTrue(tcasResolutionAdvisory.isTCASResolutionAdvisoryActive());
+        assertTrue(tcasResolutionAdvisory.isCollisionAvoidanceResolutionAdvisoryActive());
         assertFalse(tcasResolutionAdvisory.isIDENTSwitchActive());
         assertFalse(tcasResolutionAdvisory.isReceivingATCServices());
 
         OperationalModeCodeV1V2 activeIdentSwitch = withOperationalModeCode(0x1000);
-        assertFalse(activeIdentSwitch.isTCASResolutionAdvisoryActive());
+        assertFalse(activeIdentSwitch.isCollisionAvoidanceResolutionAdvisoryActive());
         assertTrue(activeIdentSwitch.isIDENTSwitchActive());
         assertFalse(activeIdentSwitch.isReceivingATCServices());
 
         OperationalModeCodeV1V2 receivingAtcServices = withOperationalModeCode(0x0800);
-        assertFalse(receivingAtcServices.isTCASResolutionAdvisoryActive());
+        assertFalse(receivingAtcServices.isCollisionAvoidanceResolutionAdvisoryActive());
         assertFalse(receivingAtcServices.isIDENTSwitchActive());
         assertTrue(receivingAtcServices.isReceivingATCServices());
     }

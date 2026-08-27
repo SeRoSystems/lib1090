@@ -34,4 +34,29 @@ public interface OperationalModeCodeV1V2 extends KnownOperationalModeCode {
     default boolean isReceivingATCServices() {
         return getMEBit(29);
     }
+
+    /**
+     * The subfield under the name the earlier standards give it: a <b>TCAS/ACAS resolution advisory</b>,
+     * ED-102B §2.2.3.2.7.2.4.2. Version 3 generalises the same bit to "CA RA Active", which is why
+     * {@link #isCollisionAvoidanceResolutionAdvisoryActive()} is the unified name.
+     * <p>
+     * Declared on this interface rather than on each layout class, which the era-accessor rule otherwise
+     * calls for, because this interface's layout-set is exactly the set of layouts using the older term:
+     * versions 1 and 2, all subtypes and both protocols. There is therefore no version it can leak to.
+     *
+     * @return true if a TCAS/ACAS resolution advisory is active, ME bit 27
+     */
+    default boolean isTCASResolutionAdvisoryActive() {
+        return getMEBit(27);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see #isTCASResolutionAdvisoryActive() the name versions 1 and 2 use for this subfield
+     */
+    @Override
+    default boolean isCollisionAvoidanceResolutionAdvisoryActive() {
+        return isTCASResolutionAdvisoryActive();
+    }
 }

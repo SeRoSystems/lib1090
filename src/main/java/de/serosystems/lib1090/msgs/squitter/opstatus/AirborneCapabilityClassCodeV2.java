@@ -61,4 +61,32 @@ public class AirborneCapabilityClassCodeV2 extends AbstractMEField
                     "Capability class code format selector " + getFormatSelector()
                             + " is not layout " + FORMAT_SELECTOR);
     }
+
+    /**
+     * The subfield under the name DO-260B gives it: <b>"TCAS Operational"</b>. Version 3 generalises the
+     * same bit to "CA Operational", collision avoidance covering the DAA-based systems it introduces as
+     * well as TCAS/ACAS, which is why {@link #isCollisionAvoidanceOperational()} is the unified name.
+     * <p>
+     * Reading a version 2 message through the wider name is safe — TCAS being operational does imply a
+     * collision avoidance system is — but it loses the fact that the system in question is specifically
+     * TCAS/ACAS.
+     * <p>
+     * As with the unified accessor, {@code true} means operational <i>or unknown</i>; only {@code false}
+     * asserts that it is not operational.
+     *
+     * @return true if TCAS is operational or its state is unknown, ME bit 11
+     */
+    public boolean isTCASOperational() {
+        return getMEBit(11);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see #isTCASOperational() the name DO-260B uses for this subfield
+     */
+    @Override
+    public boolean isCollisionAvoidanceOperational() {
+        return isTCASOperational();
+    }
 }

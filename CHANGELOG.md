@@ -44,6 +44,11 @@ and CPR decoding made since v4.1.3.
   the supplement value, not a predicate), and `getHorizontalReferenceDirection()` →
   `isHeadingReferencedToMagneticNorth()` (a boolean that was named like a direction; `true` means magnetic north). The
   `setNICSupplement{A,C}()` setters are unchanged
+- `hasTCASResolutionAdvisory()` is now `isCollisionAvoidanceResolutionAdvisoryActive()`, taking version 3's term
+  ("CA RA Active") as the unified name, with `isTCASResolutionAdvisoryActive()` available on the version 1 and 2
+  layouts under the term those standards use. The same generalization as ME 11, where version 3 renamed
+  "TCAS Operational" to "CA Operational"; `isTCASOperational()` is the DO-260B-era accessor on the version 2 airborne
+  capability class layouts
 
 ### New Features
 - Added support for ADS-B v3, including new v3-only message types: HVA Position/Velocity, Wx AIREP (aircraft state,

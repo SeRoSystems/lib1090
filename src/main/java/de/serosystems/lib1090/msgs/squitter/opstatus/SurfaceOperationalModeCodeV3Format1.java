@@ -83,14 +83,14 @@ public class SurfaceOperationalModeCodeV3Format1 extends AbstractMEField
      * @return always false
      */
     @Override
-    public boolean isTCASResolutionAdvisoryActive() {
+    public boolean isCollisionAvoidanceResolutionAdvisoryActive() {
         return false;
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * Always false, for the same reason as {@link #isTCASResolutionAdvisoryActive()}.
+     * Always false, for the same reason as {@link #isCollisionAvoidanceResolutionAdvisoryActive()}.
      *
      * @return always false
      */
