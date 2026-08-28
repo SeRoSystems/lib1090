@@ -177,7 +177,7 @@ public class ModeSDownlinkMsg implements Serializable {
         else if (ftc >= 5 && ftc <= 8)
             // surface position
             imf = ((payload[5] >>> 3) & 0x1) == 1;
-        else if (ftc >= 2 && ftc <= 4)
+        else if (ftc >= 1 && ftc <= 4)
             // ID and category -> no IMF, always ICAO 24
             imf = false; // -> will result in ICAO 24
         else if (ftc == 19)
