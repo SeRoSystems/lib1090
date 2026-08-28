@@ -55,6 +55,22 @@ If required, users of this library need to explicitly call the correct Comm-B me
 The Comm-D data link and military ES are not parsed.
 
 
+### Known limitations
+
+**Address type of some TIS-B and ADS-R messages.** For DF=18 the target's address type is derived from the ICAO/Mode A
+Flag (IMF), and the standard puts that flag at a different bit position in every message type. Some message types it
+permits in ADS-R define no IMF field at all — format type code 25 is the clearest case — so their address type simply
+cannot be determined. We consider this a defect in the specification rather than something a decoder can work around.
+
+`lib1090` reports `QualifiedAddress.Type.UNKNOWN` for these. Since the decoder keys its per-target state on the
+qualified address *including its type*, such a message neither contributes to nor reads that state. For ADS-R, whose
+decoding needs the version established by an earlier operational status message, this means the message is not decoded
+further and is returned as a plain `ExtendedSquitter`.
+
+Affected format type codes are 0, 23, 24, 25, 27 and 30. Apart from 25 these are either reserved or not decoded by this
+library in any case, so 25 is the only one where the limitation costs anything today.
+
+
 ### Packaging
 
 This is a Maven project. You can simply generate a jar file with `mvn package`.
