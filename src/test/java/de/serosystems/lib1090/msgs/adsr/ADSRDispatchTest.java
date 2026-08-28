@@ -106,10 +106,14 @@ class ADSRDispatchTest {
 
     @Test
     void identification() throws Exception {
-        for (int ftc = 2; ftc <= 4; ftc++) {
+        for (int ftc = 1; ftc <= 4; ftc++) {
             assertDispatch(1, message(ftc, 0), IdentificationV1Msg.class);
             assertDispatch(2, message(ftc, 0), IdentificationV2Msg.class);
-            assertDispatch(3, message(ftc, 0), IdentificationV3Msg.class);
+            // format type code 1 is not defined for identification in version 3, so it is discarded
+            // there — but only after the address type has been resolved, which is why it decodes at
+            // versions 1 and 2 rather than being lost for all of them
+            assertDispatch(3, message(ftc, 0),
+                    ftc == 1 ? ExtendedSquitter.class : IdentificationV3Msg.class);
         }
     }
 
@@ -166,37 +170,43 @@ class ADSRDispatchTest {
         assertDispatch(2, messageSubtypeInME67(29, 0), ExtendedSquitter.class);
     }
 
+    @Test
+    void wxAIREP() throws Exception {
+        assertDispatch(3, messageSubtypeInME67(26, 0), WxAIREPAircraftStateMsg.class);
+        assertDispatch(3, messageSubtypeInME67(26, 1), WxAIREPWeatherStateMsg.class);
+        assertDispatch(3, messageSubtypeInME67(26, 2), WxAIREPAlternateWeatherStateMsg.class);
+        // subtype 3 is not assigned
+        assertDispatch(3, messageSubtypeInME67(26, 3), ExtendedSquitter.class);
+        // new in version 3; earlier versions leave it undecoded
+        assertDispatch(2, messageSubtypeInME67(26, 0), ExtendedSquitter.class);
+    }
+
     /**
-     * <b>Records a defect.</b> {@code decodeADSR} has a Wx AIREP branch for version 3, but it is
-     * unreachable, and so is identification at format type code 1.
-     * <p>
-     * For DF=18 the address type comes from the IMF flag, and
-     * {@code ModeSDownlinkMsg.extractIMF} knows where that flag sits only for format type codes 2–4,
-     * 5–8, 9–22, 19, 28, 29 and 31. For anything else it returns {@code null}, the address type becomes
-     * {@link de.serosystems.lib1090.msgs.QualifiedAddress.Type#UNKNOWN}, and since the decoder keys its
-     * per-target state on the qualified address <i>including its type</i>, such a message lands on a
-     * fresh {@code DecoderData} whose version is 0 — where ADS-R decoding stops, being unspecified for
-     * version 0.
-     * <p>
-     * Fixing it needs the standard's IMF position for these format type codes. Until then this test
-     * pins the behaviour so the gap is visible rather than silent; it will fail once the cause is
-     * addressed, which is the point.
+     * Both format type codes reach the dispatch only because {@code ModeSDownlinkMsg.extractIMF} knows
+     * where their IMF flag sits. Without that the address type is
+     * {@link de.serosystems.lib1090.msgs.QualifiedAddress.Type#UNKNOWN}, which keys a fresh
+     * {@code DecoderData} whose version is 0 — and ADS-R decoding stops there, being unspecified for
+     * version 0. Resolving the address type and deciding whether the message is defined for the
+     * target's version are separate steps, and this asserts they stay that way.
      */
     @Test
-    void wxAIREPAndFormatTypeCode1AreUnreachable() throws Exception {
-        assertDispatch(3, messageSubtypeInME67(26, 0), ExtendedSquitter.class);
-        assertDispatch(3, messageSubtypeInME67(26, 1), ExtendedSquitter.class);
-        assertDispatch(3, messageSubtypeInME67(26, 2), ExtendedSquitter.class);
-        assertDispatch(1, message(1, 0), ExtendedSquitter.class);
-        assertDispatch(2, message(1, 0), ExtendedSquitter.class);
-
-        // the address type is what goes wrong, and it is observable on the message itself
+    void addressTypeResolvesIndependentlyOfWhetherTheMessageIsDefined() throws Exception {
         StatefulModeSDecoder d = new StatefulModeSDecoder();
         d.decode(opStatus(0, 3), T);
-        assertEquals(de.serosystems.lib1090.msgs.QualifiedAddress.Type.UNKNOWN,
-                d.decode(messageSubtypeInME67(26, 0), T).getAddress().getType());
+
+        // version 3 discards identification at format type code 1, yet the address is still qualified
+        ModeSDownlinkMsg identification = d.decode(message(1, 0), T);
+        assertEquals(ExtendedSquitter.class, identification.getClass());
         assertEquals(de.serosystems.lib1090.msgs.QualifiedAddress.Type.ICAO24,
-                d.decode(message(9, 0), T).getAddress().getType());
+                identification.getAddress().getType());
+
+        // Wx AIREP carries its IMF at ME 56, so the flag selects the address type
+        assertEquals(de.serosystems.lib1090.msgs.QualifiedAddress.Type.ICAO24,
+                d.decode(messageSubtypeInME67(26, 0), T).getAddress().getType());
+        byte[] anonymous = messageSubtypeInME67(26, 0);
+        anonymous[10] = 0x01;                       // ME 56
+        assertEquals(de.serosystems.lib1090.msgs.QualifiedAddress.Type.ANONYMOUS,
+                d.decode(anonymous, T).getAddress().getType());
     }
 
     /** A format type code the table does not assign stays an undecoded extended squitter. */

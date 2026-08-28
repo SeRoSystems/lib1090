@@ -183,6 +183,9 @@ public class ModeSDownlinkMsg implements Serializable {
         else if (ftc == 19)
             // velocity / airspeed
             imf = (payload[4] & 0x80) > 0;
+        else if (ftc == 26)
+            // Wx AIREP
+            imf = (payload[9] & 0x1) != 0;
         else if (ftc == 28)
             // emergency and prio status
             imf = (payload[9] & 0x1) != 0;
