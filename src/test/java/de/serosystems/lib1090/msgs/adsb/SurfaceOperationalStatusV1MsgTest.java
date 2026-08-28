@@ -22,6 +22,7 @@ import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.opstatus.SurfaceCapabilityClassCodeV1;
 import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
+import de.serosystems.lib1090.msgs.SurfaceOperationalStatusMsgTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

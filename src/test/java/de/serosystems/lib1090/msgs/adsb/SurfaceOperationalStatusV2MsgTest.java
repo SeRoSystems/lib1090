@@ -26,6 +26,7 @@ import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV2V3;
 import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalModeCodeV2V3;
+import de.serosystems.lib1090.msgs.SurfaceOperationalStatusMsgTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

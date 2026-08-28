@@ -16,15 +16,17 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCodeV1V2;
-import de.serosystems.lib1090.msgs.squitter.AirborneOperationalStatusV1V2Msg;
+import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV1V2;
+import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCode;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
+import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV1V2;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
 import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
@@ -34,26 +36,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Shared tests for the capability class code and operational mode code fields, which are encoded
- * identically (same bit offsets, same reserved-bit validation) across ADS-B versions 1 and 2 for
- * airborne operational status messages. isCollisionAvoidanceOperational()'s polarity differs between versions
- * and is intentionally NOT covered here; it stays in the version-specific subclasses.
+ * identically (same bit offsets, same reserved-bit validation) across versions 1 and 2, in both ADS-B and ADS-R, for
+ * surface operational status messages. isPositionOffsetApplied() is derived differently per
+ * version (a capability class code bit in v1, the GPS antenna offset in v2) and is intentionally
+ * NOT covered here; it stays in the version-specific subclasses.
  */
-abstract class AirborneOperationalStatusMsgTest {
+public abstract class SurfaceOperationalStatusMsgTest {
 
     protected abstract byte[] baseMessage();
 
-    protected abstract AirborneOperationalStatusV1V2Msg create(byte[] msg) throws Exception;
+    protected abstract SurfaceOperationalStatusMsg create(byte[] msg) throws Exception;
 
 
-    /**
-     * The capability class and operational mode subfields live on the decoded field objects now, not on
-     * the message, so these helpers hand back what the message's format selector selected.
-     */
-    protected AirborneCapabilityClassCodeV1V2 withCapabilityClassCode(int capabilityClassCode) throws Exception {
+    protected SurfaceCapabilityClassCode withCapabilityClassCode(int capabilityClassCode) throws Exception {
         byte[] msg = baseMessage();
-        msg[5] = (byte) (capabilityClassCode >>> 8);
-        msg[6] = (byte) capabilityClassCode;
-        return (AirborneCapabilityClassCodeV1V2) create(msg).getCapabilityClass();
+        msg[5] = (byte) (capabilityClassCode >>> 4);
+        msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
+        return (SurfaceCapabilityClassCode) create(msg).getCapabilityClass();
     }
 
     protected OperationalModeCodeV1V2 withOperationalModeCode(int operationalModeCode) throws Exception {
@@ -67,8 +66,8 @@ abstract class AirborneOperationalStatusMsgTest {
     /** The undecoded field, for the layouts this library does not model. */
     protected CapabilityClassCode rawCapabilityClass(int capabilityClassCode) throws Exception {
         byte[] msg = baseMessage();
-        msg[5] = (byte) (capabilityClassCode >>> 8);
-        msg[6] = (byte) capabilityClassCode;
+        msg[5] = (byte) (capabilityClassCode >>> 4);
+        msg[6] = (byte) ((msg[6] & 0x0F) | ((capabilityClassCode & 0x0F) << 4));
         return create(msg).getCapabilityClass();
     }
 
@@ -81,33 +80,18 @@ abstract class AirborneOperationalStatusMsgTest {
 
     @Test
     void testSubtypeCode() throws Exception {
-        assertEquals(0, create(baseMessage()).getSubtypeCode());
+        assertEquals(1, create(baseMessage()).getSubtypeCode());
     }
 
     @Test
     void testCapabilityClassCodeFlags() throws Exception {
-        AirborneCapabilityClassCodeV1V2 es1090In = withCapabilityClassCode(0x1000);
-        assertTrue(es1090In.has1090ESIn());
-        assertFalse(es1090In.supportsARVReport());
-        assertFalse(es1090In.supportsTSReport());
+        SurfaceCapabilityClassCode esIn = withCapabilityClassCode(0x100);
+        assertTrue(esIn.has1090ESIn());
+        assertFalse(esIn.isB2Low());
 
-        AirborneCapabilityClassCodeV1V2 airReferencedVelocity = withCapabilityClassCode(0x0200);
-        assertFalse(airReferencedVelocity.has1090ESIn());
-        assertTrue(airReferencedVelocity.supportsARVReport());
-        assertFalse(airReferencedVelocity.supportsTSReport());
-
-        AirborneCapabilityClassCodeV1V2 targetStateReport = withCapabilityClassCode(0x0100);
-        assertFalse(targetStateReport.has1090ESIn());
-        assertFalse(targetStateReport.supportsARVReport());
-        assertTrue(targetStateReport.supportsTSReport());
-    }
-
-    @Test
-    void testTargetChangeReportCapability() throws Exception {
-        assertEquals(0, withCapabilityClassCode(0x00).getTCReportCapabilityLevelEncoded());
-        assertEquals(1, withCapabilityClassCode(0x40).getTCReportCapabilityLevelEncoded());
-        assertEquals(2, withCapabilityClassCode(0x80).getTCReportCapabilityLevelEncoded());
-        assertEquals(3, withCapabilityClassCode(0xC0).getTCReportCapabilityLevelEncoded());
+        SurfaceCapabilityClassCode lowTxPower = withCapabilityClassCode(0x20);
+        assertFalse(lowTxPower.has1090ESIn());
+        assertTrue(lowTxPower.isB2Low());
     }
 
     /**
@@ -117,12 +101,12 @@ abstract class AirborneOperationalStatusMsgTest {
      */
     @Test
     void unknownCapabilityClassSelectorFallsBackInsteadOfThrowing() throws Exception {
-        for (int selector : new int[]{0x8000, 0x4000}) {
+        for (int selector : new int[]{0x800, 0x400}) {
             CapabilityClassCode cc = rawCapabilityClass(selector);
             assertInstanceOf(UnknownCapabilityClassCode.class, cc);
             assertFalse(KnownCapabilityClassCode.class.isInstance(cc));
         }
-        assertInstanceOf(KnownCapabilityClassCode.class, rawCapabilityClass(0x0000));
+        assertInstanceOf(KnownCapabilityClassCode.class, rawCapabilityClass(0x200));
     }
 
     @Test
@@ -132,7 +116,7 @@ abstract class AirborneOperationalStatusMsgTest {
             assertInstanceOf(UnknownOperationalModeCode.class, om);
             assertFalse(KnownOperationalModeCode.class.isInstance(om));
         }
-        assertInstanceOf(KnownOperationalModeCode.class, rawOperationalMode(0x0000));
+        assertInstanceOf(KnownOperationalModeCode.class, rawOperationalMode(0x2000));
     }
 
     @Test

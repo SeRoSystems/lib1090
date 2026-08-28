@@ -23,6 +23,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.opstatus.UnknownOperationalModeCode;
+import de.serosystems.lib1090.msgs.AirborneOperationalStatusMsgTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
