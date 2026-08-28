@@ -20,10 +20,11 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
+import de.serosystems.lib1090.msgs.AirborneOperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.squitter.AirborneCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV2V3;
+import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
