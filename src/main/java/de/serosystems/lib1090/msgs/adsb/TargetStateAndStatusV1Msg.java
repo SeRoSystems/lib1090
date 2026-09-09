@@ -119,9 +119,14 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
         return verticalDataAvailableAndSourceIndicator;
     }
 
+    public boolean hasTargetAltitudeCapability() {
+        return targetAltitudeCapability != 1 && targetAltitudeCapability != 2;
+    }
+
     @Override
     public boolean hasSelectedAltitude() {
-        return targetAltitudeCapability == 1 || targetAltitudeCapability == 2;
+        // rules from ED-129B
+        return hasTargetAltitudeCapability() && targetAltitude <= 1010;
     }
 
     @Override
