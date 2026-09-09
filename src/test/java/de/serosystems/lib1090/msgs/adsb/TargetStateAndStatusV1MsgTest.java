@@ -30,7 +30,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TargetStateAndStatusV1MsgTest {
 
-    public static final String TSS_V1 = withSubtype(TargetStateAndStatusV2MsgTest.TSS_WITHOUT_HEADING, 0);
+    // A Target State and Status message, Subtype 0, composed by single bits
+    public static final String TSS_V1 = withParity(Tools.hexStringToByteArray(
+            // 10001 => DF 17
+            //   101 => FF (first field, not needed here)
+            "8d" +
+
+                    // ICAO 24 bit address
+                    "89653e" +
+
+                    //      11101 => type code 29
+                    //         00 => subtype 0
+                    //         01 => vertical data available and source indicator
+                    //          1 => target altitude type
+                    //          0 => reserved
+                    //         00 => target altitude capability
+                    //         10 => vertical mode indicator
+                    // 0010010000 => target altitude
+                    //         01 => horizontal data available and source indicator
+                    //  010000000 => target heading / track angle
+                    "e8c448280" +
+
+                    //        0 => target heading / track indicator
+                    //       10 => horizontal mode indicator
+                    //     1001 => NACp
+                    //        1 => NICbaro
+                    "53" +
+
+                    //    11 => SIL
+                    // 00000 => reserved
+                    //     0 => capability: not TCAS
+                    "c0" +
+
+                    //   1 => TCAS resolution advisory active
+                    // 100 => emergency / priority status
+                    "c" +
+
+                    // parity, overwritten below
+                    "000000"));
+
     public static final String A_OPSTAT_V1 = withAddress("8D000000F8000200492900000000", "89653e");
 
     @Test
@@ -41,12 +79,14 @@ public class TargetStateAndStatusV1MsgTest {
         assertEquals(17, tss.getDownlinkFormat());
         assertEquals(29, tss.getFormatTypeCode());
 
-        assertEquals(0, tss.getVerticalDataAvailableAndSourceIndicator());
+        assertEquals(1, tss.getVerticalDataAvailableAndSourceIndicator());
+        assertTrue(tss.hasTargetAltitudeCapability());
         assertTrue(tss.hasSelectedAltitude());
         assertEquals(144, tss.getSelectedAltitudeEncoded());
         assertEquals(13400, tss.getSelectedAltitude());
         assertTrue(tss.hasSelectedHeading());
-        assertNotNull(tss.getSelectedHeading());
+        assertEquals(128, tss.getSelectedHeadingEncoded());
+        assertEquals(90.f, tss.getSelectedHeading());
         assertEquals(9, tss.getNACp());
         assertTrue(tss.getBarometricAltitudeIntegrityCode());
         assertEquals(3, tss.getSIL());
@@ -55,9 +95,61 @@ public class TargetStateAndStatusV1MsgTest {
         assertEquals(4, tss.getEmergencyPriorityStatus());
     }
 
-    private static String withSubtype(String message, int subtype) {
+    @Test
+    public void testTargetAltitudeCapability() throws UnspecifiedFormatError, BadFormatException {
+        for (int capability : new int[]{0, 3}) {
+            final TargetStateAndStatusV1Msg tss = decode(withTargetAltitudeCapability(TSS_V1, capability));
+
+            assertTrue(tss.hasTargetAltitudeCapability(), "capability " + capability);
+            assertTrue(tss.hasSelectedAltitude(), "capability " + capability);
+            assertEquals(13400, tss.getSelectedAltitude(), "capability " + capability);
+        }
+
+        for (int capability : new int[]{1, 2}) {
+            final TargetStateAndStatusV1Msg tss = decode(withTargetAltitudeCapability(TSS_V1, capability));
+
+            assertFalse(tss.hasTargetAltitudeCapability(), "capability " + capability);
+            assertFalse(tss.hasSelectedAltitude(), "capability " + capability);
+            assertNull(tss.getSelectedAltitude(), "capability " + capability);
+            assertEquals(144, tss.getSelectedAltitudeEncoded(), "capability " + capability);
+        }
+    }
+
+    @Test
+    public void testSelectedAltitudeOutOfRange() throws UnspecifiedFormatError, BadFormatException {
+        final TargetStateAndStatusV1Msg inRange = decode(withTargetAltitude(TSS_V1, 1010));
+
+        assertTrue(inRange.hasSelectedAltitude());
+        assertEquals(100000, inRange.getSelectedAltitude());
+
+        for (int altitude : new int[]{1011, 1023}) {
+            final TargetStateAndStatusV1Msg tss = decode(withTargetAltitude(TSS_V1, altitude));
+
+            assertTrue(tss.hasTargetAltitudeCapability(), "altitude " + altitude);
+            assertFalse(tss.hasSelectedAltitude(), "altitude " + altitude);
+            assertNull(tss.getSelectedAltitude(), "altitude " + altitude);
+            assertEquals(altitude, tss.getSelectedAltitudeEncoded(), "altitude " + altitude);
+        }
+    }
+
+    private static TargetStateAndStatusV1Msg decode(String message)
+            throws UnspecifiedFormatError, BadFormatException {
+        return new TargetStateAndStatusV1Msg(Tools.hexStringToByteArray(message));
+    }
+
+    private static String withTargetAltitudeCapability(String message, int capability) {
         byte[] raw = Tools.hexStringToByteArray(message);
-        raw[4] = (byte) ((raw[4] & ~0x06) | ((subtype & 0x3) << 1));
+        // ME bits 12-13
+        raw[5] = (byte) ((raw[5] & ~0x18) | ((capability & 0x3) << 3));
+        return withParity(raw);
+    }
+
+    private static String withTargetAltitude(String message, int altitude) {
+        byte[] raw = Tools.hexStringToByteArray(message);
+        // ME bits 16-25
+        raw[5] = (byte) ((raw[5] & ~0x01) | ((altitude >> 9) & 0x1));
+        raw[6] = (byte) ((altitude >> 1) & 0xFF);
+        raw[7] = (byte) ((raw[7] & ~0x80) | ((altitude & 0x1) << 7));
         return withParity(raw);
     }
 
