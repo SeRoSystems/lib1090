@@ -27,10 +27,11 @@ public interface OperationalStatusMsg {
      * The MOPS (Minimum Operational Performance Standards) version number of the formats and protocols in
      * use on the aircraft installation.
      * <ul>
-     *     <li>0: Conformant to ED-102 and DO-242</li>
-     *     <li>1: Conformant to DO-260A and DO-242A</li>
-     *     <li>2: Conformant to ED-102A and DO-242B</li>
-     *     <li>3-7: reserved</li>
+     *     <li>0: Conformant to DO-260/ED-102</li>
+     *     <li>1: Conformant to DO-260A</li>
+     *     <li>2: Conformant to DO-260B/ED-102A</li>
+     *     <li>3: Conformant to DO-260C/ED-102B</li>
+     *     <li>4-7: reserved</li>
      * </ul>
      *
      * @return the version number
