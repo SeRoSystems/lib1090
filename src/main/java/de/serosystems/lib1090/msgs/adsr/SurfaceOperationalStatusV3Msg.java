@@ -76,8 +76,7 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     /**
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException if message has the wrong typecode or ADS-R version or is not a surface
-     *                            operational status message or the capability class code or operational mode
-     *                            code is invalid.
+     *                            operational status message.
      */
     public SurfaceOperationalStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
