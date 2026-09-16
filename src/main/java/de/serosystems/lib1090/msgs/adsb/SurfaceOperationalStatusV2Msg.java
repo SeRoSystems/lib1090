@@ -98,7 +98,6 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
         if (mopsVersion < 2)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-
         nicSupplementA = b.readBoolean(44);
         nacP = b.readByte(45, 48);
         // bits 49 and 50 reserved
