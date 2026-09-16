@@ -78,13 +78,13 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
     }
 
     /**
-     * Whether the reported position has already been corrected for the GPS antenna offset — the "POA"
-     * bit of ED-129B, encoded from version 2 onwards as the reserved all-but-one value of the offset
+     * Whether the reported position has already been corrected for the GPS antenna offset —
+     * encoded from version 2 onwards as the reserved all-but-one value of the longitudinal offset
      * field itself. ADS-B version 1 carries this in the Capability Class Code instead.
      *
-     * @return true if the position offset has been applied, i.e. ME 33–40 read exactly 1
+     * @return true if the position offset has been applied, i.e. ME 36–40 read exactly 1
      */
     default boolean isPositionOffsetApplied() {
-        return getMEBits(33, 40) == 1;
+        return getMEBits(36, 40) == 1;
     }
 }
