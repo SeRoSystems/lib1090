@@ -95,7 +95,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
         if (mopsVersion != 1)
             throw new BadFormatException("Unsupported operational status version " + mopsVersion);
 
-
         nicSupplement = b.readBoolean(44);
         nacP = b.readByte(45, 48);
         baq = b.readByte(49, 50);
