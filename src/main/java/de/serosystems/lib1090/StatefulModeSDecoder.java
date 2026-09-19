@@ -269,6 +269,7 @@ public class StatefulModeSDecoder {
                     de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg a2 =
                             new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg(es1090, timestamp);
                     a2.setNICSupplementA(dd.nicSupplA);
+                    a2.setNICSupplementB(dd.nicSupplB);
                     return a2;
                 case 3:
                 default:

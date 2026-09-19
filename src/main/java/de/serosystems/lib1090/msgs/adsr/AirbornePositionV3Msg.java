@@ -21,6 +21,10 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NICSupplementD;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -95,7 +99,8 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 3.
+     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 3, for a
+     * caller that knows the supplements.
      * <p>
      * Note: unlike ADS-B, ADS-R does not carry the NIC supplement B bit itself (ME bit 8 is
      * redefined as the IMF flag here), so it must be supplied by the caller, e.g., as obtained
@@ -105,18 +110,38 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
      * @param nicSupplementB NIC supplement B bit for this aircraft
      * @param nicSupplementD NIC supplement D (2-bit value) for this aircraft, used for format type
      *                       codes 20-22 (geometric height)
+     * @return the guaranteed upper bound on the containment radius in meters, as described by
+     * {@link #getHorizontalContainmentRadiusLimit()}
      */
-    public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA, boolean nicSupplementB, byte nicSupplementD) {
-        byte formatTypeCode = getFormatTypeCode();
-        if (formatTypeCode >= 20 && formatTypeCode <= 22)
-            return AirbornePosition.decodeHCR(formatTypeCode, nicSupplementD);
-        else
-            return AirbornePosition.decodeHCR(formatTypeCode, nicSupplementA, nicSupplementB);
+    public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA, boolean nicSupplementB,
+                                                      byte nicSupplementD) {
+        return getContainmentRadius(nicSupplementA, nicSupplementB, nicSupplementD).getGuaranteedUpperBound();
     }
 
+    /**
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on.
+     * <p>
+     * ADS-R carries none of the three supplements in this message, so a plain instance knows none of
+     * them and reports the poorest row the type code allows.
+     *
+     * @return the containment radius
+     */
     @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return getHorizontalContainmentRadiusLimit(false, false, (byte) 0);
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics().getContainmentRadius();
+    }
+
+    /**
+     * @param nicSupplementA NIC supplement A bit for this aircraft
+     * @param nicSupplementB NIC supplement B bit for this aircraft
+     * @param nicSupplementD NIC supplement D (2-bit value) for this aircraft
+     * @return the containment radius that type code and supplements select
+     */
+    public ContainmentRadius getContainmentRadius(boolean nicSupplementA, boolean nicSupplementB,
+                                                  byte nicSupplementD) {
+        return characteristics(NICSupplement.of(nicSupplementA), NICSupplement.of(nicSupplementB),
+                NICSupplementD.of(nicSupplementD)).getContainmentRadius();
     }
 
     /**
@@ -130,28 +155,35 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
      * @param nicSupplementB NIC supplement B bit for this aircraft
      * @param nicSupplementD NIC supplement D (2-bit value) for this aircraft, used for format type
      *                       codes 20-22 (geometric height)
+     * @return the NIC that type code and supplements select
      */
     public byte getNIC(boolean nicSupplementA, boolean nicSupplementB, byte nicSupplementD) {
-        byte formatTypeCode = getFormatTypeCode();
-        if (formatTypeCode >= 20 && formatTypeCode <= 22)
-            return AirbornePosition.decodeNIC(formatTypeCode, nicSupplementD);
-        else
-            return AirbornePosition.decodeNIC(formatTypeCode, nicSupplementA, nicSupplementB);
+        return characteristics(NICSupplement.of(nicSupplementA), NICSupplement.of(nicSupplementB),
+                NICSupplementD.of(nicSupplementD)).getNIC();
     }
 
     @Override
     public byte getNIC() {
-        return getNIC(false, false, (byte) 0);
+        return getNavigationCharacteristics().getNIC();
     }
 
-    @Override
-    public byte getNACp() {
-        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
+    /**
+     * Everything the format type code and the NIC supplements say about this position.
+     * <p>
+     * All three supplements reach ADS-R from other messages, so a plain instance knows none of them.
+     * {@link WithNICSupplements} knows them and overrides this.
+     *
+     * @return the row this message's format type code and known supplements select
+     */
+    protected NavigationCharacteristicsV3 getNavigationCharacteristics() {
+        return characteristics(NICSupplement.UNKNOWN, NICSupplement.UNKNOWN, NICSupplementD.UNKNOWN);
     }
 
-    @Override
-    public double getPositionUncertainty() {
-        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    protected NavigationCharacteristicsV3 characteristics(NICSupplement nicSupplementA,
+                                                          NICSupplement nicSupplementB,
+                                                          NICSupplementD nicSupplementD) {
+        return NavigationCharacteristicsV3.forAirborneFormatTypeCode(
+                getFormatTypeCode(), nicSupplementA, nicSupplementB, nicSupplementD);
     }
 
     @Override
@@ -240,14 +272,15 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
             this.nicSupplementD = nicSupplementD;
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * The supplements are known here, so the row they select is reported.
+         */
         @Override
-        public double getHorizontalContainmentRadiusLimit() {
-            return getHorizontalContainmentRadiusLimit(nicSupplementA, nicSupplementB, nicSupplementD);
-        }
-
-        @Override
-        public byte getNIC() {
-            return getNIC(nicSupplementA, nicSupplementB, nicSupplementD);
+        protected NavigationCharacteristicsV3 getNavigationCharacteristics() {
+            return this.characteristics(NICSupplement.of(nicSupplementA), NICSupplement.of(nicSupplementB),
+                    NICSupplementD.of(nicSupplementD));
         }
     }
 

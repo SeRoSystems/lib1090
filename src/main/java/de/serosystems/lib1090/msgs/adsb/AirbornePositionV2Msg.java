@@ -21,6 +21,9 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -98,37 +101,70 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 2.
+     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 2, for a
+     * caller that knows NIC supplement A.
+     *
+     * @param nicSupplementA NIC supplement A from the operational status message
+     * @return the guaranteed upper bound on the containment radius in meters, as described by
+     * {@link #getHorizontalContainmentRadiusLimit()}
      */
     public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA) {
-        return AirbornePosition.decodeHCR(getFormatTypeCode(), nicSupplementA, nicSupplementB);
+        return getContainmentRadius(nicSupplementA).getGuaranteedUpperBound();
     }
 
+    /**
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on.
+     * <p>
+     * Supplement B is read from this message, and outside type code 13 it settles the row on its own,
+     * so not knowing supplement A costs nothing there.
+     *
+     * @return the containment radius
+     */
     @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return getHorizontalContainmentRadiusLimit(false);
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics().getContainmentRadius();
+    }
+
+    /**
+     * @param nicSupplementA NIC supplement A from the operational status message
+     * @return the containment radius that type code and supplements select
+     */
+    public ContainmentRadius getContainmentRadius(boolean nicSupplementA) {
+        return characteristics(NICSupplement.of(nicSupplementA)).getContainmentRadius();
     }
 
     /**
      * Navigation integrity category for ADS-B version 2.
+     *
+     * @param nicSupplementA NIC supplement A from the operational status message
+     * @return the NIC that type code and supplements select
      */
     public byte getNIC(boolean nicSupplementA) {
-        return AirbornePosition.decodeNIC(getFormatTypeCode(), nicSupplementA, nicSupplementB);
+        return characteristics(NICSupplement.of(nicSupplementA)).getNIC();
     }
 
     @Override
     public byte getNIC() {
-        return getNIC(false);
+        return getNavigationCharacteristics().getNIC();
     }
 
-    @Override
-    public byte getNACp() {
-        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
+    /**
+     * Everything the format type code and the NIC supplements say about this position.
+     * <p>
+     * Supplement A is transmitted in the operational status message rather than here, so a plain
+     * instance does not know it; supplement B is ME bit 8 of this message and always is.
+     * {@link WithNICSupplementA} knows both and overrides this.
+     *
+     * @return the row this message's format type code and known supplements select
+     */
+    protected NavigationCharacteristicsV2 getNavigationCharacteristics() {
+        return characteristics(NICSupplement.UNKNOWN);
     }
 
-    @Override
-    public double getPositionUncertainty() {
-        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    protected NavigationCharacteristicsV2 characteristics(NICSupplement nicSupplementA) {
+        return NavigationCharacteristicsV2.forAirborneFormatTypeCode(
+                getFormatTypeCode(), nicSupplementA, NICSupplement.of(nicSupplementB));
     }
 
     @Override
@@ -218,14 +254,14 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
         protected WithNICSupplementA() {
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * Supplement A is known here, so the row it selects with supplement B is reported.
+         */
         @Override
-        public double getHorizontalContainmentRadiusLimit() {
-            return getHorizontalContainmentRadiusLimit(nicSupplementA);
-        }
-
-        @Override
-        public byte getNIC() {
-            return getNIC(nicSupplementA);
+        protected NavigationCharacteristicsV2 getNavigationCharacteristics() {
+            return this.characteristics(NICSupplement.of(nicSupplementA));
         }
     }
 

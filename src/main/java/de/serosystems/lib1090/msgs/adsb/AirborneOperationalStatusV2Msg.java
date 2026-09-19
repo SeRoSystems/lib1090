@@ -130,11 +130,6 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
         return nacP;
     }
 
-    @Override
-    public double getPositionUncertainty() {
-        return AirborneOperationalStatusV1V2Msg.super.getPositionUncertainty();
-    }
-
     /**
      * @return the raw encoded Source Integrity Level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70
      */

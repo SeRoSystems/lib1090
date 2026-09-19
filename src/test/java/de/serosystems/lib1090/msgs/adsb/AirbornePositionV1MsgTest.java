@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
@@ -48,5 +49,39 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
         assertFalse(msg.hasSingleAntenna());
         assertTrue(msg.toString().contains("AirbornePositionV1Msg{"));
         assertTrue(msg.toString().contains("singleAntennaFlag="));
+    }
+
+    /**
+     * Without the supplement the message reports the worst row its type code allows, which is not the
+     * same as assuming the supplement is clear. At type code 13 a clear supplement is the better of
+     * the two rows — Rc &lt; 926 m against &lt; 1111.2 m — so assuming it would overstate the position.
+     */
+    @Test
+    void v1WithoutSupplementReportsTheWorstCase() throws Exception {
+        // the message above with its type code changed from 11 to 13
+        AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
+                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")), Instant.EPOCH);
+
+        assertEquals(13, msg.getFormatTypeCode());
+
+        assertEquals(926.0, msg.getHorizontalContainmentRadiusLimit(false));
+        assertEquals(1111.2, msg.getHorizontalContainmentRadiusLimit(true));
+        assertEquals(1111.2, msg.getHorizontalContainmentRadiusLimit());
+
+        assertEquals(ContainmentRadius.BELOW_1111_2, msg.getContainmentRadius());
+        assertEquals(6, msg.getNIC());
+    }
+
+    /**
+     * The variant that knows the supplement reports the row it selects, including the better one.
+     */
+    @Test
+    void v1WithSupplementReportsTheSelectedRow() throws Exception {
+        AirbornePositionV1Msg msg = new AirbornePositionV1Msg.WithNICSupplementA(
+                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")), Instant.EPOCH, false);
+
+        assertEquals(ContainmentRadius.BELOW_926, msg.getContainmentRadius());
+        assertEquals(926.0, msg.getHorizontalContainmentRadiusLimit());
+        assertEquals(6, msg.getNIC());
     }
 }

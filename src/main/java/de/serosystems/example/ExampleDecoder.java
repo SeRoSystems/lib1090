@@ -21,6 +21,7 @@ package de.serosystems.example;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.OperationalStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -95,7 +96,7 @@ public class ExampleDecoder {
                 else
                     System.out.println("Now at position (" + c0.getLatitude() + "," + c0.getLongitude() + ")");
                 System.out.println("          Horizontal containment radius limit/protection level: " +
-                        ap.getHorizontalContainmentRadiusLimit() + " m");
+                        ap.getContainmentRadius() + " (" + ap.getHorizontalContainmentRadiusLimit() + " m)");
 
                 if (ap.hasValidAltitude()) {
                     System.out.println("          Altitude: " + ap.getAltitude() + " ft");
@@ -112,10 +113,12 @@ public class ExampleDecoder {
 
                 // we want to inspect fields for ADS-B of different versions
                 if (msg instanceof AirbornePositionV0Msg) {
+                    AirbornePositionV0Msg ap0 = (AirbornePositionV0Msg) msg;
                     // NACp and SIL for newer ADS-B versions contained in operational status message
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + ap.getNACp());
-                    System.out.println("          Position Uncertainty (based on NACp): " + ap.getPositionUncertainty());
-                    System.out.println("          Surveillance Integrity Level (SIL): " + ap.getSIL());
+                    byte nacP = ap0.getNACp();
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
+                    System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(nacP));
+                    System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSIL());
                 } else if (msg instanceof AirbornePositionV2Msg) {
                     AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
                     System.out.println("          NIC supplement B set: " + ap2.getNICSupplementB());
@@ -143,8 +146,9 @@ public class ExampleDecoder {
                     System.out.println("          Ground speed resolution: " + surfacePosition.getGroundSpeedResolution() + "kt");
                 }
 
-                System.out.println("          Horizontal containment radius limit/protection level is " +
-                        surfacePosition.getHorizontalContainmentRadiusLimit() + "m");
+                System.out.println("          Horizontal containment radius limit/protection level: " +
+                        surfacePosition.getContainmentRadius() + " ("
+                        + surfacePosition.getHorizontalContainmentRadiusLimit() + " m)");
                 System.out.println("          Navigation Integrity Category: " + surfacePosition.getNIC());
 
                 // we want to inspect fields for ADS-B of different versions
@@ -152,8 +156,9 @@ public class ExampleDecoder {
                     SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
                     // NACp and SIL for newer ADS-B versions contained in operational status message
                     // Use the following only with version 0 as the others are more accurate
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + sp0.getNACp());
-                    System.out.println("          Position Uncertainty (based on NACp): " + sp0.getPositionUncertainty() + "m");
+                    byte nacP = sp0.getNACp();
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
+                    System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(nacP) + "m");
                     System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSIL());
                 }
             } else if (msg instanceof EmergencyOrPriorityStatusMsg) {
@@ -196,7 +201,7 @@ public class ExampleDecoder {
                 if (msg instanceof AirborneOperationalStatusMsg) {
                     AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
-                    System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getPositionUncertainty());
+                    System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(opstatA.getNACpEncoded()));
                     System.out.println("          Has NIC supplement A: " + opstatA.getNICSupplementA());
                     System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
                 }

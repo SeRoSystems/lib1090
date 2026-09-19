@@ -20,62 +20,15 @@ package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.SurfacePosition;
+import de.serosystems.lib1090.decoding.NavigationCharacteristics;
 
 /**
  * Common API for ADS-B surface position messages.
  */
-public interface SurfacePositionMsg extends PositionMsg {
+public interface SurfacePositionMsg extends PositionMsg, NavigationCharacteristics {
 
-    /**
-     * @return the message's format type code.
-     */
-    byte getFormatTypeCode();
-
-    /**
-     * Navigation accuracy category.
-     * <p>
-     * In ADS-B version 0 this is derived from the format type code. For version 1+ aircraft,
-     * it is typically provided by the corresponding operational status message, ED-102B
-     * §2.2.3.2.7.2.7 TABLE 2-68.
-     *
-     * @return navigation accuracy category, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
-     */
-    byte getNACp();
-
-    /**
-     * Estimated horizontal accuracy derived from NACp.
-     *
-     * @return the estimated position uncertainty in meters, or -1 for unknown
-     */
-    double getPositionUncertainty();
-
-    /**
-     * Navigation integrity category. The default implementation assumes no supplements,
-     * which may not be accurate for ADS-B version 1 and 2 aircraft that set them. The base NIC
-     * value is derived from the format type code, ED-102B §2.2.3.2.2 TABLE 2-11; NIC
-     * Supplement-A comes from the aircraft operational status message, ED-102B §2.2.3.2.7.2.6.
-     *
-     * @return navigation integrity category, ED-102B §2.2.3.2.2 TABLE 2-11
-     */
+    @Override
     byte getNIC();
-
-    /**
-     * The position error, i.e., 95% accuracy for the horizontal position. The default
-     * implementation assumes no supplements, which may not be accurate for ADS-B version
-     * 1 and 2 aircraft that set them.
-     *
-     * @return horizontal containment radius limit in meters
-     */
-    double getHorizontalContainmentRadiusLimit();
-
-    /**
-     * Source integrity level.
-     *
-     * @return the source integrity level
-     */
-    default byte getSIL() {
-        return (byte) (getFormatTypeCode() == 0 ? 0 : 2);
-    }
 
     /**
      * Movement field as encoded in the surface position message.

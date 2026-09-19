@@ -21,6 +21,8 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV0;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -94,24 +96,67 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
         position = AirbornePosition.extractCPREncodedPosition(br, Objects.requireNonNull(timestamp, "timestamp"));
     }
 
+    /**
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on, ED-102B §N.2.2.2 TABLE N-4.
+     *
+     * @return the containment radius the format type code reports
+     */
     @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
+    public ContainmentRadius getContainmentRadius() {
+        return characteristics().getContainmentRadius();
     }
 
-    @Override
+    /**
+     * Navigation uncertainty category for position, the one of these ADS-B version 0 defines itself,
+     * ED-102 §2.2.8.1.5.
+     *
+     * @return the navigation uncertainty category for position, never {@code null} for an airborne
+     * type code other than 22
+     */
+    public Byte getNUCp() {
+        return characteristics().getNUCp();
+    }
+
+    /**
+     * Navigation accuracy category for position, derived from the format type code.
+     * <p>
+     * NACp was introduced in ADS-B version 1, which transmits it in the operational status and target
+     * state and status messages. Version 0 has no such field, and this mapping is the only way to
+     * obtain the value — which is why no other position message offers it.
+     *
+     * @return the navigation accuracy category for position
+     * @see de.serosystems.lib1090.decoding.OperationalStatus#nacPtoEPU(byte) to turn it into an
+     * estimated position uncertainty in meters
+     */
     public byte getNACp() {
-        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
-    }
-
-    @Override
-    public double getPositionUncertainty() {
-        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+        return characteristics().getNACp();
     }
 
     @Override
     public byte getNIC() {
-        return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
+        return characteristics().getNIC();
+    }
+
+    /**
+     * Source integrity level, derived from the format type code.
+     * <p>
+     * SIL was introduced in ADS-B version 1, which transmits it in the operational status and target
+     * state and status messages. Version 0 has no such field, and this mapping is the only way to
+     * obtain the value — which is why no other position message offers it.
+     *
+     * @return the source integrity level
+     */
+    public byte getSIL() {
+        return characteristics().getSIL();
+    }
+
+    /**
+     * Everything the format type code says about this position, as one row. The type code is
+     * validated in the constructor, so the lookup always finds one.
+     */
+    private NavigationCharacteristicsV0 characteristics() {
+        return NavigationCharacteristicsV0.forFormatTypeCode(getFormatTypeCode());
     }
 
     @Override

@@ -53,7 +53,6 @@ abstract class SurfacePositionMsgTest {
     void testDecodeSurfacePosition() throws Exception {
         final SurfacePositionMsg sPos = create(SURF_POS);
 
-        assertEquals(2, sPos.getSIL());
         assertTrue(sPos.hasGroundSpeed());
         assertEquals(0, sPos.getGroundSpeed());
         assertEquals(0.125, sPos.getGroundSpeedResolution());
