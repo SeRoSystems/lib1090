@@ -142,11 +142,6 @@ public class SurfaceOperationalStatusV2Msg extends ExtendedSquitter implements S
     }
 
     @Override
-    public double getPositionUncertainty() {
-        return SurfaceOperationalStatusMsg.super.getPositionUncertainty();
-    }
-
-    @Override
     public byte getSILEncoded() {
         return sil;
     }

@@ -20,10 +20,12 @@ package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV1;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
@@ -46,7 +48,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     private boolean imf;
     private CPREncodedPosition position;
 
-    private boolean nicSupplementA;
+    private Boolean nicSupplementA;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -95,54 +97,52 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * @return NIC supplement that was set before
-     */
-    public boolean getNICSupplementA() {
-        return nicSupplementA;
-    }
-
-    /**
-     * @param nicSupplementA Navigation Integrity Category (NIC) supplement from operational status message.
-     *                       Otherwise worst case is assumed for containment radius limit and NIC.
+     * @param nicSupplementA Navigation Integrity Category (NIC) supplement from the operational status
+     *                       message. Until it is set, the worst case the format type code allows is
+     *                       reported for the containment radius limit and NIC.
      */
     public void setNICSupplementA(boolean nicSupplementA) {
         this.nicSupplementA = nicSupplementA;
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-     * (NACp) see {@link AirborneOperationalStatusV1Msg}. Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67.
-     * <p>
-     * The horizontal containment radius is also known as "horizontal protection level".
-     *
-     * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-     * If aircraft uses ADS-R version 1+, set NIC supplement A from Operational Status Message
-     * for better precision.
+     * @return the NIC supplement that was set before, or {@code null} if none was — the supplement is
+     * transmitted in the operational status message, so a receiver that has seen none does not know it
      */
-    @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return SurfacePosition.decodeHCR(getFormatTypeCode(), getNICSupplementA());
+    public Boolean getNICSupplementA() {
+        return nicSupplementA;
     }
 
     /**
-     * Values according to ED-102B §2.2.3.2.7.2.6 TABLE 2-67
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on, ED-102B §N.5.4 TABLE N-16.
      *
-     * @return Navigation integrity category. A NIC of 0 means "unknown". If aircraft uses ADS-R version 1+,
-     * set NIC supplement A from Operational Status Message for better precision.
+     * @return the containment radius, worst case until {@link #setNICSupplementA(boolean)} is called
+     */
+    @Override
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics().getContainmentRadius();
+    }
+
+    /**
+     * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
     @Override
     public byte getNIC() {
-        return SurfacePosition.decodeNIC(getFormatTypeCode(), getNICSupplementA());
+        return getNavigationCharacteristics().getNIC();
     }
 
-    @Override
-    public byte getNACp() {
-        return getNIC();
-    }
-
-    @Override
-    public double getPositionUncertainty() {
-        return SurfacePosition.decodeEPU(getFormatTypeCode());
+    /**
+     * Everything the format type code and the NIC supplement say about this position, ED-102B §N.5.4
+     * TABLE N-16.
+     * <p>
+     * Until the supplement is set this reports the worst row the type code allows, which is not the
+     * same as assuming the supplement is clear: at type code 13 a clear supplement is the better of
+     * the two rows.
+     */
+    private NavigationCharacteristicsV1 getNavigationCharacteristics() {
+        return NavigationCharacteristicsV1.forFormatTypeCode(
+                getFormatTypeCode(), NICSupplement.of(nicSupplementA));
     }
 
     @Override

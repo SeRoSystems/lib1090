@@ -129,11 +129,6 @@ public class AirborneOperationalStatusV1Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public double getPositionUncertainty() {
-        return AirborneOperationalStatusV1V2Msg.super.getPositionUncertainty();
-    }
-
-    @Override
     public byte getSILEncoded() {
         return sil;
     }

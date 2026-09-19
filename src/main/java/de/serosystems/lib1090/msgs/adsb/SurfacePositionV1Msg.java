@@ -20,6 +20,9 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV1;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -92,37 +95,63 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position in ADS-B version 1.
+     * The horizontal containment radius limit for a caller that knows the NIC supplement.
+     *
+     * @param nicSupplement the NIC supplement as transmitted in the operational status message
+     * @return the guaranteed upper bound on the containment radius in meters, as described by
+     * {@link #getHorizontalContainmentRadiusLimit()}
      */
-    public double getHorizontalContainmentRadiusLimit(boolean nicSupplementA) {
-        return SurfacePosition.decodeHCR(getFormatTypeCode(), nicSupplementA);
+    public double getHorizontalContainmentRadiusLimit(boolean nicSupplement) {
+        return getContainmentRadius(nicSupplement).getGuaranteedUpperBound();
     }
 
+    /**
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on, ED-102B §N.5.4 TABLE N-16.
+     *
+     * @return the containment radius, worst case where the NIC supplement is not known
+     */
     @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return getHorizontalContainmentRadiusLimit(false);
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics().getContainmentRadius();
+    }
+
+    /**
+     * @param nicSupplement the NIC supplement as transmitted in the operational status message
+     * @return the containment radius that type code and supplement select
+     */
+    public ContainmentRadius getContainmentRadius(boolean nicSupplement) {
+        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplement))
+                .getContainmentRadius();
     }
 
     /**
      * Navigation integrity category for ADS-B version 1.
+     *
+     * @param nicSupplement the NIC supplement as transmitted in the operational status message
+     * @return the NIC that type code and supplement select
      */
-    public byte getNIC(boolean nicSupplementA) {
-        return SurfacePosition.decodeNIC(getFormatTypeCode(), nicSupplementA);
+    public byte getNIC(boolean nicSupplement) {
+        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplement)).getNIC();
     }
 
     @Override
     public byte getNIC() {
-        return getNIC(false);
+        return getNavigationCharacteristics().getNIC();
     }
 
-    @Override
-    public byte getNACp() {
-        return SurfacePosition.decodeNIC(getFormatTypeCode());
-    }
-
-    @Override
-    public double getPositionUncertainty() {
-        return SurfacePosition.decodeEPU(getFormatTypeCode());
+    /**
+     * Everything the format type code and the NIC supplement say about this position.
+     * <p>
+     * The supplement is transmitted in the operational status message rather than here, so a plain
+     * instance does not know it and reports the worst row the type code allows — which is not the
+     * same as assuming the supplement is clear, since at type code 13 a clear supplement is the
+     * better of the two rows. {@link WithNICSupplementA} knows it and overrides this.
+     *
+     * @return the row this message's format type code and known supplements select
+     */
+    protected NavigationCharacteristicsV1 getNavigationCharacteristics() {
+        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.UNKNOWN);
     }
 
     @Override
@@ -217,14 +246,15 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
         protected WithNICSupplementA() {
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>
+         * The supplement is known here, so the row it selects is reported rather than the worst the
+         * type code allows.
+         */
         @Override
-        public double getHorizontalContainmentRadiusLimit() {
-            return getHorizontalContainmentRadiusLimit(nicSupplementA);
-        }
-
-        @Override
-        public byte getNIC() {
-            return getNIC(nicSupplementA);
+        protected NavigationCharacteristicsV1 getNavigationCharacteristics() {
+            return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplementA));
         }
     }
 

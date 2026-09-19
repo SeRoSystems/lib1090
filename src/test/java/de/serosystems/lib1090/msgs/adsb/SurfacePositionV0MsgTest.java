@@ -24,9 +24,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
+
+    // SURF_POS with its type code raised from 7 to 8, the one surface type code that guarantees no
+    // containment radius. Everything else, parity included, is left as it is.
+    private static final String SURF_POS_TYPE_CODE_8 = "8c" + "3c4dc6" + "401c07331b029e" + "b308de";
 
     @Override
     protected SurfacePositionMsg create(String hex) throws Exception {
@@ -38,5 +43,25 @@ class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
         final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
 
         assertFalse(sPos.hasTimeFlag());
+    }
+
+    @Test
+    void testGetSIL() throws Exception {
+        final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
+
+        assertEquals(2, sPos.getSIL());
+    }
+
+    /**
+     * Type code 8 reports no containment radius at all, so it carries no integrity either: ED-102B
+     * §2.4.8.1.16 TABLE 2-304 gives it SIL 0, as it does type code 0.
+     */
+    @Test
+    void testGetSILWithoutContainmentRadius() throws Exception {
+        final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS_TYPE_CODE_8, Instant.EPOCH);
+
+        assertEquals(8, sPos.getFormatTypeCode());
+        assertEquals(0, sPos.getNIC());
+        assertEquals(0, sPos.getSIL());
     }
 }

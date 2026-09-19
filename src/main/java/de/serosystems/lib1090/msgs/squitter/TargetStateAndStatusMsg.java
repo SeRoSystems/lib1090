@@ -18,8 +18,6 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.OperationalStatus;
-
 /**
  * Common API for ADS-B target state and status messages across supported versions.
  */
@@ -73,15 +71,6 @@ public interface TargetStateAndStatusMsg {
      * @return the navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8
      */
     byte getNACp();
-
-    /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
-     *
-     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-     */
-    default double getPositionUncertainty() {
-        return OperationalStatus.nacPtoEPU(getNACp());
-    }
 
     /**
      * @return the barometric altitude integrity code (NIC_BARO) indicating whether barometric

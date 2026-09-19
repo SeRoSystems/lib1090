@@ -41,19 +41,9 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
     boolean getNICSupplementA();
 
     /**
-     * @return the navigation accuracy for position messages; rather use getPositionUncertainty,
-     * ED-102B §2.2.3.2.7.2.7 TABLE 2-68
+     * @return the navigation accuracy for position messages, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACpEncoded();
-
-    /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, ED-102B §2.2.3.2.7.2.7 TABLE 2-68.
-     *
-     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-     */
-    default double getPositionUncertainty() {
-        return OperationalStatus.nacPtoEPU(getNACpEncoded());
-    }
 
     /**
      * @return the source integrity level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70

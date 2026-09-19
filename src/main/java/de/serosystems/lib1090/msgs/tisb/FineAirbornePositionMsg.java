@@ -19,12 +19,11 @@
 package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
-import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV0;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
-import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
@@ -105,45 +104,14 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position. Values according to ED-102B §N.2.2.2 TABLE N-4.
-     * <p>
-     * The horizontal containment radius is also known as "horizontal protection level".
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on, ED-102B §N.2.2.2 TABLE N-4.
      *
-     * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
+     * @return the containment radius the format type code reports
      */
     @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        return AirbornePosition.typeCodeToHCR(getFormatTypeCode());
-    }
-
-    /**
-     * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
-     * in the operational status message. For version 0 it is derived from the format type code.
-     * <p>
-     * For a value in meters, use {@link #getPositionUncertainty()}.
-     *
-     * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
-     * {@link AirborneOperationalStatusV1Msg}.
-     */
-    @Override
-    public byte getNACp() {
-        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
-    }
-
-    /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see ED-102B §2.2.3.2.7.2.7 TABLE 2-68.
-     * <p>
-     * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-     * {@link AirborneOperationalStatusV2Msg}'s getPositionUncertainty method for aircraft supporting ADS-B
-     * version 1 and 2.
-     *
-     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-     */
-    @Override
-    public double getPositionUncertainty() {
-        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    public ContainmentRadius getContainmentRadius() {
+        return characteristics().getContainmentRadius();
     }
 
     /**
@@ -151,7 +119,16 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
      */
     @Override
     public byte getNIC() {
-        return AirbornePosition.typeCodeToNIC(getFormatTypeCode());
+        return characteristics().getNIC();
+    }
+
+    /**
+     * Everything the format type code says about this position, as one row. TIS-B carries no ADS-B
+     * version of its own and reads its type code the same way version 0 does. The type code is
+     * validated in the constructor, so the lookup always finds a row.
+     */
+    private NavigationCharacteristicsV0 characteristics() {
+        return NavigationCharacteristicsV0.forFormatTypeCode(getFormatTypeCode());
     }
 
     @Override

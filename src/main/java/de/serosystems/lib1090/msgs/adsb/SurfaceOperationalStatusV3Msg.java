@@ -145,11 +145,6 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
         return nacP;
     }
 
-    @Override
-    public double getPositionUncertainty() {
-        return SurfaceOperationalStatusMsg.super.getPositionUncertainty();
-    }
-
     /**
      * @return the raw encoded Source Integrity Level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70
      */

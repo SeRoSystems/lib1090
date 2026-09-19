@@ -21,9 +21,11 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NavigationCharacteristicsV2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
@@ -47,7 +49,8 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
     private boolean timeFlag;
     private CPREncodedPosition position;
 
-    private boolean nicSupplementA;
+    private Boolean nicSupplementA;
+    private Boolean nicSupplementB;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -96,107 +99,66 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
     }
 
     /**
-     * @param nicSupplementA Navigation Integrity Category (NIC) supplement from operational status message.
-     *                       Otherwise worst case is assumed for containment radius limit and NIC.
+     * @param nicSupplementA Navigation Integrity Category (NIC) supplement A from the operational
+     *                       status message. Until it is set, the worst case the format type code and
+     *                       the other supplements allow is reported.
      */
     public void setNICSupplementA(boolean nicSupplementA) {
         this.nicSupplementA = nicSupplementA;
     }
 
     /**
-     * @return NIC supplement that was set before
+     * @return the NIC supplement A that was set before, or {@code null} if none was
      */
-    public boolean getNICSupplementA() {
+    public Boolean getNICSupplementA() {
         return nicSupplementA;
     }
 
     /**
-     * The position error, i.e., 95% accuracy for the horizontal position. For the navigation accuracy category
-     * (NACp) see {@link AirborneOperationalStatusV2Msg}. According to ED-102B §2.2.3.2.7.2.6 TABLE 2-67.
-     * <p>
-     * The horizontal containment radius is also known as "horizontal protection level".
-     *
-     * @return horizontal containment radius limit in meters. A return value of -1 means "unknown".
-     * If aircraft uses ADS-B version 2, set NIC supplement A from Operational Status Message
-     * for better precision. Otherwise, we'll be pessimistic.
+     * @param nicSupplementB Navigation Integrity Category (NIC) supplement B. ADS-R carries it in the
+     *                       airborne capability class of the operational status message, ME bit 20,
+     *                       rather than in the position message as ADS-B does.
      */
-    @Override
-    public double getHorizontalContainmentRadiusLimit() {
-        switch (getFormatTypeCode()) {
-            case 0:
-            case 18:
-            case 22:
-                return -1;
-            case 9:
-            case 20:
-                return 7.5;
-            case 10:
-            case 21:
-                return 25;
-            case 11:
-                return 185.2;
-            case 12:
-                return 370.4;
-            case 13:
-                return getNICSupplementA() ? 1111.2 : 555.6;
-            case 14:
-                return 1852;
-            case 15:
-                return 3704;
-            case 16:
-                return 14816;
-            case 17:
-                return 37040;
-            default:
-                return -1;
-        }
+    public void setNICSupplementB(boolean nicSupplementB) {
+        this.nicSupplementB = nicSupplementB;
     }
 
     /**
-     * According to ED-102B §2.2.3.2.7.2.6 TABLE 2-67.
+     * @return the NIC supplement B that was set before, or {@code null} if none was
+     */
+    public Boolean getNICSupplementB() {
+        return nicSupplementB;
+    }
+
+    /**
+     * The horizontal containment radius limit together with the side of that value the true radius
+     * lies on, ED-102A TABLE 2-14.
      *
+     * @return the containment radius, worst case for whichever supplements have not been set
+     */
+    @Override
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics().getContainmentRadius();
+    }
+
+    /**
      * @return Navigation integrity category. A NIC of 0 means "unknown".
      */
     @Override
     public byte getNIC() {
-        switch (getFormatTypeCode()) {
-            case 0:
-            case 18:
-            case 22:
-                return 0;
-            case 9:
-            case 20:
-                return 11;
-            case 10:
-            case 21:
-                return 10;
-            case 11:
-                return 8;
-            case 12:
-                return 7;
-            case 13:
-                return 6;
-            case 14:
-                return 5;
-            case 15:
-                return 4;
-            case 16:
-                return 2;
-            case 17:
-                return 1;
-            default:
-                return 0;
-        }
+        return getNavigationCharacteristics().getNIC();
     }
 
-    @Override
-    public byte getNACp() {
-        return AirbornePosition.typeCodeToNACp(getFormatTypeCode());
-    }
-
-    @Override
-    public double getPositionUncertainty() {
-        return AirbornePosition.typeCodeToPositionUncertainty(getFormatTypeCode());
+    /**
+     * Everything the format type code and the NIC supplements say about this position, ED-102A
+     * TABLE 2-14.
+     * <p>
+     * ADS-R carries both supplements in the operational status message, so both may be unset, and an
+     * unset one reports the poorest row its knowledge allows rather than being read as clear.
+     */
+    private NavigationCharacteristicsV2 getNavigationCharacteristics() {
+        return NavigationCharacteristicsV2.forAirborneFormatTypeCode(
+                getFormatTypeCode(), NICSupplement.of(nicSupplementA), NICSupplement.of(nicSupplementB));
     }
 
     @Override
@@ -239,6 +201,7 @@ public class AirbornePositionV2Msg extends ExtendedSquitter implements Serializa
                 ", timeFlag=" + timeFlag +
                 ", position=" + position +
                 ", nicSupplementA=" + nicSupplementA +
+                ", nicSupplementB=" + nicSupplementB +
                 '}';
     }
 
