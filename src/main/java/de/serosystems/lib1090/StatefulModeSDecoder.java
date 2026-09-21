@@ -240,16 +240,11 @@ public class StatefulModeSDecoder {
             // surface position message
             switch (dd.adsbVersion) {
                 case 1:
-                    de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg s1 =
-                            new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg(es1090, timestamp);
-                    s1.setNICSupplementA(dd.nicSupplA);
-                    return s1;
+                    return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg.WithNICSupplementA(
+                            es1090, timestamp, dd.nicSupplA);
                 case 2:
-                    de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg s2 =
-                            new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg(es1090, timestamp);
-                    s2.setNICSupplementA(dd.nicSupplA);
-                    s2.setNICSupplementC(dd.nicSupplC);
-                    return s2;
+                    return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
                 case 3:
                 default:
                     return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV3Msg.WithNICSupplements(
@@ -261,16 +256,11 @@ public class StatefulModeSDecoder {
             // airborne position message
             switch (dd.adsbVersion) {
                 case 1:
-                    de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg a1 =
-                            new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg(es1090, timestamp);
-                    a1.setNICSupplementA(dd.nicSupplA);
-                    return a1;
+                    return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg.WithNICSupplementA(
+                            es1090, timestamp, dd.nicSupplA);
                 case 2:
-                    de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg a2 =
-                            new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg(es1090, timestamp);
-                    a2.setNICSupplementA(dd.nicSupplA);
-                    a2.setNICSupplementB(dd.nicSupplB);
-                    return a2;
+                    return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplA, dd.nicSupplB);
                 case 3:
                 default:
                     return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV3Msg.WithNICSupplements(
