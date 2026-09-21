@@ -215,7 +215,9 @@ public class ExampleDecoder {
                     System.out.println("          Horizontal reference: " + (opstatS.isHeadingReferencedToMagneticNorth() ? "magnetic north" : "true north"));
                 }
                 if (msg instanceof AirborneOperationalStatusV2V3Msg) {
-                    System.out.println("          Geometric vertical accuracy: " + ((AirborneOperationalStatusV2V3Msg) msg).getGeometricVerticalAccuracy() + "m");
+                    AirborneOperationalStatusV2V3Msg v2v3 = (AirborneOperationalStatusV2V3Msg) msg;
+                    System.out.println("          Geometric vertical accuracy: " + v2v3.getGVAEncoded()
+                            + " (" + v2v3.getGeometricVerticalAccuracy() + ")");
                 }
                 if (msg instanceof OperationalStatusV2V3Msg) {
                     System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).getSILSupplement());

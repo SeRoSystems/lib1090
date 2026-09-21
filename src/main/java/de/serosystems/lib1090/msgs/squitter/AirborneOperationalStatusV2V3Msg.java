@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
+import de.serosystems.lib1090.decoding.GeometricVerticalAccuracy;
+
 /**
  * Common API for ADS-B airborne operational status version 2 and 3 messages.
  */
@@ -29,14 +31,13 @@ public interface AirborneOperationalStatusV2V3Msg extends AirborneOperationalSta
     byte getGVAEncoded();
 
     /**
-     * @return the geometric vertical accuracy in meters or -1 for "unknown or above 150m"
+     * The same category typed, so that what it guarantees can be read off it rather than looked up,
+     * ED-102B §2.2.3.2.7.2.8 TABLE 2-69.
+     *
+     * @return the geometric vertical accuracy the reported category guarantees; category 0
+     * guarantees nothing, reading "unknown or more than 150 m"
      */
-    default int getGeometricVerticalAccuracy() {
-        byte gva = getGVAEncoded();
-        if (gva == 1)
-            return 150;
-        else if (gva == 2)
-            return 45;
-        else return -1;
+    default GeometricVerticalAccuracy getGeometricVerticalAccuracy() {
+        return GeometricVerticalAccuracy.forGVA(getGVAEncoded());
     }
 }
