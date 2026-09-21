@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
@@ -41,10 +42,10 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
         AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
                 new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-        assertEquals(9, msg.getNIC(true));
-        assertEquals(8, msg.getNIC(false));
-        assertEquals(75.0, msg.getHorizontalContainmentRadiusLimit(true));
-        assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
+        assertEquals(9, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getNIC());
+        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNIC());
+        assertEquals(75.0, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getHorizontalContainmentRadiusLimit());
+        assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());
         assertInstanceOf(SingleAntennaMsg.class, msg);
         assertFalse(msg.hasSingleAntenna());
         assertTrue(msg.toString().contains("AirbornePositionV1Msg{"));
@@ -64,8 +65,8 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
 
         assertEquals(13, msg.getFormatTypeCode());
 
-        assertEquals(926.0, msg.getHorizontalContainmentRadiusLimit(false));
-        assertEquals(1111.2, msg.getHorizontalContainmentRadiusLimit(true));
+        assertEquals(926.0, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());
+        assertEquals(1111.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getHorizontalContainmentRadiusLimit());
         assertEquals(1111.2, msg.getHorizontalContainmentRadiusLimit());
 
         assertEquals(ContainmentRadius.BELOW_1111_2, msg.getContainmentRadius());
@@ -77,8 +78,9 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
      */
     @Test
     void v1WithSupplementReportsTheSelectedRow() throws Exception {
-        AirbornePositionV1Msg msg = new AirbornePositionV1Msg.WithNICSupplementA(
-                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")), Instant.EPOCH, false);
+        AirbornePositionV1Msg msg = new AirbornePositionV1Msg.WithNICSupplements(
+                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")),
+                Instant.EPOCH, NICSupplements.none().withA(false));
 
         assertEquals(ContainmentRadius.BELOW_926, msg.getContainmentRadius());
         assertEquals(926.0, msg.getHorizontalContainmentRadiusLimit());

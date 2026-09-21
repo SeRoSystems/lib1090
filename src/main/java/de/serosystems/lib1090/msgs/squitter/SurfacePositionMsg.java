@@ -20,12 +20,30 @@ package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.SurfacePosition;
+import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.decoding.NavigationCharacteristics;
 
 /**
  * Common API for ADS-B surface position messages.
  */
 public interface SurfacePositionMsg extends PositionMsg, NavigationCharacteristics {
+
+    /**
+     * The characteristics this message reports for what is known of its target's NIC supplements.
+     * <p>
+     * Each ADS-B version reads the supplements its table is keyed on and ignores the rest — version 0
+     * reads none of them, the format type code settling everything there — so a caller passes what it
+     * knows without needing to know which version will read what. Where the message carries a
+     * supplement itself, that value wins over the one supplied.
+     * <p>
+     * The no-argument accessors inherited from {@link NavigationCharacteristics} answer with what the
+     * message knew when it was decoded. This is how a caller re-reads it against newer knowledge,
+     * which is a deliberate act rather than something the message does on its own.
+     *
+     * @param nicSupplements what is known of the target's NIC supplements
+     * @return the navigation characteristics that knowledge selects
+     */
+    NavigationCharacteristics getNavigationCharacteristics(NICSupplements nicSupplements);
 
     @Override
     byte getNIC();

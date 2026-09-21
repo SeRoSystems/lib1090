@@ -30,7 +30,7 @@ package de.serosystems.lib1090.decoding;
  * <b>That unknown state cannot be substituted by a constant.</b> At type codes 7, 11 and 16 a clear
  * supplement is the poorer report; at type code 13 it is the set one, where clear gives Rc &lt; 926 m
  * and set gives Rc &lt; 1111.2 m. Either assumption therefore overstates the position quality for some
- * type code. {@link #forFormatTypeCode(byte, NICSupplement)} instead answers
+ * type code. {@link #forFormatTypeCode(byte, NICSupplements)} instead answers
  * {@link NICSupplement#UNKNOWN} with the poorer of the two rows, which is the only claim a receiver
  * can defend when it has not seen the bit.
  * <p>
@@ -42,7 +42,9 @@ package de.serosystems.lib1090.decoding;
  */
 public enum NavigationCharacteristicsV1 implements NavigationCharacteristics {
 
-    /** No position information; nothing is claimed about a position that is not there. */
+    /**
+     * No position information; nothing is claimed about a position that is not there.
+     */
     TYPE_CODE_0(0, 0, ContainmentRadius.UNKNOWN),
 
     TYPE_CODE_5(5, 11, ContainmentRadius.BELOW_7_5),
@@ -50,7 +52,9 @@ public enum NavigationCharacteristicsV1 implements NavigationCharacteristics {
     TYPE_CODE_7_SUPPLEMENT_SET(7, 9, ContainmentRadius.BELOW_75),
     TYPE_CODE_7_SUPPLEMENT_CLEAR(7, 8, ContainmentRadius.BELOW_185_2),
 
-    /** The one surface type code that bounds its containment radius only from below. */
+    /**
+     * The one surface type code that bounds its containment radius only from below.
+     */
     TYPE_CODE_8(8, 0, ContainmentRadius.AT_LEAST_185_2),
 
     TYPE_CODE_9(9, 11, ContainmentRadius.BELOW_7_5),
@@ -73,7 +77,9 @@ public enum NavigationCharacteristicsV1 implements NavigationCharacteristics {
     TYPE_CODE_16_SUPPLEMENT_CLEAR(16, 2, ContainmentRadius.BELOW_14816),
     TYPE_CODE_17(17, 1, ContainmentRadius.BELOW_37040),
 
-    /** The airborne counterpart of {@link #TYPE_CODE_8}: a containment radius bounded from below. */
+    /**
+     * The airborne counterpart of {@link #TYPE_CODE_8}: a containment radius bounded from below.
+     */
     TYPE_CODE_18(18, 0, ContainmentRadius.AT_LEAST_37040),
 
     TYPE_CODE_20(20, 11, ContainmentRadius.BELOW_7_5),
@@ -102,14 +108,17 @@ public enum NavigationCharacteristicsV1 implements NavigationCharacteristics {
      * 16, and the set one at type code 13, where the supplement runs the other way.
      *
      * @param formatTypeCode the message's format type code
-     * @param nicSupplement  what is known about the aircraft's NIC supplement
+     * @param nicSupplements what is known of the aircraft's NIC supplements; version 1 reads
+     *                       only supplement A, the single bit it defines
      * @return the characteristics version 1 assigns to that combination
      * @throws IllegalArgumentException if the type code belongs to no position message, since no row
      *                                  exists for it and reporting "unknown" would hide the caller's
      *                                  mistake
      */
     public static NavigationCharacteristicsV1 forFormatTypeCode(byte formatTypeCode,
-                                                                NICSupplement nicSupplement) {
+                                                                NICSupplements nicSupplements) {
+        NICSupplement nicSupplement = nicSupplements.getA();
+
         switch (formatTypeCode) {
             case 0:
                 return TYPE_CODE_0;

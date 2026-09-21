@@ -32,6 +32,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NavigationCharacteristicsV2Test {
 
+    /** Builds the supplements the airborne rows read: A and B. */
+    private static NICSupplements airborneSupplements(NICSupplement a, NICSupplement b) {
+        return NICSupplements.none().withA(a).withB(b);
+    }
+
+    /** Builds the supplements the surface rows read: A and C. */
+    private static NICSupplements surfaceSupplements(NICSupplement a, NICSupplement c) {
+        return NICSupplements.none().withA(a).withC(c);
+    }
+
     private static final Set<Integer> SURFACE_TYPE_CODES = new HashSet<>(Arrays.asList(0, 5, 6, 7, 8));
     private static final Set<Integer> AIRBORNE_TYPE_CODES =
             new HashSet<>(Arrays.asList(0, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22));
@@ -40,8 +50,8 @@ class NavigationCharacteristicsV2Test {
     private static NavigationCharacteristicsV2 lookup(int formatTypeCode, NICSupplement first,
                                                       NICSupplement second) {
         return formatTypeCode >= 5 && formatTypeCode <= 8
-                ? NavigationCharacteristicsV2.forSurfaceFormatTypeCode((byte) formatTypeCode, first, second)
-                : NavigationCharacteristicsV2.forAirborneFormatTypeCode((byte) formatTypeCode, first, second);
+                ? NavigationCharacteristicsV2.forSurfaceFormatTypeCode((byte) formatTypeCode, surfaceSupplements(first, second))
+                : NavigationCharacteristicsV2.forAirborneFormatTypeCode((byte) formatTypeCode, airborneSupplements(first, second));
     }
 
     /** What a supplement could turn out to be: itself if known, either value if not. */
@@ -95,11 +105,11 @@ class NavigationCharacteristicsV2Test {
         for (byte formatTypeCode : new byte[]{11, 16}) {
             for (NICSupplement nicSupplementB : NICSupplement.values()) {
                 NavigationCharacteristicsV2 expected = NavigationCharacteristicsV2
-                        .forAirborneFormatTypeCode(formatTypeCode, NICSupplement.UNKNOWN, nicSupplementB);
+                        .forAirborneFormatTypeCode(formatTypeCode, airborneSupplements(NICSupplement.UNKNOWN, nicSupplementB));
 
                 for (NICSupplement nicSupplementA : NICSupplement.values())
                     assertSame(expected, NavigationCharacteristicsV2
-                                    .forAirborneFormatTypeCode(formatTypeCode, nicSupplementA, nicSupplementB),
+                                    .forAirborneFormatTypeCode(formatTypeCode, airborneSupplements(nicSupplementA, nicSupplementB)),
                             "type code " + formatTypeCode + ", B " + nicSupplementB);
             }
         }
@@ -111,11 +121,11 @@ class NavigationCharacteristicsV2Test {
         for (byte formatTypeCode : new byte[]{0, 5, 6, 7}) {
             for (NICSupplement nicSupplementA : NICSupplement.values()) {
                 NavigationCharacteristicsV2 expected = NavigationCharacteristicsV2
-                        .forSurfaceFormatTypeCode(formatTypeCode, nicSupplementA, NICSupplement.UNKNOWN);
+                        .forSurfaceFormatTypeCode(formatTypeCode, surfaceSupplements(nicSupplementA, NICSupplement.UNKNOWN));
 
                 for (NICSupplement nicSupplementC : NICSupplement.values())
                     assertSame(expected, NavigationCharacteristicsV2
-                                    .forSurfaceFormatTypeCode(formatTypeCode, nicSupplementA, nicSupplementC),
+                                    .forSurfaceFormatTypeCode(formatTypeCode, surfaceSupplements(nicSupplementA, nicSupplementC)),
                             "type code " + formatTypeCode + ", A " + nicSupplementA);
             }
         }
@@ -144,11 +154,11 @@ class NavigationCharacteristicsV2Test {
 
             if (!AIRBORNE_TYPE_CODES.contains((int) code))
                 assertThrows(IllegalArgumentException.class, () -> NavigationCharacteristicsV2
-                        .forAirborneFormatTypeCode(code, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));
+                        .forAirborneFormatTypeCode(code, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.UNKNOWN)));
 
             if (!SURFACE_TYPE_CODES.contains((int) code))
                 assertThrows(IllegalArgumentException.class, () -> NavigationCharacteristicsV2
-                        .forSurfaceFormatTypeCode(code, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));
+                        .forSurfaceFormatTypeCode(code, surfaceSupplements(NICSupplement.UNKNOWN, NICSupplement.UNKNOWN)));
         }
     }
 
@@ -218,14 +228,14 @@ class NavigationCharacteristicsV2Test {
         assertEquals(ContainmentRadius.AT_LEAST_1111_2, surface(8, NICSupplement.CLEAR, NICSupplement.CLEAR));
 
         assertEquals((byte) 7, NavigationCharacteristicsV2
-                .forSurfaceFormatTypeCode((byte) 8, NICSupplement.SET, NICSupplement.SET).getNIC());
+                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.SET, NICSupplement.SET)).getNIC());
         assertEquals((byte) 0, NavigationCharacteristicsV2
-                .forSurfaceFormatTypeCode((byte) 8, NICSupplement.CLEAR, NICSupplement.CLEAR).getNIC());
+                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.CLEAR, NICSupplement.CLEAR)).getNIC());
 
         assertEquals((byte) 9, NavigationCharacteristicsV2
-                .forAirborneFormatTypeCode((byte) 11, NICSupplement.UNKNOWN, NICSupplement.SET).getNIC());
+                .forAirborneFormatTypeCode((byte) 11, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNIC());
         assertEquals((byte) 3, NavigationCharacteristicsV2
-                .forAirborneFormatTypeCode((byte) 16, NICSupplement.UNKNOWN, NICSupplement.SET).getNIC());
+                .forAirborneFormatTypeCode((byte) 16, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNIC());
 
         assertEquals(ContainmentRadius.AT_LEAST_37040, airborne(18, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));
         assertEquals(ContainmentRadius.AT_LEAST_25, airborne(22, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));
@@ -234,12 +244,12 @@ class NavigationCharacteristicsV2Test {
 
     private static ContainmentRadius airborne(int formatTypeCode, NICSupplement a, NICSupplement b) {
         return NavigationCharacteristicsV2
-                .forAirborneFormatTypeCode((byte) formatTypeCode, a, b).getContainmentRadius();
+                .forAirborneFormatTypeCode((byte) formatTypeCode, airborneSupplements(a, b)).getContainmentRadius();
     }
 
     private static ContainmentRadius surface(int formatTypeCode, NICSupplement a, NICSupplement c) {
         return NavigationCharacteristicsV2
-                .forSurfaceFormatTypeCode((byte) formatTypeCode, a, c).getContainmentRadius();
+                .forSurfaceFormatTypeCode((byte) formatTypeCode, surfaceSupplements(a, c)).getContainmentRadius();
     }
 
     private static Set<Integer> union(Set<Integer> first, Set<Integer> second) {

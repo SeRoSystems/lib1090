@@ -18,20 +18,21 @@
 
 package de.serosystems.lib1090;
 
-import de.serosystems.lib1090.msgs.squitter.ADSRAirborneCapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
+import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
+import de.serosystems.lib1090.msgs.squitter.ADSRAirborneCapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
 import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
+import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import de.serosystems.lib1090.msgs.tisb.CoarsePositionMsg;
 import de.serosystems.lib1090.msgs.tisb.FineAirbornePositionMsg;
@@ -174,20 +175,20 @@ public class StatefulModeSDecoder {
                     case 1:
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg s1 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV1Msg(es1090);
-                        dd.nicSupplA = s1.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s1.getNICSupplementA());
                         captureNICSupplements(dd, s1.getCapabilityClass());
                         return s1;
                     case 2:
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg s2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV2Msg(es1090);
-                        dd.nicSupplA = s2.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s2.getNICSupplementA());
                         captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg s3 =
                                 new de.serosystems.lib1090.msgs.adsr.AirborneOperationalStatusV3Msg(es1090);
-                        dd.nicSupplA = s3.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s3.getNICSupplementA());
                         captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
@@ -197,19 +198,19 @@ public class StatefulModeSDecoder {
                     case 1:
                         de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg s1 =
                                 new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV1Msg(es1090);
-                        dd.nicSupplA = s1.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s1.getNICSupplementA());
                         return s1;
                     case 2:
                         de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg s2 =
                                 new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV2Msg(es1090);
-                        dd.nicSupplA = s2.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s2.getNICSupplementA());
                         captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV3Msg s3 =
                                 new de.serosystems.lib1090.msgs.adsr.SurfaceOperationalStatusV3Msg(es1090);
-                        dd.nicSupplA = s3.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s3.getNICSupplementA());
                         captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
@@ -240,15 +241,15 @@ public class StatefulModeSDecoder {
             // surface position message
             switch (dd.adsbVersion) {
                 case 1:
-                    return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg.WithNICSupplementA(
-                            es1090, timestamp, dd.nicSupplA);
+                    return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV1Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 2:
                     return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV2Msg.WithNICSupplements(
-                            es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
+                            es1090, timestamp, dd.nicSupplements);
                 case 3:
                 default:
                     return new de.serosystems.lib1090.msgs.adsr.SurfacePositionV3Msg.WithNICSupplements(
-                            es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
+                            es1090, timestamp, dd.nicSupplements);
             }
         }
 
@@ -256,15 +257,15 @@ public class StatefulModeSDecoder {
             // airborne position message
             switch (dd.adsbVersion) {
                 case 1:
-                    return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg.WithNICSupplementA(
-                            es1090, timestamp, dd.nicSupplA);
+                    return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV1Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 2:
                     return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV2Msg.WithNICSupplements(
-                            es1090, timestamp, dd.nicSupplA, dd.nicSupplB);
+                            es1090, timestamp, dd.nicSupplements);
                 case 3:
                 default:
                     return new de.serosystems.lib1090.msgs.adsr.AirbornePositionV3Msg.WithNICSupplements(
-                            es1090, timestamp, dd.nicSupplA, dd.nicSupplB, dd.nicSupplD);
+                            es1090, timestamp, dd.nicSupplements);
             }
         }
 
@@ -426,12 +427,15 @@ public class StatefulModeSDecoder {
                 case 0:
                     return new SurfacePositionV0Msg(es1090, timestamp);
                 case 1:
-                    return new SurfacePositionV1Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
+                    return new SurfacePositionV1Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 2:
-                    return new SurfacePositionV2Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
+                    return new SurfacePositionV2Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 3:
                 default:
-                    return new SurfacePositionV3Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplC);
+                    return new SurfacePositionV3Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
             }
         }
 
@@ -441,12 +445,15 @@ public class StatefulModeSDecoder {
                 case 0:
                     return new AirbornePositionV0Msg(es1090, timestamp);
                 case 1:
-                    return new AirbornePositionV1Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
+                    return new AirbornePositionV1Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 2:
-                    return new AirbornePositionV2Msg.WithNICSupplementA(es1090, timestamp, dd.nicSupplA);
+                    return new AirbornePositionV2Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
                 case 3:
                 default:
-                    return new AirbornePositionV3Msg.WithNICSupplements(es1090, timestamp, dd.nicSupplA, dd.nicSupplD);
+                    return new AirbornePositionV3Msg.WithNICSupplements(
+                            es1090, timestamp, dd.nicSupplements);
             }
         }
 
@@ -565,16 +572,16 @@ public class StatefulModeSDecoder {
                         return new OperationalStatusV0Msg(es1090);
                     case 1:
                         AirborneOperationalStatusV1Msg s1 = new AirborneOperationalStatusV1Msg(es1090);
-                        dd.nicSupplA = s1.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s1.getNICSupplementA());
                         return s1;
                     case 2:
                         AirborneOperationalStatusV2Msg s2 = new AirborneOperationalStatusV2Msg(es1090);
-                        dd.nicSupplA = s2.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s2.getNICSupplementA());
                         return s2;
                     case 3:
                     default:
                         AirborneOperationalStatusV3Msg s3 = new AirborneOperationalStatusV3Msg(es1090);
-                        dd.nicSupplA = s3.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s3.getNICSupplementA());
                         return s3;
                 }
             } else if (subtype == 1) {
@@ -584,17 +591,17 @@ public class StatefulModeSDecoder {
                         break;
                     case 1:
                         SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
-                        dd.nicSupplA = s1.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s1.getNICSupplementA());
                         return s1;
                     case 2:
                         SurfaceOperationalStatusV2Msg s2 = new SurfaceOperationalStatusV2Msg(es1090);
-                        dd.nicSupplA = s2.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s2.getNICSupplementA());
                         captureNICSupplements(dd, s2.getCapabilityClass());
                         return s2;
                     case 3:
                     default:
                         SurfaceOperationalStatusV3Msg s3 = new SurfaceOperationalStatusV3Msg(es1090);
-                        dd.nicSupplA = s3.getNICSupplementA();
+                        dd.nicSupplements = dd.nicSupplements.withA(s3.getNICSupplementA());
                         captureNICSupplements(dd, s3.getCapabilityClass());
                         return s3;
                 }
@@ -731,10 +738,7 @@ public class StatefulModeSDecoder {
      */
     private static class DecoderData {
         byte adsbVersion;
-        boolean nicSupplA;
-        boolean nicSupplB;
-        boolean nicSupplC;
-        byte nicSupplD;
+        NICSupplements nicSupplements = NICSupplements.none();
         Double geoMinusBaro;
         Instant lastUsed;
         PositionDecoder posDec;
@@ -839,8 +843,10 @@ public class StatefulModeSDecoder {
      */
     private static void captureNICSupplements(DecoderData dd, CapabilityClassCode cc) {
         if (cc instanceof ADSRAirborneCapabilityClassCode)
-            dd.nicSupplB = ((ADSRAirborneCapabilityClassCode) cc).getNICSupplementB();
+            dd.nicSupplements = dd.nicSupplements.withB(
+                    ((ADSRAirborneCapabilityClassCode) cc).getNICSupplementB());
         if (cc instanceof SurfaceCapabilityClassCodeV2V3)
-            dd.nicSupplC = ((SurfaceCapabilityClassCodeV2V3) cc).getNICSupplementC();
+            dd.nicSupplements = dd.nicSupplements.withC(
+                    ((SurfaceCapabilityClassCodeV2V3) cc).getNICSupplementC());
     }
 }

@@ -116,16 +116,16 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
      * Type codes 20 to 22 read supplement D instead and ignore A and B entirely.
      *
      * @param formatTypeCode the message's format type code, 0, 9 to 18 or 20 to 22
-     * @param nicSupplementA what is known of NIC supplement A, from the operational status message
-     * @param nicSupplementB NIC supplement B, ME bit 8 of this message and therefore usually known
-     * @param nicSupplementD what is known of NIC supplement D, from the airborne velocity message
+     * @param nicSupplements what is known of the target's NIC supplements
      * @return the characteristics version 3 assigns to that combination
      * @throws IllegalArgumentException if the type code is not an airborne position type code
      */
     public static NavigationCharacteristicsV3 forAirborneFormatTypeCode(byte formatTypeCode,
-                                                                        NICSupplement nicSupplementA,
-                                                                        NICSupplement nicSupplementB,
-                                                                        NICSupplementD nicSupplementD) {
+                                                                        NICSupplements nicSupplements) {
+        NICSupplement nicSupplementA = nicSupplements.getA();
+        NICSupplement nicSupplementB = nicSupplements.getB();
+        NICSupplementD nicSupplementD = nicSupplements.getD();
+
         switch (formatTypeCode) {
             case 0:
                 return TYPE_CODE_0;
@@ -200,14 +200,15 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
      * reaches no surface type code, so version 3 reads these exactly as version 2 does.
      *
      * @param formatTypeCode the message's format type code, 0 or 5 to 8
-     * @param nicSupplementA what is known of NIC supplement A, from the operational status message
-     * @param nicSupplementC what is known of NIC supplement C, from the operational status message
+     * @param nicSupplements what is known of the target's NIC supplements
      * @return the characteristics version 3 assigns to that combination
      * @throws IllegalArgumentException if the type code is not a surface position type code
      */
     public static NavigationCharacteristicsV3 forSurfaceFormatTypeCode(byte formatTypeCode,
-                                                                       NICSupplement nicSupplementA,
-                                                                       NICSupplement nicSupplementC) {
+                                                                       NICSupplements nicSupplements) {
+        NICSupplement nicSupplementA = nicSupplements.getA();
+        NICSupplement nicSupplementC = nicSupplements.getC();
+
         switch (formatTypeCode) {
             case 0:
                 return TYPE_CODE_0;

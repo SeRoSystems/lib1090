@@ -28,8 +28,8 @@ package de.serosystems.lib1090.decoding;
  * TABLE 2-14 again.
  * <p>
  * Version 2 uses three supplements, and which two apply depends on the subtype: <b>A and B</b>
- * airborne, <b>A and C</b> surface. Hence the two entry points — a supplement that does not apply is
- * not a parameter rather than a parameter to be ignored.
+ * airborne, <b>A and C</b> surface. Hence the two entry points: each reads the two its rows are keyed
+ * on and ignores the third, as every table ignores the supplements its rows do not turn on.
  * <p>
  * <b>Where the supplements come from decides how much is ever unknown.</b> Supplement B travels in
  * ME bit 8 of the airborne position message itself, so an ADS-B receiver always has it; A and C
@@ -119,14 +119,15 @@ public enum NavigationCharacteristicsV2 implements NavigationCharacteristics {
      * code offers.
      *
      * @param formatTypeCode the message's format type code, 0, 9 to 18 or 20 to 22
-     * @param nicSupplementA what is known of NIC supplement A, from the operational status message
-     * @param nicSupplementB NIC supplement B, ME bit 8 of this message and therefore usually known
+     * @param nicSupplements what is known of the target's NIC supplements
      * @return the characteristics version 2 assigns to that combination
      * @throws IllegalArgumentException if the type code is not an airborne position type code
      */
     public static NavigationCharacteristicsV2 forAirborneFormatTypeCode(byte formatTypeCode,
-                                                                        NICSupplement nicSupplementA,
-                                                                        NICSupplement nicSupplementB) {
+                                                                        NICSupplements nicSupplements) {
+        NICSupplement nicSupplementA = nicSupplements.getA();
+        NICSupplement nicSupplementB = nicSupplements.getB();
+
         switch (formatTypeCode) {
             case 0:
                 return TYPE_CODE_0;
@@ -183,14 +184,15 @@ public enum NavigationCharacteristicsV2 implements NavigationCharacteristics {
      * poorest row its knowledge allows.
      *
      * @param formatTypeCode the message's format type code, 0 or 5 to 8
-     * @param nicSupplementA what is known of NIC supplement A, from the operational status message
-     * @param nicSupplementC what is known of NIC supplement C, from the operational status message
+     * @param nicSupplements what is known of the target's NIC supplements
      * @return the characteristics version 2 assigns to that combination
      * @throws IllegalArgumentException if the type code is not a surface position type code
      */
     public static NavigationCharacteristicsV2 forSurfaceFormatTypeCode(byte formatTypeCode,
-                                                                       NICSupplement nicSupplementA,
-                                                                       NICSupplement nicSupplementC) {
+                                                                       NICSupplements nicSupplements) {
+        NICSupplement nicSupplementA = nicSupplements.getA();
+        NICSupplement nicSupplementC = nicSupplements.getC();
+
         switch (formatTypeCode) {
             case 0:
                 return TYPE_CODE_0;

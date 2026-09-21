@@ -28,7 +28,7 @@ package de.serosystems.lib1090.decoding;
  * <p>
  * Unlike the single-bit supplements it is monotone wherever it applies: a higher value always reports
  * a smaller containment radius, so {@link #ZERO} is the poorest of the four and stands in for
- * {@link #UNKNOWN} in the tables. That equivalence is a property of the tables, not a licence to
+ * {@link #UNKNOWN} in the tables. That equivalence is a property of the tables, not a license to
  * substitute one for the other — see {@link NavigationCharacteristicsV3}.
  *
  * @see NICSupplement for the single-bit supplements A, B and C
