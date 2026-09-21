@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.decoding.AirborneVelocity;
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 /**
@@ -43,13 +43,17 @@ public interface AirborneVelocityMsg extends IMFMsg {
     boolean hasGeoFlag();
 
     /**
-     * @return the interpreted 95% horizontal velocity accuracy in m/s, or {@code null} if unavailable
+     * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
+     * TABLE 2-18.
+     *
+     * @return what the category guarantees, or {@code null} where this message carries no category
+     * at all — which is not the same as a category guaranteeing nothing
      */
-    default Float getAccuracyBound() {
+    default HorizontalVelocityError getHorizontalVelocityError() {
         Byte nacv = getNACv();
         if (nacv == null)
             return null;
-        return AirborneVelocity.decodeAccuracyBound(nacv);
+        return HorizontalVelocityError.forNACv(nacv);
     }
 
 }

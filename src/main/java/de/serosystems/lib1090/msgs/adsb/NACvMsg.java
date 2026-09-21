@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.AirborneVelocity;
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 
 /**
  * Common API for messages that expose the Navigation Accuracy Category for velocity (NACv).
@@ -31,9 +31,13 @@ public interface NACvMsg {
     byte getNACvEncoded();
 
     /**
-     * @return the interpreted 95% horizontal velocity accuracy in m/s, or -1 if unknown or greater than 10m/s
+     * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
+     * TABLE 2-18.
+     *
+     * @return what the category guarantees; category 0 guarantees nothing, reading "unknown or
+     * 10 m/s or more"
      */
-    default float getAccuracyBound() {
-        return AirborneVelocity.decodeAccuracyBound(getNACvEncoded());
+    default HorizontalVelocityError getHorizontalVelocityError() {
+        return HorizontalVelocityError.forNACv(getNACvEncoded());
     }
 }

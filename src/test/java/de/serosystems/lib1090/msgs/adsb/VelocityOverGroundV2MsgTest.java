@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
 import org.junit.jupiter.api.Test;
@@ -32,9 +33,9 @@ class VelocityOverGroundV2MsgTest extends VelocityOverGroundMsgTest {
     }
 
     @Test
-    public void testNACvRawAndAccuracyBound_485020() throws Exception {
+    public void testNACvRawAndHorizontalVelocityError_485020() throws Exception {
         VelocityOverGroundV2Msg msg = new VelocityOverGroundV2Msg("8D485020994409940838175B284F");
         assertEquals(0, msg.getNACvEncoded());
-        assertEquals(-1.0f, msg.getAccuracyBound());
+        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10, msg.getHorizontalVelocityError());
     }
 }
