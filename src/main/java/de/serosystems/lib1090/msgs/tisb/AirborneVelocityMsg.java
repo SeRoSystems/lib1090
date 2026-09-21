@@ -29,12 +29,12 @@ public interface AirborneVelocityMsg extends IMFMsg {
     /**
      * @return the raw encoded Navigation Accuracy Category for velocity, or {@code null} if unavailable
      */
-    Byte getNACv();
+    Byte getNACvEncoded();
 
     /**
      * The Geo Flag determines whether the geometric minus barometric altitude difference (see
      * {@link de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg#hasDiffBaroAlt()}) or the
-     * Navigation Accuracy Category for velocity and Source Integrity Level (see {@link #getNACv()})
+     * Navigation Accuracy Category for velocity and Source Integrity Level (see {@link #getNACvEncoded()})
      * are present in this message; the two are mutually exclusive.
      *
      * @return true if geometric minus barometric altitude difference data is present, false if
@@ -50,7 +50,7 @@ public interface AirborneVelocityMsg extends IMFMsg {
      * at all — which is not the same as a category guaranteeing nothing
      */
     default HorizontalVelocityError getHorizontalVelocityError() {
-        Byte nacv = getNACv();
+        Byte nacv = getNACvEncoded();
         if (nacv == null)
             return null;
         return HorizontalVelocityError.forNACv(nacv);

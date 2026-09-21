@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+
 /**
  * Common API for the surface Capability Class Code of ADS-B versions 2 and 3.
  */
@@ -31,12 +33,22 @@ public interface SurfaceCapabilityClassCodeV2V3 extends SurfaceCapabilityClassCo
     }
 
     /**
-     * The encoded Navigation Accuracy Category for velocity (NACv).
+     * The Navigation Accuracy Category for velocity (NACv) as transmitted.
      *
-     * @return the NACv value, ME bits 17–19
+     * @return the encoded NACv, ME bits 17–19
      */
-    default byte getNACv() {
+    default byte getNACvEncoded() {
         return (byte) getMEBits(17, 19);
+    }
+
+    /**
+     * The same category typed, so that what it guarantees can be read off it rather than looked up,
+     * ED-102B §2.2.3.2.6.1.5 TABLE 2-18.
+     *
+     * @return the 95% horizontal velocity error the reported category guarantees
+     */
+    default HorizontalVelocityError getNACv() {
+        return HorizontalVelocityError.forNACv(getNACvEncoded());
     }
 
     /**

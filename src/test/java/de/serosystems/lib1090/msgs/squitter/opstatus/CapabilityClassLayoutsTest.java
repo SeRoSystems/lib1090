@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter.opstatus;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -170,8 +171,8 @@ class CapabilityClassLayoutsTest {
         assertFalse(new SurfaceCapabilityClassCodeV2(0).isB2Low(), "isB2Low ME 15");
         assertTrue(new SurfaceCapabilityClassCodeV2(0x10).hasUATIn(), "hasUATIn ME 16");
         assertFalse(new SurfaceCapabilityClassCodeV2(0).hasUATIn(), "hasUATIn ME 16");
-        assertEquals(7, new SurfaceCapabilityClassCodeV2(0xE).getNACv(), "getNACv ME 17–19");
-        assertEquals(0, new SurfaceCapabilityClassCodeV2(0).getNACv(), "getNACv ME 17–19");
+        assertEquals(7, new SurfaceCapabilityClassCodeV2(0xE).getNACvEncoded(), "getNACvEncoded ME 17–19");
+        assertEquals(0, new SurfaceCapabilityClassCodeV2(0).getNACvEncoded(), "getNACvEncoded ME 17–19");
         assertTrue(new SurfaceCapabilityClassCodeV2(0x1).getNICSupplementC(), "getNICSupplementC ME 20");
         assertFalse(new SurfaceCapabilityClassCodeV2(0).getNICSupplementC(), "getNICSupplementC ME 20");
 
@@ -249,11 +250,36 @@ class CapabilityClassLayoutsTest {
         assertFalse(new SurfaceCapabilityClassCodeV3(0).isB2Low(), "isB2Low ME 15");
         assertTrue(new SurfaceCapabilityClassCodeV3(0x10).hasUATIn(), "hasUATIn ME 16");
         assertFalse(new SurfaceCapabilityClassCodeV3(0).hasUATIn(), "hasUATIn ME 16");
-        assertEquals(7, new SurfaceCapabilityClassCodeV3(0xE).getNACv(), "getNACv ME 17–19");
-        assertEquals(0, new SurfaceCapabilityClassCodeV3(0).getNACv(), "getNACv ME 17–19");
+        assertEquals(7, new SurfaceCapabilityClassCodeV3(0xE).getNACvEncoded(), "getNACvEncoded ME 17–19");
+        assertEquals(0, new SurfaceCapabilityClassCodeV3(0).getNACvEncoded(), "getNACvEncoded ME 17–19");
         assertTrue(new SurfaceCapabilityClassCodeV3(0x1).getNICSupplementC(), "getNICSupplementC ME 20");
         assertFalse(new SurfaceCapabilityClassCodeV3(0).getNICSupplementC(), "getNICSupplementC ME 20");
 
         assertThrows(IllegalArgumentException.class, () -> new SurfaceCapabilityClassCodeV3(0x800));
     }
+    /**
+     * The surface capability class carries a NACv of its own, and reports it both as transmitted and
+     * as what the category guarantees. The pair must agree: ME 17-19 is the encoded category and the
+     * typed accessor is that category read through ED-102B §2.2.3.2.6.1.5 TABLE 2-18.
+     */
+    @Test
+    void surfaceCapabilityClassReportsItsNACvBothWays() {
+        assertEquals(HorizontalVelocityError.BELOW_3, new SurfaceCapabilityClassCodeV2(0x4).getNACv(),
+                "NACv 2 at ME 17-19");
+        assertEquals(HorizontalVelocityError.BELOW_0_3, new SurfaceCapabilityClassCodeV3(0x8).getNACv(),
+                "NACv 4 at ME 17-19");
+
+        // category 0 and the reserved ones guarantee nothing
+        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10,
+                new SurfaceCapabilityClassCodeV2(0).getNACv(), "NACv 0");
+        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10,
+                new SurfaceCapabilityClassCodeV2(0xE).getNACv(), "NACv 7, reserved");
+
+        for (int encoded = 0; encoded <= 7; encoded++) {
+            SurfaceCapabilityClassCodeV2 cc = new SurfaceCapabilityClassCodeV2(encoded << 1);
+            assertEquals(HorizontalVelocityError.forNACv(cc.getNACvEncoded()), cc.getNACv(),
+                    "NACv " + encoded);
+        }
+    }
+
 }

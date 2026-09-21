@@ -198,7 +198,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     @Override
-    public Byte getNACv() {
+    public Byte getNACvEncoded() {
         return hasGeoFlag() ? null : nacv;
     }
 

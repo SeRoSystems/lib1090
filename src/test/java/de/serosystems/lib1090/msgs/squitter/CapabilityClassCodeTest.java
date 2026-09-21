@@ -135,7 +135,7 @@ class CapabilityClassCodeTest {
     public void surfaceOnlySubfields() {
         SurfaceV3 cc = new SurfaceV3(0x20 | 0xE | 0x1);
         assertTrue(cc.isB2Low());
-        assertEquals(7, cc.getNACv());
+        assertEquals(7, cc.getNACvEncoded());
         assertTrue(cc.getNICSupplementC());
     }
 
