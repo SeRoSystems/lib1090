@@ -21,7 +21,8 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.ContainmentRadius;
-import de.serosystems.lib1090.decoding.NICSupplement;
+import de.serosystems.lib1090.decoding.NICSupplements;
+import de.serosystems.lib1090.decoding.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.NavigationCharacteristicsV1;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
@@ -95,63 +96,35 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * The horizontal containment radius limit for a caller that knows the NIC supplement.
-     *
-     * @param nicSupplement the NIC supplement as transmitted in the operational status message
-     * @return the guaranteed upper bound on the containment radius in meters, as described by
-     * {@link #getHorizontalContainmentRadiusLimit()}
-     */
-    public double getHorizontalContainmentRadiusLimit(boolean nicSupplement) {
-        return getContainmentRadius(nicSupplement).getGuaranteedUpperBound();
-    }
-
-    /**
-     * The horizontal containment radius limit together with the side of that value the true radius
-     * lies on, ED-102B §N.5.4 TABLE N-16.
-     *
-     * @return the containment radius, worst case where the NIC supplement is not known
+     * {@inheritDoc}
+     * <p>
+     * Version 1 reads supplement A only, the single bit it defines. It is transmitted in the
+     * operational status message rather than here, so a plain instance knows none.
      */
     @Override
-    public ContainmentRadius getContainmentRadius() {
-        return getNavigationCharacteristics().getContainmentRadius();
-    }
-
-    /**
-     * @param nicSupplement the NIC supplement as transmitted in the operational status message
-     * @return the containment radius that type code and supplement select
-     */
-    public ContainmentRadius getContainmentRadius(boolean nicSupplement) {
-        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplement))
-                .getContainmentRadius();
-    }
-
-    /**
-     * Navigation integrity category for ADS-B version 1.
-     *
-     * @param nicSupplement the NIC supplement as transmitted in the operational status message
-     * @return the NIC that type code and supplement select
-     */
-    public byte getNIC(boolean nicSupplement) {
-        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplement)).getNIC();
+    public NavigationCharacteristics getNavigationCharacteristics(NICSupplements nicSupplements) {
+        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), nicSupplements);
     }
 
     @Override
     public byte getNIC() {
-        return getNavigationCharacteristics().getNIC();
+        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    }
+
+    @Override
+    public ContainmentRadius getContainmentRadius() {
+        return getNavigationCharacteristics(getKnownSupplements()).getContainmentRadius();
     }
 
     /**
-     * Everything the format type code and the NIC supplement say about this position.
-     * <p>
-     * The supplement is transmitted in the operational status message rather than here, so a plain
-     * instance does not know it and reports the worst row the type code allows — which is not the
-     * same as assuming the supplement is clear, since at type code 13 a clear supplement is the
-     * better of the two rows. {@link WithNICSupplementA} knows it and overrides this.
+     * What this message knows of its target's NIC supplements on its own, which is what the
+     * no-argument accessors report with. A supplement it does not carry stays unknown, and the
+     * tables answer that with the poorest row it allows.
      *
-     * @return the row this message's format type code and known supplements select
+     * @return the supplements this message knows
      */
-    protected NavigationCharacteristicsV1 getNavigationCharacteristics() {
-        return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.UNKNOWN);
+    protected NICSupplements getKnownSupplements() {
+        return NICSupplements.none();
     }
 
     @Override
@@ -197,65 +170,65 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * Variant of {@link SurfacePositionV1Msg} that stores the NIC supplement A bit, e.g., as
-     * obtained from the corresponding operational status message, so that {@link #getNIC()} and
-     * {@link #getHorizontalContainmentRadiusLimit()} can take it into account.
+     * Variant of {@link SurfacePositionV1Msg} that carries what is known of its target's NIC supplements,
+     * as accumulated from the messages that transmit them, so that {@link #getNIC()} and
+     * {@link #getContainmentRadius()} report the row those supplements select rather than the worst
+     * the format type code allows.
      */
-    public static class WithNICSupplementA extends SurfacePositionV1Msg {
+    public static class WithNICSupplements extends SurfacePositionV1Msg {
 
         private static final long serialVersionUID = 5381651494408125465L;
 
-        private boolean nicSupplementA;
+        private NICSupplements nicSupplements;
 
         /**
          * @param rawMessage     raw ADS-B surface position message as hex string
          * @param timestamp      timestamp for this position message
-         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException     if message has wrong format
          * @throws UnspecifiedFormatError if message format is not further specified
          */
-        public WithNICSupplementA(String rawMessage, Instant timestamp, boolean nicSupplementA) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA);
+        public WithNICSupplements(String rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
          * @param rawMessage     raw ADS-B surface position message as byte array
          * @param timestamp      timestamp for this position message
-         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException     if message has wrong format
          * @throws UnspecifiedFormatError if message format is not further specified
          */
-        public WithNICSupplementA(byte[] rawMessage, Instant timestamp, boolean nicSupplementA) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplementA);
+        public WithNICSupplements(byte[] rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
+            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
-         * @param squitter       extended squitter which contains this surface position msg
+         * @param squitter       extended squitter containing the surface position msg
          * @param timestamp      timestamp for this position message
-         * @param nicSupplementA NIC supplement A bit for this aircraft
+         * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException if message has wrong format
          */
-        public WithNICSupplementA(ExtendedSquitter squitter, Instant timestamp, boolean nicSupplementA) throws BadFormatException {
+        public WithNICSupplements(ExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
             super(squitter, timestamp);
-            this.nicSupplementA = nicSupplementA;
+            this.nicSupplements = nicSupplements;
         }
 
         /**
          * protected no-arg constructor e.g. for serialization with Kryo
          **/
-        protected WithNICSupplementA() {
+        protected WithNICSupplements() {
         }
 
         /**
          * {@inheritDoc}
          * <p>
-         * The supplement is known here, so the row it selects is reported rather than the worst the
-         * type code allows.
+         * These are the supplements this variant was given. A supplement the message carries itself
+         * still overrides them, since it describes this very position.
          */
         @Override
-        protected NavigationCharacteristicsV1 getNavigationCharacteristics() {
-            return NavigationCharacteristicsV1.forFormatTypeCode(getFormatTypeCode(), NICSupplement.of(nicSupplementA));
+        protected NICSupplements getKnownSupplements() {
+            return nicSupplements;
         }
     }
-
 }

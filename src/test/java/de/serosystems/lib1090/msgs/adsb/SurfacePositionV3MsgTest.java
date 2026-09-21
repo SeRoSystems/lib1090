@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import org.junit.jupiter.api.Test;
@@ -37,13 +38,13 @@ class SurfacePositionV3MsgTest extends SurfacePositionMsgTest {
     void testGetNICWithSupplementA() throws Exception {
         final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
 
-        assertEquals(9, sPos.getNIC(true, false));
+        assertEquals(9, sPos.getNavigationCharacteristics(NICSupplements.none().withA(true).withC(false)).getNIC());
     }
 
     @Test
     void testGetHorizontalContainmentRadiusLimitWithSupplementA() throws Exception {
         final SurfacePositionV3Msg sPos = new SurfacePositionV3Msg(SURF_POS, Instant.EPOCH);
 
-        assertEquals(75, sPos.getHorizontalContainmentRadiusLimit(true, false));
+        assertEquals(75, sPos.getNavigationCharacteristics(NICSupplements.none().withA(true).withC(false)).getHorizontalContainmentRadiusLimit());
     }
 }

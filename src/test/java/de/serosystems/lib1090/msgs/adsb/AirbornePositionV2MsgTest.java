@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,8 @@ class AirbornePositionV2MsgTest extends AirbornePositionMsgTest {
         AirbornePositionV2Msg msg = new AirbornePositionV2Msg(
                 new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-        assertEquals(8, msg.getNIC(false));
-        assertEquals(185.2, msg.getHorizontalContainmentRadiusLimit(false));
+        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNIC());
+        assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());
         assertEquals(Position.AltitudeType.BAROMETRIC_ALTITUDE, msg.getAltitudeType());
         assertTrue(msg.toString().contains("AirbornePositionV2Msg{"));
         assertTrue(msg.toString().contains("nicSupplementB="));

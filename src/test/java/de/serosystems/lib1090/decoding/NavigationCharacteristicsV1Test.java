@@ -27,12 +27,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NavigationCharacteristicsV1Test {
 
-    /** The type codes that carry a position, and therefore the type codes the table must cover. */
+    /**
+     * Builds the supplements version 1 reads: A alone.
+     */
+    private static NICSupplements supplements(NICSupplement nicSupplementA) {
+        return NICSupplements.none().withA(nicSupplementA);
+    }
+
+    /**
+     * The type codes that carry a position, and therefore the type codes the table must cover.
+     */
     private static final Set<Integer> POSITION_TYPE_CODES =
             new HashSet<>(Arrays.asList(0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22));
 
     private static NavigationCharacteristicsV1 lookup(byte formatTypeCode, NICSupplement nicSupplement) {
-        return NavigationCharacteristicsV1.forFormatTypeCode(formatTypeCode, nicSupplement);
+        return NavigationCharacteristicsV1.forFormatTypeCode(formatTypeCode, supplements(nicSupplement));
     }
 
     @Test
@@ -45,7 +54,7 @@ class NavigationCharacteristicsV1Test {
 
             if (parts.length == 2) {
                 NICSupplement supplement = parts[1].equals("SET") ? NICSupplement.SET : NICSupplement.CLEAR;
-                assertSame(row, NavigationCharacteristicsV1.forFormatTypeCode(row.getFormatTypeCode(), supplement),
+                assertSame(row, NavigationCharacteristicsV1.forFormatTypeCode(row.getFormatTypeCode(), supplements(supplement)),
                         name);
             }
         }
@@ -69,7 +78,7 @@ class NavigationCharacteristicsV1Test {
             byte rejected = formatTypeCode;
             for (NICSupplement supplement : NICSupplement.values())
                 assertThrows(IllegalArgumentException.class,
-                        () -> NavigationCharacteristicsV1.forFormatTypeCode(rejected, supplement));
+                        () -> NavigationCharacteristicsV1.forFormatTypeCode(rejected, supplements(supplement)));
         }
     }
 

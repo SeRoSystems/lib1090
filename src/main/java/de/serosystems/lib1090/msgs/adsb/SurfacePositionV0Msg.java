@@ -21,6 +21,8 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.NICSupplements;
+import de.serosystems.lib1090.decoding.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.NavigationCharacteristicsV0;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
@@ -94,14 +96,44 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
     }
 
     /**
-     * The horizontal containment radius limit together with the side of that value the true radius
-     * lies on, ED-102B §N.2.2.2 TABLE N-4.
-     *
-     * @return the containment radius the format type code reports
+     * {@inheritDoc}
+     * <p>
+     * Version 0 defines no NIC supplements, so the supplements given are not read: the format type
+     * code settles everything. The parameter is kept because every position message answers this
+     * question the same way — reading the supplements its table is keyed on, here none of them.
      */
     @Override
+    public NavigationCharacteristics getNavigationCharacteristics(NICSupplements nicSupplements) {
+        return characteristics();
+    }
+
+    @Override
+    public byte getNIC() {
+        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    }
+
+    @Override
     public ContainmentRadius getContainmentRadius() {
-        return characteristics().getContainmentRadius();
+        return getNavigationCharacteristics(getKnownSupplements()).getContainmentRadius();
+    }
+
+    /**
+     * What this message knows of its target's NIC supplements on its own, which is what the
+     * no-argument accessors report with. A supplement it does not carry stays unknown, and the
+     * tables answer that with the poorest row it allows.
+     *
+     * @return the supplements this message knows
+     */
+    protected NICSupplements getKnownSupplements() {
+        return NICSupplements.none();
+    }
+
+    /**
+     * The version 0 row this message's format type code selects, typed so that the columns only
+     * version 0 has — NUCp, NACp and SIL — can be read from it.
+     */
+    private NavigationCharacteristicsV0 characteristics() {
+        return NavigationCharacteristicsV0.forFormatTypeCode(getFormatTypeCode());
     }
 
     /**
@@ -130,11 +162,6 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
         return characteristics().getNACp();
     }
 
-    @Override
-    public byte getNIC() {
-        return characteristics().getNIC();
-    }
-
     /**
      * Source integrity level, derived from the format type code.
      * <p>
@@ -146,14 +173,6 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      */
     public byte getSIL() {
         return characteristics().getSIL();
-    }
-
-    /**
-     * Everything the format type code says about this position, as one row. The type code is
-     * validated in the constructor, so the lookup always finds one.
-     */
-    private NavigationCharacteristicsV0 characteristics() {
-        return NavigationCharacteristicsV0.forFormatTypeCode(getFormatTypeCode());
     }
 
     @Override
