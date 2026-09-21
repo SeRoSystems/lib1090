@@ -120,8 +120,8 @@ class ADSRDispatchTest {
     @Test
     void surfacePosition() throws Exception {
         for (int ftc = 5; ftc <= 8; ftc++) {
-            assertDispatch(1, message(ftc, 0), SurfacePositionV1Msg.class);
-            assertDispatch(2, message(ftc, 0), SurfacePositionV2Msg.class);
+            assertDispatch(1, message(ftc, 0), SurfacePositionV1Msg.WithNICSupplementA.class);
+            assertDispatch(2, message(ftc, 0), SurfacePositionV2Msg.WithNICSupplements.class);
             assertDispatch(3, message(ftc, 0), SurfacePositionV3Msg.WithNICSupplements.class);
         }
     }
@@ -129,8 +129,8 @@ class ADSRDispatchTest {
     @Test
     void airbornePosition() throws Exception {
         for (int ftc : new int[]{9, 12, 18, 20, 22}) {
-            assertDispatch(1, message(ftc, 0), AirbornePositionV1Msg.class);
-            assertDispatch(2, message(ftc, 0), AirbornePositionV2Msg.class);
+            assertDispatch(1, message(ftc, 0), AirbornePositionV1Msg.WithNICSupplementA.class);
+            assertDispatch(2, message(ftc, 0), AirbornePositionV2Msg.WithNICSupplements.class);
             assertDispatch(3, message(ftc, 0), AirbornePositionV3Msg.WithNICSupplements.class);
         }
     }
