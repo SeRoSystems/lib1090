@@ -155,7 +155,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public Byte getNACv() {
+    public Byte getNACvEncoded() {
         return hasGeoFlag() ? null : nacv;
     }
 

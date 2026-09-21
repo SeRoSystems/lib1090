@@ -248,7 +248,8 @@ public class ExampleDecoder {
                 if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
                     SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
                     System.out.println("          Has NIC supplement C: " + surface.getNICSupplementC());
-                    System.out.println("          Navigation Accuracy Category for velocity (NACv): " + surface.getNACv());
+                    System.out.println("          Navigation Accuracy Category for velocity (NACv): "
+                            + surface.getNACvEncoded() + " (" + surface.getNACv() + ")");
                 }
                 if (cc instanceof AirborneCapabilityClassCodeV3) {
                     AirborneCapabilityClassCodeV3 v3 = (AirborneCapabilityClassCodeV3) cc;

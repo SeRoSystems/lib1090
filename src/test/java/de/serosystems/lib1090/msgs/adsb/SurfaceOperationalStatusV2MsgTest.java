@@ -71,17 +71,17 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
     public void testCapabilityClassCodeVersion2Fields() throws Exception {
         SurfaceOperationalStatusV2Msg uatIn = statusWithCapabilityClassCode(0x10);
         assertTrue(((CapabilityClassCodeV2V3) uatIn.getCapabilityClass()).hasUATIn());
-        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNACv());
+        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNACvEncoded());
         assertFalse(((SurfaceCapabilityClassCodeV2V3) uatIn.getCapabilityClass()).getNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nacv = statusWithCapabilityClassCode(0x0A);
         assertFalse(((CapabilityClassCodeV2V3) nacv.getCapabilityClass()).hasUATIn());
-        assertEquals(5, ((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNACv());
+        assertEquals(5, ((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNACvEncoded());
         assertFalse(((SurfaceCapabilityClassCodeV2V3) nacv.getCapabilityClass()).getNICSupplementC());
 
         SurfaceOperationalStatusV2Msg nicSupplementC = statusWithCapabilityClassCode(0x01);
         assertFalse(((CapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).hasUATIn());
-        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNACv());
+        assertEquals(0, ((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNACvEncoded());
         assertTrue(((SurfaceCapabilityClassCodeV2V3) nicSupplementC.getCapabilityClass()).getNICSupplementC());
     }
 
