@@ -283,7 +283,14 @@ public class StatefulModeSDecoder {
                         break;
                     case 3:
                     default:
-                        velocity = new de.serosystems.lib1090.msgs.adsr.AirborneVelocityV3Msg(es1090);
+                        de.serosystems.lib1090.msgs.adsr.AirborneVelocityV3Msg velocityV3 =
+                                new de.serosystems.lib1090.msgs.adsr.AirborneVelocityV3Msg(es1090);
+                        // the only message carrying NIC supplement D, and only when it reports no
+                        // barometric altitude difference in its place; a velocity message without it
+                        // says nothing about D, so what was known of it survives
+                        if (velocityV3.hasNICSupplementD())
+                            dd.nicSupplements = dd.nicSupplements.withD(velocityV3.getNICSupplementD());
+                        velocity = velocityV3;
                         break;
                 }
                 if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
@@ -474,7 +481,14 @@ public class StatefulModeSDecoder {
                         break;
                     case 3:
                     default:
-                        velocity = new AirborneVelocityV3Msg(es1090);
+                        AirborneVelocityV3Msg velocityV3 =
+                                new AirborneVelocityV3Msg(es1090);
+                        // the only message carrying NIC supplement D, and only when it reports no
+                        // barometric altitude difference in its place; a velocity message without it
+                        // says nothing about D, so what was known of it survives
+                        if (velocityV3.hasNICSupplementD())
+                            dd.nicSupplements = dd.nicSupplements.withD(velocityV3.getNICSupplementD());
+                        velocity = velocityV3;
                         break;
                 }
                 if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
