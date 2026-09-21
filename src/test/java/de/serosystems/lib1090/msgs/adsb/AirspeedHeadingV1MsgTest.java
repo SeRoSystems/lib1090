@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,6 @@ class AirspeedHeadingV1MsgTest extends AirspeedHeadingMsgTest {
     public void testNACvRawAndAccuracyBound() throws Exception {
         AirspeedHeadingV1Msg msg = new AirspeedHeadingV1Msg("8DA05F219B06B6AF189400CBC33F");
         assertEquals(0, msg.getNACvEncoded());
-        assertEquals(-1.0f, msg.getAccuracyBound());
+        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10, msg.getHorizontalVelocityError());
     }
 }
