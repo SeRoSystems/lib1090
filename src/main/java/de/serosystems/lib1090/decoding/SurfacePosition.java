@@ -112,35 +112,5 @@ public final class SurfacePosition {
         return speed;
     }
 
-    /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value in meter, see ED-102B §
-     * §N.2.3.7 TABLE N-9 (Type Code to NACP Mapping), "Position Error (95%)" column.
-     * <p>
-     * The concept of NACp has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to what {@link OperationalStatus#nacPtoEPU(byte)} yields for the NACp an
-     * aircraft supporting ADS-B version 1 or later transmits in its operational status message.
-     * <ul>
-     *     <li>Only upper bounds are reported - if the type code encodes a lower bound, this will return
-     *         {@code Double.POSITIVE_INFINITY}.</li>
-     *     <li>If the position error is unknown, {@code Double.NaN} is returned.</li>
-     * </ul>
-     *
-     * @return the estimated position uncertainty according to the position NAC in meters
-     */
-    public static double decodeEPU(byte formatTypeCode) {
-        switch (formatTypeCode) {
-            case 5:
-                return 3;
-            case 6:
-                return 10;
-            case 7:
-                return 92.6;
-            case 8:
-                return Double.POSITIVE_INFINITY;
-            default:
-                return Double.NaN;
-        }
-    }
 
 }

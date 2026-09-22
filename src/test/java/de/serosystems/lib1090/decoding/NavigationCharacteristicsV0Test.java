@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -173,5 +174,26 @@ class NavigationCharacteristicsV0Test {
         assertEquals((byte) 2, typeCode16.getNUCpEncoded());
         assertEquals((byte) 1, typeCode16.getNACpEncoded());
         assertEquals(ContainmentRadius.BELOW_18520, typeCode16.getContainmentRadius());
+    }
+
+    /**
+     * The surface type codes used to have their own format-type-code-to-EPU switch, which the NACp
+     * column plus {@link EstimatedPositionUncertainty} now replace. The answers must be the ones that
+     * switch gave, except for type code 8, where it reported an infinite upper bound and the category
+     * it maps to turns out to mean "unknown accuracy" as much as "poor accuracy".
+     */
+    @Test
+    void testTheSurfaceTypeCodesStillGiveTheirTabulatedAccuracy() {
+        assertEquals(EstimatedPositionUncertainty.BELOW_3, epuForTypeCode(5));
+        assertEquals(EstimatedPositionUncertainty.BELOW_10, epuForTypeCode(6));
+        assertEquals(EstimatedPositionUncertainty.BELOW_92_6, epuForTypeCode(7));
+
+        assertEquals(EstimatedPositionUncertainty.UNKNOWN_OR_AT_LEAST_18520, epuForTypeCode(8));
+        assertFalse(epuForTypeCode(8).isKnown());
+    }
+
+    private static EstimatedPositionUncertainty epuForTypeCode(int formatTypeCode) {
+        return EstimatedPositionUncertainty.forNACp(
+                NavigationCharacteristicsV0.forFormatTypeCode((byte) formatTypeCode).getNACpEncoded());
     }
 }
