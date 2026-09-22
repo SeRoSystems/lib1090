@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.squitter;
 /**
  * Common API for ADS-B target state and status messages across supported versions.
  */
-public interface TargetStateAndStatusMsg extends SILMsg {
+public interface TargetStateAndStatusMsg extends SILMsg, NACpMsg {
 
     /**
      * @return whether selected altitude is available, ED-102B §2.2.3.2.7.1.3.2
@@ -70,6 +70,7 @@ public interface TargetStateAndStatusMsg extends SILMsg {
     /**
      * @return the raw encoded navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8
      */
+    @Override
     byte getNACpEncoded();
 
     /**

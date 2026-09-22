@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs.tisb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -30,7 +31,7 @@ import java.io.Serializable;
 /**
  * Decoder for TIS-B velocity message, as defined in ED-102B §2.2.17.3.4.
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg {
+public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg, NACpMsg {
 
     private static final long serialVersionUID = -2121820203874488709L;
 
@@ -209,7 +210,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * in the operational status message. For version 0 it is derived from the format type code.
      *
      * @return the raw encoded NACp (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
-     * {@link AirborneOperationalStatusV1Msg}. Returns null if not available.
+     * {@link AirborneOperationalStatusV1Msg}
      */
     public byte getNACpEncoded() {
         return nacp;

@@ -29,6 +29,7 @@ import de.serosystems.lib1090.decoding.SourceIntegrityLevel;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
@@ -41,7 +42,7 @@ import java.util.Objects;
  * Decoder for ADS-B airborne position messages (version 0), as defined in ED-102B §2.2.3.2.3.1 TABLE 2-11.
  */
 @SuppressWarnings("unused")
-public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg {
+public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg, NACpMsg {
 
     private static final long serialVersionUID = 8440428954946862126L;
 
@@ -159,8 +160,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
      * obtain the value — which is why no other position message offers it.
      *
      * @return the navigation accuracy category for position
-     * @see de.serosystems.lib1090.decoding.OperationalStatus#nacPtoEPU(byte) to turn it into an
-     * estimated position uncertainty in meters
+     * @see #getEstimatedPositionUncertainty() for the accuracy bound the category stands for
      */
     public byte getNACpEncoded() {
         return characteristics().getNACpEncoded();

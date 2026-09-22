@@ -23,39 +23,6 @@ public final class OperationalStatus {
     private OperationalStatus() {
     }
 
-    /**
-     * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, see ED-102B §2.2.3.2.7.2.7 TABLE 2-68
-     *
-     * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
-     */
-    public static double nacPtoEPU(byte nacPos) {
-        switch (nacPos) {
-            case 1:
-                return 18520;
-            case 2:
-                return 7408;
-            case 3:
-                return 3704;
-            case 4:
-                return 1852.0;
-            case 5:
-                return 926.0;
-            case 6:
-                return 555.6;
-            case 7:
-                return 185.2;
-            case 8:
-                return 92.6;
-            case 9:
-                return 30.0;
-            case 10:
-                return 10.0;
-            case 11:
-                return 3.0;
-            default:
-                return -1;
-        }
-    }
 
     /**
      * According to ED-102B §2.2.3.2.7.2.11 TABLE 2-71. Compatible with ADS-B version 1 and 2

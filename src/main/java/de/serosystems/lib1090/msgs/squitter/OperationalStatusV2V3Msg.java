@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.squitter;
 /**
  * Common API for ADS-B operational status version 2 and 3 messages, for both airborne and surface subtype.
  */
-public interface OperationalStatusV2V3Msg extends OperationalStatusMsg, SILMsg {
+public interface OperationalStatusV2V3Msg extends OperationalStatusMsg, SILMsg, NACpMsg {
 
     /**
      * @return the subtype code, 0 for airborne operational status messages and 1 for surface operational status messages
@@ -34,8 +34,4 @@ public interface OperationalStatusV2V3Msg extends OperationalStatusMsg, SILMsg {
      */
     boolean getNICSupplementA();
 
-    /**
-     * @return the navigation accuracy for position messages, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
-     */
-    byte getNACpEncoded();
 }
