@@ -21,6 +21,7 @@ package de.serosystems.example;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.SystemDesignAssurance;
 import de.serosystems.lib1090.decoding.OperationalStatus;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -276,7 +277,11 @@ public class ExampleDecoder {
                 }
                 if (om instanceof OperationalModeCodeV2V3) {
                     OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;
-                    System.out.println("          System design assurance: " + v2v3.getSDAEncoded());
+                    SystemDesignAssurance sda = v2v3.getSystemDesignAssurance();
+                    System.out.println("          System design assurance: " + v2v3.getSDAEncoded()
+                            + " (" + sda.getSupportedFailureCondition()
+                            + ", " + sda.getUndetectedFaultProbability()
+                            + " per flight hour, " + sda.getDesignAssuranceLevel() + ")");
                     System.out.println("          Uses single antenna: " + v2v3.hasSingleAntenna());
                 }
                 if (om instanceof SurfaceOperationalModeCodeV2V3) {

@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
+import de.serosystems.lib1090.decoding.SystemDesignAssurance;
+
 /**
  * Common API for the Operational Mode Code of ADS-B versions 2 and 3, airborne and surface alike.
  */
@@ -40,5 +42,17 @@ public interface OperationalModeCodeV2V3 extends KnownOperationalModeCode {
      */
     default byte getSDAEncoded() {
         return (byte) getMEBits(31, 32);
+    }
+
+    /**
+     * What the reported System Design Assurance assures, ED-102B §2.2.3.2.7.2.4.6 TABLE 2-58.
+     * <p>
+     * The row carries all three of the table's columns; read whichever the question needs. Like the
+     * single-antenna flag above, this describes the installation rather than the moment.
+     *
+     * @return the assurance the value stands for; the lowest claims nothing
+     */
+    default SystemDesignAssurance getSystemDesignAssurance() {
+        return SystemDesignAssurance.forSDA(getSDAEncoded());
     }
 }
