@@ -32,7 +32,7 @@ public interface SILMsg {
     /**
      * @return the raw encoded source integrity level, which indicates the probability of the true
      * position exceeding the NIC containment radius, ED-102B §2.2.3.2.7.2.9 TABLE 2-70; not to be
-     * confused with the "SIL Supplement" TABLE A-15
+     * confused with the SIL supplement of {@link #getSILSupplement()}, ED-102B TABLE 2-32
      */
     byte getSILEncoded();
 
@@ -40,8 +40,9 @@ public interface SILMsg {
      * The probability of exceeding the NIC containment radius that the reported level guarantees,
      * ED-102B §2.2.3.2.7.2.9 TABLE 2-70.
      * <p>
-     * The figure is per flight hour or per sample, as the SIL supplement says — a separate bit, which
-     * version 1 does not transmit at all and the later versions expose as {@code getSILSupplement()}.
+     * The figure is per flight hour or per sample, as {@link #getSILSupplement()} says. It is not
+     * comparable across the two, so a caller weighing one target's integrity against another's reads
+     * both.
      *
      * @return what the level guarantees; level 0 guarantees nothing, reading "unknown or more than
      * 10&#94;-3"
@@ -49,4 +50,21 @@ public interface SILMsg {
     default SourceIntegrityLevel getSourceIntegrityLevel() {
         return SourceIntegrityLevel.forSIL(getSILEncoded());
     }
+
+    /**
+     * What the probability of {@link #getSourceIntegrityLevel()} is measured per, ED-102B
+     * TABLE 2-32.
+     * <p>
+     * The standard describes the field twice, once per message carrying it: §2.2.3.2.7.1.3.1 for the
+     * target state and status message, which is where TABLE 2-32 defines it, and §2.2.3.2.7.2.14 for
+     * the aircraft operational status message, which refers to that definition. Both are the same
+     * field, which is why one accessor serves both here.
+     * <p>
+     * Every message carrying a SIL can answer this, but only version 2 and later transmit a bit for
+     * it; version 1 fixes the basis instead, and says so where it does.
+     *
+     * @return true if the SIL is based on a "per sample" probability, false if on a "per flight hour"
+     * one
+     */
+    boolean getSILSupplement();
 }
