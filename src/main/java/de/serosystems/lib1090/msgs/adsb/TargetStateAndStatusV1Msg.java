@@ -169,6 +169,17 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
         return sil;
     }
 
+    /**
+     * Version 1 transmits no SIL supplement. It does not leave the basis open either: the probability
+     * is per flight hour, which the later versions express by clearing the bit they added.
+     *
+     * @return false, version 1 having fixed the basis to "per flight hour"
+     */
+    @Override
+    public boolean getSILSupplement() {
+        return false;
+    }
+
     @Override
     public boolean hasOperationalTCAS() {
         return !capabilityNotTcas;

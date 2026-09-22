@@ -45,4 +45,15 @@ public interface OperationalStatusV1Msg extends OperationalStatusMsg, SILMsg {
      * ED-102B §2.2.3.2.7.2.13 TABLE 2-73
      */
     boolean isHeadingReferencedToMagneticNorth();
+
+    /**
+     * Version 1 transmits no SIL supplement. It does not leave the basis open either: the probability
+     * is per flight hour, which the later versions express by clearing the bit they added.
+     *
+     * @return false, version 1 having fixed the basis to "per flight hour"
+     */
+    @Override
+    default boolean getSILSupplement() {
+        return false;
+    }
 }

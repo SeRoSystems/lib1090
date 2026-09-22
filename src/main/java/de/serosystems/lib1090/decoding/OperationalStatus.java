@@ -25,7 +25,6 @@ public final class OperationalStatus {
 
     /**
      * Get the 95% horizontal accuracy bounds (EPU) derived from NACp value, see ED-102B §2.2.3.2.7.2.7 TABLE 2-68
-     * (main body), also ED-102B §A.1.4.9.9 TABLE A-22
      *
      * @return the estimated position uncertainty according to the position NAC in meters (-1 for unknown)
      */

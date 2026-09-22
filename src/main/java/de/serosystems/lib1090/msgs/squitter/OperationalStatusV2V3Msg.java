@@ -38,12 +38,4 @@ public interface OperationalStatusV2V3Msg extends OperationalStatusMsg, SILMsg {
      * @return the navigation accuracy for position messages, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACpEncoded();
-
-    /**
-     * ED-102B §2.2.3.2.7.2.14
-     *
-     * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
-     * it's based on "per hour".
-     */
-    boolean getSILSupplement();
 }
