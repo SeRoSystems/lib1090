@@ -34,6 +34,6 @@ class VelocityOverGroundV0MsgTest extends VelocityOverGroundMsgTest {
     @Test
     public void testNUCrRaw_485020() throws Exception {
         VelocityOverGroundV0Msg msg = new VelocityOverGroundV0Msg("8D485020994409940838175B284F");
-        assertEquals(0, msg.getNUCr());
+        assertEquals(0, msg.getNUCrEncoded());
     }
 }

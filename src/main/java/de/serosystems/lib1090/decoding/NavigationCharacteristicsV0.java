@@ -137,9 +137,9 @@ public enum NavigationCharacteristicsV0 implements NavigationCharacteristics {
      * Navigation uncertainty category for position, the only one of these version 0 defined itself,
      * ED-102 §2.2.8.1.5.
      *
-     * @return the NUCp, or {@code null} for a type code version 0 never assigned one
+     * @return the encoded NUCp, or {@code null} for a type code version 0 never assigned one
      */
-    public Byte getNUCp() {
+    public Byte getNUCpEncoded() {
         return nucP;
     }
 
@@ -149,7 +149,7 @@ public enum NavigationCharacteristicsV0 implements NavigationCharacteristics {
      *
      * @return the NACp
      */
-    public byte getNACp() {
+    public byte getNACpEncoded() {
         return nacP;
     }
 
@@ -157,10 +157,10 @@ public enum NavigationCharacteristicsV0 implements NavigationCharacteristics {
      * Navigation integrity category. Version 0 transmits no such field, and no NIC supplements
      * either, so unlike later versions the type code determines it outright.
      *
-     * @return the NIC
+     * @return the encoded NIC
      */
     @Override
-    public byte getNIC() {
+    public byte getNICEncoded() {
         return nic;
     }
 
@@ -168,15 +168,24 @@ public enum NavigationCharacteristicsV0 implements NavigationCharacteristics {
      * Source integrity level. Version 0 transmits no such field; the type codes that bound their
      * containment radius only from below report 0 here, the rest report 2.
      *
-     * @return the SIL
+     * @return the encoded SIL
      */
-    public byte getSIL() {
+    public byte getSILEncoded() {
         return sil;
     }
 
     /**
+     * What the source integrity level of this row guarantees, ED-102B §2.2.3.2.7.2.9 TABLE 2-70.
+     *
+     * @return the probability of exceeding the containment radius the row's SIL guarantees
+     */
+    public SourceIntegrityLevel getSourceIntegrityLevel() {
+        return SourceIntegrityLevel.forSIL(sil);
+    }
+
+    /**
      * The horizontal containment radius limit, with the side of the value the true radius lies on.
-     * Travels with {@link #getNIC()} and must not be derived from it: the two are separate columns
+     * Travels with {@link #getNICEncoded()} and must not be derived from it: the two are separate columns
      * of the same row.
      *
      * @return the containment radius

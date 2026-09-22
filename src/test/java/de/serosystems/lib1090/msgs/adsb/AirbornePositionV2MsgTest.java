@@ -42,7 +42,7 @@ class AirbornePositionV2MsgTest extends AirbornePositionMsgTest {
         AirbornePositionV2Msg msg = new AirbornePositionV2Msg(
                 new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNIC());
+        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNICEncoded());
         assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());
         assertEquals(Position.AltitudeType.BAROMETRIC_ALTITUDE, msg.getAltitudeType());
         assertTrue(msg.toString().contains("AirbornePositionV2Msg{"));

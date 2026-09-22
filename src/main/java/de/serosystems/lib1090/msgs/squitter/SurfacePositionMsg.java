@@ -46,7 +46,7 @@ public interface SurfacePositionMsg extends PositionMsg, NavigationCharacteristi
     NavigationCharacteristics getNavigationCharacteristics(NICSupplements nicSupplements);
 
     @Override
-    byte getNIC();
+    byte getNICEncoded();
 
     /**
      * Movement field as encoded in the surface position message.

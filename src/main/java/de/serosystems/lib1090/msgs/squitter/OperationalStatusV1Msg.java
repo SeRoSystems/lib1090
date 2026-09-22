@@ -22,7 +22,7 @@ package de.serosystems.lib1090.msgs.squitter;
  * Common API for ADS-B operational status version 1 messages. The Version One (1) Aircraft
  * Operational Status Message format is documented in ED-102B §N.5.2 Figure N-15.
  */
-public interface OperationalStatusV1Msg extends OperationalStatusMsg {
+public interface OperationalStatusV1Msg extends OperationalStatusMsg, SILMsg {
 
     /**
      * @return the subtype code, 0 for airborne operational status messages and 1 for surface operational status messages
@@ -39,21 +39,6 @@ public interface OperationalStatusV1Msg extends OperationalStatusMsg {
      * @return the navigation accuracy for position messages, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACpEncoded();
-
-    /**
-     * Source integrity level encoding.
-     * <ul>
-     *     <li>0: unknown or &gt; 1e-3</li>
-     *     <li>1: &lt;= 1e-3</li>
-     *     <li>2: &lt;= 1e-5</li>
-     *     <li>3: &lt;= 1e-7</li>
-     * </ul>
-     *
-     * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius, ED-102B §2.2.3.2.7.2.9 TABLE 2-70; not to be confused with
-     * the "SIL Supplement" TABLE A-15
-     */
-    byte getSILEncoded();
 
     /**
      * @return true if the horizontal reference direction is magnetic north, false if true north,

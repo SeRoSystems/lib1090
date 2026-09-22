@@ -264,20 +264,20 @@ class CapabilityClassLayoutsTest {
      */
     @Test
     void surfaceCapabilityClassReportsItsNACvBothWays() {
-        assertEquals(HorizontalVelocityError.BELOW_3, new SurfaceCapabilityClassCodeV2(0x4).getNACv(),
+        assertEquals(HorizontalVelocityError.BELOW_3, new SurfaceCapabilityClassCodeV2(0x4).getHorizontalVelocityError(),
                 "NACv 2 at ME 17-19");
-        assertEquals(HorizontalVelocityError.BELOW_0_3, new SurfaceCapabilityClassCodeV3(0x8).getNACv(),
+        assertEquals(HorizontalVelocityError.BELOW_0_3, new SurfaceCapabilityClassCodeV3(0x8).getHorizontalVelocityError(),
                 "NACv 4 at ME 17-19");
 
         // category 0 and the reserved ones guarantee nothing
         assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10,
-                new SurfaceCapabilityClassCodeV2(0).getNACv(), "NACv 0");
+                new SurfaceCapabilityClassCodeV2(0).getHorizontalVelocityError(), "NACv 0");
         assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10,
-                new SurfaceCapabilityClassCodeV2(0xE).getNACv(), "NACv 7, reserved");
+                new SurfaceCapabilityClassCodeV2(0xE).getHorizontalVelocityError(), "NACv 7, reserved");
 
         for (int encoded = 0; encoded <= 7; encoded++) {
             SurfaceCapabilityClassCodeV2 cc = new SurfaceCapabilityClassCodeV2(encoded << 1);
-            assertEquals(HorizontalVelocityError.forNACv(cc.getNACvEncoded()), cc.getNACv(),
+            assertEquals(HorizontalVelocityError.forNACv(cc.getNACvEncoded()), cc.getHorizontalVelocityError(),
                     "NACv " + encoded);
         }
     }

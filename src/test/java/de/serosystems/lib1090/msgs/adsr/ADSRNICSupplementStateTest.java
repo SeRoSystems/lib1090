@@ -94,7 +94,7 @@ class ADSRNICSupplementStateTest {
     private static byte nicOfFollowingPosition(StatefulModeSDecoder decoder) throws Exception {
         AirbornePositionV3Msg.WithNICSupplements position =
                 (AirbornePositionV3Msg.WithNICSupplements) decoder.decode(airbornePosition(), T);
-        return position.getNIC();
+        return position.getNICEncoded();
     }
 
     @Test
@@ -155,7 +155,7 @@ class ADSRNICSupplementStateTest {
         decoder.decode(otherStatus, T);
         AirbornePositionV3Msg.WithNICSupplements other =
                 (AirbornePositionV3Msg.WithNICSupplements) decoder.decode(otherPosition, T);
-        assertEquals(8, other.getNIC(), "the second target never reported supplement B");
+        assertEquals(8, other.getNICEncoded(), "the second target never reported supplement B");
 
         assertEquals(9, nicOfFollowingPosition(decoder), "the first target still has it");
     }

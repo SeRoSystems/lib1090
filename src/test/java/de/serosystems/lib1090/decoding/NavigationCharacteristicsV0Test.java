@@ -87,7 +87,7 @@ class NavigationCharacteristicsV0Test {
     @Test
     void testNICAndNACpCoincideInEveryRow() {
         for (NavigationCharacteristicsV0 characteristics : NavigationCharacteristicsV0.values())
-            assertEquals(characteristics.getNACp(), characteristics.getNIC(), characteristics.name());
+            assertEquals(characteristics.getNACpEncoded(), characteristics.getNICEncoded(), characteristics.name());
     }
 
     /**
@@ -99,18 +99,18 @@ class NavigationCharacteristicsV0Test {
         NavigationCharacteristicsV0 surface = NavigationCharacteristicsV0.TYPE_CODE_8;
         NavigationCharacteristicsV0 airborne = NavigationCharacteristicsV0.TYPE_CODE_12;
 
-        assertEquals(surface.getNUCp(), airborne.getNUCp());
-        assertEquals((byte) 0, surface.getNACp());
-        assertEquals((byte) 7, airborne.getNACp());
+        assertEquals(surface.getNUCpEncoded(), airborne.getNUCpEncoded());
+        assertEquals((byte) 0, surface.getNACpEncoded());
+        assertEquals((byte) 7, airborne.getNACpEncoded());
     }
 
     @Test
     void testOnlyTypeCode22HasNoNUCp() {
         for (NavigationCharacteristicsV0 characteristics : NavigationCharacteristicsV0.values()) {
             if (characteristics == NavigationCharacteristicsV0.TYPE_CODE_22)
-                assertNull(characteristics.getNUCp(), characteristics.name());
+                assertNull(characteristics.getNUCpEncoded(), characteristics.name());
             else
-                assertNotNull(characteristics.getNUCp(), characteristics.name());
+                assertNotNull(characteristics.getNUCpEncoded(), characteristics.name());
         }
     }
 
@@ -141,25 +141,37 @@ class NavigationCharacteristicsV0Test {
             boolean guaranteesRadius =
                     characteristics.getContainmentRadius().getBound() == ContainmentRadius.Bound.UPPER;
 
-            assertEquals(guaranteesRadius ? (byte) 2 : (byte) 0, characteristics.getSIL(),
+            assertEquals(guaranteesRadius ? (byte) 2 : (byte) 0, characteristics.getSILEncoded(),
                     characteristics.name());
+            assertEquals(guaranteesRadius
+                            ? SourceIntegrityLevel.AT_MOST_1E_MINUS_5
+                            : SourceIntegrityLevel.UNKNOWN_OR_ABOVE_1E_MINUS_3,
+                    characteristics.getSourceIntegrityLevel(), characteristics.name());
         }
+    }
+
+    /** The two SIL accessors are one column read two ways, so they may never disagree. */
+    @Test
+    void testTheSILCodeAndWhatItGuaranteesAgree() {
+        for (NavigationCharacteristicsV0 characteristics : NavigationCharacteristicsV0.values())
+            assertEquals(SourceIntegrityLevel.forSIL(characteristics.getSILEncoded()),
+                    characteristics.getSourceIntegrityLevel(), characteristics.name());
     }
 
     @Test
     void testSpotChecksAgainstTheStandardTable() {
         NavigationCharacteristicsV0 typeCode13 = NavigationCharacteristicsV0.forFormatTypeCode((byte) 13);
 
-        assertEquals((byte) 5, typeCode13.getNUCp());
-        assertEquals((byte) 6, typeCode13.getNACp());
-        assertEquals((byte) 6, typeCode13.getNIC());
-        assertEquals((byte) 2, typeCode13.getSIL());
+        assertEquals((byte) 5, typeCode13.getNUCpEncoded());
+        assertEquals((byte) 6, typeCode13.getNACpEncoded());
+        assertEquals((byte) 6, typeCode13.getNICEncoded());
+        assertEquals(SourceIntegrityLevel.AT_MOST_1E_MINUS_5, typeCode13.getSourceIntegrityLevel());
         assertEquals(ContainmentRadius.BELOW_926, typeCode13.getContainmentRadius());
 
         NavigationCharacteristicsV0 typeCode16 = NavigationCharacteristicsV0.forFormatTypeCode((byte) 16);
 
-        assertEquals((byte) 2, typeCode16.getNUCp());
-        assertEquals((byte) 1, typeCode16.getNACp());
+        assertEquals((byte) 2, typeCode16.getNUCpEncoded());
+        assertEquals((byte) 1, typeCode16.getNACpEncoded());
         assertEquals(ContainmentRadius.BELOW_18520, typeCode16.getContainmentRadius());
     }
 }

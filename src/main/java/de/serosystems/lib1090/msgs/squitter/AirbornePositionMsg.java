@@ -46,7 +46,7 @@ public interface AirbornePositionMsg extends PositionMsg, NavigationCharacterist
     NavigationCharacteristics getNavigationCharacteristics(NICSupplements nicSupplements);
 
     @Override
-    byte getNIC();
+    byte getNICEncoded();
 
     /**
      * 12-bit altitude field as encoded in the airborne position message.

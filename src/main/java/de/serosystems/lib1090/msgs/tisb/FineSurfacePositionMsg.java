@@ -120,8 +120,8 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
     }
 
     @Override
-    public byte getNIC() {
-        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    public byte getNICEncoded() {
+        return getNavigationCharacteristics(getKnownSupplements()).getNICEncoded();
     }
 
     @Override

@@ -98,7 +98,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     /**
      * @return the raw encoded PIC field (Position Integrity Category)
      */
-    public byte getPIC() {
+    public byte getPICEncoded() {
         return positionIntegrityCategory;
     }
 

@@ -111,8 +111,8 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public byte getNIC() {
-        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    public byte getNICEncoded() {
+        return getNavigationCharacteristics(getKnownSupplements()).getNICEncoded();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class AirbornePositionV3Msg extends ExtendedSquitter implements Serializa
 
     /**
      * Variant of {@link AirbornePositionV3Msg} that carries what is known of its target's NIC supplements,
-     * as accumulated from the messages that transmit them, so that {@link #getNIC()} and
+     * as accumulated from the messages that transmit them, so that {@link #getNICEncoded()} and
      * {@link #getContainmentRadius()} report the row those supplements select rather than the worst
      * the format type code allows.
      */

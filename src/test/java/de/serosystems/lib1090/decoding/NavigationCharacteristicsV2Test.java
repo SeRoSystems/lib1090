@@ -65,8 +65,8 @@ class NavigationCharacteristicsV2Test {
                                                        NavigationCharacteristicsV2 second) {
         if (first == null)
             return second;
-        if (first.getNIC() != second.getNIC())
-            return first.getNIC() < second.getNIC() ? first : second;
+        if (first.getNICEncoded() != second.getNICEncoded())
+            return first.getNICEncoded() < second.getNICEncoded() ? first : second;
 
         ContainmentRadius worse =
                 ContainmentRadius.worseOf(first.getContainmentRadius(), second.getContainmentRadius());
@@ -202,7 +202,7 @@ class NavigationCharacteristicsV2Test {
     void testEachNICPairsWithItsOwnRadius() {
         for (NavigationCharacteristicsV2 row : NavigationCharacteristicsV2.values()) {
             ContainmentRadius expected;
-            switch (row.getNIC()) {
+            switch (row.getNICEncoded()) {
                 case 11: expected = ContainmentRadius.BELOW_7_5; break;
                 case 10: expected = ContainmentRadius.BELOW_25; break;
                 case 9: expected = ContainmentRadius.BELOW_75; break;
@@ -228,14 +228,14 @@ class NavigationCharacteristicsV2Test {
         assertEquals(ContainmentRadius.AT_LEAST_1111_2, surface(8, NICSupplement.CLEAR, NICSupplement.CLEAR));
 
         assertEquals((byte) 7, NavigationCharacteristicsV2
-                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.SET, NICSupplement.SET)).getNIC());
+                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.SET, NICSupplement.SET)).getNICEncoded());
         assertEquals((byte) 0, NavigationCharacteristicsV2
-                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.CLEAR, NICSupplement.CLEAR)).getNIC());
+                .forSurfaceFormatTypeCode((byte) 8, surfaceSupplements(NICSupplement.CLEAR, NICSupplement.CLEAR)).getNICEncoded());
 
         assertEquals((byte) 9, NavigationCharacteristicsV2
-                .forAirborneFormatTypeCode((byte) 11, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNIC());
+                .forAirborneFormatTypeCode((byte) 11, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNICEncoded());
         assertEquals((byte) 3, NavigationCharacteristicsV2
-                .forAirborneFormatTypeCode((byte) 16, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNIC());
+                .forAirborneFormatTypeCode((byte) 16, airborneSupplements(NICSupplement.UNKNOWN, NICSupplement.SET)).getNICEncoded());
 
         assertEquals(ContainmentRadius.AT_LEAST_37040, airborne(18, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));
         assertEquals(ContainmentRadius.AT_LEAST_25, airborne(22, NICSupplement.UNKNOWN, NICSupplement.UNKNOWN));

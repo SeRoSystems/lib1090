@@ -129,7 +129,7 @@ public class VelocityOverGroundV0Msg extends ExtendedSquitter implements Seriali
      * @return the raw encoded Navigation Uncertainty Category for Velocity (NUC_R)
      */
     @Override
-    public byte getNUCr() {
+    public byte getNUCrEncoded() {
         return navigationAccuracyCategory;
     }
 

@@ -42,7 +42,7 @@ class AirbornePositionV3MsgTest extends AirbornePositionMsgTest {
         AirbornePositionV3Msg msg = new AirbornePositionV3Msg(
                 new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false).withD((byte) 0)).getNIC());
+        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false).withD((byte) 0)).getNICEncoded());
         assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false).withD((byte) 0)).getHorizontalContainmentRadiusLimit());
         assertEquals(Position.AltitudeType.BAROMETRIC_ALTITUDE, msg.getAltitudeType());
         assertTrue(msg.toString().contains("AirbornePositionV3Msg{"));

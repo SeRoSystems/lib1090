@@ -47,7 +47,7 @@ public interface SurfaceCapabilityClassCodeV2V3 extends SurfaceCapabilityClassCo
      *
      * @return the 95% horizontal velocity error the reported category guarantees
      */
-    default HorizontalVelocityError getNACv() {
+    default HorizontalVelocityError getHorizontalVelocityError() {
         return HorizontalVelocityError.forNACv(getNACvEncoded());
     }
 

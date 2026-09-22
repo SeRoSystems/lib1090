@@ -226,16 +226,16 @@ public enum NavigationCharacteristicsV2 implements NavigationCharacteristics {
     }
 
     /**
-     * @return the navigation integrity category
+     * @return the encoded navigation integrity category
      */
     @Override
-    public byte getNIC() {
+    public byte getNICEncoded() {
         return nic;
     }
 
     /**
      * The horizontal containment radius limit, with the side of the value the true radius lies on.
-     * Travels with {@link #getNIC()} and must not be derived from it — type code 13 reports NIC 6 at
+     * Travels with {@link #getNICEncoded()} and must not be derived from it — type code 13 reports NIC 6 at
      * three different radii, and surface type code 8 reports NIC 6 at two.
      *
      * @return the containment radius

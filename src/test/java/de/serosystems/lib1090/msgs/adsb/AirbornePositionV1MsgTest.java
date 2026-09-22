@@ -42,8 +42,8 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
         AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
                 new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
-        assertEquals(9, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getNIC());
-        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNIC());
+        assertEquals(9, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getNICEncoded());
+        assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNICEncoded());
         assertEquals(75.0, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getHorizontalContainmentRadiusLimit());
         assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());
         assertInstanceOf(SingleAntennaMsg.class, msg);
@@ -70,7 +70,7 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
         assertEquals(1111.2, msg.getHorizontalContainmentRadiusLimit());
 
         assertEquals(ContainmentRadius.BELOW_1111_2, msg.getContainmentRadius());
-        assertEquals(6, msg.getNIC());
+        assertEquals(6, msg.getNICEncoded());
     }
 
     /**
@@ -84,6 +84,6 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
 
         assertEquals(ContainmentRadius.BELOW_926, msg.getContainmentRadius());
         assertEquals(926.0, msg.getHorizontalContainmentRadiusLimit());
-        assertEquals(6, msg.getNIC());
+        assertEquals(6, msg.getNICEncoded());
     }
 }

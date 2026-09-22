@@ -30,5 +30,5 @@ public interface NUCrMsg {
     /**
      * @return the raw encoded Navigation Uncertainty Category for velocity
      */
-    byte getNUCr();
+    byte getNUCrEncoded();
 }

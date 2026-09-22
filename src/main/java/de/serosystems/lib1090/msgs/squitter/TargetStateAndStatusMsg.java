@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.squitter;
 /**
  * Common API for ADS-B target state and status messages across supported versions.
  */
-public interface TargetStateAndStatusMsg {
+public interface TargetStateAndStatusMsg extends SILMsg {
 
     /**
      * @return whether selected altitude is available, ED-102B §2.2.3.2.7.1.3.2
@@ -68,9 +68,9 @@ public interface TargetStateAndStatusMsg {
     int getSelectedHeadingEncoded();
 
     /**
-     * @return the navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8
+     * @return the raw encoded navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8
      */
-    byte getNACp();
+    byte getNACpEncoded();
 
     /**
      * @return the barometric altitude integrity code (NIC_BARO) indicating whether barometric
@@ -81,9 +81,10 @@ public interface TargetStateAndStatusMsg {
     boolean getBarometricAltitudeIntegrityCode();
 
     /**
-     * @return the surveillance/source integrity level, ED-102B §2.2.3.2.7.1.3.10
+     * @return the raw encoded surveillance/source integrity level, ED-102B §2.2.3.2.7.1.3.10
      */
-    byte getSIL();
+    @Override
+    byte getSILEncoded();
 
     /**
      * @return true if TCAS is operational, false otherwise, ED-102B §2.2.3.2.7.1.3.17 TABLE 2-44

@@ -41,9 +41,9 @@ public interface NavigationCharacteristics {
     byte getFormatTypeCode();
 
     /**
-     * @return the navigation integrity category. A NIC of 0 means "unknown" or "not upper bounded".
+     * @return the encoded navigation integrity category. A NIC of 0 means "unknown" or "not upper bounded".
      */
-    byte getNIC();
+    byte getNICEncoded();
 
     /**
      * The horizontal containment radius limit, with the side of the reported value the true radius
