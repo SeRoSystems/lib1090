@@ -23,7 +23,7 @@ import de.serosystems.lib1090.decoding.OperationalStatus;
 /**
  * Common API for ADS-B surface operational status messages.
  */
-public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
+public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg, SILMsg {
 
     byte SUBTYPE_CODE = 1;
 
@@ -44,11 +44,6 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg {
      * @return the navigation accuracy for position messages, ED-102B §2.2.3.2.7.2.7 TABLE 2-68
      */
     byte getNACpEncoded();
-
-    /**
-     * @return the source integrity level (SIL), ED-102B §2.2.3.2.7.2.9 TABLE 2-70
-     */
-    byte getSILEncoded();
 
     /**
      * @return raw aircraft vehicle length and width code (4 bit)

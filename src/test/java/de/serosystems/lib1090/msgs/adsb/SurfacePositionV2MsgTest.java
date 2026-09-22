@@ -46,7 +46,7 @@ class SurfacePositionV2MsgTest extends SurfacePositionMsgTest {
     void testGetNICWithSupplementA() throws Exception {
         final SurfacePositionV2Msg sPos = new SurfacePositionV2Msg(SURF_POS, Instant.EPOCH);
 
-        assertEquals(9, sPos.getNavigationCharacteristics(NICSupplements.none().withA(true).withC(false)).getNIC());
+        assertEquals(9, sPos.getNavigationCharacteristics(NICSupplements.none().withA(true).withC(false)).getNICEncoded());
     }
 
     @Test

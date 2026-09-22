@@ -136,7 +136,7 @@ class NavigationCharacteristicsV1Test {
                 NavigationCharacteristicsV1 known = lookup(ftc, supplement);
                 String where = "type code " + formatTypeCode + ", supplement " + supplement;
 
-                assertTrue(unknown.getNIC() <= known.getNIC(), where);
+                assertTrue(unknown.getNICEncoded() <= known.getNICEncoded(), where);
                 assertEquals(ContainmentRadius.worseOf(unknown.getContainmentRadius(),
                         known.getContainmentRadius()), unknown.getContainmentRadius(), where);
             }
@@ -156,14 +156,14 @@ class NavigationCharacteristicsV1Test {
                 if (row.getFormatTypeCode() == formatTypeCode)
                     rows.add(row);
 
-            byte worstNIC = rows.stream().map(NavigationCharacteristicsV1::getNIC)
+            byte worstNIC = rows.stream().map(NavigationCharacteristicsV1::getNICEncoded)
                     .min(Byte::compare).orElseThrow(AssertionError::new);
             ContainmentRadius worstRadius = rows.stream().map(NavigationCharacteristicsV1::getContainmentRadius)
                     .reduce(ContainmentRadius::worseOf).orElseThrow(AssertionError::new);
 
             NavigationCharacteristicsV1 worst = lookup((byte) formatTypeCode, NICSupplement.UNKNOWN);
 
-            assertEquals(worstNIC, worst.getNIC(), "type code " + formatTypeCode);
+            assertEquals(worstNIC, worst.getNICEncoded(), "type code " + formatTypeCode);
             assertEquals(worstRadius, worst.getContainmentRadius(), "type code " + formatTypeCode);
         }
     }
@@ -176,18 +176,39 @@ class NavigationCharacteristicsV1Test {
     void testEachNICPairsWithItsOwnRadius() {
         for (NavigationCharacteristicsV1 row : NavigationCharacteristicsV1.values()) {
             ContainmentRadius expected;
-            switch (row.getNIC()) {
-                case 11: expected = ContainmentRadius.BELOW_7_5; break;
-                case 10: expected = ContainmentRadius.BELOW_25; break;
-                case 9: expected = ContainmentRadius.BELOW_75; break;
-                case 8: expected = ContainmentRadius.BELOW_185_2; break;
-                case 7: expected = ContainmentRadius.BELOW_370_4; break;
-                case 5: expected = ContainmentRadius.BELOW_1852; break;
-                case 4: expected = ContainmentRadius.BELOW_3704; break;
-                case 3: expected = ContainmentRadius.BELOW_7408; break;
-                case 2: expected = ContainmentRadius.BELOW_14816; break;
-                case 1: expected = ContainmentRadius.BELOW_37040; break;
-                default: continue;   // NIC 6 is subdivided, NIC 0 reports no radius
+            switch (row.getNICEncoded()) {
+                case 11:
+                    expected = ContainmentRadius.BELOW_7_5;
+                    break;
+                case 10:
+                    expected = ContainmentRadius.BELOW_25;
+                    break;
+                case 9:
+                    expected = ContainmentRadius.BELOW_75;
+                    break;
+                case 8:
+                    expected = ContainmentRadius.BELOW_185_2;
+                    break;
+                case 7:
+                    expected = ContainmentRadius.BELOW_370_4;
+                    break;
+                case 5:
+                    expected = ContainmentRadius.BELOW_1852;
+                    break;
+                case 4:
+                    expected = ContainmentRadius.BELOW_3704;
+                    break;
+                case 3:
+                    expected = ContainmentRadius.BELOW_7408;
+                    break;
+                case 2:
+                    expected = ContainmentRadius.BELOW_14816;
+                    break;
+                case 1:
+                    expected = ContainmentRadius.BELOW_37040;
+                    break;
+                default:
+                    continue;   // NIC 6 is subdivided, NIC 0 reports no radius
             }
 
             assertEquals(expected, row.getContainmentRadius(), row.name());
@@ -201,16 +222,16 @@ class NavigationCharacteristicsV1Test {
 
     @Test
     void testSpotChecksAgainstTheStandardTable() {
-        assertEquals((byte) 9, lookup((byte) 7, NICSupplement.SET).getNIC());
+        assertEquals((byte) 9, lookup((byte) 7, NICSupplement.SET).getNICEncoded());
         assertEquals(ContainmentRadius.BELOW_75,
                 lookup((byte) 7, NICSupplement.SET).getContainmentRadius());
 
-        assertEquals((byte) 8, lookup((byte) 11, NICSupplement.CLEAR).getNIC());
+        assertEquals((byte) 8, lookup((byte) 11, NICSupplement.CLEAR).getNICEncoded());
         assertEquals(ContainmentRadius.BELOW_185_2,
                 lookup((byte) 11, NICSupplement.CLEAR).getContainmentRadius());
 
-        assertEquals((byte) 2, lookup((byte) 16, NICSupplement.CLEAR).getNIC());
-        assertEquals((byte) 3, lookup((byte) 16, NICSupplement.SET).getNIC());
+        assertEquals((byte) 2, lookup((byte) 16, NICSupplement.CLEAR).getNICEncoded());
+        assertEquals((byte) 3, lookup((byte) 16, NICSupplement.SET).getNICEncoded());
 
         assertEquals(ContainmentRadius.AT_LEAST_185_2,
                 lookup((byte) 8, NICSupplement.UNKNOWN).getContainmentRadius());

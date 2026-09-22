@@ -87,9 +87,9 @@ public class TargetStateAndStatusV1MsgTest {
         assertTrue(tss.hasSelectedHeading());
         assertEquals(128, tss.getSelectedHeadingEncoded());
         assertEquals(90.f, tss.getSelectedHeading());
-        assertEquals(9, tss.getNACp());
+        assertEquals(9, tss.getNACpEncoded());
         assertTrue(tss.getBarometricAltitudeIntegrityCode());
-        assertEquals(3, tss.getSIL());
+        assertEquals(3, tss.getSILEncoded());
         assertTrue(tss.hasOperationalTCAS());
         assertTrue(tss.hasActiveTCASResolutionAdvisory());
         assertEquals(4, tss.getEmergencyPriorityStatus());

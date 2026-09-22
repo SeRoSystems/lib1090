@@ -108,17 +108,17 @@ public class ExampleDecoder {
                     System.out.println("          Height (geom.): " + ap.getAltitude() + geoMinusBaro + " ft");
                 }
 
-                System.out.println("          Navigation Integrity Category: " + ap.getNIC());
+                System.out.println("          Navigation Integrity Category: " + ap.getNICEncoded());
                 System.out.println("          Surveillance status: " + ap.getSurveillanceStatusDescription());
 
                 // we want to inspect fields for ADS-B of different versions
                 if (msg instanceof AirbornePositionV0Msg) {
                     AirbornePositionV0Msg ap0 = (AirbornePositionV0Msg) msg;
                     // NACp and SIL for newer ADS-B versions contained in operational status message
-                    byte nacP = ap0.getNACp();
+                    byte nacP = ap0.getNACpEncoded();
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
                     System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(nacP));
-                    System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSIL());
+                    System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSourceIntegrityLevel());
                 } else if (msg instanceof AirbornePositionV2Msg) {
                     AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
                     System.out.println("          NIC supplement B set: " + ap2.getNICSupplementB());
@@ -149,17 +149,17 @@ public class ExampleDecoder {
                 System.out.println("          Horizontal containment radius limit/protection level: " +
                         surfacePosition.getContainmentRadius() + " ("
                         + surfacePosition.getHorizontalContainmentRadiusLimit() + " m)");
-                System.out.println("          Navigation Integrity Category: " + surfacePosition.getNIC());
+                System.out.println("          Navigation Integrity Category: " + surfacePosition.getNICEncoded());
 
                 // we want to inspect fields for ADS-B of different versions
                 if (msg instanceof SurfacePositionV0Msg) {
                     SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
                     // NACp and SIL for newer ADS-B versions contained in operational status message
                     // Use the following only with version 0 as the others are more accurate
-                    byte nacP = sp0.getNACp();
+                    byte nacP = sp0.getNACpEncoded();
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
                     System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(nacP) + "m");
-                    System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSIL());
+                    System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSourceIntegrityLevel());
                 }
             } else if (msg instanceof EmergencyOrPriorityStatusMsg) {
                 EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
@@ -203,7 +203,8 @@ public class ExampleDecoder {
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
                     System.out.println("          Position Uncertainty (based on NACp): " + OperationalStatus.nacPtoEPU(opstatA.getNACpEncoded()));
                     System.out.println("          Has NIC supplement A: " + opstatA.getNICSupplementA());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatA.getSILEncoded());
+                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                            + opstatA.getSILEncoded() + " (" + opstatA.getSourceIntegrityLevel() + ")");
                 }
                 if (msg instanceof SurfaceOperationalStatusMsg) {
                     SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
@@ -251,7 +252,7 @@ public class ExampleDecoder {
                     SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
                     System.out.println("          Has NIC supplement C: " + surface.getNICSupplementC());
                     System.out.println("          Navigation Accuracy Category for velocity (NACv): "
-                            + surface.getNACvEncoded() + " (" + surface.getNACv() + ")");
+                            + surface.getNACvEncoded() + " (" + surface.getHorizontalVelocityError() + ")");
                 }
                 if (cc instanceof AirborneCapabilityClassCodeV3) {
                     AirborneCapabilityClassCodeV3 v3 = (AirborneCapabilityClassCodeV3) cc;
@@ -313,9 +314,10 @@ public class ExampleDecoder {
                 System.out.println("[" + icao24 + "]: Target State and Status reported");
                 if (msg instanceof TargetStateAndStatusV1Msg) {
                     TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
                     System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
+                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                            + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
                     System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
                     if (tStatus.hasSelectedAltitude()) {
                         System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
@@ -330,9 +332,10 @@ public class ExampleDecoder {
                 } else {
 
                     TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACp());
+                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
                     System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): " + tStatus.getSIL());
+                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                            + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
                     System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
                     System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
 

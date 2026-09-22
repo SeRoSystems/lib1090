@@ -75,8 +75,8 @@ class NavigationCharacteristicsV3Test {
                                                        NavigationCharacteristicsV3 second) {
         if (first == null)
             return second;
-        if (first.getNIC() != second.getNIC())
-            return first.getNIC() < second.getNIC() ? first : second;
+        if (first.getNICEncoded() != second.getNICEncoded())
+            return first.getNICEncoded() < second.getNICEncoded() ? first : second;
 
         ContainmentRadius worse =
                 ContainmentRadius.worseOf(first.getContainmentRadius(), second.getContainmentRadius());
@@ -148,7 +148,7 @@ class NavigationCharacteristicsV3Test {
                         NavigationCharacteristicsV3 v3 =
                                 NavigationCharacteristicsV3.forSurfaceFormatTypeCode(ftc, surfaceSupplements(first, second));
 
-                        assertEquals(v2.getNIC(), v3.getNIC(), where);
+                        assertEquals(v2.getNICEncoded(), v3.getNICEncoded(), where);
                         assertEquals(v2.getContainmentRadius(), v3.getContainmentRadius(), where);
                     }
 
@@ -158,7 +158,7 @@ class NavigationCharacteristicsV3Test {
                         NavigationCharacteristicsV3 v3 = NavigationCharacteristicsV3
                                 .forAirborneFormatTypeCode(ftc, airborneSupplements(first, second, NICSupplementD.UNKNOWN));
 
-                        assertEquals(v2.getNIC(), v3.getNIC(), where);
+                        assertEquals(v2.getNICEncoded(), v3.getNICEncoded(), where);
                         assertEquals(v2.getContainmentRadius(), v3.getContainmentRadius(), where);
                     }
                 }
@@ -171,11 +171,11 @@ class NavigationCharacteristicsV3Test {
      */
     @Test
     void testDiffersFromVersion2WhereSupplementDApplies() {
-        assertEquals((byte) 11, v2Airborne(20).getNIC());
-        assertEquals((byte) 8, airborne(20, NICSupplementD.UNKNOWN).getNIC());
+        assertEquals((byte) 11, v2Airborne(20).getNICEncoded());
+        assertEquals((byte) 8, airborne(20, NICSupplementD.UNKNOWN).getNICEncoded());
 
-        assertEquals((byte) 10, v2Airborne(21).getNIC());
-        assertEquals((byte) 7, airborne(21, NICSupplementD.UNKNOWN).getNIC());
+        assertEquals((byte) 10, v2Airborne(21).getNICEncoded());
+        assertEquals((byte) 7, airborne(21, NICSupplementD.UNKNOWN).getNICEncoded());
 
         assertEquals(ContainmentRadius.AT_LEAST_25, v2Airborne(22).getContainmentRadius());
         assertEquals(ContainmentRadius.AT_LEAST_3704,
@@ -266,18 +266,39 @@ class NavigationCharacteristicsV3Test {
     void testEachNICPairsWithItsOwnRadius() {
         for (NavigationCharacteristicsV3 row : NavigationCharacteristicsV3.values()) {
             ContainmentRadius expected;
-            switch (row.getNIC()) {
-                case 11: expected = ContainmentRadius.BELOW_7_5; break;
-                case 10: expected = ContainmentRadius.BELOW_25; break;
-                case 9: expected = ContainmentRadius.BELOW_75; break;
-                case 8: expected = ContainmentRadius.BELOW_185_2; break;
-                case 7: expected = ContainmentRadius.BELOW_370_4; break;
-                case 5: expected = ContainmentRadius.BELOW_1852; break;
-                case 4: expected = ContainmentRadius.BELOW_3704; break;
-                case 3: expected = ContainmentRadius.BELOW_7408; break;
-                case 2: expected = ContainmentRadius.BELOW_14816; break;
-                case 1: expected = ContainmentRadius.BELOW_37040; break;
-                default: continue;   // NIC 6 is subdivided, NIC 0 reports no radius
+            switch (row.getNICEncoded()) {
+                case 11:
+                    expected = ContainmentRadius.BELOW_7_5;
+                    break;
+                case 10:
+                    expected = ContainmentRadius.BELOW_25;
+                    break;
+                case 9:
+                    expected = ContainmentRadius.BELOW_75;
+                    break;
+                case 8:
+                    expected = ContainmentRadius.BELOW_185_2;
+                    break;
+                case 7:
+                    expected = ContainmentRadius.BELOW_370_4;
+                    break;
+                case 5:
+                    expected = ContainmentRadius.BELOW_1852;
+                    break;
+                case 4:
+                    expected = ContainmentRadius.BELOW_3704;
+                    break;
+                case 3:
+                    expected = ContainmentRadius.BELOW_7408;
+                    break;
+                case 2:
+                    expected = ContainmentRadius.BELOW_14816;
+                    break;
+                case 1:
+                    expected = ContainmentRadius.BELOW_37040;
+                    break;
+                default:
+                    continue;   // NIC 6 is subdivided, NIC 0 reports no radius
             }
 
             assertEquals(expected, row.getContainmentRadius(), row.name());
@@ -299,7 +320,7 @@ class NavigationCharacteristicsV3Test {
 
         // the row the old decoder could not express: -1 stood for this and for "nothing reported"
         assertEquals(ContainmentRadius.AT_LEAST_3704, airborne(22, NICSupplementD.ZERO).getContainmentRadius());
-        assertEquals((byte) 0, airborne(22, NICSupplementD.ZERO).getNIC());
+        assertEquals((byte) 0, airborne(22, NICSupplementD.ZERO).getNICEncoded());
         assertNotEquals(ContainmentRadius.UNKNOWN, airborne(22, NICSupplementD.ZERO).getContainmentRadius());
     }
 

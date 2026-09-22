@@ -118,8 +118,8 @@ public class FineAirbornePositionMsg extends ExtendedSquitter implements Seriali
     }
 
     @Override
-    public byte getNIC() {
-        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    public byte getNICEncoded() {
+        return getNavigationCharacteristics(getKnownSupplements()).getNICEncoded();
     }
 
     @Override

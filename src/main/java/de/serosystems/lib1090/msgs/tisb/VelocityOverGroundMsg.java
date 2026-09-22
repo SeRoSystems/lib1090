@@ -208,10 +208,10 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
      * in the operational status message. For version 0 it is derived from the format type code.
      *
-     * @return NACp according value (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
+     * @return the raw encoded NACp (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
      * {@link AirborneOperationalStatusV1Msg}. Returns null if not available.
      */
-    public byte getNACp() {
+    public byte getNACpEncoded() {
         return nacp;
     }
 
@@ -221,13 +221,13 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
      * is reflected by this method.
      * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-     * {@link AirborneOperationalStatusV2Msg}'s getSIL method for aircraft supporting ADS-B
+     * {@link AirborneOperationalStatusV2Msg}'s getSILEncoded method for aircraft supporting ADS-B
      * version 1 and 2.
      *
-     * @return the source integrity level (SIL) which indicates the probability of exceeding
-     * the NIC containment radius. Returns null if not available.
+     * @return the raw encoded source integrity level (SIL) which indicates the probability of
+     * exceeding the NIC containment radius. Returns null if not available.
      */
-    public Byte getSIL() {
+    public Byte getSILEncoded() {
         return hasGeoFlag() ? null : sil;
     }
 

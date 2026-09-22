@@ -126,7 +126,7 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
     }
 
     @Override
-    public byte getNUCr() {
+    public byte getNUCrEncoded() {
         return navigationAccuracyCategory;
     }
 

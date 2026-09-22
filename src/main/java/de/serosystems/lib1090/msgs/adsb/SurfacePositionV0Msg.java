@@ -24,6 +24,7 @@ import de.serosystems.lib1090.decoding.ContainmentRadius;
 import de.serosystems.lib1090.decoding.NICSupplements;
 import de.serosystems.lib1090.decoding.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.NavigationCharacteristicsV0;
+import de.serosystems.lib1090.decoding.SourceIntegrityLevel;
 import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -108,8 +109,8 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
     }
 
     @Override
-    public byte getNIC() {
-        return getNavigationCharacteristics(getKnownSupplements()).getNIC();
+    public byte getNICEncoded() {
+        return getNavigationCharacteristics(getKnownSupplements()).getNICEncoded();
     }
 
     @Override
@@ -143,8 +144,8 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @return the navigation uncertainty category for position, never {@code null} for a surface
      * type code
      */
-    public Byte getNUCp() {
-        return characteristics().getNUCp();
+    public Byte getNUCpEncoded() {
+        return characteristics().getNUCpEncoded();
     }
 
     /**
@@ -158,8 +159,8 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @see de.serosystems.lib1090.decoding.OperationalStatus#nacPtoEPU(byte) to turn it into an
      * estimated position uncertainty in meters
      */
-    public byte getNACp() {
-        return characteristics().getNACp();
+    public byte getNACpEncoded() {
+        return characteristics().getNACpEncoded();
     }
 
     /**
@@ -169,10 +170,20 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * state and status messages. Version 0 has no such field, and this mapping is the only way to
      * obtain the value — which is why no other position message offers it.
      *
-     * @return the source integrity level
+     * @return the encoded source integrity level
      */
-    public byte getSIL() {
-        return characteristics().getSIL();
+    public byte getSILEncoded() {
+        return characteristics().getSILEncoded();
+    }
+
+    /**
+     * What the source integrity level derived from the format type code guarantees, ED-102B
+     * §2.2.3.2.7.2.9 TABLE 2-70.
+     *
+     * @return the probability of exceeding the containment radius the level guarantees
+     */
+    public SourceIntegrityLevel getSourceIntegrityLevel() {
+        return characteristics().getSourceIntegrityLevel();
     }
 
     @Override

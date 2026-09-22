@@ -67,7 +67,7 @@ abstract class SurfacePositionMsgTest {
     void testGetNIC() throws Exception {
         final SurfacePositionMsg sPos = create(SURF_POS);
 
-        assertEquals(8, sPos.getNIC());
+        assertEquals(8, sPos.getNICEncoded());
     }
 
     @Test

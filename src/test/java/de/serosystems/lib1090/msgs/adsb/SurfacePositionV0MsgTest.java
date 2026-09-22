@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.SourceIntegrityLevel;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,8 @@ class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
     void testGetSIL() throws Exception {
         final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS, Instant.EPOCH);
 
-        assertEquals(2, sPos.getSIL());
+        assertEquals(2, sPos.getSILEncoded());
+        assertEquals(SourceIntegrityLevel.AT_MOST_1E_MINUS_5, sPos.getSourceIntegrityLevel());
     }
 
     /**
@@ -61,7 +63,8 @@ class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
         final SurfacePositionV0Msg sPos = new SurfacePositionV0Msg(SURF_POS_TYPE_CODE_8, Instant.EPOCH);
 
         assertEquals(8, sPos.getFormatTypeCode());
-        assertEquals(0, sPos.getNIC());
-        assertEquals(0, sPos.getSIL());
+        assertEquals(0, sPos.getNICEncoded());
+        assertEquals(0, sPos.getSILEncoded());
+        assertEquals(SourceIntegrityLevel.UNKNOWN_OR_ABOVE_1E_MINUS_3, sPos.getSourceIntegrityLevel());
     }
 }

@@ -115,7 +115,7 @@ class NICSupplementDStateTest {
             decoder.decode(velocityWithSupplementD(supplement), T);
 
             AirbornePositionV3Msg position = positionAfter(decoder);
-            assertEquals(expectedNIC[supplement], position.getNIC(), "supplement D " + supplement);
+            assertEquals(expectedNIC[supplement], position.getNICEncoded(), "supplement D " + supplement);
             assertEquals(expectedRadius[supplement], position.getContainmentRadius(),
                     "supplement D " + supplement);
         }
@@ -128,7 +128,7 @@ class NICSupplementDStateTest {
     void testWithoutAVelocityMessageTheWorstRowIsReported() throws Exception {
         AirbornePositionV3Msg position = positionAfter(decoderAtVersion3());
 
-        assertEquals((byte) 8, position.getNIC());
+        assertEquals((byte) 8, position.getNICEncoded());
         assertEquals(ContainmentRadius.BELOW_185_2, position.getContainmentRadius());
     }
 
@@ -142,6 +142,6 @@ class NICSupplementDStateTest {
         decoder.decode(velocityWithSupplementD(3), T);
         decoder.decode(velocityWithoutSupplementD(), T);
 
-        assertEquals((byte) 11, positionAfter(decoder).getNIC());
+        assertEquals((byte) 11, positionAfter(decoder).getNICEncoded());
     }
 }
