@@ -29,7 +29,8 @@ import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 3 airborne velocity messages, as defined in ED-102B §2.2.18.4.4 Figure 2-59.
+ * Decoder for ADS-R airborne velocity messages (version 3), as defined in ED-102B §2.2.18.4.4
+ * Figure 2-59.
  */
 public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, IMFMsg, NACvMsg, ADSRMsg {
 

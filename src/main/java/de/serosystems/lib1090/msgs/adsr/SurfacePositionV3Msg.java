@@ -36,7 +36,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for ADS-R surface position messages (version 3), as defined in ED-102B §2.2.18.4.2 Figure 2-58.
+ * Decoder for ADS-R surface position messages (version 3), as defined in ED-102B §2.2.18.4.2
+ * Figure 2-58.
  */
 public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, ADSRMsg {
 
