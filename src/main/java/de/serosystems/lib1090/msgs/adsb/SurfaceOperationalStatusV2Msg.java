@@ -71,6 +71,112 @@ public class SurfaceOperationalStatusV2Msg extends SurfaceOperationalStatusV1Msg
 	}
 
 	/**
+	 * @return whether aircraft has an UAT receiver, ME bit 16
+	 */
+	@Override
+	public boolean hasUATIn() {
+		return (capability_class_code & 0x10) != 0;
+	}
+
+	/**
+	 * @return navigation accuracy category for velocity, ME bits 17-19
+	 */
+	@Override
+	public byte getNACv() {
+		return (byte) ((capability_class_code & 0xE) >>> 1);
+	}
+
+	/**
+	 * @return NIC supplement C for use on the surface, ME bit 20
+	 */
+	@Override
+	public boolean getNICSupplementC() {
+		return (capability_class_code & 0x1) != 0;
+	}
+
+	/**
+	 * @return whether aircraft uses a single antenna or two, ME bit 30
+	 */
+	@Override
+	public boolean hasSingleAntenna() {
+		return (operational_mode_code & 0x400) != 0;
+	}
+
+	/**
+	 * For interpretation see Table 2-65 in DO-260B
+	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B), ME bits 31-32
+	 */
+	@Override
+	public byte getSystemDesignAssurance() {
+		return (byte) ((operational_mode_code & 0x300) >>> 8);
+	}
+
+	/**
+	 * Encoded lateral (ME bits 33-35) and longitudinal (ME bits 36-40) distance of the GPS antenna,
+	 * see DO-260B Tables 2-66 and 2-67.
+	 *
+	 * @return encoded GPS antenna offset (8 bits); mask with {@code 0xFF} to obtain the unsigned value
+	 * @see #getLateralAxisGPSAntennaOffset()
+	 * @see #getLongitudinalAxisGPSAntennaOffset()
+	 */
+	@Override
+	public byte getGPSAntennaOffset() {
+		return (byte) (operational_mode_code & 0xFF);
+	}
+
+	/**
+	 * Lateral axis GPS antenna offset, derived from ME bits 33-35 (DO-260B Table 2-66).
+	 * <ul>
+	 *     <li>values are measured from the longitudinal center line (=roll axis) of the aircraft</li>
+	 *     <li>values are given in meters</li>
+	 *     <li>values denote an upper bound</li>
+	 *     <li>positive values mean "toward left wing tip"</li>
+	 *     <li>negative values mean "toward right wing tip"</li>
+	 *     <li>values have a resolution of 2m</li>
+	 *     <li>values are capped at 6m, i.e. 6 means "or above"</li>
+	 * </ul>
+	 *
+	 * @return lateral axis GPS antenna offset in meters or {@code null} for "no data"
+	 * @see #hasPositionOffsetApplied() if the aircraft already corrects the antenna offset, this is not meaningful
+	 */
+	public Integer getLateralAxisGPSAntennaOffset() {
+		boolean right = (operational_mode_code & 0x80) != 0;
+		int magnitude = (operational_mode_code & 0x60) >>> 5;
+		if (!right && magnitude == 0)
+			return null;
+		return 2 * (right ? -magnitude : magnitude);
+	}
+
+	/**
+	 * Longitudinal axis GPS antenna offset, derived from ME bits 36-40 (DO-260B Table 2-67).
+	 * <ul>
+	 *     <li>values are measured from the nose of the aircraft</li>
+	 *     <li>values are given in meters</li>
+	 *     <li>values denote an upper bound</li>
+	 *     <li>values have a resolution of 2m</li>
+	 *     <li>values are capped at 60m, i.e. 60 means "or above"</li>
+	 * </ul>
+	 *
+	 * @return longitudinal axis GPS antenna offset in meters or {@code null} for "no data"
+	 * @see #hasPositionOffsetApplied() if the aircraft already corrects the antenna offset, this is not meaningful
+	 */
+	public Integer getLongitudinalAxisGPSAntennaOffset() {
+		int offset = operational_mode_code & 0x1F;
+		return offset == 0 ? null : 2 * (offset - 1);
+	}
+
+	/**
+	 * From version 2 on, POA is no longer a capability class code flag (ME bit 11 is reserved) but encoded
+	 * as value 1 of the longitudinal GPS antenna offset (ME bits 36-40), see ED-102B.
+	 *
+	 * @return true if the reported position has already been corrected for the GPS antenna offset
+	 */
+	@Override
+	public boolean hasPositionOffsetApplied() {
+		return (operational_mode_code & 0x1F) == 1;
+	}
+
+	/**
 	 * DO-260B 2.2.3.2.7.2.14
 	 * @return true if SIL (Source Integrity Level) is based on "per sample" probability, otherwise
 	 * 			it's based on "per hour".

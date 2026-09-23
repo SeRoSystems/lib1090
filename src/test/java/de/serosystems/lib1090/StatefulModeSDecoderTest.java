@@ -4,6 +4,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.OperationalStatusMsgTest;
+import de.serosystems.lib1090.msgs.adsb.SurfacePositionV2Msg;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsg;
 import de.serosystems.lib1090.msgs.adsb.TargetStateAndStatusMsgTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,34 @@ public class StatefulModeSDecoderTest {
 		TargetStateAndStatusMsg tss = (TargetStateAndStatusMsg) reply;
 
 		assertFalse(tss.hasSelectedHeadingInfo());
+	}
+
+	// surface position with type code 8, i.e. NIC depends on NIC supplements A and C
+	private static final String SURFACE_POSITION_TC8 = "8D4D013140000000000000000000";
+
+	private static String surfaceOpStatus(int cc, int version) {
+		return String.format("8D4D0131F9%03X00000%02X00000000", cc, version << 5);
+	}
+
+	@Test
+	public void surfaceOpStatusV2_shouldPassNICSupplementCToSurfacePosition() throws UnspecifiedFormatError, BadFormatException {
+		decoder.decode(surfaceOpStatus(0x001, 2), 0L);
+
+		final ModeSDownlinkMsg reply = decoder.decode(SURFACE_POSITION_TC8, 0L);
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_SURFACE_POSITION_V2, reply.getType());
+		assertTrue(((SurfacePositionV2Msg) reply).hasNICSupplementC());
+		assertEquals(6, ((SurfacePositionV2Msg) reply).getNIC());
+	}
+
+	@Test
+	public void surfaceOpStatusV2UATIn_shouldNotSetNICSupplementC() throws UnspecifiedFormatError, BadFormatException {
+		// UAT IN and NACv set, but not NIC supplement C
+		decoder.decode(surfaceOpStatus(0x01E, 2), 0L);
+
+		final ModeSDownlinkMsg reply = decoder.decode(SURFACE_POSITION_TC8, 0L);
+		assertEquals(ModeSDownlinkMsg.subtype.ADSB_SURFACE_POSITION_V2, reply.getType());
+		assertFalse(((SurfacePositionV2Msg) reply).hasNICSupplementC());
+		assertEquals(0, ((SurfacePositionV2Msg) reply).getNIC());
 	}
 
 }

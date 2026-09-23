@@ -36,13 +36,12 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	private static final long serialVersionUID = 1146349460486137986L;
 
 	private byte subtype_code;
-	private int capability_class_code; // actually 16 bit unsigned
-	private int operational_mode_code; // actually 16 bit unsigned
+	protected int capability_class_code; // 12 bit unsigned (ME bits 9-20)
+	protected int operational_mode_code; // 16 bit unsigned (ME bits 25-40)
 	private byte airplane_len_width; // only in subtype_code == 1 surface msgs
 	private byte version;
 	private boolean nic_suppl; // may be passed to position messages
 	private byte nac_pos; // navigational accuracy category - position
-	private byte geometric_vertical_accuracy; // bit 49 and 50
 	private byte sil; // surveillance integrity level
 	private boolean nic_trk_hdg; // NIC baro for airborne status, heading/ground track info else
 	private boolean hrd; // heading info is based on true north (0) or magnetic north (1)
@@ -97,12 +96,13 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 		operational_mode_code = ((msg[3]&0xFF)<<8)|(msg[4]&0xFF);
 		version = (byte) ((msg[5]>>>5) & 0x07);
 
-		if ((capability_class_code & 0xE00) != 0)
+		// ME bits 9-10 must be 0 for the only defined capability class code format
+		if ((capability_class_code & 0xC00) != 0)
 			throw new BadFormatException("Unknown capability class code!");
 
 		nic_suppl = ((msg[5] & 0x10) != 0);
 		nac_pos = (byte) (msg[5] & 0xF);
-		geometric_vertical_accuracy = (byte) ((msg[6] >>> 6) & 0x3);
+		// ME bits 49 and 50 are reserved for surface participants
 		sil = (byte) ((msg[6]>>>4)&0x3);
 		nic_trk_hdg = ((msg[6] & 0x8) != 0);
 		hrd = ((msg[6] & 0x4) != 0);
@@ -119,45 +119,76 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return whether 1090ES IN is available 
+	 * In version 1, this capability is called "CDTI Traffic Display" (CDTI operational or unknown).
+	 * From version 2 on, it is called "1090ES IN".
+	 *
+	 * @return whether 1090ES IN (or an operational CDTI in version 1) is available, ME bit 12
 	 */
 	public boolean has1090ESIn() {
-		return (capability_class_code & 0x1000) != 0;
-	}
-
-	/**
-	 * @return whether transponder has less than 70 Watts transmit power
-	 */
-	public boolean hasLowTxPower() {
-		return (capability_class_code & 0x200) != 0;
-	}
-
-	/**
-	 * @return whether aircraft has an UAT receiver
-	 */
-	public boolean hasUATIn() {
 		return (capability_class_code & 0x100) != 0;
 	}
 
 	/**
-	 * @return navigation accuracy category for velocity
+	 * B2 Low: whether a Class B2 ground vehicle transmits with less than 70 Watts
+	 *
+	 * @return whether transponder has less than 70 Watts transmit power, ME bit 15
 	 */
+	public boolean hasLowTxPower() {
+		return (capability_class_code & 0x20) != 0;
+	}
+
+	/**
+	 * Position Offset Applied (POA): in version 1, this is a flag in the capability class code.
+	 *
+	 * @return true if the reported position has already been corrected for the GPS antenna offset, ME bit 11
+	 */
+	public boolean hasPositionOffsetApplied() {
+		return (capability_class_code & 0x200) != 0;
+	}
+
+	/**
+	 * UAT IN is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always false
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#hasUATIn()}
+	 */
+	@Deprecated
+	public boolean hasUATIn() {
+		return false;
+	}
+
+	/**
+	 * NACv is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always 0 (unknown)
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#getNACv()}
+	 */
+	@Deprecated
 	public byte getNACv() {
-		return (byte) ((capability_class_code & 0xE0)>>>5);
+		return 0;
 	}
 
 	/**
-	 * @return NIC supplement C for use on the surface
+	 * NIC supplement C is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always false
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#getNICSupplementC()}
 	 */
+	@Deprecated
 	public boolean getNICSupplementC() {
-		return (capability_class_code & 0x10) != 0;
+		return false;
 	}
 
 	/**
-	 * @return NIC supplement B for use on the surface
+	 * NIC supplement B is not part of the surface capability class code (ME bit 20 is reserved in
+	 * version 1 and NIC supplement C in version 2).
+	 *
+	 * @return always false
+	 * @deprecated NIC supplement B is not transmitted in surface operational status messages
 	 */
+	@Deprecated
 	public boolean getNICSupplementB() {
-		return (capability_class_code & 0x1) != 0;
+		return false;
 	}
 
 	/**
@@ -175,26 +206,43 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return whether aircraft uses a single antenna or two
+	 * @return whether the ADS-R transmitting subsystem is receiving ATC services, ME bit 29
 	 */
+	public boolean hasReceivingATCServices() {
+		return (operational_mode_code&0x800) != 0;
+	}
+
+	/**
+	 * The single antenna flag is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always false
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#hasSingleAntenna()}
+	 */
+	@Deprecated
 	public boolean hasSingleAntenna() {
-		return (operational_mode_code&0x400) != 0;
+		return false;
 	}
 
 	/**
-	 * For interpretation see Table 2-65 in DO-260B
-	 * @return system design assurance (see A.1.4.10.14 in RTCA DO-260B)
+	 * The system design assurance (SDA) is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always 0 (unknown / no safety effect)
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#getSystemDesignAssurance()}
 	 */
+	@Deprecated
 	public byte getSystemDesignAssurance() {
-		return (byte) ((operational_mode_code&0x300)>>>8);
+		return 0;
 	}
 
 	/**
-	 * @return encoded longitudinal distance of the GPS Antenna from the NOSE of the aircraft
-	 *         (see Table A-34, RTCA DO-260B)
+	 * The GPS antenna offset is not defined in version 1 surface operational status messages.
+	 *
+	 * @return always 0 (no data)
+	 * @deprecated only defined from version 2 on, use {@link SurfaceOperationalStatusV2Msg#getGPSAntennaOffset()}
 	 */
+	@Deprecated
 	public byte getGPSAntennaOffset() {
-		return (byte) (operational_mode_code&0xFF);
+		return 0;
 	}
 
 	/**
@@ -247,14 +295,15 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 	}
 
 	/**
-	 * @return the geometric vertical accuracy in meters or -1 for unknown
+	 * The geometric vertical accuracy (GVA) is not defined for surface participants; ME bits 49 and 50 are
+	 * reserved in surface operational status messages.
+	 *
+	 * @return always -1 (unknown)
+	 * @deprecated not transmitted in surface operational status messages
 	 */
+	@Deprecated
 	public int getGeometricVerticalAccuracy() {
-		if (geometric_vertical_accuracy == 1)
-			return 150;
-		else if (geometric_vertical_accuracy == 2)
-			return 45;
-		else return -1;
+		return -1;
 	}
 
 	/**
@@ -300,7 +349,6 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
 				", version=" + version +
 				", nic_suppl_c=" + nic_suppl +
 				", nac_pos=" + nac_pos +
-				", geometric_vertical_accuracy=" + geometric_vertical_accuracy +
 				", sil=" + sil +
 				", nic_trk_hdg=" + nic_trk_hdg +
 				", hrd=" + hrd +

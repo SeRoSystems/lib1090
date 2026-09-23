@@ -245,33 +245,36 @@ public class ExampleDecoder {
 				SurfaceOperationalStatusV1Msg opstatS1 = (SurfaceOperationalStatusV1Msg) msg;
 
 				System.out.println("["+icao24+"]: Using ADS-B version "+opstatS1.getVersion());
-				System.out.println("          Gemoetric vertical accuracy: "+opstatS1.getGeometricVerticalAccuracy()+"m");
 
 				if (opstatS1.getHorizontalReferenceDirection())
-					System.out.println("          Horizontal reference: true north");
+					System.out.println("          Horizontal reference: magnetic north");
 				else
 					System.out.println("          Horizontal reference: true north");
 				System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS1.getNACp());
 				System.out.println("          Position Uncertainty (based on NACp): " + opstatS1.getPositionUncertainty());
 				System.out.println("          Has NIC supplement A: " + opstatS1.hasNICSupplementA());
-				System.out.println("          Has NIC supplement C: " + opstatS1.getNICSupplementC());
 				System.out.println("          Surveillance/Source Integrity Level (SIL): " + opstatS1.getSIL());
-				System.out.println("          System design assurance: " + opstatS1.getSystemDesignAssurance());
 				System.out.println("          Has 1090ES in: " + opstatS1.has1090ESIn());
 				System.out.println("          IDENT switch active: " + opstatS1.hasActiveIDENTSwitch());
 				System.out.println("          Has TCAS resolution advisory: " + opstatS1.hasTCASResolutionAdvisory());
-				System.out.println("          Has UAT in: " + opstatS1.hasUATIn());
-				System.out.println("          Uses single antenna: " + opstatS1.hasSingleAntenna());
+				System.out.println("          Receiving ATC services: " + opstatS1.hasReceivingATCServices());
 				System.out.println("          Airplane length: " + opstatS1.getAirplaneLength() + "m");
 				System.out.println("          Airplane width: " + opstatS1.getAirplaneWidth() + "m");
-				System.out.println("          Navigation Accuracy Category for velocity (NACv): " + opstatS1.getNACv());
 				System.out.println("          Low (<70W) TX power: " + opstatS1.hasLowTxPower());
-				System.out.println("          Encoded GPS antenna offset: " + opstatS1.getGPSAntennaOffset());
+				System.out.println("          Position offset applied: " + opstatS1.hasPositionOffsetApplied());
 				System.out.println("          Has track heading info: " + opstatS1.hasTrackHeadingInfo());
 
-				// SIL supplement in version 2
+				// fields introduced in version 2
 				if (msg instanceof SurfaceOperationalStatusV2Msg) {
-					System.out.println("          Has SIL supplement: " + ((SurfaceOperationalStatusV2Msg) msg).hasSILSupplement());
+					SurfaceOperationalStatusV2Msg opstatS2 = (SurfaceOperationalStatusV2Msg) msg;
+					System.out.println("          Has NIC supplement C: " + opstatS2.getNICSupplementC());
+					System.out.println("          System design assurance: " + opstatS2.getSystemDesignAssurance());
+					System.out.println("          Has UAT in: " + opstatS2.hasUATIn());
+					System.out.println("          Uses single antenna: " + opstatS2.hasSingleAntenna());
+					System.out.println("          Navigation Accuracy Category for velocity (NACv): " + opstatS2.getNACv());
+					System.out.println("          Lateral GPS antenna offset: " + opstatS2.getLateralAxisGPSAntennaOffset() + "m");
+					System.out.println("          Longitudinal GPS antenna offset: " + opstatS2.getLongitudinalAxisGPSAntennaOffset() + "m");
+					System.out.println("          Has SIL supplement: " + opstatS2.hasSILSupplement());
 				}
 
 				break;
