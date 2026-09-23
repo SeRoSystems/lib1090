@@ -30,7 +30,8 @@ import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 3 emergency and priority status messages, as defined in ED-102B §2.2.18.4.5 Figure 2-60.
+ * Decoder for ADS-R emergency and priority status messages (version 3), as defined in ED-102B §2.2.18.4.5
+ * Figure 2-60.
  */
 public class EmergencyOrPriorityStatusV3Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg, IMFMsg, ADSRMsg {
 

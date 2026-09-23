@@ -28,7 +28,9 @@ import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-R version 3 identification messages, as defined in ED-102B §2.2.18.4.3 Figure 2-7.
+ * Decoder for ADS-R version 3 identification messages, as defined in ED-102B §2.2.18.4.3,
+ * which carries no figure of its own and refers to the ADS-B identification
+ * format of ED-102B §2.2.3.2.5 Figure 2-7.
  */
 public class IdentificationV3Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
 
