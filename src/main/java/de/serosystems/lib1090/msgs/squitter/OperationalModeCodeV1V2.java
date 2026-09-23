@@ -37,7 +37,7 @@ public interface OperationalModeCodeV1V2 extends KnownOperationalModeCode {
 
     /**
      * The subfield under the name the earlier standards give it: a <b>TCAS/ACAS resolution advisory</b>,
-     * ED-102B §2.2.3.2.7.2.4.2. Version 3 generalises the same bit to "CA RA Active", which is why
+     * ED-102B §2.2.3.2.7.2.4.2. Version 3 generalizes the same bit to "CA RA Active", which is why
      * {@link #isCollisionAvoidanceResolutionAdvisoryActive()} is the unified name.
      * <p>
      * Declared on this interface rather than on each layout class, which the era-accessor rule otherwise

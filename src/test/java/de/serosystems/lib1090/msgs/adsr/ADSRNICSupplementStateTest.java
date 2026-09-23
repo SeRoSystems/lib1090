@@ -27,7 +27,7 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * NIC supplement B travelling from an operational status message to the position messages that follow
+ * NIC supplement B traveling from an operational status message to the position messages that follow
  * it, through the decoder's per-target state.
  * <p>
  * Supplement B lives inside the capability class field, so which layout the format selector picks

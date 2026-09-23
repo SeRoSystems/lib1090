@@ -95,7 +95,7 @@ class ADSRDispatchTest {
         assertEquals(ExtendedSquitter.class, d.decode(message(11, 0), T).getClass());
     }
 
-    /** Versions above 3 are decoded as version 3, newer versions being backwards compatible. */
+    /** Versions above 3 are decoded as version 3, newer versions being backward compatible. */
     @Test
     void unknownVersionsDecodeAsVersion3() throws Exception {
         StatefulModeSDecoder d = new StatefulModeSDecoder();

@@ -20,7 +20,7 @@
  * What the extended squitter formats have in common, as interfaces the message classes implement.
  * <p>
  * The same message format is broadcast by aircraft as ADS-B, rebroadcast by ground stations as ADS-R
- * and synthesised from other surveillance as TIS-B. Where a field means the same thing in more than
+ * and synthesized from other surveillance as TIS-B. Where a field means the same thing in more than
  * one of those, the accessor for it is declared here and the concrete classes in the protocol
  * packages implement it; where a field belongs to one protocol alone, its interface lives with that
  * protocol instead.

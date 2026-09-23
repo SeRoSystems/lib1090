@@ -154,7 +154,7 @@ public class StatefulModeSDecoder {
 
         // ADS-R has not been specified for version 0 at all; version 2 and any
         // higher (not yet defined) version is decoded as version 2, since, per
-        // ED-102B §2.2.7.1, newer versions are expected to be backwards compatible
+        // ED-102B §2.2.7.1, newer versions are expected to be backward compatible
         // with version 2
 
         // we need stateful decoding, because ADS-R version > 0 can only be assumed
@@ -403,7 +403,7 @@ public class StatefulModeSDecoder {
 
         // only (assumed or confirmed) version 0 is decoded as such; version 3 and any
         // higher (not yet defined) version is decoded as version 3, since, per
-        // ED-102B §2.2.7.1, newer versions are expected to be backwards compatible
+        // ED-102B §2.2.7.1, newer versions are expected to be backward compatible
         // with version 3
 
         // we need stateful decoding, because ADS-B version > 0 can only be assumed

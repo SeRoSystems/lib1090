@@ -223,7 +223,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
     /**
      * MCP/FCU mode status bit information according to ED-102B §2.2.3.2.7.1.3.11
      * <p>
-     * A value of false indidates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
+     * A value of false indicates that information of {@link #hasAutopilotEngaged()}, {@link #hasVNAVModeEngaged()},
      * {@link #hasActiveAltitudeHoldMode()}, and {@link #hasActiveApproachMode()} is not provided by the aircraft.
      *
      * @return true if Mode information is deliberately being provided, false otherwise

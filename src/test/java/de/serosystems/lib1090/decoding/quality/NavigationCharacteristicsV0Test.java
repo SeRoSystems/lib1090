@@ -82,7 +82,7 @@ class NavigationCharacteristicsV0Test {
     /**
      * NIC and NACp agree in every row of the merged table. This is a coincidence of how ED-102B
      * tabulates version 0 and not an identity — the two describe integrity and accuracy — so the
-     * assertion guards the transcription, and must not be read as licence to compute one from the
+     * assertion guards the transcription, and must not be read as license to compute one from the
      * other.
      */
     @Test

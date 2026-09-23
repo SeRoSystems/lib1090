@@ -17,7 +17,7 @@
  */
 
 /**
- * TIS-B messages: traffic reports a ground station synthesises from other surveillance, such as
+ * TIS-B messages: traffic reports a ground station synthesizes from other surveillance, such as
  * radar, for aircraft that do not broadcast ADS-B themselves.
  * <p>
  * Because the source is not the target, these formats say less and say it differently: positions come

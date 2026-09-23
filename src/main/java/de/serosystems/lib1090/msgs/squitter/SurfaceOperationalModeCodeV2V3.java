@@ -42,13 +42,13 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
      * Lateral GPS antenna offset, derived from ME 33–35: ME 33 gives the direction and ME 34–35 the
      * magnitude, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-59.
      * <ul>
-     *     <li>measured from the longitudinal centre line (roll axis) of the aircraft</li>
-     *     <li>in metres, at a resolution of 2 m, denoting an upper bound</li>
-     *     <li>positive towards the left wing tip, negative towards the right</li>
+     *     <li>measured from the longitudinal center line (roll axis) of the aircraft</li>
+     *     <li>in meters, at a resolution of 2 m, denoting an upper bound</li>
+     *     <li>positive toward the left wing tip, negative toward the right</li>
      *     <li>capped at 6 m, i.e. 6 means "or above"</li>
      * </ul>
      *
-     * @return the lateral offset in metres, or {@code null} for "no data"
+     * @return the lateral offset in meters, or {@code null} for "no data"
      * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */
@@ -64,11 +64,11 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
      * Longitudinal GPS antenna offset, ME 36–40, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-60.
      * <ul>
      *     <li>measured from the nose of the aircraft</li>
-     *     <li>in metres, at a resolution of 2 m, denoting an upper bound</li>
+     *     <li>in meters, at a resolution of 2 m, denoting an upper bound</li>
      *     <li>capped at 60 m, i.e. 60 means "or above"</li>
      * </ul>
      *
-     * @return the longitudinal offset in metres, or {@code null} for "no data"
+     * @return the longitudinal offset in meters, or {@code null} for "no data"
      * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */

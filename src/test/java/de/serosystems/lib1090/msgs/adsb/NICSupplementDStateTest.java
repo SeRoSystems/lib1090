@@ -28,7 +28,7 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * NIC supplement D travelling from an airborne velocity message to the position messages that follow
+ * NIC supplement D traveling from an airborne velocity message to the position messages that follow
  * it, through the decoder's per-target state.
  * <p>
  * Supplement D is the one supplement carried by neither the position message nor the operational

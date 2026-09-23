@@ -143,7 +143,7 @@ class FactoryTest {
     }
 
     /**
-     * Both era accessors for the TCAS/collision-avoidance generalisation: the older standards name these
+     * Both era accessors for the TCAS/collision-avoidance generalization: the older standards name these
      * bits for TCAS, version 3 for collision avoidance generally. Each layout answers under the name its
      * own standard uses, and both names agree.
      */

@@ -173,7 +173,7 @@ class OperationalModeLayoutsTest {
     /** ED-102B TABLE 2-59 and TABLE 2-60, derived from the ME 33–40 offset field. */
     @Test
     public void surfaceAntennaOffsetsAreDerived() {
-        // ME 33 clear (left) with zero magnitude means "no data", not zero metres
+        // ME 33 clear (left) with zero magnitude means "no data", not zero meters
         assertNull(new SurfaceOperationalModeCodeV3(0).getLateralAxisGPSAntennaOffset());
         assertNull(new SurfaceOperationalModeCodeV3(0).getLongitudinalAxisGPSAntennaOffset());
 

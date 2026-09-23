@@ -89,7 +89,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
     }
 
     /**
-     * @return true if this is a uplink ELM acknowledgement
+     * @return true if this is a uplink ELM acknowledgment
      */
     public boolean isAck() {
         return ack;

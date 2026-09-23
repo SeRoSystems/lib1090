@@ -61,7 +61,7 @@ public class ADSRAirborneCapabilityClassCodeV2 extends AbstractMEField
     }
 
     /**
-     * The subfield under the name DO-260B gives it: <b>"TCAS Operational"</b>. Version 3 generalises the
+     * The subfield under the name DO-260B gives it: <b>"TCAS Operational"</b>. Version 3 generalizes the
      * same bit to "CA Operational", collision avoidance covering the DAA-based systems it introduces as
      * well as TCAS/ACAS, which is why {@link #isCollisionAvoidanceOperational()} is the unified name.
      * <p>
