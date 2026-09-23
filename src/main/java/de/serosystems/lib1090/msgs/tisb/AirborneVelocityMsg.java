@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 /**
@@ -34,8 +35,9 @@ public interface AirborneVelocityMsg extends IMFMsg {
     /**
      * The Geo Flag determines whether the geometric minus barometric altitude difference (see
      * {@link de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg#hasDiffBaroAlt()}) or the
-     * Navigation Accuracy Category for velocity and Source Integrity Level (see {@link #getNACvEncoded()})
-     * are present in this message; the two are mutually exclusive.
+     * Navigation Accuracy Category for velocity and Source Integrity Level (see
+     * {@link #getNACvEncoded()} and {@link #getSILEncoded()}) are present in this message; the two
+     * are mutually exclusive.
      *
      * @return true if geometric minus barometric altitude difference data is present, false if
      * NACv/SIL data is present instead
@@ -54,6 +56,35 @@ public interface AirborneVelocityMsg extends IMFMsg {
         if (nacv == null)
             return null;
         return HorizontalVelocityError.forNACv(nacv);
+    }
+
+    /**
+     * Source/Surveillance Integrity Level (SIL) according to ED-102B §N.2.3.9 TABLE N-10.
+     * <p>
+     * The concept of SIL was introduced in ADS-B version 1; for version 0 transmitters a mapping
+     * exists, which is what this reports. The values are comparable to those an aircraft supporting
+     * ADS-B version 1 or 2 transmits in its operational status message.
+     * <p>
+     * It shares its bits with the barometric altitude difference, as {@link #hasGeoFlag()} describes,
+     * so a message carrying that difference carries no level at all.
+     *
+     * @return the raw encoded source integrity level, which indicates the probability of exceeding
+     * the NIC containment radius, or {@code null} if unavailable
+     */
+    Byte getSILEncoded();
+
+    /**
+     * The probability of exceeding the NIC containment radius that the reported level guarantees,
+     * ED-102B §2.2.3.2.7.2.9 TABLE 2-70.
+     *
+     * @return what the level guarantees, or {@code null} where this message carries no level at all
+     * — which is not the same as a level guaranteeing nothing
+     */
+    default SourceIntegrityLevel getSourceIntegrityLevel() {
+        Byte sil = getSILEncoded();
+        if (sil == null)
+            return null;
+        return SourceIntegrityLevel.forSIL(sil);
     }
 
 }

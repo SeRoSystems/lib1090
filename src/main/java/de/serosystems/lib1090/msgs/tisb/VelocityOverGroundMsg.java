@@ -216,18 +216,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
         return nacp;
     }
 
-    /**
-     * Source/Surveillance Integrity Level (SIL) according to ED-102B §N.2.3.9 TABLE N-10.
-     * <p>
-     * The concept of SIL has been introduced in ADS-B version 1. For version 0 transmitters, a mapping exists which
-     * is reflected by this method.
-     * Values are comparable to those of {@link AirborneOperationalStatusV1Msg}'s and
-     * {@link AirborneOperationalStatusV2Msg}'s getSILEncoded method for aircraft supporting ADS-B
-     * version 1 and 2.
-     *
-     * @return the raw encoded source integrity level (SIL) which indicates the probability of
-     * exceeding the NIC containment radius. Returns null if not available.
-     */
+    @Override
     public Byte getSILEncoded() {
         return hasGeoFlag() ? null : sil;
     }
