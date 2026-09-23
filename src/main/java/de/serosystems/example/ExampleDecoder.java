@@ -385,7 +385,8 @@ public class ExampleDecoder {
                 System.out.println("          North/South velocity: " + (hvaVel.hasHVANorthSouthVelocity() ? hvaVel.getHVANorthSouthVelocity() : "unknown") + " kt");
                 System.out.println("          Vertical rate: " + (hvaVel.hasHVAVerticalRate() ? hvaVel.getHVAVerticalRate() : "unknown") + " ft/min");
                 if (hvaVel.hasPIC())
-                    System.out.println("          Radius of Containment: < " + hvaVel.getRadiusOfContainment() + " m");
+                    System.out.println("          Radius of Containment: " + hvaVel.getContainmentRadius()
+                            + " (" + hvaVel.getContainmentRadius().getGuaranteedUpperBound() + " m)");
             } else if (msg instanceof WxAIREPAircraftStateMsg) {
                 WxAIREPAircraftStateMsg wxState = (WxAIREPAircraftStateMsg) msg;
                 System.out.println("[" + icao24 + "]: Wx AIREP Aircraft State reported");
