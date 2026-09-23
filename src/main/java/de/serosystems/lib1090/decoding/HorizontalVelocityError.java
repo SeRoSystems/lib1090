@@ -94,6 +94,22 @@ public enum HorizontalVelocityError {
     }
 
     /**
+     * The error a version 0 Navigation Uncertainty Category for velocity reports.
+     * <p>
+     * Version 0 transmits NUCr where later versions transmit NACv, and ED-102B §N.2.3.8 maps the two
+     * one for one, so this reads the same table. It exists so that a call site says which field it
+     * holds; the answer is the same either way.
+     *
+     * @param nucR the encoded navigation uncertainty category for velocity, 0 to 7
+     * @return what that category guarantees, {@link #UNKNOWN_OR_AT_LEAST_10} for category 0 and for
+     * the categories the standard reserves
+     * @throws IllegalArgumentException if the value is outside the three bits the field occupies
+     */
+    public static HorizontalVelocityError forNUCr(byte nucR) {
+        return forNACv(nucR);
+    }
+
+    /**
      * The largest error this category guarantees the true error stays below, in meters per second, or
      * {@link Double#NaN} where it guarantees none.
      * <p>

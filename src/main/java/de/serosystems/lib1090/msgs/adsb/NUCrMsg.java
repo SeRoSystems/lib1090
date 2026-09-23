@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+
 /**
  * Common API for messages that expose the Navigation Uncertainty Category for velocity (NUCr).
  * NUCr is not defined in current ED-102B, where it is superseded by NACV, ED-102B
@@ -31,4 +33,15 @@ public interface NUCrMsg {
      * @return the raw encoded Navigation Uncertainty Category for velocity
      */
     byte getNUCrEncoded();
+
+    /**
+     * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
+     * TABLE 2-18, which §N.2.3.8 maps this field onto one for one.
+     *
+     * @return what the category guarantees; category 0 guarantees nothing, reading "unknown or
+     * 10 m/s or more"
+     */
+    default HorizontalVelocityError getHorizontalVelocityError() {
+        return HorizontalVelocityError.forNUCr(getNUCrEncoded());
+    }
 }
