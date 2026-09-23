@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.GeometricVerticalAccuracy;
+import de.serosystems.lib1090.decoding.quality.GeometricVerticalAccuracy;
 
 /**
  * Common API for ADS-B airborne operational status version 2 and 3 messages.

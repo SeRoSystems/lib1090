@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
 import org.junit.jupiter.api.Test;

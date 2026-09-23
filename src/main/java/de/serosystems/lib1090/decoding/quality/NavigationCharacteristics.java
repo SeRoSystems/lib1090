@@ -16,7 +16,7 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.decoding;
+package de.serosystems.lib1090.decoding.quality;
 
 /**
  * What a position report says about its own integrity: a navigation integrity category and the

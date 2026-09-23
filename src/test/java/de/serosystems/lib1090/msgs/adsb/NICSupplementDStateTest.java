@@ -20,7 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
-import de.serosystems.lib1090.decoding.ContainmentRadius;
+import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

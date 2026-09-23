@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter.opstatus;
 
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

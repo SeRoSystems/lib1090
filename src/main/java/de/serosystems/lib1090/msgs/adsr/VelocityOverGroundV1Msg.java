@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.adsb.NACvMsg;
+import de.serosystems.lib1090.msgs.squitter.NACvMsg;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IFRCapabilityMsg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;

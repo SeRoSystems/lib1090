@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.SourceIntegrityLevel;
+import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import org.junit.jupiter.api.Test;

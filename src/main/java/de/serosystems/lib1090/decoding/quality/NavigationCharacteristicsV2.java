@@ -16,30 +16,45 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.decoding;
+package de.serosystems.lib1090.decoding.quality;
 
 /**
- * What an ADS-B version 3 position message says about the integrity of its own position, as one row
- * per format type code and NIC supplement combination, ED-102B §2.2.3.2.3.1 TABLE 2-11.
+ * What an ADS-B version 2 position message says about the integrity of its own position, as one row
+ * per format type code and NIC supplement combination.
  * <p>
- * Version 3 keeps supplements A, B and C exactly as version 2 uses them, and adds <b>supplement D</b>,
- * two bits carried in the airborne velocity message. D applies to type codes 20, 21 and 22 alone, and
- * where it applies it replaces A and B rather than joining them — which is what separates this table
- * from version 2's. Those same three type codes are the only rows where the two versions differ at
- * all: version 2 reads them from ED-102B TABLE N-24 instead.
+ * The table originates in ED-102A TABLE 2-14. ED-102B carries it as TABLE 2-11 for type codes up to
+ * 18, and since that table adds the version 3 NIC supplement D for type codes 20 to 22, ED-102B
+ * TABLE N-24 supplies those three rows as version 2 defines them. The two together are ED-102A
+ * TABLE 2-14 again.
  * <p>
- * For type codes 0 to 18 everything said of {@link NavigationCharacteristicsV2} holds here unchanged,
- * supplement B outranking supplement A included. The rows are restated rather than shared because the
- * two versions are separate documents that happen to agree today; a test asserts that they still do.
+ * Version 2 uses three supplements, and which two apply depends on the subtype: <b>A and B</b>
+ * airborne, <b>A and C</b> surface. Hence the two entry points: each reads the two its rows are keyed
+ * on and ignores the third, as every table ignores the supplements its rows do not turn on.
  * <p>
- * Supplement D is monotone where the single-bit supplements are not: each higher value reports a
- * smaller radius, so an unknown D yields the {@code D = 0} row, which is both the poorest row and the
- * one the standard assigns to that value. As everywhere else, the answer for partial knowledge is the
- * poorest answer any completion of that knowledge could give.
+ * <b>Where the supplements come from decides how much is ever unknown.</b> Supplement B travels in
+ * ME bit 8 of the airborne position message itself, so an ADS-B receiver always has it; A and C
+ * travel in the operational status message, so a receiver holding a position for a target it has not
+ * heard an operational status from has neither.
+ * <p>
+ * <b>Airborne, supplement B outranks supplement A.</b> The source tables define only a subset of the
+ * A/B combinations, leaving a receiver without a row whenever it observes one of the rest. Supplement
+ * B is the sounder of the two to resolve that by: it arrives with the very message it qualifies,
+ * whereas A comes from a separate operational status message that may have never been received, or
+ * may have been received long enough ago to no longer describe the aircraft. So B decides wherever
+ * the two disagree, and at type codes 11 and 16 — where the tables pair a set B only with a set A —
+ * it decides outright and A is not consulted at all.
+ * <p>
+ * Type code 13 is the one place a set B still leaves two rows. There an unknown A takes the worst NIC
+ * and radius the type code offers, Rc &lt; 1111.2 m, rather than the &lt; 555.6 m a clear A would
+ * give. Surface likewise: a supplement not known to be set is read as clear, which is that
+ * knowledge's poorest row. Throughout, the answer for partial knowledge is exactly the poorest answer
+ * any completion of that knowledge could give — a worst case, never a guess.
+ * <p>
+ * Taken together these rules are what ED-129C TABLE 15 prescribes.
  *
- * @see NavigationCharacteristicsV2 for version 2, whose type code 20 to 22 rows differ
+ * @see NavigationCharacteristicsV1 for version 1, which has a single supplement
  */
-public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
+public enum NavigationCharacteristicsV2 implements NavigationCharacteristics {
 
     /** No position information; nothing is claimed about a position that is not there. */
     TYPE_CODE_0(0, 0, ContainmentRadius.UNKNOWN),
@@ -79,30 +94,15 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
     /** The airborne counterpart of {@link #TYPE_CODE_8_A_CLEAR_C_CLEAR}. */
     TYPE_CODE_18(18, 0, ContainmentRadius.AT_LEAST_37040),
 
-    /**
-     * Type codes 20 and 22 are graded by supplement D alone, and unlike the single-bit supplements it
-     * grades monotonically: every step up reports a smaller radius. Type code 21 defines only
-     * {@code D = 0}, so nothing there depends on D at all.
-     */
-    TYPE_CODE_20_D_3(20, 11, ContainmentRadius.BELOW_7_5),
-    TYPE_CODE_20_D_2(20, 10, ContainmentRadius.BELOW_25),
-    TYPE_CODE_20_D_1(20, 9, ContainmentRadius.BELOW_75),
-    TYPE_CODE_20_D_0(20, 8, ContainmentRadius.BELOW_185_2),
-
-    TYPE_CODE_21(21, 7, ContainmentRadius.BELOW_370_4),
-
-    TYPE_CODE_22_D_3(22, 6, ContainmentRadius.BELOW_1111_2),
-    TYPE_CODE_22_D_2(22, 5, ContainmentRadius.BELOW_1852),
-    TYPE_CODE_22_D_1(22, 4, ContainmentRadius.BELOW_3704),
-
-    /** Version 3's third row reporting no integrity, alongside type codes 8 and 18. */
-    TYPE_CODE_22_D_0(22, 0, ContainmentRadius.AT_LEAST_3704);
+    TYPE_CODE_20(20, 11, ContainmentRadius.BELOW_7_5),
+    TYPE_CODE_21(21, 10, ContainmentRadius.BELOW_25),
+    TYPE_CODE_22(22, 0, ContainmentRadius.AT_LEAST_25);
 
     private final byte formatTypeCode;
     private final byte nic;
     private final ContainmentRadius containmentRadius;
 
-    NavigationCharacteristicsV3(int formatTypeCode, int nic, ContainmentRadius containmentRadius) {
+    NavigationCharacteristicsV2(int formatTypeCode, int nic, ContainmentRadius containmentRadius) {
         this.formatTypeCode = (byte) formatTypeCode;
         this.nic = (byte) nic;
         this.containmentRadius = containmentRadius;
@@ -111,20 +111,22 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
     /**
      * The row an airborne position message's format type code and NIC supplements select.
      * <p>
-     * Type codes up to 18 read supplements A and B as version 2 does, B taking priority since only a
-     * subset of their combinations is tabulated and B is the one that arrives with this message.
-     * Type codes 20 to 22 read supplement D instead and ignore A and B entirely.
+     * Supplement B takes priority over supplement A, since only a subset of their combinations is
+     * tabulated and B is the one that arrives with this message while A may be missing or stale. At
+     * type codes 11 and 16 B therefore decides alone and A is not consulted, so a receiver that has
+     * heard no operational status message still decodes them exactly. Type code 13 is the one place
+     * A still narrows what B leaves, and an unknown A there yields the worst NIC and radius the type
+     * code offers.
      *
      * @param formatTypeCode the message's format type code, 0, 9 to 18 or 20 to 22
      * @param nicSupplements what is known of the target's NIC supplements
-     * @return the characteristics version 3 assigns to that combination
+     * @return the characteristics version 2 assigns to that combination
      * @throws IllegalArgumentException if the type code is not an airborne position type code
      */
-    public static NavigationCharacteristicsV3 forAirborneFormatTypeCode(byte formatTypeCode,
+    public static NavigationCharacteristicsV2 forAirborneFormatTypeCode(byte formatTypeCode,
                                                                         NICSupplements nicSupplements) {
         NICSupplement nicSupplementA = nicSupplements.getA();
         NICSupplement nicSupplementB = nicSupplements.getB();
-        NICSupplementD nicSupplementD = nicSupplements.getD();
 
         switch (formatTypeCode) {
             case 0:
@@ -163,32 +165,11 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
             case 18:
                 return TYPE_CODE_18;
             case 20:
-                switch (nicSupplementD) {
-                    case THREE:
-                        return TYPE_CODE_20_D_3;
-                    case TWO:
-                        return TYPE_CODE_20_D_2;
-                    case ONE:
-                        return TYPE_CODE_20_D_1;
-                    default:
-                        // D = 0, or not known: either way the poorest row this type code has
-                        return TYPE_CODE_20_D_0;
-                }
+                return TYPE_CODE_20;
             case 21:
-                // only D = 0 is defined here, so nothing depends on the supplement
                 return TYPE_CODE_21;
             case 22:
-                switch (nicSupplementD) {
-                    case THREE:
-                        return TYPE_CODE_22_D_3;
-                    case TWO:
-                        return TYPE_CODE_22_D_2;
-                    case ONE:
-                        return TYPE_CODE_22_D_1;
-                    default:
-                        // D = 0, or not known: either way the poorest row this type code has
-                        return TYPE_CODE_22_D_0;
-                }
+                return TYPE_CODE_22;
             default:
                 throw new IllegalArgumentException(
                         "Format type code " + formatTypeCode + " is not an airborne position type code");
@@ -196,15 +177,18 @@ public enum NavigationCharacteristicsV3 implements NavigationCharacteristics {
     }
 
     /**
-     * The row a surface position message's format type code and NIC supplements select. Supplement D
-     * reaches no surface type code, so version 3 reads these exactly as version 2 does.
+     * The row a surface position message's format type code and NIC supplements select.
+     * <p>
+     * Both supplements travel in the operational status message, so both are routinely unknown. Each
+     * improves the report where it applies, so one not known to be set is read as clear, which is the
+     * poorest row its knowledge allows.
      *
      * @param formatTypeCode the message's format type code, 0 or 5 to 8
      * @param nicSupplements what is known of the target's NIC supplements
-     * @return the characteristics version 3 assigns to that combination
+     * @return the characteristics version 2 assigns to that combination
      * @throws IllegalArgumentException if the type code is not a surface position type code
      */
-    public static NavigationCharacteristicsV3 forSurfaceFormatTypeCode(byte formatTypeCode,
+    public static NavigationCharacteristicsV2 forSurfaceFormatTypeCode(byte formatTypeCode,
                                                                        NICSupplements nicSupplements) {
         NICSupplement nicSupplementA = nicSupplements.getA();
         NICSupplement nicSupplementC = nicSupplements.getC();

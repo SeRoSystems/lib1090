@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.EstimatedPositionUncertainty;
+import de.serosystems.lib1090.decoding.quality.EstimatedPositionUncertainty;
 
 /**
  * Common API for messages that report a Navigation Accuracy Category for position (NACp).

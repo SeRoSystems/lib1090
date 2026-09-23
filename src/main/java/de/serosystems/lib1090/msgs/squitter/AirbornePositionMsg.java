@@ -20,8 +20,8 @@ package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.decoding.Altitude;
-import de.serosystems.lib1090.decoding.NICSupplements;
-import de.serosystems.lib1090.decoding.NavigationCharacteristics;
+import de.serosystems.lib1090.decoding.quality.NICSupplements;
+import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
 
 /**
  * Common API for ADS-B airborne position messages.

@@ -16,7 +16,7 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.decoding;
+package de.serosystems.lib1090.decoding.quality;
 
 /**
  * Everything a System Design Assurance (SDA) says about the equipment transmitting it, as one row per

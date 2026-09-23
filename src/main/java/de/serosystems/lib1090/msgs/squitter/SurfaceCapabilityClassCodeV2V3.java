@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
 
 /**
  * Common API for the surface Capability Class Code of ADS-B versions 2 and 3.

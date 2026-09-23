@@ -16,11 +16,11 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.decoding;
+package de.serosystems.lib1090.decoding.quality;
 
-import de.serosystems.lib1090.decoding.SystemDesignAssurance.DesignAssuranceLevel;
-import de.serosystems.lib1090.decoding.SystemDesignAssurance.SupportedFailureCondition;
-import de.serosystems.lib1090.decoding.SystemDesignAssurance.UndetectedFaultProbability;
+import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance.DesignAssuranceLevel;
+import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance.SupportedFailureCondition;
+import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance.UndetectedFaultProbability;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
