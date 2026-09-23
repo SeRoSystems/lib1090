@@ -35,7 +35,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for TIS-B fine surface position, as defined in ED-102B §2.2.17.3.2.
+ * Decoder for TIS-B fine surface position, as defined in ED-102B §2.2.17.3.2 Figure 2-53.
  */
 public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
 
