@@ -1,5 +1,27 @@
 # Changelog for lib1090
 
+## v4.1.4
+
+### Bug Fixes
+- `SurfaceOperationalStatusV1Msg`/`V2Msg` (ADS-B and ADS-R): fixed bit positions of the capability class code
+  subfields (1090ES IN, B2 Low, UAT IN, NACv, NIC supplement C)
+- `SurfaceOperationalStatusV1Msg`: messages with the POA bit set are no longer rejected
+- `SurfaceOperationalStatusV2Msg`: GPS antenna offset is now decoded into lateral and longitudinal offsets
+  (`getLateralAxisGPSAntennaOffset()`, `getLongitudinalAxisGPSAntennaOffset()`)
+- `StatefulModeSDecoder`: NIC supplement C passed to `SurfacePositionV2Msg` was read from the UAT IN bit;
+  it is no longer taken from version 1 surface operational status messages
+
+### Improvements
+- `SurfaceOperationalStatusV1Msg`: added `hasPositionOffsetApplied()` and `hasReceivingATCServices()`
+
+### Deprecations
+- `SurfaceOperationalStatusV1Msg`: `hasUATIn()`, `getNACv()`, `getNICSupplementC()`, `hasSingleAntenna()`,
+  `getSystemDesignAssurance()` and `getGPSAntennaOffset()` are only defined from ADS-B version 2 on and return
+  neutral values for version 1; use the overrides in `SurfaceOperationalStatusV2Msg`
+- `SurfaceOperationalStatusV1Msg`: `getGeometricVerticalAccuracy()` and ADS-R `getNICSupplementB()` are not
+  transmitted in surface operational status messages and return neutral values
+
+
 ## v4.1.3
 
 ### Bug Fixes
