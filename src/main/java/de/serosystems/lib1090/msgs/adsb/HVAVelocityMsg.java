@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -110,44 +111,17 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
     }
 
     /**
-     * Decode the position integrity category (PIC) field into a Radius of Containment (Rc) bound
-     * in meters: the actual containment radius is smaller than the returned value.
+     * The horizontal containment region this message reports, ED-102B §2.2.3.2.7.5.4.8 TABLE 2-82.
+     * <p>
+     * The HVA Velocity Message reports its containment through the PIC field rather than through a
+     * format type code and NIC supplements, so this is the one place a containment radius is read
+     * without {@code NavigationCharacteristics}. What it means is the same.
      *
-     * @return the Radius of Containment bound in meters, or {@code null} if unavailable or reserved
+     * @return the containment radius the category reports; {@link ContainmentRadius#UNKNOWN} where
+     * the category reports none, which is PIC 0 and the reserved PIC 15
      */
-    public Double getRadiusOfContainment() {
-        switch (positionIntegrityCategory) {
-            case 1:
-                return 37040.;
-            case 2:
-                return 18520.;
-            case 3:
-                return 14816.;
-            case 4:
-                return 7408.;
-            case 5:
-                return 3704.;
-            case 6:
-                return 1852.;
-            case 7:
-                return 1111.2;
-            case 8:
-                return 926.;
-            case 9:
-                return 555.6;
-            case 10:
-                return 370.4;
-            case 11:
-                return 185.2;
-            case 12:
-                return 75.;
-            case 13:
-                return 25.;
-            case 14:
-                return 7.5;
-            default:
-                return null; // 0: unknown, 15: reserved
-        }
+    public ContainmentRadius getContainmentRadius() {
+        return ContainmentRadius.forPIC(positionIntegrityCategory);
     }
 
     /**

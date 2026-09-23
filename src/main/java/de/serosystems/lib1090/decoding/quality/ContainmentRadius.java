@@ -83,6 +83,9 @@ public enum ContainmentRadius {
         LOWER
     }
 
+    /** The position integrity category is four bits wide, so this is every value it can carry. */
+    private static final int MAX_PIC = 15;
+
     private final Bound bound;
     private final double meters;
 
@@ -133,6 +136,67 @@ public enum ContainmentRadius {
      */
     public boolean isUnknown() {
         return bound == Bound.NONE;
+    }
+
+    /**
+     * The containment radius a Position Integrity Category (PIC) reports, ED-102B §2.2.3.2.7.5.4.8
+     * TABLE 2-82.
+     * <p>
+     * PIC is the HVA Velocity Message's own way of reporting the horizontal containment region, in
+     * place of the format type code and supplements a position message is read with. The field is
+     * four bits and the table defines every value: fourteen of them bound the radius from above, and
+     * the two at the ends report nothing — PIC 0 because the radius is unknown, PIC 15 because the
+     * standard reserves it.
+     * <p>
+     * <b>This does not give the NIC.</b> ED-102B §2.2.3.2.7.2.6 TABLE 2-67 tabulates the same radii
+     * against a NIC, and against the format type code and supplements a position message would have
+     * needed to report them. That mapping is deliberately left out: a NIC obtained from a containment
+     * radius is not the NIC a message transmitted, and the two are tabulated independently everywhere
+     * else in this package precisely so that neither is computed from the other. Reading it off
+     * TABLE 2-67 remains possible, and is then the caller's own claim rather than the library's.
+     *
+     * @param pic the encoded position integrity category, 0 to 15
+     * @return the radius that category reports, {@link #UNKNOWN} for PIC 0 and for the reserved
+     * PIC 15
+     * @throws IllegalArgumentException if the value is outside the four bits the field occupies
+     */
+    public static ContainmentRadius forPIC(byte pic) {
+        if (pic < 0 || pic > MAX_PIC)
+            throw new IllegalArgumentException(
+                    "Position integrity category " + pic + " does not fit the four bits it occupies");
+
+        switch (pic) {
+            case 1:
+                return BELOW_37040;
+            case 2:
+                return BELOW_18520;
+            case 3:
+                return BELOW_14816;
+            case 4:
+                return BELOW_7408;
+            case 5:
+                return BELOW_3704;
+            case 6:
+                return BELOW_1852;
+            case 7:
+                return BELOW_1111_2;
+            case 8:
+                return BELOW_926;
+            case 9:
+                return BELOW_555_6;
+            case 10:
+                return BELOW_370_4;
+            case 11:
+                return BELOW_185_2;
+            case 12:
+                return BELOW_75;
+            case 13:
+                return BELOW_25;
+            case 14:
+                return BELOW_7_5;
+            default:
+                return UNKNOWN;
+        }
     }
 
     /**
