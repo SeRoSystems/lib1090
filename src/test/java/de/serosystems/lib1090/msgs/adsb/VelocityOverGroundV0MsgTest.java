@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
 import org.junit.jupiter.api.Test;
@@ -35,5 +36,19 @@ class VelocityOverGroundV0MsgTest extends VelocityOverGroundMsgTest {
     public void testNUCrRaw_485020() throws Exception {
         VelocityOverGroundV0Msg msg = new VelocityOverGroundV0Msg("8D485020994409940838175B284F");
         assertEquals(0, msg.getNUCrEncoded());
+    }
+
+    /**
+     * Version 0 reports NUCr where later versions report NACv, and ED-102B §N.2.3.8 maps the two one
+     * for one, so a version 0 velocity message answers the same question a version 1 one does. This
+     * message carries category 0, which guarantees nothing.
+     */
+    @Test
+    public void testNUCrGivesTheSameVelocityErrorAsNACvWould() throws Exception {
+        VelocityOverGroundV0Msg msg = new VelocityOverGroundV0Msg("8D485020994409940838175B284F");
+
+        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10, msg.getHorizontalVelocityError());
+        assertEquals(HorizontalVelocityError.forNACv(msg.getNUCrEncoded()),
+                msg.getHorizontalVelocityError());
     }
 }
