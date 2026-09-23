@@ -16,7 +16,7 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.decoding;
+package de.serosystems.lib1090.decoding.quality;
 
 /**
  * The 95% horizontal accuracy bound a Navigation Accuracy Category for position reports, ED-102B

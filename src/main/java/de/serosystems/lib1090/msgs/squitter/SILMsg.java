@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.SourceIntegrityLevel;
+import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
 
 /**
  * Common API for messages that transmit a Source Integrity Level (SIL).

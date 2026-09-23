@@ -16,9 +16,9 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
 
 /**
  * Common API for messages that expose the Navigation Uncertainty Category for velocity (NUCr).

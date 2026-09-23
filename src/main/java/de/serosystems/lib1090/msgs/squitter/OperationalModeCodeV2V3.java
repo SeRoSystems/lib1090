@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.SystemDesignAssurance;
+import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance;
 
 /**
  * Common API for the Operational Mode Code of ADS-B versions 2 and 3, airborne and surface alike.

@@ -19,8 +19,8 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
-import de.serosystems.lib1090.decoding.ContainmentRadius;
-import de.serosystems.lib1090.decoding.NICSupplements;
+import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
+import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;

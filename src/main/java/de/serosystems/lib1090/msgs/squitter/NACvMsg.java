@@ -16,26 +16,28 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
+package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
-import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
-import org.junit.jupiter.api.Test;
+/**
+ * Common API for messages that expose the Navigation Accuracy Category for velocity (NACv).
+ */
+public interface NACvMsg {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+    /**
+     * @return the raw encoded Navigation Accuracy Category for velocity
+     */
+    byte getNACvEncoded();
 
-class VelocityOverGroundV2MsgTest extends VelocityOverGroundMsgTest {
-
-    @Override
-    protected VelocityOverGroundMsg create(String hex) throws Exception {
-        return new VelocityOverGroundV2Msg(hex);
-    }
-
-    @Test
-    public void testNACvRawAndHorizontalVelocityError_485020() throws Exception {
-        VelocityOverGroundV2Msg msg = new VelocityOverGroundV2Msg("8D485020994409940838175B284F");
-        assertEquals(0, msg.getNACvEncoded());
-        assertEquals(HorizontalVelocityError.UNKNOWN_OR_AT_LEAST_10, msg.getHorizontalVelocityError());
+    /**
+     * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
+     * TABLE 2-18.
+     *
+     * @return what the category guarantees; category 0 guarantees nothing, reading "unknown or
+     * 10 m/s or more"
+     */
+    default HorizontalVelocityError getHorizontalVelocityError() {
+        return HorizontalVelocityError.forNACv(getNACvEncoded());
     }
 }

@@ -16,28 +16,14 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.adsb;
-
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
-
 /**
- * Common API for messages that expose the Navigation Accuracy Category for velocity (NACv).
+ * ADS-B messages, as an aircraft broadcasts them about itself, across all four versions of the
+ * standard.
+ * <p>
+ * A class here decodes one message format at one version, since the versions disagree about what the
+ * bits mean rather than merely adding to each other; what the versions share is declared in
+ * {@link de.serosystems.lib1090.msgs.squitter} and implemented here. An interface in this package is
+ * one that only ADS-B can implement, either because the version it belongs to has no counterpart
+ * elsewhere or because the other protocols put a different field in the same place.
  */
-public interface NACvMsg {
-
-    /**
-     * @return the raw encoded Navigation Accuracy Category for velocity
-     */
-    byte getNACvEncoded();
-
-    /**
-     * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
-     * TABLE 2-18.
-     *
-     * @return what the category guarantees; category 0 guarantees nothing, reading "unknown or
-     * 10 m/s or more"
-     */
-    default HorizontalVelocityError getHorizontalVelocityError() {
-        return HorizontalVelocityError.forNACv(getNACvEncoded());
-    }
-}
+package de.serosystems.lib1090.msgs.adsb;

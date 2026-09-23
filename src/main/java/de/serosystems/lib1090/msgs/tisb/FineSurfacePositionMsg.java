@@ -20,10 +20,10 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.ContainmentRadius;
-import de.serosystems.lib1090.decoding.NICSupplements;
-import de.serosystems.lib1090.decoding.NavigationCharacteristics;
-import de.serosystems.lib1090.decoding.NavigationCharacteristicsV0;
+import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
+import de.serosystems.lib1090.decoding.quality.NICSupplements;
+import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
+import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV0;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;

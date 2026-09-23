@@ -21,7 +21,7 @@ package de.serosystems.example;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
-import de.serosystems.lib1090.decoding.SystemDesignAssurance;
+import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;

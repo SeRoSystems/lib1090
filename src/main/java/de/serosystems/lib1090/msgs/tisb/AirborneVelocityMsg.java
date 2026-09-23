@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.tisb;
 
-import de.serosystems.lib1090.decoding.HorizontalVelocityError;
+import de.serosystems.lib1090.decoding.quality.HorizontalVelocityError;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 
 /**

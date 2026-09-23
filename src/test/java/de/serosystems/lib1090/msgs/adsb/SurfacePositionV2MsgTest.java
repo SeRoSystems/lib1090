@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.decoding.NICSupplements;
+import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import org.junit.jupiter.api.Test;
