@@ -25,7 +25,7 @@ import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import java.io.Serializable;
 
 /**
- * Decoder for TIS-B/ADS-R Management Message, as defined in ED-102B §2.2.19.2.3.
+ * Decoder for TIS-B/ADS-R Management Message, as defined in ED-102B §2.2.19.2 Figure 2-67.
  */
 public class ManagementMessage extends ExtendedSquitter implements Serializable, TISBMsg {
 

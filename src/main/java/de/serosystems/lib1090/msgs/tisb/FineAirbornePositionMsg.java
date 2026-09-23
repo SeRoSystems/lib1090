@@ -35,7 +35,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for TIS-B fine airborne position, as defined in ED-102B §2.2.17.3.1.
+ * Decoder for TIS-B fine airborne position, as defined in ED-102B §2.2.17.3.1 Figure 2-52.
  */
 public class FineAirbornePositionMsg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, IMFMsg, TISBMsg {
 

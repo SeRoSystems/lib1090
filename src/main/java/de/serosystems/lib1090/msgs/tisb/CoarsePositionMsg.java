@@ -33,7 +33,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Decoder for TIS-B coarse position, formerly ED-102A §2.2.17.3.5. This TIS-B message format has been removed from ED-102B.
+ * Decoder for TIS-B coarse position, formerly ED-102A §2.2.17.3.5 Figure 2-31. This TIS-B
+ * message format has been removed from ED-102B.
  */
 public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg, TISBMsg {
 
