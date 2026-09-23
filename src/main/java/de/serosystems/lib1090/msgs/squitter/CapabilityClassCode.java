@@ -40,7 +40,7 @@ public interface CapabilityClassCode extends MEField {
 
     /**
      * The 2-bit CC Code format selector, ED-102B §2.2.3.2.7.2.3. Only {@code 0} is defined for the
-     * layouts modelled here.
+     * layouts modeled here.
      * <p>
      * ADS-B version 1 widens the selector: the standard reserves ME 13–14 as well, and since version 1
      * is no longer maintained those four bits are treated as one logical selector of which only

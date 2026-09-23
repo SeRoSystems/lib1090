@@ -238,7 +238,7 @@ public final class CPREncodedPosition {
     /**
      * Compact Position Reporting: Global decoding.
      * Can only be used if another position report with a different format (even/odd) is available.
-     * This and the {@code other} position must fulfil the following constraints:
+     * This and the {@code other} position must fulfill the following constraints:
      * <ul>
      *     <li>Number of bits must match</li>
      *     <li>Exactly one must be even and exactly one must be odd</li>
