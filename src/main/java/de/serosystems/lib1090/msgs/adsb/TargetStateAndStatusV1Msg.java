@@ -28,7 +28,7 @@ import java.io.Serializable;
 
 /**
  * Decoder for the ADS-B version 1 Target State and Status Message, Subtype=0, as defined in the
- * former standard DO-260A, per DO-260B §2.2.3.2.7.1.2 TABLE 2-40 and DO-260B §N.4.2 Figure N-16.
+ * former standard DO-260A and depicted in ED-102B Appendix N §N.5.2 Figure N-14.
  * This encoding is no longer specified in ED-102B: ED-102B §2.2.3.2.7.1.2 TABLE 2-31 reserves
  * Subtype Code ZERO, noting this coding was defined in RTCA DO-260A, and requires Subtype Code
  * ONE (1) for compliant Transmitting Subsystems; this Subtype=0 format is decoded here only for

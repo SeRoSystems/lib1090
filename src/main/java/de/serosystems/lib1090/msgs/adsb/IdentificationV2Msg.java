@@ -28,7 +28,8 @@ import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 2 identification messages, as defined in ED-102B §2.2.3.2.5 Figure 2-7. Individual callsign characters are
+ * Decoder for ADS-B version 2 identification messages, as defined in
+ * ED-102B Appendix N §N.5.3 Figure N-18 (legacy format retained for backward compatibility). Individual callsign characters are
  * decoded by {@link Identification#identificationDigits(long)}, whose 6-bit IA-5 alphabet
  * is cited in ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8.
  */
