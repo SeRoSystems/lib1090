@@ -33,7 +33,8 @@ import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
 import java.io.Serializable;
 
 /**
- * Decoder for the ADS-B operational status message, as defined in ED-102A (ADS-B version 2), with subtype 0 (airborne).
+ * Decoder for the ADS-B operational status message (version 2), subtype 0 (airborne), as defined in
+ * ED-102B Appendix N §N.5.3 Figure N-24 (legacy format retained for backward compatibility).
  */
 public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, ADSBMsg {
 
