@@ -21,39 +21,10 @@ package de.serosystems.lib1090.msgs.squitter;
 /**
  * Common API for ADS-B emergency and priority status messages across supported versions.
  */
-public interface EmergencyOrPriorityStatusMsg {
+public interface EmergencyOrPriorityStatusMsg extends EmergencyStateMsg {
 
     /**
      * @return the subtype code of the aircraft status report (should always be 1)
      */
     byte getSubtype();
-
-    /**
-     * @return the emergency state code, ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
-     */
-    byte getEmergencyStateCode();
-
-    /**
-     * @return the human readable emergency state, ED-102B §2.2.3.2.7.8.1.1 TABLE 2-97
-     */
-    default String getEmergencyStateText() {
-        switch (getEmergencyStateCode()) {
-            case 0:
-                return "no emergency";
-            case 1:
-                return "general emergency";
-            case 2:
-                return "lifeguard/medical";
-            case 3:
-                return "minimum fuel";
-            case 4:
-                return "no communications";
-            case 5:
-                return "unlawful interference";
-            case 6:
-                return "downed aircraft";
-            default:
-                return "unknown";
-        }
-    }
 }

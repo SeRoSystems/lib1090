@@ -18,22 +18,23 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV3;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-class EmergencyOrPriorityStatusV0V1MsgTest {
+class EmergencyOrPriorityStatusV1MsgTest {
 
+    /** Downed aircraft in version 1, reported as a general emergency, ED-102B §N.3.3.4 TABLE N-19. */
     @Test
-    public void testEmergencyState() throws Exception {
-        EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
-        assertEquals(0, msg.getEmergencyStateCode());
-        assertEquals("no emergency", msg.getEmergencyStateText());
-    }
-
-    @Test
-    public void testTypeCode28() throws Exception {
-        EmergencyOrPriorityStatusV0V1Msg msg = new EmergencyOrPriorityStatusV0V1Msg("8DA2C1B6E112B600000000760759");
-        assertEquals(28, msg.getFormatTypeCode());
+    public void testDownedAircraft() throws Exception {
+        EmergencyOrPriorityStatusV1Msg msg =
+                new EmergencyOrPriorityStatusV1Msg(EmergencyOrPriorityStatusV0MsgTest.EMERGENCY_STATE_6);
+        assertEquals(6, msg.getEmergencyStateEncoded());
+        assertSame(EmergencyStateV1V2.DOWNED_AIRCRAFT, msg.getEmergencyState());
+        assertEquals("Downed Aircraft", msg.getEmergencyState().getText());
+        assertSame(EmergencyStateV3.GENERAL_EMERGENCY, msg.getReportedEmergencyState());
     }
 }

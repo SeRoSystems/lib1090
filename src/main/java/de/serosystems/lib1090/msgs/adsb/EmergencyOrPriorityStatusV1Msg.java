@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -27,13 +28,12 @@ import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B emergency and priority status messages (versions 0 and 1), as defined in
- * ED-102B Appendix N §N.5.1 Figure N-6 for version 0 and §N.5.2 Figure N-13 for version 1
- * (legacy formats retained for backward compatibility).
+ * Decoder for ADS-B emergency and priority status messages (version 1), as defined in
+ * ED-102B Appendix N §N.5.2 Figure N-13 (legacy format retained for backward compatibility).
  */
-public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ADSBMsg {
+public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ADSBMsg {
 
-    private static final long serialVersionUID = 7380235047641841128L;
+    private static final long serialVersionUID = 2896163207436581504L;
 
     private static final byte SUBTYPE = 1;
 
@@ -42,7 +42,7 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected EmergencyOrPriorityStatusV0V1Msg() {
+    protected EmergencyOrPriorityStatusV1Msg() {
     }
 
     /**
@@ -50,7 +50,7 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public EmergencyOrPriorityStatusV0V1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -59,7 +59,7 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public EmergencyOrPriorityStatusV0V1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -67,7 +67,7 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
      * @param squitter extended squitter which contains this emergency or priority status msg
      * @throws BadFormatException if message has wrong format
      */
-    public EmergencyOrPriorityStatusV0V1Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public EmergencyOrPriorityStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)
@@ -87,13 +87,18 @@ public class EmergencyOrPriorityStatusV0V1Msg extends ExtendedSquitter implement
     }
 
     @Override
-    public byte getEmergencyStateCode() {
+    public byte getEmergencyStateEncoded() {
         return emergencyState;
     }
 
     @Override
+    public EmergencyStateV1V2 getEmergencyState() {
+        return EmergencyStateV1V2.forEncoded(emergencyState);
+    }
+
+    @Override
     public String toString() {
-        return "EmergencyOrPriorityStatusV0V1Msg{" + super.toString() +
+        return "EmergencyOrPriorityStatusV1Msg{" + super.toString() +
                 ", emergencyState=" + emergencyState +
                 '}';
     }

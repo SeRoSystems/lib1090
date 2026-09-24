@@ -19,6 +19,8 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -92,7 +94,9 @@ public class TargetStateAndStatusV1MsgTest {
         assertEquals(3, tss.getSILEncoded());
         assertTrue(tss.hasOperationalTCAS());
         assertTrue(tss.hasActiveTCASResolutionAdvisory());
-        assertEquals(4, tss.getEmergencyPriorityStatus());
+        assertEquals(4, tss.getEmergencyStateEncoded());
+        assertSame(EmergencyStateV1V2.NO_COMMUNICATIONS, tss.getEmergencyState());
+        assertSame(EmergencyStateV3.NO_COMMUNICATIONS, tss.getReportedEmergencyState());
     }
 
     @Test
