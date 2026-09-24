@@ -19,9 +19,11 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.EmergencyStateMsg;
 import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 
 import java.io.Serializable;
@@ -34,7 +36,7 @@ import java.io.Serializable;
  * ONE (1) for compliant Transmitting Subsystems; this Subtype=0 format is decoded here only for
  * backward compatibility with legacy transmitters.
  */
-public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, ADSBMsg {
+public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, EmergencyStateMsg, ADSBMsg {
 
     private static final long serialVersionUID = 1112214139901070039L;
 
@@ -52,7 +54,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
     private byte sil;
     private boolean capabilityNotTcas;
     private boolean capabilityTcasRaActive;
-    private byte emergencyPriorityStatus;
+    private byte emergencyState;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -109,7 +111,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
         sil = b.readByte(45, 46);
         capabilityNotTcas = b.readBoolean(52);
         capabilityTcasRaActive = b.readBoolean(53);
-        emergencyPriorityStatus = b.readByte(54, 56);
+        emergencyState = b.readByte(54, 56);
     }
 
     /**
@@ -192,11 +194,14 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
         return capabilityTcasRaActive;
     }
 
-    /**
-     * @return the raw emergency / priority status field value
-     */
-    public byte getEmergencyPriorityStatus() {
-        return emergencyPriorityStatus;
+    @Override
+    public byte getEmergencyStateEncoded() {
+        return emergencyState;
+    }
+
+    @Override
+    public EmergencyStateV1V2 getEmergencyState() {
+        return EmergencyStateV1V2.forEncoded(emergencyState);
     }
 
     @Override
@@ -216,7 +221,7 @@ public class TargetStateAndStatusV1Msg extends ExtendedSquitter implements Seria
                 ", sil=" + sil +
                 ", capabilityNotTcas=" + capabilityNotTcas +
                 ", capabilityTcasRaActive=" + capabilityTcasRaActive +
-                ", emergencyPriorityStatus=" + emergencyPriorityStatus +
+                ", emergencyState=" + emergencyState +
                 '}';
     }
 

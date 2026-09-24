@@ -19,32 +19,30 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV0;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
-import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
 
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B emergency and priority status messages (ADS-B version 2), as defined in
- * ED-102B Appendix N §N.5.3 Figure N-21 (legacy format retained for backward compatibility).
+ * Decoder for ADS-B emergency and priority status messages (version 0), as defined in
+ * ED-102B Appendix N §N.5.1 Figure N-6 (legacy format retained for backward compatibility).
  */
-public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ModeACodeMsg, ADSBMsg {
+public class EmergencyOrPriorityStatusV0Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ADSBMsg {
 
-    private static final long serialVersionUID = 3560754083142828235L;
+    private static final long serialVersionUID = 7380235047641841128L;
 
     private static final byte SUBTYPE = 1;
 
     private byte emergencyState;
-    private short modeACode;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected EmergencyOrPriorityStatusV2Msg() {
+    protected EmergencyOrPriorityStatusV0Msg() {
     }
 
     /**
@@ -52,7 +50,7 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public EmergencyOrPriorityStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -61,7 +59,7 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException     if message has wrong format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public EmergencyOrPriorityStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public EmergencyOrPriorityStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ExtendedSquitter(rawMessage));
     }
 
@@ -69,7 +67,7 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
      * @param squitter extended squitter which contains this emergency or priority status msg
      * @throws BadFormatException if message has wrong format
      */
-    public EmergencyOrPriorityStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public EmergencyOrPriorityStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)
@@ -81,7 +79,6 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
             throw new BadFormatException("Emergency And Priority Status messages must have subtype 1");
 
         emergencyState = b.readByte(9, 11);
-        modeACode = b.readShort(12, 24);
     }
 
     @Override
@@ -95,23 +92,14 @@ public class EmergencyOrPriorityStatusV2Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public EmergencyStateV1V2 getEmergencyState() {
-        return EmergencyStateV1V2.forEncoded(emergencyState);
-    }
-
-    /**
-     * @return the four-digit Mode A (4096) code (only ADS-B version 2)
-     */
-    @Override
-    public short getModeACode() {
-        return modeACode;
+    public EmergencyStateV0 getEmergencyState() {
+        return EmergencyStateV0.forEncoded(emergencyState);
     }
 
     @Override
     public String toString() {
-        return "EmergencyOrPriorityStatusV2Msg{" + super.toString() +
+        return "EmergencyOrPriorityStatusV0Msg{" + super.toString() +
                 ", emergencyState=" + emergencyState +
-                ", modeACode=" + modeACode +
                 '}';
     }
 

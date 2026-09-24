@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.emergency.EmergencyStateV1V2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -91,8 +92,13 @@ public class EmergencyOrPriorityStatusV1Msg extends ExtendedSquitter implements 
     }
 
     @Override
-    public byte getEmergencyStateCode() {
+    public byte getEmergencyStateEncoded() {
         return emergencyState;
+    }
+
+    @Override
+    public EmergencyStateV1V2 getEmergencyState() {
+        return EmergencyStateV1V2.forEncoded(emergencyState);
     }
 
     @Override

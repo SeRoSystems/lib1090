@@ -163,7 +163,7 @@ public class ExampleDecoder {
                 }
             } else if (msg instanceof EmergencyOrPriorityStatusMsg) {
                 EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
-                System.out.println("[" + icao24 + "]: " + status.getEmergencyStateText());
+                System.out.println("[" + icao24 + "]: " + status.getReportedEmergencyState().getText());
                 if (status instanceof ModeACodeMsg) {
                     System.out.println("          Mode A code is " + ((ModeACodeMsg) status).getIdentity());
                 }
