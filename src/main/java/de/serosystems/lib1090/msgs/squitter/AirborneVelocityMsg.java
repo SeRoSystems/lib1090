@@ -87,7 +87,7 @@ public interface AirborneVelocityMsg {
      */
     default boolean isDiffBaroAltSaturated() {
         if (!hasDiffBaroAlt()) return false;
-        return getDiffBaroAltEncoded() != 0x7f;
+        return getDiffBaroAltEncoded() == 0x7f;
     }
 
     /**

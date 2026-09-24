@@ -93,4 +93,15 @@ abstract class AirspeedHeadingMsgTest {
         assertFalse(msg.hasHeadingStatusFlag());
         assertNull(msg.getHeading());
     }
+
+    @Test
+    public void testDiffBaroAltSaturation() throws Exception {
+        String hex = "8DA05F219B06B6AF189400CBC33F";
+        VelocityOverGroundMsgTest.assertDiffBaroAltSaturation(
+                create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 0)),
+                create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 1)),
+                create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 126)),
+                create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 127)),
+                create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, true, 127)));
+    }
 }
