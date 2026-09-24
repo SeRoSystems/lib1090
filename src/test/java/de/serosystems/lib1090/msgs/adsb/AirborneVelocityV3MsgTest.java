@@ -48,6 +48,17 @@ class AirborneVelocityV3MsgTest extends VelocityOverGroundMsgTest {
         assertNull(msg.getDiffBaroAlt());
     }
 
+    /**
+     * In version 3, 127 in ME 50-56 marks the extended zone of the 11-bit field rather than saturation,
+     * which needs the extension bits set as well; see {@link #testExtendedDiffBaroAltSaturated()}.
+     */
+    @Override
+    public void testDiffBaroAltSaturation() throws Exception {
+        VelocityOverGroundMsg msg = create(withDiffBaroAlt("8D485020994409940838175B284F", false, 127));
+        assertTrue(msg.hasDiffBaroAlt());
+        assertFalse(msg.isDiffBaroAltSaturated());
+    }
+
     @Test
     void testNICSupplementDAvailableWhenDiffBaroAltEncodedIsZero() throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg(messageWithNICSupplementD(0));

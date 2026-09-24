@@ -125,4 +125,48 @@ abstract class VelocityOverGroundMsgTest {
         VelocityOverGroundMsg msg = create("8D485020994409940838175B284F");
         assertFalse(msg.isSupersonic(), "Ground speed messages should not be supersonic");
     }
+
+    /**
+     * The message with its Difference from Barometric Altitude replaced: the sign in ME 49 and the
+     * 7-bit magnitude in ME 50-56, which together are the last ME byte.
+     */
+    static String withDiffBaroAlt(String hex, boolean negative, int encoded) {
+        return hex.substring(0, 20) + String.format("%02X", (negative ? 0x80 : 0) | encoded) + hex.substring(22);
+    }
+
+    /**
+     * Only 127, "&gt; 3137.5 ft", saturates the 7-bit field of versions 0 to 2, and it does so whatever
+     * the sign; 0 means the difference is unavailable and so is not saturated either.
+     */
+    static void assertDiffBaroAltSaturation(AirborneVelocityMsg unavailable, AirborneVelocityMsg smallest,
+                                            AirborneVelocityMsg largestExact, AirborneVelocityMsg saturated,
+                                            AirborneVelocityMsg saturatedNegative) {
+        assertFalse(unavailable.hasDiffBaroAlt());
+        assertFalse(unavailable.isDiffBaroAltSaturated());
+
+        assertTrue(smallest.hasDiffBaroAlt());
+        assertFalse(smallest.isDiffBaroAltSaturated());
+
+        assertTrue(largestExact.hasDiffBaroAlt());
+        assertFalse(largestExact.isDiffBaroAltSaturated());
+        assertEquals(3125., largestExact.getDiffBaroAlt());
+
+        assertTrue(saturated.hasDiffBaroAlt());
+        assertTrue(saturated.isDiffBaroAltSaturated());
+        assertEquals(3137.5, saturated.getDiffBaroAltMidpoint());
+
+        assertTrue(saturatedNegative.isDiffBaroAltSaturated());
+        assertEquals(-3137.5, saturatedNegative.getDiffBaroAltMidpoint());
+    }
+
+    @Test
+    public void testDiffBaroAltSaturation() throws Exception {
+        String hex = "8D485020994409940838175B284F";
+        assertDiffBaroAltSaturation(
+                create(withDiffBaroAlt(hex, false, 0)),
+                create(withDiffBaroAlt(hex, false, 1)),
+                create(withDiffBaroAlt(hex, false, 126)),
+                create(withDiffBaroAlt(hex, false, 127)),
+                create(withDiffBaroAlt(hex, true, 127)));
+    }
 }
