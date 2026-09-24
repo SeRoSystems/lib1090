@@ -182,7 +182,7 @@ public class ModeSDownlinkMsg implements Serializable {
             imf = false; // -> will result in ICAO 24
         else if (ftc == 19)
             // velocity / airspeed
-            imf = (payload[4] & 0x80) > 0;
+            imf = (payload[4] & 0x80) != 0;
         else if (ftc == 26)
             // Wx AIREP
             imf = (payload[9] & 0x1) != 0;
@@ -191,7 +191,7 @@ public class ModeSDownlinkMsg implements Serializable {
             imf = (payload[9] & 0x1) != 0;
         else if (ftc == 29)
             // target state and status
-            imf = ((payload[9] & 0x20) != 0);
+            imf = (payload[9] & 0x20) != 0;
         else if (ftc == 31)
             // operational status
             imf = (payload[9] & 0x1) != 0;
@@ -304,7 +304,7 @@ public class ModeSDownlinkMsg implements Serializable {
                     break;
                 case 3:
                     // coarse position
-                    if ((payload[3] & 0x80) > 0) // IMF field
+                    if ((payload[3] & 0x80) == 0) // IMF field
                         type = QualifiedAddress.Type.ICAO24;
                     else
                         type = QualifiedAddress.Type.MODEA_TRACK;
