@@ -55,6 +55,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     private boolean geoFlag;
     private boolean diffBaroAltNegative;
     private short diffBaroAltEncoded;
+    private boolean nicSupplementA;
     private byte nacv;
     private byte sil;
     private boolean magneticHeading;
@@ -122,6 +123,9 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
 
         verticalRateDown = br.readBoolean(37);
         verticalRateEncoded = br.readShort(38, 46);
+
+        // outside the geo flag's reach: the supplement is carried whichever way the bits below go
+        nicSupplementA = br.readBoolean(47);
 
         if (geoFlag) {
             diffBaroAltNegative = br.readBoolean(49);
@@ -204,6 +208,17 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     /**
+     * NIC supplement A, ME bit 47. The standard has it read together with the Message TYPE Code to
+     * decode the NIC of this target's airborne and surface position messages, which is why a
+     * receiver keeps it per target rather than per message.
+     *
+     * @return the NIC supplement A bit
+     */
+    public boolean getNICSupplementA() {
+        return nicSupplementA;
+    }
+
+    /**
      * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
      * in the operational status message. For version 0 it is derived from the format type code.
      *
@@ -234,6 +249,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
                 ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
                 ", nacp=" + nacp +
+                ", nicSupplementA=" + nicSupplementA +
                 ", verticalRateDown=" + verticalRateDown +
                 ", verticalRateEncoded=" + verticalRateEncoded +
                 ", headingStatusBit=" + headingStatusBit +

@@ -50,6 +50,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     private boolean geoFlag;
     private boolean diffBaroAltNegative;
     private short diffBaroAltEncoded;
+    private boolean nicSupplementA;
     private byte nacv;
     private byte sil;
 
@@ -114,6 +115,9 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
 
         verticalRateDown = br.readBoolean(37);
         verticalRateEncoded = br.readShort(38, 46);
+
+        // outside the geo flag's reach: the supplement is carried whichever way the bits below go
+        nicSupplementA = br.readBoolean(47);
 
         if (geoFlag) {
             diffBaroAltNegative = br.readBoolean(49);
@@ -207,6 +211,17 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     /**
+     * NIC supplement A, ME bit 47. The standard has it read together with the Message TYPE Code to
+     * decode the NIC of this target's airborne and surface position messages, which is why a
+     * receiver keeps it per target rather than per message.
+     *
+     * @return the NIC supplement A bit
+     */
+    public boolean getNICSupplementA() {
+        return nicSupplementA;
+    }
+
+    /**
      * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
      * in the operational status message. For version 0 it is derived from the format type code.
      *
@@ -228,6 +243,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
                 ", messageSubtype=" + messageSubtype +
                 ", imf=" + imf +
                 ", nacp=" + nacp +
+                ", nicSupplementA=" + nicSupplementA +
                 ", velocityToEastNegative=" + velocityToEastNegative +
                 ", velocityToEastEncoded=" + velocityToEastEncoded +
                 ", velocityToNorthNegative=" + velocityToNorthNegative +
