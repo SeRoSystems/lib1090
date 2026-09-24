@@ -367,9 +367,9 @@ public class StatefulModeSDecoder {
         byte ftc = es1090.getFormatTypeCode();
 
         if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
-            return new FineAirbornePositionMsg(es1090, timestamp);
+            return new FineAirbornePositionMsg.WithNICSupplements(es1090, timestamp, dd.nicSupplements);
         } else if (ftc >= 5 && ftc <= 8) {
-            return new FineSurfacePositionMsg(es1090, timestamp);
+            return new FineSurfacePositionMsg.WithNICSupplements(es1090, timestamp, dd.nicSupplements);
         } else if (ftc == 19) {
             int subtype = es1090.getMessage()[0] & 0x7;
             if (subtype == 1 || subtype == 2) {
@@ -377,6 +377,7 @@ public class StatefulModeSDecoder {
                         new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
                 if (vog.hasDiffBaroAlt())
                     dd.geoMinusBaro = vog.getDiffBaroAlt();
+                dd.nicSupplements = dd.nicSupplements.withA(vog.getNICSupplementA());
                 return vog;
             } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
                 // subtypes 3/4 (airspeed & heading) are reserved per ED-102B; still decoded
@@ -385,6 +386,7 @@ public class StatefulModeSDecoder {
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
                 if (ash.hasDiffBaroAlt())
                     dd.geoMinusBaro = ash.getDiffBaroAlt();
+                dd.nicSupplements = dd.nicSupplements.withA(ash.getNICSupplementA());
                 return ash;
             }
         } else if (ftc >= 1 && ftc <= 4) {

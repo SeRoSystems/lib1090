@@ -45,6 +45,18 @@ public interface AirborneVelocityMsg extends IMFMsg {
     boolean hasGeoFlag();
 
     /**
+     * NIC supplement A, ME bit 47, which ED-102B has read together with the Message TYPE Code to
+     * decode the NIC of the airborne and surface position messages of the same target.
+     * <p>
+     * It is the only place TIS-B carries the supplement, there being no operational status message
+     * to hold it as there is in ADS-B, and it sits outside the geo flag's reach: unlike the velocity
+     * error and the integrity level above, it is present whichever way that flag goes.
+     *
+     * @return the NIC supplement A bit
+     */
+    boolean getNICSupplementA();
+
+    /**
      * The 95% horizontal velocity error the reported category guarantees, ED-102B §2.2.3.2.6.1.5
      * TABLE 2-18.
      *
