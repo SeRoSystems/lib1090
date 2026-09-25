@@ -23,7 +23,6 @@ import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Decoder for aircraft identification (BDS 2,0), as defined in ICAO Doc 9871 (First Edition,
@@ -35,10 +34,9 @@ import java.util.Arrays;
 public class AircraftIdentification extends BDSRegister implements Serializable {
     private static final long serialVersionUID = -8005492828828163576L;
 
-    // BDS Code
-    private short bdsCode;
-    // aircraft Identification
-    private byte[] aircraftIdentification;
+    private static final BDSCode BDS_CODE = new BDSCode(2, 0);
+
+    private long aircraftIdentificationEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -51,24 +49,40 @@ public class AircraftIdentification extends BDSRegister implements Serializable 
      */
     public AircraftIdentification(byte[] message) {
         super(message);
-        setBds(BDSRegister.bdsCode.AIRCRAFT_IDENTIFICATION);
 
-        this.bdsCode = extractBdsCode(message);
-        this.aircraftIdentification = Identification.identificationDigits(BitReader.forBigEndian(message).readLong(9, 56));
+        aircraftIdentificationEncoded = BitReader.forBigEndian(message).readLong(9, 56);
     }
 
     /**
-     * @return The call sign as 8 characters array
+     * @return the eight 6-bit characters of the aircraft identification as transmitted
+     */
+    public long getAircraftIdentificationEncoded() {
+        return aircraftIdentificationEncoded;
+    }
+
+    /**
+     * @return the eight characters of the aircraft identification as 6-bit IA-5 codes
+     */
+    public byte[] getAircraftIdentificationDigits() {
+        return Identification.identificationDigits(aircraftIdentificationEncoded);
+    }
+
+    /**
+     * @return the call sign as an array of 8 characters
      */
     public char[] getAircraftIdentification() {
-        return InternationalAlphabet5.mapChar(aircraftIdentification);
+        return InternationalAlphabet5.mapChar(getAircraftIdentificationDigits());
+    }
+
+    @Override
+    public BDSCode getBDSCode() {
+        return BDS_CODE;
     }
 
     @Override
     public String toString() {
-        return "AircraftIdentification{" +
-                "bdsCode=" + bdsCode +
-                ", aircraftIdentification=" + Arrays.toString(aircraftIdentification) +
+        return "AircraftIdentification{" + super.toString() +
+                ", aircraftIdentificationEncoded=" + aircraftIdentificationEncoded +
                 '}';
     }
 

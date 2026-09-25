@@ -42,11 +42,6 @@ public class ACASActiveResolutionAdvisoryReportTest {
     }
 
     @Test
-    public void bdsCode() {
-        assertEquals(BDSRegister.bdsCode.ACAS_ACTIVE_RESOLUTION_ADVISORY, acasReport.getBds());
-    }
-
-    @Test
     public void activeResolutionAdvisories() {
         boolean[] activeResolutionAdvisories = acasReport.getActiveResolutionAdvisories();
         assertFalse(activeResolutionAdvisories[0]);

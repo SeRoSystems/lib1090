@@ -18,38 +18,31 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
-import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.Identification;
-import de.serosystems.lib1090.decoding.InternationalAlphabet5;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AircraftIdentificationTest {
 
-    private static byte[] msg;
-
-    @BeforeAll
-    public static void setup() {
-        msg = new byte[]{
-                (byte) 0b00100000, (byte) 0b00101100, (byte) 0b11000011, (byte) 0b01110001, (byte) 0b11000011,
-                (byte) 0b00011101, (byte) 0b11100000
-        };
-    }
-
-    @Test
-    public void bdsCode() {
-        short bds = AircraftIdentification.extractBdsCode(msg);
-        assertEquals(20, bds);
-    }
+    private static final byte[] MSG = {
+            (byte) 0b00100000, (byte) 0b00101100, (byte) 0b11000011, (byte) 0b01110001, (byte) 0b11000011,
+            (byte) 0b00011101, (byte) 0b11100000
+    };
 
     @Test
     public void aircraftIdentification() {
-        byte[] identityByteArray = Identification.identificationDigits(BitReader.forBigEndian(msg).readLong(9, 56));
-        char[] identityCharArray = InternationalAlphabet5.mapChar(identityByteArray);
+        AircraftIdentification id = new AircraftIdentification(MSG);
 
-        assertEquals("KLM1017 ", String.valueOf(identityCharArray));
+        assertEquals(0x2CC371C31DE0L, id.getAircraftIdentificationEncoded());
+        assertArrayEquals(new byte[]{11, 12, 13, 49, 48, 49, 55, 32}, id.getAircraftIdentificationDigits());
+        assertEquals("KLM1017 ", String.valueOf(id.getAircraftIdentification()));
+    }
+
+    /** Every register reports its raw message through the base class, as the ADS-B messages do. */
+    @Test
+    public void toStringIncludesTheMessage() {
+        assertTrue(new AircraftIdentification(MSG).toString()
+                .startsWith("AircraftIdentification{BDSRegister{bdsCode=2,0, message=202cc371c31de0}"));
     }
 
 }

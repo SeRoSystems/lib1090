@@ -21,10 +21,10 @@ package de.serosystems.lib1090.msgs.bds;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CommonUsageGICBCapabilityReportTest {
 
@@ -40,38 +40,64 @@ public class CommonUsageGICBCapabilityReportTest {
 
     @Test
     public void commonGICBCapabilityReport() {
-        Map<String, Boolean> map = CommonUsageGICBCapabilityReport.extractCommonGICBCapabilityReport(msg);
+        Map<BDSCode, Boolean> map = new CommonUsageGICBCapabilityReport(msg).getCommonUsageGICBCapabilityReport();
 
-        assertTrue(map.get("BDS05"));
-        assertTrue(map.get("BDS06"));
-        assertTrue(map.get("BDS07"));
-        assertTrue(map.get("BDS08"));
-        assertTrue(map.get("BDS09"));
-        assertFalse(map.get("BDS0A"));
-        assertTrue(map.get("BDS20"));
-        assertFalse(map.get("BDS21"));
+        assertTrue(map.get(new BDSCode(0, 5)));
+        assertTrue(map.get(new BDSCode(0, 6)));
+        assertTrue(map.get(new BDSCode(0, 7)));
+        assertTrue(map.get(new BDSCode(0, 8)));
+        assertTrue(map.get(new BDSCode(0, 9)));
+        assertFalse(map.get(new BDSCode(0, 0xA)));
+        assertTrue(map.get(new BDSCode(2, 0)));
+        assertFalse(map.get(new BDSCode(2, 1)));
 
-        assertTrue(map.get("BDS40"));
-        assertFalse(map.get("BDS41"));
-        assertFalse(map.get("BDS42"));
-        assertFalse(map.get("BDS43"));
-        assertFalse(map.get("BDS44"));
-        assertFalse(map.get("BDS45"));
-        assertFalse(map.get("BDS48"));
-        assertTrue(map.get("BDS50"));
+        assertTrue(map.get(new BDSCode(4, 0)));
+        assertFalse(map.get(new BDSCode(4, 1)));
+        assertFalse(map.get(new BDSCode(4, 2)));
+        assertFalse(map.get(new BDSCode(4, 3)));
+        assertFalse(map.get(new BDSCode(4, 4)));
+        assertFalse(map.get(new BDSCode(4, 5)));
+        assertFalse(map.get(new BDSCode(4, 8)));
+        assertTrue(map.get(new BDSCode(5, 0)));
 
-        assertTrue(map.get("BDS51"));
-        assertTrue(map.get("BDS52"));
-        assertFalse(map.get("BDS53"));
-        assertFalse(map.get("BDS54"));
-        assertFalse(map.get("BDS55"));
-        assertFalse(map.get("BDS56"));
-        assertFalse(map.get("BDS5F"));
-        assertTrue(map.get("BDS60"));
+        assertTrue(map.get(new BDSCode(5, 1)));
+        assertTrue(map.get(new BDSCode(5, 2)));
+        assertFalse(map.get(new BDSCode(5, 3)));
+        assertFalse(map.get(new BDSCode(5, 4)));
+        assertFalse(map.get(new BDSCode(5, 5)));
+        assertFalse(map.get(new BDSCode(5, 6)));
+        assertFalse(map.get(new BDSCode(5, 0xF)));
+        assertTrue(map.get(new BDSCode(6, 0)));
 
-        assertFalse(map.get("BDSE1"));
-        assertFalse(map.get("BDSE2"));
-        assertFalse(map.get("BDSF1"));
+        assertFalse(map.get(new BDSCode(0xE, 1)));
+        assertFalse(map.get(new BDSCode(0xE, 2)));
+        assertFalse(map.get(new BDSCode(0xF, 1)));
+    }
+
+    /** The map follows the register list of Table A-2-23, which is also what toString() prints. */
+    @Test
+    public void followsTheTableOrder() {
+        Map<BDSCode, Boolean> map = new CommonUsageGICBCapabilityReport(msg).getCommonUsageGICBCapabilityReport();
+
+        assertEquals(27, map.size());
+        assertEquals(new BDSCode(0, 5), new ArrayList<>(map.keySet()).get(0));
+        assertEquals(new BDSCode(0xF, 1), new ArrayList<>(map.keySet()).get(26));
+        assertTrue(map.toString().startsWith("{0,5=true, 0,6=true, 0,7=true, 0,8=true, 0,9=true, 0,A=false, 2,0=true"));
+    }
+
+    /** A register the report does not cover is not a key, so it reads as null rather than false. */
+    @Test
+    public void uncoveredRegisterIsNotAKey() {
+        Map<BDSCode, Boolean> map = new CommonUsageGICBCapabilityReport(msg).getCommonUsageGICBCapabilityReport();
+
+        assertNull(map.get(new BDSCode(1, 0)));
+    }
+
+    @Test
+    public void isUnmodifiable() {
+        Map<BDSCode, Boolean> map = new CommonUsageGICBCapabilityReport(msg).getCommonUsageGICBCapabilityReport();
+
+        assertThrows(UnsupportedOperationException.class, () -> map.put(new BDSCode(1, 0), true));
     }
 
 }

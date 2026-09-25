@@ -72,9 +72,8 @@ public class ThreatIdentityData implements Serializable {
 
         hasTransponderAddress = false;
 
-        if (range > 127 || bearing > 60) {
+        if (range > 127 || bearing > 60)
             throw new BadFormatException("Threat identity data range must be between 0 and 127");
-        }
     }
 
     /**
@@ -136,6 +135,7 @@ public class ThreatIdentityData implements Serializable {
      * @return the decoded barometric altitude in feet if applicable
      */
     public Integer getAltitude() {
+        if (hasTransponderAddress) return null;
         return Altitude.decode13BitAltitude(altitudeCode);
     }
 
@@ -151,15 +151,12 @@ public class ThreatIdentityData implements Serializable {
      * 0.05 if the estimate is less than 0.05NM, or the actual estimated range (shortest estimate) in NM
      */
     public Float getRange() {
-        if (range == 0) {
+        if (hasTransponderAddress || range == 0)
             return null;
-        }
 
-        if (range == 1) {
+        if (range == 1)
             return 0.05F;
-        }
-
-        return (range - 1) / 10 - 0.05F;
+        return (range - 1) / 10F - 0.05F;
     }
 
     /**
@@ -175,9 +172,7 @@ public class ThreatIdentityData implements Serializable {
      * degrees
      */
     public Float[] getBearing() {
-        if (bearing == 0) {
-            return null;
-        }
+        if (hasTransponderAddress || bearing == 0) return null;
 
         return new Float[]{6F * (bearing - 1), 6F * bearing};
     }

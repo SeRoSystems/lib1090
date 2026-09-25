@@ -36,123 +36,118 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void bdsCode() {
-        assertEquals(10, DataLinkCapabilityReport.extractBdsCode(msg));
-    }
-
-    @Test
     public void continuationFlag() {
-        assertTrue(DataLinkCapabilityReport.extractContinuationFlag(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isContinuationFlag());
     }
 
     @Test
     public void tcasOperationalCoordinationMessage() {
-        assertTrue(DataLinkCapabilityReport.extractTcasOperationalCoordinationMessage(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isTcasOperationalCoordinationMessage());
     }
 
     @Test
     public void tcasExtendedVersionNumber() {
-        assertEquals(0, DataLinkCapabilityReport.extractTcasExtendedVersionNumber(msg));
+        assertEquals(0, new DataLinkCapabilityReport(msg).getTcasExtendedVersionNumber());
     }
 
     @Test
     public void overlayCommandCapability() {
-        assertFalse(DataLinkCapabilityReport.extractOverlayCommandCapability(msg));
+        assertFalse(new DataLinkCapabilityReport(msg).isOverlayCommandCapability());
     }
 
     @Test
     public void tcasInterfaceOperational() {
-        assertFalse(DataLinkCapabilityReport.extractTcasInterfaceOperational(msg));
+        assertFalse(new DataLinkCapabilityReport(msg).isTcasInterfaceOperational());
     }
 
     @Test
     public void modeSSubNetworkVersionNumber() {
-        assertEquals(1, DataLinkCapabilityReport.extractModeSSubNetworkVersionNumber(msg));
+        assertEquals(1, new DataLinkCapabilityReport(msg).getModeSSubNetworkVersionNumber());
     }
 
     @Test
     public void transponderEnhancedProtocolIndicator() {
-        assertTrue(DataLinkCapabilityReport.extractTransponderEnhancedProtocolIndicator(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isTransponderEnhancedProtocolIndicator());
     }
 
     @Test
     public void modeSSpecificServicesCapability() {
-        assertTrue(DataLinkCapabilityReport.extractModeSSpecificServicesCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isModeSSpecificServicesCapability());
     }
 
     @Test
     public void uelmAverageThroughputCapability() {
-        assertEquals(3, DataLinkCapabilityReport.extractUelmAverageThroughputCapability(msg));
+        assertEquals(3, new DataLinkCapabilityReport(msg).getUelmAverageThroughputCapability());
     }
 
     @Test
     public void delmThroughputCapability() {
-        assertEquals(3, DataLinkCapabilityReport.extractDelmThroughputCapability(msg));
+        assertEquals(3, new DataLinkCapabilityReport(msg).getDelmThroughputCapability());
     }
 
     @Test
     public void aircraftIdentificationCapability() {
-        assertTrue(DataLinkCapabilityReport.extractAircraftIdentificationCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isAircraftIdentificationCapability());
     }
 
     @Test
     public void squitterCapabilitySubfield() {
-        assertTrue(DataLinkCapabilityReport.extractSquitterCapabilitySubfield(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isSquitterCapabilitySubfield());
     }
 
     @Test
     public void surveillanceIdentifierCode() {
-        assertTrue(DataLinkCapabilityReport.extractSurveillanceIdentifierCode(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isSurveillanceIdentifierCode());
     }
 
     @Test
     public void commonUsageGICB() {
-        assertTrue(DataLinkCapabilityReport.extractCommonUsageGICB(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isCommonUsageGicb());
     }
 
     @Test
     public void tcasHybridSurveillanceCapability() {
-        assertTrue(DataLinkCapabilityReport.extractTcasHybridSurveillanceCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isTcasHybridSurveillanceCapability());
     }
 
     @Test
     public void tcasRataCapability() {
-        assertTrue(DataLinkCapabilityReport.extractTcasRataCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isTcasRataCapability());
     }
 
     @Test
     public void tcasVersionNumber() {
-        assertEquals(2, DataLinkCapabilityReport.extractTcasVersionNumber(msg));
+        assertEquals(2, new DataLinkCapabilityReport(msg).getTcasVersionNumber());
     }
 
     @Test
     public void basicDataFlashCapability() {
-        assertTrue(DataLinkCapabilityReport.extractBasicDataFlashCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isBasicDataFlashCapability());
     }
 
     @Test
     public void phaseOverlayExtendedSquitterCapability() {
-        assertTrue(DataLinkCapabilityReport.extractPhaseOverlayExtendedSquitterCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isPhaseOverlayExtendedSquitterCapability());
     }
 
     @Test
     public void phaseOverlayModeSCapability() {
-        assertTrue(DataLinkCapabilityReport.extractPhaseOverlayModeSCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isPhaseOverlayModeSCapability());
     }
 
     @Test
     public void enhancedSurveillanceCapability() {
-        assertTrue(DataLinkCapabilityReport.extractEnhancedSurveillanceCapability(msg));
+        assertTrue(new DataLinkCapabilityReport(msg).isEnhancedSurveillanceCapability());
     }
 
     @Test
     public void activeTransponderSideIndicator() {
-        assertEquals(1, DataLinkCapabilityReport.extractActiveTransponderSideIndicator(msg));
+        assertEquals(1, new DataLinkCapabilityReport(msg).getActiveTransponderSideIndicator());
     }
 
     @Test
-    public void extractChangeFlag() {
-        assertTrue(DataLinkCapabilityReport.extractChangeFlag(msg));
+    public void changeFlag() {
+        assertTrue(new DataLinkCapabilityReport(msg).isChangeFlag());
     }
 
     @Test
@@ -162,7 +157,7 @@ public class DataLinkCapabilityReportTest {
                 (byte) 0b11111100,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(0, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+        assertEquals(0, new DataLinkCapabilityReport(message).getTcasVersionNumber());
     }
 
     @Test
@@ -172,7 +167,7 @@ public class DataLinkCapabilityReportTest {
                 (byte) 0b11111110,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(1, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+        assertEquals(1, new DataLinkCapabilityReport(message).getTcasVersionNumber());
     }
 
     @Test
@@ -182,7 +177,7 @@ public class DataLinkCapabilityReportTest {
                 (byte) 0b11111101,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(2, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+        assertEquals(2, new DataLinkCapabilityReport(message).getTcasVersionNumber());
     }
 
     @Test
@@ -192,6 +187,6 @@ public class DataLinkCapabilityReportTest {
                 (byte) 0b11111111,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(3, DataLinkCapabilityReport.extractTcasVersionNumber(message));
+        assertEquals(3, new DataLinkCapabilityReport(message).getTcasVersionNumber());
     }
 }

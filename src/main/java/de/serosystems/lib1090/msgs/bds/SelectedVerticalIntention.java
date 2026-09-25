@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.BitReader;
+
 import java.io.Serializable;
 
 /**
@@ -28,30 +30,25 @@ import java.io.Serializable;
 public class SelectedVerticalIntention extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 4359765861426574750L;
 
-    // MCP/FCU Selected Altitude Status
-    private boolean mcpFcuSelectedAltitudeStatus;
+    private static final BDSCode BDS_CODE = new BDSCode(4, 0);
+
     // MCP/FCU Selected Altitude
-    private int mcpFcuSelectedAltitudeValue;
-    // FMS Selected Altitude Status
-    private boolean fmsSelectedAltitudeStatus;
+    private boolean mcpFcuSelectedAltitudeStatus;
+    private short mcpFcuSelectedAltitudeEncoded;
     // FMS Selected Altitude
-    private int fmsSelectedAltitudeValue;
-    // Barometric Pressure Setting Status
-    private boolean barometricPressureSettingStatus;
+    private boolean fmsSelectedAltitudeStatus;
+    private short fmsSelectedAltitudeEncoded;
     // Barometric Pressure Setting
-    private float barometricPressureSettingValue;
-    // VNAV, Alt Hold and Approach Status
-    private boolean otherStatus;
-    // VNAV
-    private boolean vnavValue;
-    // Alt Hold
-    private boolean altHoldValue;
-    // Approach
-    private boolean approachValue;
-    // Target alt source Status
+    private boolean barometricPressureSettingStatus;
+    private short barometricPressureSettingEncoded;
+    // MCP/FCU Mode Bits
+    private boolean mcpFcuModeStatus;
+    private boolean vnavMode;
+    private boolean altitudeHoldMode;
+    private boolean approachMode;
+    // Target Altitude Source
     private boolean targetAltSourceStatus;
-    // Target alt source
-    private short targetAltSourceValue;
+    private short targetAltSourceEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -64,161 +61,183 @@ public class SelectedVerticalIntention extends BDSRegister implements Serializab
      */
     public SelectedVerticalIntention(byte[] message) {
         super(message);
-        setBds(BDSRegister.bdsCode.SELECTED_VERTICAL_INTENTION);
 
-        this.mcpFcuSelectedAltitudeStatus = extractMcpFcuSelectedAltitudeStatus(message);
-        this.mcpFcuSelectedAltitudeValue = extractMcpFcuSelectedAltitudeValue(message);
-        this.fmsSelectedAltitudeStatus = extractFmsSelectedAltitudeStatus(message);
-        this.fmsSelectedAltitudeValue = extractFmsSelectedAltitudeValue(message);
-        this.barometricPressureSettingStatus = extractBarometricPressureSettingStatus(message);
-        this.barometricPressureSettingValue = extractBarometricPressureSettingValue(message);
-        this.otherStatus = extractOtherStatus(message);
-        this.vnavValue = extractVnavValue(message);
-        this.altHoldValue = extractAltHoldValue(message);
-        this.approachValue = extractApproachValue(message);
-        this.targetAltSourceStatus = extractTargetAltSourceStatus(message);
-        this.targetAltSourceValue = extractTargetAltSourceValue(message);
+        BitReader b = BitReader.forBigEndian(message);
+
+        mcpFcuSelectedAltitudeStatus = b.readBoolean(1);
+        mcpFcuSelectedAltitudeEncoded = b.readShort(2, 13);
+        fmsSelectedAltitudeStatus = b.readBoolean(14);
+        fmsSelectedAltitudeEncoded = b.readShort(15, 26);
+        barometricPressureSettingStatus = b.readBoolean(27);
+        barometricPressureSettingEncoded = b.readShort(28, 39);
+        mcpFcuModeStatus = b.readBoolean(48);
+        vnavMode = b.readBoolean(49);
+        altitudeHoldMode = b.readBoolean(50);
+        approachMode = b.readBoolean(51);
+        targetAltSourceStatus = b.readBoolean(54);
+        targetAltSourceEncoded = b.readShort(55, 56);
     }
 
     /**
-     * @return the MCP/FCU selected altitude. The data shall be derived from the mode control panel/flight control unit
-     * or equivalent equipment. Alerting devices may be used to provide data if it is not available from “control”
-     * equipment.
-     * The value range is [0, 65520] feet. Return value is null if the information is not available.
+     * @return whether the MCP/FCU selected altitude is available
+     */
+    public boolean hasMcpFcuSelectedAltitude() {
+        return mcpFcuSelectedAltitudeStatus;
+    }
+
+    /**
+     * @return the encoded MCP/FCU selected altitude
+     */
+    public short getMcpFcuSelectedAltitudeEncoded() {
+        return mcpFcuSelectedAltitudeEncoded;
+    }
+
+    /**
+     * The MCP/FCU selected altitude, derived from the mode control panel/flight control unit or
+     * equivalent equipment. Alerting devices may be used to provide data if it is not available from
+     * "control" equipment. The resolution is 16 feet and the range is [0, 65520] feet.
+     *
+     * @return the MCP/FCU selected altitude in feet, or null if not available
      */
     public Integer getMcpFcuSelectedAltitude() {
-        return computeSelectedAltitude(mcpFcuSelectedAltitudeStatus, mcpFcuSelectedAltitudeValue);
+        if (!mcpFcuSelectedAltitudeStatus) return null;
+        return mcpFcuSelectedAltitudeEncoded * 16;
     }
 
     /**
-     * @return the FMS selected altitude. The data shall de derived from the flight management system or equivalent
-     * equipment managing the vertical profile of the aircraft.
-     * The value range is [0, 65520] feet. Return value is null if the information is not available.
+     * @return whether the FMS selected altitude is available
+     */
+    public boolean hasFmsSelectedAltitude() {
+        return fmsSelectedAltitudeStatus;
+    }
+
+    /**
+     * @return the encoded FMS selected altitude
+     */
+    public short getFmsSelectedAltitudeEncoded() {
+        return fmsSelectedAltitudeEncoded;
+    }
+
+    /**
+     * The FMS selected altitude, derived from the flight management system or equivalent equipment
+     * managing the vertical profile of the aircraft. The resolution is 16 feet and the range is
+     * [0, 65520] feet.
+     *
+     * @return the FMS selected altitude in feet, or null if not available
      */
     public Integer getFmsSelectedAltitude() {
-        return computeSelectedAltitude(fmsSelectedAltitudeStatus, fmsSelectedAltitudeValue);
+        if (!fmsSelectedAltitudeStatus) return null;
+        return fmsSelectedAltitudeEncoded * 16;
     }
 
     /**
-     * @return the barometric pressure setting.The value range is [0, 410] mb, null if the information is not available
+     * @return whether the barometric pressure setting is available
+     */
+    public boolean hasBarometricPressureSetting() {
+        return barometricPressureSettingStatus;
+    }
+
+    /**
+     * The barometric pressure setting as transmitted, which is the setting minus 800 mb.
+     *
+     * @return the encoded barometric pressure setting
+     */
+    public short getBarometricPressureSettingEncoded() {
+        return barometricPressureSettingEncoded;
+    }
+
+    /**
+     * The barometric pressure setting in millibars, at a resolution of 0.1 mb and in the range
+     * [800, 1209.5] mb. A setting outside that range is reported as not available.
+     *
+     * @return the barometric pressure setting in millibars, or null if not available
      */
     public Float getBarometricPressureSetting() {
-        return computeBarometricPressureSetting(barometricPressureSettingStatus, barometricPressureSettingValue);
+        if (!barometricPressureSettingStatus) return null;
+        return (float) (800 + barometricPressureSettingEncoded * 0.1);
     }
 
     /**
-     * @return whether the vertical navigation mode is active or not, null if the information is not available
+     * @return whether the MCP/FCU mode bits are populated, i.e. whether {@link #hasVNAVModeEngaged()},
+     * {@link #hasActiveAltitudeHoldMode()} and {@link #hasActiveApproachMode()} carry information
+     */
+    public boolean hasModeInfo() {
+        return mcpFcuModeStatus;
+    }
+
+    /**
+     * @return whether the vertical navigation mode is active, or null if no mode information is provided
      */
     public Boolean hasVNAVModeEngaged() {
-        return computeOthers(otherStatus, vnavValue);
+        if (!mcpFcuModeStatus) return null;
+        return vnavMode;
     }
 
     /**
-     * @return whether the altitude hold mode is active or not, null if the information is not available
+     * @return whether the altitude hold mode is active, or null if no mode information is provided
      */
     public Boolean hasActiveAltitudeHoldMode() {
-        return computeOthers(otherStatus, altHoldValue);
+        if (!mcpFcuModeStatus) return null;
+        return altitudeHoldMode;
     }
 
     /**
-     * @return whether the approach mode is active or not, null if the information is not available
+     * @return whether the approach mode is active, or null if no mode information is provided
      */
     public Boolean hasActiveApproachMode() {
-        return computeOthers(otherStatus, approachValue);
+        if (!mcpFcuModeStatus) return null;
+        return approachMode;
     }
 
     /**
-     * @return the target altitude source
+     * @return whether the target altitude source is available
+     */
+    public boolean hasTargetAltSource() {
+        return targetAltSourceStatus;
+    }
+
+    /**
+     * @return the encoded target altitude source
+     * @see #getTargetAltSource()
+     */
+    public short getTargetAltSourceEncoded() {
+        return targetAltSourceEncoded;
+    }
+
+    /**
+     * @return the target altitude source, or null if not available:
      * <ul>
-     *     <li> 0 signifies unknown</li>
-     *     <li> 1 signifies aircraft altitude </li>
-     *     <li> 2 signifies FCU/MCP selected altitude </li>
-     *     <li> 3 signifies FMS selected altitud </li>
+     *     <li>0: unknown</li>
+     *     <li>1: aircraft altitude</li>
+     *     <li>2: FCU/MCP selected altitude</li>
+     *     <li>3: FMS selected altitude</li>
      * </ul>
      */
     public Short getTargetAltSource() {
-        return computeTargetAltSource(targetAltSourceStatus, targetAltSourceValue);
+        if (!targetAltSourceStatus) return null;
+        return targetAltSourceEncoded;
     }
 
-    static boolean extractMcpFcuSelectedAltitudeStatus(byte[] message) {
-        return ((message[0] >>> 7) & 0x01) == 1;
-    }
-
-    static int extractMcpFcuSelectedAltitudeValue(byte[] message) {
-        return (((message[0] & 0x7F) << 5) | ((message[1] >>> 3) & 0x1F)) & 0xFFF;
-    }
-
-    static boolean extractFmsSelectedAltitudeStatus(byte[] message) {
-        return ((message[1] >>> 2) & 0x01) == 1;
-    }
-
-    static int extractFmsSelectedAltitudeValue(byte[] message) {
-        return (((message[1] & 0x03) << 10) | ((message[2] << 2) & 0x3FF) | ((message[3] >>> 6) & 0x03)) & 0xFFF;
-    }
-
-    static boolean extractBarometricPressureSettingStatus(byte[] message) {
-        return ((message[3] >>> 5) & 0x01) == 1;
-    }
-
-    static float extractBarometricPressureSettingValue(byte[] message) {
-        return (((message[3] & 0x1F) << 7) | ((message[4] >>> 1) & 0x7F)) & 0xFFF;
-    }
-
-    static boolean extractOtherStatus(byte[] message) {
-        return (message[5] & 0x01) == 1;
-    }
-
-    static boolean extractVnavValue(byte[] message) {
-        return ((message[6] >>> 7) & 0x1) == 1;
-    }
-
-    static boolean extractAltHoldValue(byte[] message) {
-        return ((message[6] >>> 6) & 0x1) == 1;
-    }
-
-    static boolean extractApproachValue(byte[] message) {
-        return ((message[6] >>> 5) & 0x1) == 1;
-    }
-
-    static boolean extractTargetAltSourceStatus(byte[] message) {
-        return ((message[6] >>> 2) & 0x1) == 1;
-    }
-
-    static short extractTargetAltSourceValue(byte[] message) {
-        return (short) (message[6] & 0x3);
-    }
-
-    static Integer computeSelectedAltitude(boolean status, int value) {
-        return status ? value * 16 : null;
-    }
-
-    static Float computeBarometricPressureSetting(boolean status, float value) {
-        return status ? value * 0.1F + 800 : null;
-    }
-
-    static Boolean computeOthers(boolean status, boolean value) {
-        return status ? value : null;
-    }
-
-    static Short computeTargetAltSource(boolean status, short value) {
-        return status ? value : null;
+    @Override
+    public BDSCode getBDSCode() {
+        return BDS_CODE;
     }
 
     @Override
     public String toString() {
-        return "SelectedVerticalIntention{" +
-                "mcpFcuSelectedAltitudeStatus=" + mcpFcuSelectedAltitudeStatus +
-                ", mcpFcuSelectedAltitudeValue=" + mcpFcuSelectedAltitudeValue +
+        return "SelectedVerticalIntention{" + super.toString() +
+                ", mcpFcuSelectedAltitudeStatus=" + mcpFcuSelectedAltitudeStatus +
+                ", mcpFcuSelectedAltitudeEncoded=" + mcpFcuSelectedAltitudeEncoded +
                 ", fmsSelectedAltitudeStatus=" + fmsSelectedAltitudeStatus +
-                ", fmsSelectedAltitudeValue=" + fmsSelectedAltitudeValue +
+                ", fmsSelectedAltitudeEncoded=" + fmsSelectedAltitudeEncoded +
                 ", barometricPressureSettingStatus=" + barometricPressureSettingStatus +
-                ", barometricPressureSettingValue=" + barometricPressureSettingValue +
-                ", otherStatus=" + otherStatus +
-                ", vnavValue=" + vnavValue +
-                ", altHoldValue=" + altHoldValue +
-                ", approachValue=" + approachValue +
+                ", barometricPressureSettingEncoded=" + barometricPressureSettingEncoded +
+                ", mcpFcuModeStatus=" + mcpFcuModeStatus +
+                ", vnavMode=" + vnavMode +
+                ", altitudeHoldMode=" + altitudeHoldMode +
+                ", approachMode=" + approachMode +
                 ", targetAltSourceStatus=" + targetAltSourceStatus +
-                ", targetAltSourceValue=" + targetAltSourceValue +
+                ", targetAltSourceEncoded=" + targetAltSourceEncoded +
                 '}';
     }
 

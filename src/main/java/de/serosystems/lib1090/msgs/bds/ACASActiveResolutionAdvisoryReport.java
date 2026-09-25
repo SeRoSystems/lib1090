@@ -33,11 +33,12 @@ import java.io.Serializable;
 public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements Serializable {
     private static final long serialVersionUID = -5637418816699536015L;
 
+    private static final BDSCode BDS_CODE = new BDSCode(3, 0);
+
     private byte racRecord;
     private boolean raTerminated;
     private boolean multiThreatEncounter;
     private byte threatType;
-    private short bdsCode;
     private short activeRa;
     private int threatIdentity;
     private ThreatIdentityData threatIdentityData;
@@ -54,9 +55,6 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
      */
     public ACASActiveResolutionAdvisoryReport(byte[] msg) throws BadFormatException {
         super(msg);
-        setBds(BDSRegister.bdsCode.ACAS_ACTIVE_RESOLUTION_ADVISORY);
-
-        this.bdsCode = extractBdsCode(msg);
 
         BitReader reader = BitReader.forBigEndian(msg);
         activeRa = TCASResolutionAdvisory.decodeActiveRa(reader);
@@ -119,13 +117,18 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
     }
 
     /**
-     * @return the threat type indicator:
-     * 0) no identity data in TID
-     * 1) TID contains Mode S transponder address
-     * 2) TID contains altitude, range, bearing
-     * 3) not assigned
-     * ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.5;
-     * not present for TCAS 6 systems
+     * Get the Threat Type indicator.
+     * <ul>
+     *     <li>0: no identity data in TID</li>
+     *     <li>1: TID contains Mode S transponder address</li>
+     *     <li>2: TID contains altitude, range, bearing</li>
+     *     <li>3: not assigned</li>
+     * </ul>
+     * <br>
+     * See also ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.5.
+     * Not present for TCAS 6 systems
+     *
+     * @return the threat type indicator
      */
     public Byte getThreatType() {
         if (isTCAS6()) return null;
@@ -186,13 +189,17 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements S
     }
 
     @Override
+    public BDSCode getBDSCode() {
+        return BDS_CODE;
+    }
+
+    @Override
     public String toString() {
-        return "ACASActiveResolutionAdvisoryReport{" +
-                "racRecord=" + racRecord +
+        return "ACASActiveResolutionAdvisoryReport{" + super.toString() +
+                ", racRecord=" + racRecord +
                 ", raTerminated=" + raTerminated +
                 ", multiThreatEncounter=" + multiThreatEncounter +
                 ", threatType=" + threatType +
-                ", bdsCode=" + bdsCode +
                 ", activeRa=" + activeRa +
                 ", threatIdentity=" + threatIdentity +
                 ", threatIdentityData=" + threatIdentityData +
