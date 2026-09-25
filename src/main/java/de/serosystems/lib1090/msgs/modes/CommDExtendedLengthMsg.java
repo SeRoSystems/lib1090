@@ -77,8 +77,8 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
 
         // extract Comm-D extended length message
         message = getPayload();
-        ack = (getDownlinkFormat() & 0x2) != 0;
-        seqno = (byte) ((getDownlinkFormat() & 0x1) << 3 | getFirstField());
+        ack = (getFirstField() & 0x10) != 0;
+        seqno = (byte) (getFirstField() & 0x0F);
     }
 
     /**
@@ -89,14 +89,15 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
     }
 
     /**
-     * @return true if this is a uplink ELM acknowledgment
+     * @return true if this is an uplink ELM acknowledgment, i.e. the KE bit is set
      */
     public boolean isAck() {
         return ack;
     }
 
     /**
-     * @return the number of the message segment returned by {@link #getMessage()}
+     * @return the number of the message segment returned by {@link #getMessage()}, i.e. the 4-bit ND
+     * field, 0 to 15
      */
     public byte getSequenceNumber() {
         return seqno;
