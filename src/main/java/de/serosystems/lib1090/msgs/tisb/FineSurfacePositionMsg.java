@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.decoding.movement.MovementV2V3;
 import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
@@ -99,13 +100,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
         groundTrack = br.readByte(14, 20);
 
         imf = br.readBoolean(21);
-        boolean cprFormat = br.readBoolean(22);
-        int cprEncodedLat = br.readInt(23, 39);
-        int cprEncodedLon = br.readInt(40, 56);
-
-        boolean highGroundSpeed = movement == 0 || movement > 49;
-        position = CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon,
-                Objects.requireNonNull(timestamp, "timestamp"));
+        position = SurfacePosition.extractCPREncodedPosition(br, getMovement(), Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
