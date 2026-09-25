@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV1V2;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
@@ -44,6 +45,11 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
     @Override
     protected SurfaceOperationalStatusV2Msg create(byte[] msg) throws Exception {
         return new SurfaceOperationalStatusV2Msg(msg);
+    }
+
+    @Override
+    protected AircraftVehicleSizeV1V2 aircraftVehicleSize(byte encoded) {
+        return AircraftVehicleSizeV1V2.forEncoded(encoded);
     }
 
     @Test

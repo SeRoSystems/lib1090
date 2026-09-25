@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -122,6 +123,11 @@ public class SurfaceOperationalStatusV3Msg extends ExtendedSquitter implements S
     @Override
     public byte getAircraftVehicleLengthAndWidthEncoded() {
         return airplaneLenWidth;
+    }
+
+    @Override
+    public AircraftVehicleSizeV3 getAircraftVehicleSize() {
+        return AircraftVehicleSizeV3.forEncoded(airplaneLenWidth);
     }
 
     /**

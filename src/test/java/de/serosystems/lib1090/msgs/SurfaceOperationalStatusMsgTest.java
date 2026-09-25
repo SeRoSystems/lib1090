@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs;
 
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSize;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.squitter.KnownOperationalModeCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV1V2;
@@ -46,6 +47,9 @@ public abstract class SurfaceOperationalStatusMsgTest {
     protected abstract byte[] baseMessage();
 
     protected abstract SurfaceOperationalStatusMsg create(byte[] msg) throws Exception;
+
+    /** The length and width table of the version under test, keyed on the encoded code. */
+    protected abstract AircraftVehicleSize aircraftVehicleSize(byte encoded);
 
 
     protected SurfaceCapabilityClassCode withCapabilityClassCode(int capabilityClassCode) throws Exception {
@@ -76,6 +80,19 @@ public abstract class SurfaceOperationalStatusMsgTest {
         msg[7] = (byte) (operationalModeCode >>> 8);
         msg[8] = (byte) operationalModeCode;
         return create(msg).getOperationalMode();
+    }
+
+    /** Each message reads ME 21-24 against its own version's length and width table. */
+    @Test
+    void testAircraftVehicleSize() throws Exception {
+        for (byte encoded = 0; encoded <= 15; encoded++) {
+            byte[] msg = baseMessage();
+            msg[6] = (byte) ((msg[6] & 0xF0) | encoded);
+            SurfaceOperationalStatusMsg status = create(msg);
+
+            assertEquals(encoded, status.getAircraftVehicleLengthAndWidthEncoded());
+            assertSame(aircraftVehicleSize(encoded), status.getAircraftVehicleSize(), "code " + encoded);
+        }
     }
 
     @Test
