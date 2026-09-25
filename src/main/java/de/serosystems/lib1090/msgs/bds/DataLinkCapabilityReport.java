@@ -23,8 +23,20 @@ import de.serosystems.lib1090.decoding.BitReader;
 import java.io.Serializable;
 
 /**
- * Decoder for the data link capability report (BDS 1,0), as defined in ICAO Doc 9871 (First
- * Edition, AN/464) §A.2 TABLE A-2-16.
+ * Decoder for the data link capability report (BDS 1,0), following the layout of DO-181F Table
+ * B-3-16a.
+ * <p>
+ * ICAO Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-16 defines the register as well, but leaves
+ * bits 10-16 and 37-40 to ACAS and uses bits 41-56 as a bit array of supported DTE sub-addresses.
+ * The fields this decoder reads there have these sources:
+ * <ul>
+ *     <li>overlay command capability (15): DO-181E §2.2.19.1.12.6.2</li>
+ *     <li>TCAS interface operational (16), hybrid surveillance (37), RA/TA capability (38) and TCAS
+ *     version (39-40): DO-181E §2.2.22.1.2.2.4</li>
+ *     <li>TCAS operational coordination message (10), TCAS extended version (11-14), and the fields in
+ *     bits 42-51: DO-181F only. A transponder following Doc 9871 First Edition reports DTE sub-address
+ *     support in bits 41-56 instead, which these accessors then misread.</li>
+ * </ul>
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
@@ -126,6 +138,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether it's a TCAS operational coordination message
      */
     public boolean isTcasOperationalCoordinationMessage() {
@@ -133,6 +147,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return the extended TCAS version number
      */
     public short getTcasExtendedVersionNumber() {
@@ -140,6 +156,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181E §2.2.19.1.12.6.2.
+     *
      * @return The Overlay Command Capability (OCC)
      * <ul>
      *     <li>0: no overlay command capability</li>
@@ -151,6 +169,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181E §2.2.22.1.2.2.4.
+     *
      * @return whether the transponder TCAS interface is operational and the transponder is receiving TCAS RI=2, 3 or 4
      */
     public boolean isTcasInterfaceOperational() {
@@ -277,7 +297,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
 
     /**
      * Bit 37 shall be set to 1 to indicate the capability of Hybrid Surveillance,
-     * and set to 0 to indicate that there is no Hybrid Surveillance capability.
+     * and set to 0 to indicate that there is no Hybrid Surveillance capability. Defined in DO-181E
+     * §2.2.22.1.2.2.4.
      *
      * @return whether TCAS Hybrid Surveillance Capability is set to 0 or 1
      */
@@ -287,7 +308,7 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
 
     /**
      * Bit 38 shall be set to 1 to indicate that the TCAS is generating both TAs and RAs,
-     * and set to 0 to indicate the generation of TAs only.
+     * and set to 0 to indicate the generation of TAs only. Defined in DO-181E §2.2.22.1.2.2.4.
      *
      * @return whether TCAS RA/TA capability is set to 0 or 1
      */
@@ -296,6 +317,9 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181E §2.2.22.1.2.2.4, whose table lists bit 40 first, i.e. as the most
+     * significant bit.
+     *
      * @return TCAS version number
      * <ul>
      *     <li>0: DO-185 (6.04A)</li>
@@ -309,6 +333,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether the transponder has Basic Dataflash capability
      */
     public boolean isBasicDataFlashCapability() {
@@ -316,6 +342,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether phase overlay in extended squitter is supported
      */
     public boolean isPhaseOverlayExtendedSquitterCapability() {
@@ -323,6 +351,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether phase overlay for Mode S is supported
      */
     public boolean isPhaseOverlayModeSCapability() {
@@ -330,17 +360,26 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether the transponder has Enhanced Surveillance capability
      */
     public boolean isEnhancedSurveillanceCapability() {
         return enhancedSurveillanceCapability;
     }
 
+    /**
+     * Defined in DO-181F only; see the class documentation.
+     *
+     * @return the active transponder side indicator
+     */
     public short getActiveTransponderSideIndicator() {
         return activeTransponderSideIndicator;
     }
 
     /**
+     * Defined in DO-181F only; see the class documentation.
+     *
      * @return whether change flag is set
      */
     public boolean isChangeFlag() {
