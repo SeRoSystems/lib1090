@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 
@@ -32,8 +33,8 @@ public class ModeSDownlinkMsg implements Serializable {
 
     private static final long serialVersionUID = 4487016880104756846L;
 
-    private byte downlink_format; // 0-24
-    private byte first_field; // the 3 bits after downlink format, the 5 bits after DF and spare for DF 24
+    private byte downlinkFormat; // 0-24
+    private byte firstField; // the 3 bits after downlink format, the 5 bits after DF and spare for DF 24
     private byte[] payload; // 3 or 10 bytes
     private int parity; // 3 bytes
     private boolean noCRC;
@@ -150,8 +151,8 @@ public class ModeSDownlinkMsg implements Serializable {
         };
     }
 
-    public static int getExpectedLength(byte downlink_format) {
-        if (downlink_format < 16) return 7;
+    public static int getExpectedLength(byte downlinkFormat) {
+        if (downlinkFormat < 16) return 7;
         else return 14;
     }
 
@@ -215,26 +216,26 @@ public class ModeSDownlinkMsg implements Serializable {
         if (reply.length != 7 && reply.length != 14) // initial test
             throw new BadFormatException("Raw message has an invalid length of " + reply.length);
 
-        downlink_format = reply[0];
-        first_field = (byte) (downlink_format & 0x7);
-        downlink_format = (byte) (downlink_format >>> 3 & 0x1F);
+        downlinkFormat = reply[0];
+        firstField = (byte) (downlinkFormat & 0x7);
+        downlinkFormat = (byte) (downlinkFormat >>> 3 & 0x1F);
 
         // DF 24 is a special case: its DF field is only the two bits 11, followed by a spare bit and the
-        // KE and ND fields, which first_field keeps so that the first byte can be rebuilt from both fields
-        if (downlink_format > 23) {
+        // KE and ND fields, which firstField keeps so that the first byte can be rebuilt from both fields
+        if (downlinkFormat > 23) {
             // verify that the third most significant bit is 0 (DF=24 is 11000)
-            if ((downlink_format & 0b00000100) != 0) {
+            if ((downlinkFormat & 0b00000100) != 0) {
                 throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 0");
             }
 
-            downlink_format = 24;
-            first_field = (byte) (reply[0] & 0x1F);
+            downlinkFormat = 24;
+            firstField = (byte) (reply[0] & 0x1F);
         }
 
-        if (reply.length != getExpectedLength(downlink_format)) {
+        if (reply.length != getExpectedLength(downlinkFormat)) {
             throw new BadFormatException(
                     String.format("Downlink format %d has length %d, but only %d bytes provided",
-                            downlink_format, getExpectedLength(downlink_format), reply.length));
+                            downlinkFormat, getExpectedLength(downlinkFormat), reply.length));
         }
 
         // extract payload
@@ -246,7 +247,7 @@ public class ModeSDownlinkMsg implements Serializable {
         // extract ICAO24 address
         QualifiedAddress.Type type = null;
         int addr = 0;
-        switch (downlink_format) {
+        switch (downlinkFormat) {
             case 0: // Short air-air (ACAS)
             case 4: // Short altitude reply
             case 5: // Short identity reply
@@ -261,15 +262,15 @@ public class ModeSDownlinkMsg implements Serializable {
             case 17:
             case 18:
             case 19: // Extended squitter
-                byte[] raw_address = new byte[3];
-                System.arraycopy(payload, 0, raw_address, 0, 3);
-                addr = rawAPToInt(raw_address);
+                byte[] rawAddress = new byte[3];
+                System.arraycopy(payload, 0, rawAddress, 0, 3);
+                addr = rawAPToInt(rawAddress);
 
-                if (downlink_format == 18 && first_field == 4)
+                if (downlinkFormat == 18 && firstField == 4)
                     throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented");
-                else if (downlink_format == 18 && first_field == 7)
+                else if (downlinkFormat == 18 && firstField == 7)
                     throw new UnspecifiedFormatError("Got invalid (reserved) format");
-                else if (downlink_format == 19 && first_field != 0)
+                else if (downlinkFormat == 19 && firstField != 0)
                     throw new UnspecifiedFormatError("Military frame not implemented");
 
                 break;
@@ -277,14 +278,14 @@ public class ModeSDownlinkMsg implements Serializable {
             default: // unknown downlink format
                 // throw exception
                 throw new BadFormatException(
-                        String.format("Invalid downlink format %d detected.", downlink_format));
+                        String.format("Invalid downlink format %d detected.", downlinkFormat));
         }
 
         // determine address type according to ED-102B §2.2.3.2.1.3 TABLE 2-7, "CF" Field Code
         // Definitions in DF=18 ADS-B and TIS-B Messages
-        if (downlink_format == 18) {
+        if (downlinkFormat == 18) {
             // check CF
-            switch (first_field) {
+            switch (firstField) {
                 case 0:
                     type = QualifiedAddress.Type.ICAO24;
                     break;
@@ -297,11 +298,11 @@ public class ModeSDownlinkMsg implements Serializable {
                     Boolean imf = extractIMF(payload);
                     if (imf == null)
                         type = QualifiedAddress.Type.UNKNOWN;
-                    else if (first_field == 2) // TIS-B
+                    else if (firstField == 2) // TIS-B
                         type = imf ? QualifiedAddress.Type.MODEA_TRACK : QualifiedAddress.Type.ICAO24;
-                    else if (first_field == 5) // TIS-B
+                    else if (firstField == 5) // TIS-B
                         type = imf ? QualifiedAddress.Type.RESERVED : QualifiedAddress.Type.NON_ICAO;
-                    else // first_field == 6 // ADS-R
+                    else // firstField == 6 // ADS-R
                         type = imf ? QualifiedAddress.Type.ANONYMOUS : QualifiedAddress.Type.ICAO24;
                     break;
                 case 3:
@@ -321,9 +322,9 @@ public class ModeSDownlinkMsg implements Serializable {
                 default:
                     type = QualifiedAddress.Type.UNKNOWN;
             }
-        } else if (downlink_format == 19) {
+        } else if (downlinkFormat == 19) {
             // check AF field
-            type = first_field == 0 ? QualifiedAddress.Type.ICAO24 : QualifiedAddress.Type.RESERVED;
+            type = firstField == 0 ? QualifiedAddress.Type.ICAO24 : QualifiedAddress.Type.RESERVED;
         } else {
             type = QualifiedAddress.Type.ICAO24;
         }
@@ -377,8 +378,8 @@ public class ModeSDownlinkMsg implements Serializable {
      * @param reply instance of ModeSReply to copy from
      */
     public ModeSDownlinkMsg(ModeSDownlinkMsg reply) {
-        downlink_format = reply.downlink_format;
-        first_field = reply.first_field;
+        downlinkFormat = reply.downlinkFormat;
+        firstField = reply.firstField;
         payload = reply.payload;
         parity = reply.parity;
         noCRC = reply.noCRC;
@@ -390,7 +391,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @return downlink format of the Mode S reply
      */
     public byte getDownlinkFormat() {
-        return downlink_format;
+        return downlinkFormat;
     }
 
     /**
@@ -404,7 +405,7 @@ public class ModeSDownlinkMsg implements Serializable {
      * @return the first field (three bits after downlink format, five for DF 24)
      */
     public byte getFirstField() {
-        return first_field;
+        return firstField;
     }
 
     /**
@@ -433,12 +434,30 @@ public class ModeSDownlinkMsg implements Serializable {
      * @return calculates Mode S parity as 24 bit integer
      */
     public int calcParityInt() {
+        return calcParityInt(withoutParity());
+    }
+
+    /**
+     * @return the reply without its parity field, the first byte rebuilt from the downlink format and
+     * the first field
+     */
+    private byte[] withoutParity() {
         byte[] message = new byte[payload.length + 1];
 
-        message[0] = (byte) (downlink_format << 3 | first_field);
+        message[0] = (byte) (downlinkFormat << 3 | firstField);
         System.arraycopy(payload, 0, message, 1, payload.length);
 
-        return calcParityInt(message);
+        return message;
+    }
+
+    /**
+     * A reader over the reply without its parity field, so that bit positions are the ones ICAO Annex 10
+     * Volume IV numbers the reply's bits with: bit 1 is the most significant bit of the downlink format.
+     *
+     * @return a big-endian reader over the reply's bits 1 to 32 or 1 to 88
+     */
+    protected BitReader getBitReader() {
+        return BitReader.forBigEndian(withoutParity());
     }
 
     /**
@@ -459,7 +478,7 @@ public class ModeSDownlinkMsg implements Serializable {
      */
     public String getHexMessage() {
         byte[] msg = new byte[4 + payload.length];
-        msg[0] = (byte) (downlink_format << 3 | first_field);
+        msg[0] = (byte) (downlinkFormat << 3 | firstField);
         System.arraycopy(payload, 0, msg, 1, payload.length);
         int crc = noCRC ? getParity() ^ calcParityInt() : getParity();
         msg[1 + payload.length] = (byte) ((crc >> 16) & 0xff);
@@ -538,8 +557,8 @@ public class ModeSDownlinkMsg implements Serializable {
     @Override
     public String toString() {
         return "ModeSReply{" +
-                "downlink_format=" + downlink_format +
-                ", first_field=" + first_field +
+                "downlinkFormat=" + downlinkFormat +
+                ", firstField=" + firstField +
                 ", payload=" + Tools.toHexString(payload) +
                 ", noCRC=" + noCRC +
                 ", class=" + getClass().getSimpleName() +
@@ -549,14 +568,14 @@ public class ModeSDownlinkMsg implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = downlink_format;
-        result = 31 * result + (int) first_field;
+        int result = downlinkFormat;
+        result = 31 * result + (int) firstField;
         result = 31 * result + Arrays.hashCode(payload);
         result = 31 * result + address.getAddress();
 
-        int effective_parity = parity;
-        if (noCRC) effective_parity = parity ^ calcParityInt();
-        result = 31 * result + effective_parity;
+        int effectiveParity = parity;
+        if (noCRC) effectiveParity = parity ^ calcParityInt();
+        result = 31 * result + effectiveParity;
 
         return result;
     }
