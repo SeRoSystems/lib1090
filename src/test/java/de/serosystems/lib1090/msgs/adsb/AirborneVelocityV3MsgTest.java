@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
@@ -34,29 +35,62 @@ class AirborneVelocityV3MsgTest extends VelocityOverGroundMsgTest {
         return new AirborneVelocityV3Msg(hex);
     }
 
+    @Test
     @Override
     public void testGeoMinusBaro_485020() throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg("8D485020994409940838175B284F");
         assertFalse(msg.hasDiffBaroAlt());
-        assertNull(msg.getDiffBaroAlt());
+        assertNull(msg.getDiffBaroAlt().getDifference());
     }
 
+    @Test
     @Override
     public void testGeoMinusBaroNegative_45AC2D() throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg("8d45ac2d9904d910613f94ba81b5");
         assertFalse(msg.hasDiffBaroAlt());
-        assertNull(msg.getDiffBaroAlt());
+        assertNull(msg.getDiffBaroAlt().getDifference());
     }
 
     /**
-     * In version 3, 127 in ME 50-56 marks the extended zone of the 11-bit field rather than saturation,
-     * which needs the extension bits set as well; see {@link #testExtendedDiffBaroAltSaturated()}.
+     * In version 3, 127 in ME 50-56 marks the extended zone of the 11-bit field, so what it reports
+     * depends on the extension bits: here ME 10 is set and ME 47-48 are clear, which is (3850, 3950] ft.
+     * The 7-bit reading of every earlier version, above 3137.5 ft, contains it.
      */
+    @Test
     @Override
-    public void testDiffBaroAltSaturation() throws Exception {
+    public void testDiffBaroAltCoding() throws Exception {
         VelocityOverGroundMsg msg = create(withDiffBaroAlt("8D485020994409940838175B284F", false, 127));
         assertTrue(msg.hasDiffBaroAlt());
-        assertFalse(msg.isDiffBaroAltSaturated());
+        assertEquals(3850., msg.getDiffBaroAlt().getDifference().getLower());
+        assertEquals(3950., msg.getDiffBaroAlt().getDifference().getUpper());
+    }
+
+    /**
+     * The inherited messages are version 2 ones, whose ME bits 9 and 10 this class reads as the extension
+     * of the difference: 350 ft in version 2, (337.5, 362.5], narrows to (337.5, 350] here, and so on.
+     */
+    @Test
+    @Override
+    public void testVerticalRate64_3461cf_a() throws Exception {
+        VelocityOverGroundMsg msg = create("8d3461cf9908388930080f948ea1");
+        assertEquals(64, msg.getVerticalRate().intValue());
+        assertEquals(343.75, msg.getDiffBaroAlt().getValue());
+    }
+
+    @Test
+    @Override
+    public void testVerticalRate128_3461cf_b() throws Exception {
+        VelocityOverGroundMsg msg = create("8d3461cf9908558e100c1071eb67");
+        assertEquals(128, msg.getVerticalRate().intValue());
+        assertEquals(368.75, msg.getDiffBaroAlt().getValue());
+    }
+
+    @Test
+    @Override
+    public void testVerticalRateNeg64_394c0f() throws Exception {
+        VelocityOverGroundMsg msg = create("8d394c0f990c4932780838866883");
+        assertEquals(-64, msg.getVerticalRate().intValue());
+        assertEquals(1368.75, msg.getDiffBaroAlt().getValue());
     }
 
     @Test
@@ -65,8 +99,8 @@ class AirborneVelocityV3MsgTest extends VelocityOverGroundMsgTest {
 
         assertTrue(msg.hasNICSupplementD());
         assertFalse(msg.hasDiffBaroAlt());
-        assertNull(msg.getDiffBaroAlt());
-        assertNull(msg.getDiffBaroAltMidpoint());
+        assertNull(msg.getDiffBaroAlt().getDifference());
+        assertNull(msg.getDiffBaroAlt().getValue());
     }
 
     @Test
@@ -141,39 +175,40 @@ class AirborneVelocityV3MsgTest extends VelocityOverGroundMsgTest {
     }
 
     @Test
-    void testExtendedDiffBaroAltSaturated() throws Exception {
-        AirborneVelocityV3Msg notSaturated = new AirborneVelocityV3Msg(messageWithExtended(0b11111111110, false));
-        assertTrue(notSaturated.hasDiffBaroAlt());
-        assertFalse(notSaturated.isDiffBaroAltSaturated());
-        assertEquals(4550., notSaturated.getDiffBaroAlt());
-        assertEquals(4500., notSaturated.getDiffBaroAltMidpoint());
+    void testExtendedDiffBaroAltHighestCodes() throws Exception {
+        AirborneVelocityV3Msg bounded = new AirborneVelocityV3Msg(messageWithExtended(0b11111111110, false));
+        assertTrue(bounded.hasDiffBaroAlt());
+        assertEquals(Bound.AT_MOST, bounded.getDiffBaroAlt().getDifference().getUpperBound());
+        assertEquals(4550., bounded.getDiffBaroAlt().getDifference().getUpper());
+        assertEquals(4500., bounded.getDiffBaroAlt().getValue());
 
-        AirborneVelocityV3Msg saturated = new AirborneVelocityV3Msg(messageWithExtended(0b11111111111, false));
-        assertTrue(saturated.hasDiffBaroAlt());
-        assertTrue(saturated.isDiffBaroAltSaturated());
-        assertEquals(4550., saturated.getDiffBaroAltMidpoint());
+        AirborneVelocityV3Msg highest = new AirborneVelocityV3Msg(messageWithExtended(0b11111111111, false));
+        assertTrue(highest.hasDiffBaroAlt());
+        assertEquals(Bound.NONE, highest.getDiffBaroAlt().getDifference().getUpperBound());
+        assertEquals(4550., highest.getDiffBaroAlt().getDifference().getLower());
+        assertEquals(4550., highest.getDiffBaroAlt().getValue());
     }
 
     @Test
     void testExtendedDiffBaroAltNegativeSign() throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg(messageWithExtended(0b00000000011, true));
         assertTrue(msg.hasDiffBaroAlt());
-        assertEquals(-12.5, msg.getDiffBaroAlt());
-        assertEquals(-6.25, msg.getDiffBaroAltMidpoint());
+        assertEquals(-12.5, msg.getDiffBaroAlt().getDifference().getLower());
+        assertEquals(-6.25, msg.getDiffBaroAlt().getValue());
     }
 
     private void assertUnavailable(String hex) throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg(hex);
         assertFalse(msg.hasDiffBaroAlt());
-        assertNull(msg.getDiffBaroAlt());
-        assertNull(msg.getDiffBaroAltMidpoint());
+        assertNull(msg.getDiffBaroAlt().getDifference());
+        assertNull(msg.getDiffBaroAlt().getValue());
     }
 
     private void assertAvailable(int encodedValue, double expectedUpper, double expectedMidpoint) throws Exception {
         AirborneVelocityV3Msg msg = new AirborneVelocityV3Msg(messageWithExtended(encodedValue, false));
         assertTrue(msg.hasDiffBaroAlt());
-        assertEquals(expectedUpper, msg.getDiffBaroAlt());
-        assertEquals(expectedMidpoint, msg.getDiffBaroAltMidpoint());
+        assertEquals(expectedUpper, msg.getDiffBaroAlt().getDifference().getUpper());
+        assertEquals(expectedMidpoint, msg.getDiffBaroAlt().getValue());
     }
 
     /**

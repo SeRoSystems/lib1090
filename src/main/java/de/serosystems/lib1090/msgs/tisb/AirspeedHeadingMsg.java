@@ -188,11 +188,6 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
     }
 
     @Override
-    public boolean hasDiffBaroAlt() {
-        return hasGeoFlag() && diffBaroAltEncoded != 0;
-    }
-
-    @Override
     public short getDiffBaroAltEncoded() {
         return diffBaroAltEncoded;
     }
