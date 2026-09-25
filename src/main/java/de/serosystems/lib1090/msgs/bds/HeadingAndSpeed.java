@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.BitReader;
+
 import java.io.Serializable;
 
 /**
@@ -28,24 +30,26 @@ import java.io.Serializable;
 public class HeadingAndSpeed extends BDSRegister implements Serializable {
     private static final long serialVersionUID = -4234774022351033835L;
 
+    private static final BDSCode BDS_CODE = new BDSCode(6, 0);
+
     // Magnetic Heading
     private boolean magneticHeadingStatus;
     private boolean magneticHeadingSign;
-    private short magneticHeadingValue;
+    private short magneticHeadingEncoded;
     // Indicated Airspeed
     private boolean indicatedAirspeedStatus;
-    private short indicatedAirspeedValue;
+    private short indicatedAirspeedEncoded;
     // Mach Number
     private boolean machNumberStatus;
-    private short machNumberValue;
+    private short machNumberEncoded;
     // Barometric Altitude Rate
     private boolean barometricAltitudeRateStatus;
     private boolean barometricAltitudeRateSign;
-    private short barometricAltitudeRateValue;
+    private short barometricAltitudeRateEncoded;
     // Inertial Vertical Rate
     private boolean inertialVerticalRateStatus;
     private boolean inertialVerticalRateSign;
-    private short inertialVerticalRateValue;
+    private short inertialVerticalRateEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -58,152 +62,202 @@ public class HeadingAndSpeed extends BDSRegister implements Serializable {
      */
     public HeadingAndSpeed(byte[] message) {
         super(message);
-        setBds(BDSRegister.bdsCode.HEADING_AND_SPEED_REPORT);
+        BitReader b = BitReader.forBigEndian(message);
 
-        this.magneticHeadingStatus = extractMagneticHeadingStatus(message);
-        this.magneticHeadingSign = extractMagneticHeadingSign(message);
-        this.magneticHeadingValue = extractMagneticHeadingValue(message);
-        this.indicatedAirspeedStatus = extractIndicatedAirspeedStatus(message);
-        this.indicatedAirspeedValue = extractIndicatedAirspeedValue(message);
-        this.machNumberStatus = extractMatchNumberStatus(message);
-        this.machNumberValue = extractMatchNumberValue(message);
-        this.barometricAltitudeRateStatus = extractBarometricAltitudeRateStatus(message);
-        this.barometricAltitudeRateSign = extractBarometricAltitudeRateSign(message);
-        this.barometricAltitudeRateValue = extractBarometricAltitudeRateValue(message);
-        this.inertialVerticalRateStatus = extractInertialVerticalRateStatus(message);
-        this.inertialVerticalRateSign = extractInertialVerticalRateSign(message);
-        this.inertialVerticalRateValue = extractInertialVerticalRateValue(message);
+        magneticHeadingStatus = b.readBoolean(1);
+        magneticHeadingSign = b.readBoolean(2);
+        magneticHeadingEncoded = b.readShort(3, 12);
+        indicatedAirspeedStatus = b.readBoolean(13);
+        indicatedAirspeedEncoded = b.readShort(14, 23);
+        machNumberStatus = b.readBoolean(24);
+        machNumberEncoded = b.readShort(25, 34);
+        barometricAltitudeRateStatus = b.readBoolean(35);
+        barometricAltitudeRateSign = b.readBoolean(36);
+        barometricAltitudeRateEncoded = b.readShort(37, 45);
+        inertialVerticalRateStatus = b.readBoolean(46);
+        inertialVerticalRateSign = b.readBoolean(47);
+        inertialVerticalRateEncoded = b.readShort(48, 56);
     }
 
     /**
-     * @return the magnetic heading.
-     * The value range is [-180, +180] degrees
+     * @return whether the magnetic heading is available
+     */
+    public boolean hasMagneticHeading() {
+        return magneticHeadingStatus;
+    }
+
+    /**
+     * @return the magnetic heading sign bit: true means west, i.e. a heading between 180 and 360
+     * degrees clockwise from magnetic north
+     */
+    public boolean getMagneticHeadingSign() {
+        return magneticHeadingSign;
+    }
+
+    /**
+     * The magnetic heading value as transmitted, without its sign. The sign and the value together
+     * are a two's complement number; {@link #getMagneticHeading()} interprets them.
+     *
+     * @return the encoded magnetic heading value
+     */
+    public short getMagneticHeadingEncoded() {
+        return magneticHeadingEncoded;
+    }
+
+    /**
+     * The magnetic heading in degrees from magnetic north: positive clockwise, i.e. east of north,
+     * and negative counterclockwise, i.e. west of north, so that -45 degrees is a heading of 315
+     * degrees. The resolution is 90/512 degrees and the range is [-180, +180) degrees.
+     *
+     * @return the magnetic heading in degrees, or null if not available
      */
     public Float getMagneticHeading() {
-        return computeMagneticHeading(magneticHeadingStatus, magneticHeadingSign, magneticHeadingValue);
+        if (!magneticHeadingStatus) return null;
+        return (float) (twosComplement(magneticHeadingSign, magneticHeadingEncoded, 10) * 90.0 / 512);
     }
 
     /**
-     * @return the indicated airspeed
-     * The value range is [0, 1023] knots
+     * @return whether the indicated airspeed is available
+     */
+    public boolean hasIndicatedAirspeed() {
+        return indicatedAirspeedStatus;
+    }
+
+    /**
+     * @return the encoded indicated airspeed
+     */
+    public short getIndicatedAirspeedEncoded() {
+        return indicatedAirspeedEncoded;
+    }
+
+    /**
+     * The indicated airspeed in knots, at a resolution of 1 knot and in the range [0, 1023] knots.
+     *
+     * @return the indicated airspeed in knots, or null if not available
      */
     public Short getIndicatedAirspeed() {
-        return computeIndicatedAirspeed(indicatedAirspeedStatus, indicatedAirspeedValue);
+        if (!indicatedAirspeedStatus) return null;
+        return indicatedAirspeedEncoded;
     }
 
     /**
-     * @return the mach number
-     * The value range is [0, 4.092] MACH
+     * @return whether the Mach number is available
+     */
+    public boolean hasMachNumber() {
+        return machNumberStatus;
+    }
+
+    /**
+     * @return the encoded Mach number
+     */
+    public short getMachNumberEncoded() {
+        return machNumberEncoded;
+    }
+
+    /**
+     * The Mach number, at a resolution of 2.048/512 = 0.004 and in the range [0, 4.092].
+     *
+     * @return the Mach number, or null if not available
      */
     public Float getMachNumber() {
-        return computeMatchNumber(machNumberStatus, machNumberValue);
+        if (!machNumberStatus) return null;
+        return (float) (machNumberEncoded * 2.048 / 512);
     }
 
     /**
-     * @return the barometric altitude rate
-     * The value range is [-16384, +16352] feet/minute
+     * @return whether the barometric altitude rate is available
+     */
+    public boolean hasBarometricAltitudeRate() {
+        return barometricAltitudeRateStatus;
+    }
+
+    /**
+     * @return the barometric altitude rate sign bit: true means below, i.e. descending
+     */
+    public boolean getBarometricAltitudeRateSign() {
+        return barometricAltitudeRateSign;
+    }
+
+    /**
+     * The barometric altitude rate value as transmitted, without its sign. The sign and the value
+     * together are a two's complement number; {@link #getBarometricAltitudeRate()} interprets them.
+     *
+     * @return the encoded barometric altitude rate value
+     */
+    public short getBarometricAltitudeRateEncoded() {
+        return barometricAltitudeRateEncoded;
+    }
+
+    /**
+     * The barometric altitude rate in feet per minute, derived solely from barometric measurement:
+     * positive when climbing, negative when descending. The resolution is 32 feet per minute and the
+     * range is [-16384, +16352] feet per minute.
+     *
+     * @return the barometric altitude rate in feet per minute, or null if not available
      */
     public Integer getBarometricAltitudeRate() {
-        return computeBarometricAltitude(barometricAltitudeRateStatus, barometricAltitudeRateSign, barometricAltitudeRateValue);
+        if (!barometricAltitudeRateStatus) return null;
+        return twosComplement(barometricAltitudeRateSign, barometricAltitudeRateEncoded, 9) * 32;
     }
 
     /**
-     * @return the inertial vertical rate.
-     * The value range is [-16384, +16352] feet/minute
+     * @return whether the inertial vertical rate is available
+     */
+    public boolean hasInertialVerticalRate() {
+        return inertialVerticalRateStatus;
+    }
+
+    /**
+     * @return the inertial vertical rate sign bit: true means below, i.e. descending
+     */
+    public boolean getInertialVerticalRateSign() {
+        return inertialVerticalRateSign;
+    }
+
+    /**
+     * The inertial vertical rate value as transmitted, without its sign. The sign and the value
+     * together are a two's complement number; {@link #getInertialVerticalRate()} interprets them.
+     *
+     * @return the encoded inertial vertical rate value
+     */
+    public short getInertialVerticalRateEncoded() {
+        return inertialVerticalRateEncoded;
+    }
+
+    /**
+     * The inertial vertical rate in feet per minute, which Doc 9871 calls the inertial vertical
+     * velocity and which carries baro-inertial information where that is available: positive when
+     * climbing, negative when descending. The resolution is 32 feet per minute and the range is
+     * [-16384, +16352] feet per minute.
+     *
+     * @return the inertial vertical rate in feet per minute, or null if not available
      */
     public Integer getInertialVerticalRate() {
-        return computeInertialVerticalRate(inertialVerticalRateStatus, inertialVerticalRateSign, inertialVerticalRateValue);
+        if (!inertialVerticalRateStatus) return null;
+        return twosComplement(inertialVerticalRateSign, inertialVerticalRateEncoded, 9) * 32;
     }
 
-    static boolean extractMagneticHeadingStatus(byte[] message) {
-        return ((message[0] >>> 7) & 0x01) == 1;
-    }
-
-    static boolean extractMagneticHeadingSign(byte[] message) {
-        return ((message[0] >>> 6) & 0x01) == 1;
-    }
-
-    static short extractMagneticHeadingValue(byte[] message) {
-        return (short) ((((message[0] & 0x3F) << 4) | ((message[1] >>> 4) & 0x0F)) & 0x3FF);
-    }
-
-    static boolean extractIndicatedAirspeedStatus(byte[] message) {
-        return ((message[1] >>> 3) & 0x01) == 1;
-    }
-
-    static short extractIndicatedAirspeedValue(byte[] message) {
-        return (short) ((((message[1] & 0x07) << 7) | ((message[2] >>> 1) & 0x7F)) & 0x3FF);
-    }
-
-    static boolean extractMatchNumberStatus(byte[] message) {
-        return (message[2] & 0x01) == 1;
-    }
-
-    static short extractMatchNumberValue(byte[] message) {
-        return (short) (((message[3] << 2) | ((message[4] >>> 6) & 0x03)) & 0x3FF);
-    }
-
-    static boolean extractBarometricAltitudeRateStatus(byte[] message) {
-        return ((message[4] >>> 5) & 0x01) == 1;
-    }
-
-    static boolean extractBarometricAltitudeRateSign(byte[] message) {
-        return ((message[4] >>> 4) & 0x01) == 1;
-    }
-
-    static short extractBarometricAltitudeRateValue(byte[] message) {
-        // FIXME Junzi p 132
-        return (short) ((((message[4] & 0x0F) << 5) | ((message[5] >>> 3) & 0x1F)) & 0x1FF);
-    }
-
-    static boolean extractInertialVerticalRateStatus(byte[] message) {
-        return ((message[5] >>> 2) & 0x01) == 1;
-    }
-
-    static boolean extractInertialVerticalRateSign(byte[] message) {
-        return ((message[5] >>> 1) & 0x01) == 1;
-    }
-
-    static short extractInertialVerticalRateValue(byte[] message) {
-        return (short) ((((message[5] & 0x01) << 8) | (message[6] & 0xFF)) & 0x1FF);
-    }
-
-    static Float computeMagneticHeading(boolean status, boolean sign, short value) {
-        return status ? (sign ? (float) ((-Math.pow(2, 10) + value) * 90 / 512) : value * 90 / 512) : null;
-    }
-
-    static Short computeIndicatedAirspeed(boolean status, short value) {
-        return status ? value : null;
-    }
-
-    static Float computeMatchNumber(boolean status, short value) {
-        return status ? (float) (value * 2.048 / 512) : null;
-    }
-
-    static Integer computeBarometricAltitude(boolean status, boolean sign, short value) {
-        return status ? (sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32) : null;
-    }
-
-    static Integer computeInertialVerticalRate(boolean status, boolean sign, short value) {
-        return status ? (sign ? (int) ((-Math.pow(2, 9) + value) * 32) : value * 32) : null;
+    @Override
+    public BDSCode getBDSCode() {
+        return BDS_CODE;
     }
 
     @Override
     public String toString() {
-        return "HeadingAndSpeed{" +
-                "magneticHeadingStatus=" + magneticHeadingStatus +
+        return "HeadingAndSpeed{" + super.toString() +
+                ", magneticHeadingStatus=" + magneticHeadingStatus +
                 ", magneticHeadingSign=" + magneticHeadingSign +
-                ", magneticHeadingValue=" + magneticHeadingValue +
+                ", magneticHeadingEncoded=" + magneticHeadingEncoded +
                 ", indicatedAirspeedStatus=" + indicatedAirspeedStatus +
-                ", indicatedAirspeedValue=" + indicatedAirspeedValue +
-                ", matchNumberStatus=" + machNumberStatus +
-                ", matchNumberValue=" + machNumberValue +
+                ", indicatedAirspeedEncoded=" + indicatedAirspeedEncoded +
+                ", machNumberStatus=" + machNumberStatus +
+                ", machNumberEncoded=" + machNumberEncoded +
                 ", barometricAltitudeRateStatus=" + barometricAltitudeRateStatus +
                 ", barometricAltitudeRateSign=" + barometricAltitudeRateSign +
-                ", barometricAltitudeRateValue=" + barometricAltitudeRateValue +
+                ", barometricAltitudeRateEncoded=" + barometricAltitudeRateEncoded +
                 ", inertialVerticalRateStatus=" + inertialVerticalRateStatus +
                 ", inertialVerticalRateSign=" + inertialVerticalRateSign +
-                ", inertialVerticalRateValue=" + inertialVerticalRateValue +
+                ", inertialVerticalRateEncoded=" + inertialVerticalRateEncoded +
                 '}';
     }
 

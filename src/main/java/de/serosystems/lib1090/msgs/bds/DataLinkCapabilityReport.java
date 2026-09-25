@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.decoding.BitReader;
+
 import java.io.Serializable;
 
 /**
@@ -28,8 +30,8 @@ import java.io.Serializable;
 public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
     private static final long serialVersionUID = 2607206512004324831L;
 
-    // BDS Code
-    private short bdsCode;
+    private static final BDSCode BDS_CODE = new BDSCode(1, 0);
+
     // Register 1116 Continuation Flag
     private boolean continuationFlag;
     // TCAS Operational Coordination Message Transmit Capability
@@ -88,32 +90,32 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
      */
     public DataLinkCapabilityReport(byte[] message) {
         super(message);
-        setBds(BDSRegister.bdsCode.DATA_LINK_CAPABILITY_REPORT);
 
-        this.bdsCode = extractBdsCode(message);
-        this.continuationFlag = extractContinuationFlag(message);
-        this.tcasOperationalCoordinationMessage = extractTcasOperationalCoordinationMessage(message);
-        this.tcasExtendedVersionNumber = extractTcasExtendedVersionNumber(message);
-        this.overlayCommandCapability = extractOverlayCommandCapability(message);
-        this.tcasInterfaceOperational = extractTcasInterfaceOperational(message);
-        this.modeSSubNetworkVersionNumber = extractModeSSubNetworkVersionNumber(message);
-        this.transponderEnhancedProtocolIndicator = extractTransponderEnhancedProtocolIndicator(message);
-        this.modeSSpecificServicesCapability = extractModeSSpecificServicesCapability(message);
-        this.uelmAverageThroughputCapability = extractUelmAverageThroughputCapability(message);
-        this.delmThroughputCapability = extractDelmThroughputCapability(message);
-        this.aircraftIdentificationCapability = extractAircraftIdentificationCapability(message);
-        this.squitterCapabilitySubfield = extractSquitterCapabilitySubfield(message);
-        this.surveillanceIdentifierCode = extractSurveillanceIdentifierCode(message);
-        this.commonUsageGicb = extractCommonUsageGICB(message);
-        this.tcasHybridSurveillanceCapability = extractTcasHybridSurveillanceCapability(message);
-        this.tcasRataCapability = extractTcasRataCapability(message);
-        this.tcasVersionNumber = extractTcasVersionNumber(message);
-        this.basicDataFlashCapability = extractBasicDataFlashCapability(message);
-        this.phaseOverlayExtendedSquitterCapability = extractPhaseOverlayExtendedSquitterCapability(message);
-        this.phaseOverlayModeSCapability = extractPhaseOverlayModeSCapability(message);
-        this.enhancedSurveillanceCapability = extractEnhancedSurveillanceCapability(message);
-        this.activeTransponderSideIndicator = extractActiveTransponderSideIndicator(message);
-        this.changeFlag = extractChangeFlag(message);
+        BitReader b = BitReader.forBigEndian(message);
+
+        continuationFlag = b.readBoolean(9);
+        tcasOperationalCoordinationMessage = b.readBoolean(10);
+        tcasExtendedVersionNumber = b.readShort(11, 14);
+        overlayCommandCapability = b.readBoolean(15);
+        tcasInterfaceOperational = b.readBoolean(16);
+        modeSSubNetworkVersionNumber = b.readShort(17, 23);
+        transponderEnhancedProtocolIndicator = b.readBoolean(24);
+        modeSSpecificServicesCapability = b.readBoolean(25);
+        uelmAverageThroughputCapability = b.readShort(26, 28);
+        delmThroughputCapability = b.readShort(29, 32);
+        aircraftIdentificationCapability = b.readBoolean(33);
+        squitterCapabilitySubfield = b.readBoolean(34);
+        surveillanceIdentifierCode = b.readBoolean(35);
+        commonUsageGicb = b.readBoolean(36);
+        tcasHybridSurveillanceCapability = b.readBoolean(37);
+        tcasRataCapability = b.readBoolean(38);
+        tcasVersionNumber = (short) (b.readShort(40, 40) << 1 | b.readShort(39, 39));
+        basicDataFlashCapability = b.readBoolean(42);
+        phaseOverlayExtendedSquitterCapability = b.readBoolean(43);
+        phaseOverlayModeSCapability = b.readBoolean(44);
+        enhancedSurveillanceCapability = b.readBoolean(47);
+        activeTransponderSideIndicator = b.readShort(49, 50);
+        changeFlag = b.readBoolean(51);
     }
 
     /**
@@ -140,8 +142,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * @return The Overlay Command Capability (OCC)
      * <ul>
-     * <li> 0 signifies no overlay command capability </li>
-     * <li> 1 signifies overlay command capability </li>
+     *     <li>0: no overlay command capability</li>
+     *     <li>1: overlay command capability</li>
      * </ul>
      */
     public boolean isOverlayCommandCapability() {
@@ -158,13 +160,13 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * @return The Mode-S Subnetwork Version Number
      * <ul>
-     *     <li> 0 signifies Mode-S subnetwork not available
-     *     <li> 1 signifies ICAO Doc 9688 (1996) </li>
-     *     <li> 2 signifies ICAO Doc 9688 (1998) </li>
-     *     <li> 3 signifies ICAO Annex 10, Volume III, Amendment 77 </li>
-     *     <li> 4 signifies ICAO Doc 9871, Edition 1 </li>
-     *     <li> 5 signifies ICAO Doc 9871, Edition 2 </li>
-     *     <li> 6-127 Reserved </li>
+     *     <li>0: Mode-S subnetwork not available</li>
+     *     <li>1: ICAO Doc 9688 (1996)</li>
+     *     <li>2: ICAO Doc 9688 (1998)</li>
+     *     <li>3: ICAO Annex 10, Volume III, Amendment 77</li>
+     *     <li>4: ICAO Doc 9871, Edition 1</li>
+     *     <li>5: ICAO Doc 9871, Edition 2</li>
+     *     <li>6-127: Reserved</li>
      * </ul>
      */
     public short getModeSSubNetworkVersionNumber() {
@@ -174,8 +176,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * @return whether the enhanced protocol indicator is set to 0 or 1
      * <ul>
-     *     <li> 0 signifies a Level 2 to 4 transponder </li>
-     *     <li> 1 signifies a Level 5 transponder </li>
+     *     <li>0: a Level 2 to 4 transponder</li>
+     *     <li>1: a Level 5 transponder</li>
      * </ul>
      */
     public boolean isTransponderEnhancedProtocolIndicator() {
@@ -196,15 +198,15 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * Uplink ELM average throughput capability shall be coded as follows:
      * <ul>
-     *  <li> 0 signifies No UELM Capability </li>
-     *  <li> 1 signifies 16 UELM segments in 1 second <li>
-     *  <li> 2 signifies 16 UELM segments in 500 ms <li>
-     *  <li> 3 signifies 16 UELM segments in 250 ms <li>
-     *  <li> 4 signifies 16 UELM segments in 125 ms <li>
-     *  <li> 5 signifies 16 UELM segments in 60 ms <li>
-     *  <li> 6 signifies 16 UELM segments in 30 ms <li>
-     *  <li> 7 signifies Unassigned <li>
-     *  </ul>
+     *     <li>0: No UELM Capability</li>
+     *     <li>1: 16 UELM segments in 1 second</li>
+     *     <li>2: 16 UELM segments in 500 ms</li>
+     *     <li>3: 16 UELM segments in 250 ms</li>
+     *     <li>4: 16 UELM segments in 125 ms</li>
+     *     <li>5: 16 UELM segments in 60 ms</li>
+     *     <li>6: 16 UELM segments in 30 ms</li>
+     *     <li>7: Unassigned</li>
+     * </ul>
      *
      * @return The uplink ELM average throughput capability
      */
@@ -217,14 +219,14 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
      * in response to a single requesting interrogation (UF = 24).
      * Downlink ELM throughput capability shall be coded as follows:
      * <ul>
-     *  <li> 0 signifies No DELM Capability </li>
-     *  <li> 1 signifies One 4 segment DELM every second </li>
-     *  <li> 2 signifies One 8 segment DELM every second </li>
-     *  <li> 3 signifies One 16 segment DELM every second </li>
-     *  <li> 4 signifies One 16 segment DELM every 500 ms </li>
-     *  <li> 5 signifies One 16 segment DELM every 250 ms </li>
-     *  <li> 6 signifies One 16 segment DELM every 125 ms </li>
-     *  <li> 7-15 signifies Unassigned </li>
+     *     <li>0: No DELM Capability</li>
+     *     <li>1: One 4 segment DELM every second</li>
+     *     <li>2: One 8 segment DELM every second</li>
+     *     <li>3: One 16 segment DELM every second</li>
+     *     <li>4: One 16 segment DELM every 500 ms</li>
+     *     <li>5: One 16 segment DELM every 250 ms</li>
+     *     <li>6: One 16 segment DELM every 125 ms</li>
+     *     <li>7-15: Unassigned</li>
      * </ul>
      *
      * @return The downlink ELM throughput capability
@@ -254,8 +256,8 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * @return The surveillance identifier code
      * <ul>
-     * <li> 0 signifies no surveillance identifier code capability </li>
-     * <li> 1 signifies surveillance identifier code capability </li>
+     *     <li>0: no surveillance identifier code capability</li>
+     *     <li>1: surveillance identifier code capability</li>
      * </ul>
      */
     public boolean isSurveillanceIdentifierCode() {
@@ -296,10 +298,10 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
     /**
      * @return TCAS version number
      * <ul>
-     *     <li> 0 signifies DO-185 (6.04A) </li>
-     *     <li> 1 signifies DO-185A </li>
-     *     <li> 2 signifies DO-185B </li>
-     *     <li> 3 signifies reserved for future versions </li>
+     *     <li>0: DO-185 (6.04A)</li>
+     *     <li>1: DO-185A</li>
+     *     <li>2: DO-185B</li>
+     *     <li>3: reserved for future versions</li>
      * </ul>
      */
     public short getTcasVersionNumber() {
@@ -345,102 +347,14 @@ public class DataLinkCapabilityReport extends BDSRegister implements Serializabl
         return changeFlag;
     }
 
-    static boolean extractContinuationFlag(byte[] message) {
-        return ((message[1] >>> 7) & 0x1) == 1;
-    }
-
-    static boolean extractTcasOperationalCoordinationMessage(byte[] message) {
-        return ((message[1] >>> 6) & 0x1) == 1;
-    }
-
-    static short extractTcasExtendedVersionNumber(byte[] message) {
-        return (short) ((message[1] >>> 2) & 0xF);
-    }
-
-    static boolean extractOverlayCommandCapability(byte[] message) {
-        return ((message[1] >>> 1) & 0x1) == 1;
-    }
-
-    static boolean extractTcasInterfaceOperational(byte[] message) {
-        return (message[1] & 0x1) == 1;
-    }
-
-    static short extractModeSSubNetworkVersionNumber(byte[] message) {
-        return (short) ((message[2] >>> 1) & 0x7F);
-    }
-
-    static boolean extractTransponderEnhancedProtocolIndicator(byte[] message) {
-        return (message[2] & 0x01) == 1;
-    }
-
-    static boolean extractModeSSpecificServicesCapability(byte[] message) {
-        return ((message[3] >>> 7) & 0x1) == 1;
-    }
-
-    static short extractUelmAverageThroughputCapability(byte[] message) {
-        return (short) ((message[3] >>> 4) & 0x07);
-    }
-
-    static short extractDelmThroughputCapability(byte[] message) {
-        return (short) (message[3] & 0x0F);
-    }
-
-    static boolean extractAircraftIdentificationCapability(byte[] message) {
-        return ((message[4] >>> 7) & 0x01) == 1;
-    }
-
-    static boolean extractSquitterCapabilitySubfield(byte[] message) {
-        return ((message[4] >>> 6) & 0x01) == 1;
-    }
-
-    static boolean extractSurveillanceIdentifierCode(byte[] message) {
-        return ((message[4] >>> 5) & 0x01) == 1;
-    }
-
-    static boolean extractCommonUsageGICB(byte[] message) {
-        return ((message[4] >>> 4) & 0x01) == 1;
-    }
-
-    static boolean extractTcasHybridSurveillanceCapability(byte[] message) {
-        return ((message[4] >>> 3) & 0x01) == 1;
-    }
-
-    static boolean extractTcasRataCapability(byte[] message) {
-        return ((message[4] >>> 2) & 0x01) == 1;
-    }
-
-    static short extractTcasVersionNumber(byte[] message) {
-        return (short) (((message[4] << 1) & 0x02) | ((message[4] >>> 1) & 0x01));
-    }
-
-    static boolean extractBasicDataFlashCapability(byte[] message) {
-        return ((message[5] >>> 6) & 0x01) == 1;
-    }
-
-    static boolean extractPhaseOverlayExtendedSquitterCapability(byte[] message) {
-        return ((message[5] >>> 5) & 0x01) == 1;
-    }
-
-    static boolean extractPhaseOverlayModeSCapability(byte[] message) {
-        return ((message[5] >>> 4) & 0x01) == 1;
-    }
-
-    static boolean extractEnhancedSurveillanceCapability(byte[] message) {
-        return ((message[5] >>> 1) & 0x01) == 1;
-    }
-
-    static short extractActiveTransponderSideIndicator(byte[] message) {
-        return (short) ((message[6] >>> 6) & 0x03);
-    }
-
-    static boolean extractChangeFlag(byte[] message) {
-        return ((message[6] >>> 5) & 0x01) == 1;
+    @Override
+    public BDSCode getBDSCode() {
+        return BDS_CODE;
     }
 
     @Override
     public String toString() {
-        return "DataLinkCapabilityReport{" +
-                "bdsCode=" + bdsCode +
+        return "DataLinkCapabilityReport{" + super.toString() +
                 ", continuationFlag=" + continuationFlag +
                 ", tcasOperationalCoordinationMessage=" + tcasOperationalCoordinationMessage +
                 ", tcasExtendedVersionNumber=" + tcasExtendedVersionNumber +
