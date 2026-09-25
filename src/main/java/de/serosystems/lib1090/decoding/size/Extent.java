@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.decoding.size;
 
+import de.serosystems.lib1090.decoding.Bound;
+
 import java.util.Objects;
 
 /**
@@ -30,21 +32,6 @@ import java.util.Objects;
  * fabricated upper bound of 85 m.
  */
 public final class Extent {
-
-    /**
-     * Which side of {@link #getMeters()} the true dimension lies on.
-     */
-    public enum Bound {
-
-        /** Nothing is reported; {@link Extent#getMeters()} is {@code NaN}. */
-        NONE,
-
-        /** The true dimension is the value or less, which is how the tables state nearly every dimension. */
-        UPPER,
-
-        /** The true dimension is more than the value. */
-        LOWER
-    }
 
     /** No dimension is reported. The true dimension may be anything. */
     public static final Extent UNKNOWN = new Extent(Bound.NONE, Double.NaN);
@@ -62,7 +49,7 @@ public final class Extent {
      * @return a dimension of at most {@code meters}
      */
     static Extent atMost(double meters) {
-        return new Extent(Bound.UPPER, meters);
+        return new Extent(Bound.AT_MOST, meters);
     }
 
     /**
@@ -70,7 +57,7 @@ public final class Extent {
      * @return a dimension of more than {@code meters}
      */
     static Extent moreThan(double meters) {
-        return new Extent(Bound.LOWER, meters);
+        return new Extent(Bound.MORE_THAN, meters);
     }
 
     /**
@@ -103,7 +90,7 @@ public final class Extent {
      * @return the guaranteed upper bound in meters, {@code POSITIVE_INFINITY}, or {@code NaN}
      */
     public double getGuaranteedUpperBound() {
-        return bound == Bound.LOWER ? Double.POSITIVE_INFINITY : meters;
+        return bound.isLower() ? Double.POSITIVE_INFINITY : meters;
     }
 
     /**
@@ -129,9 +116,9 @@ public final class Extent {
     @Override
     public String toString() {
         switch (bound) {
-            case UPPER:
+            case AT_MOST:
                 return "at most " + meters + " m";
-            case LOWER:
+            case MORE_THAN:
                 return "more than " + meters + " m";
             default:
                 return "unknown";

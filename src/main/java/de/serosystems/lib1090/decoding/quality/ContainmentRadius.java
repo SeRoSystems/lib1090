@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.decoding.quality;
 
+import de.serosystems.lib1090.decoding.Bound;
+
 /**
  * A horizontal containment radius limit (Rc) as the standard reports it: one of the values the
  * format type code and NIC supplement tables tabulate, together with which side of that value the
@@ -47,41 +49,26 @@ public enum ContainmentRadius {
     /** No containment radius is reported. The true radius may be anything. */
     UNKNOWN(Bound.NONE, Double.NaN),
 
-    BELOW_7_5(Bound.UPPER, 7.5),
-    BELOW_25(Bound.UPPER, 25),
-    BELOW_75(Bound.UPPER, 75),
-    BELOW_185_2(Bound.UPPER, 185.2),
-    BELOW_370_4(Bound.UPPER, 370.4),
-    BELOW_555_6(Bound.UPPER, 555.6),
-    BELOW_926(Bound.UPPER, 926),
-    BELOW_1111_2(Bound.UPPER, 1111.2),
-    BELOW_1852(Bound.UPPER, 1852),
-    BELOW_3704(Bound.UPPER, 3704),
-    BELOW_7408(Bound.UPPER, 7408),
-    BELOW_14816(Bound.UPPER, 14816),
-    BELOW_18520(Bound.UPPER, 18520),
-    BELOW_37040(Bound.UPPER, 37040),
+    BELOW_7_5(Bound.BELOW, 7.5),
+    BELOW_25(Bound.BELOW, 25),
+    BELOW_75(Bound.BELOW, 75),
+    BELOW_185_2(Bound.BELOW, 185.2),
+    BELOW_370_4(Bound.BELOW, 370.4),
+    BELOW_555_6(Bound.BELOW, 555.6),
+    BELOW_926(Bound.BELOW, 926),
+    BELOW_1111_2(Bound.BELOW, 1111.2),
+    BELOW_1852(Bound.BELOW, 1852),
+    BELOW_3704(Bound.BELOW, 3704),
+    BELOW_7408(Bound.BELOW, 7408),
+    BELOW_14816(Bound.BELOW, 14816),
+    BELOW_18520(Bound.BELOW, 18520),
+    BELOW_37040(Bound.BELOW, 37040),
 
-    AT_LEAST_25(Bound.LOWER, 25),
-    AT_LEAST_185_2(Bound.LOWER, 185.2),
-    AT_LEAST_1111_2(Bound.LOWER, 1111.2),
-    AT_LEAST_3704(Bound.LOWER, 3704),
-    AT_LEAST_37040(Bound.LOWER, 37040);
-
-    /**
-     * Which side of {@link #getMeters()} the true containment radius lies on.
-     */
-    public enum Bound {
-
-        /** Nothing is reported; {@link ContainmentRadius#getMeters()} is {@code NaN}. */
-        NONE,
-
-        /** The true radius is below the value. This is the useful case: it guarantees a quality. */
-        UPPER,
-
-        /** The true radius is the value or above. It bounds the quality from the wrong side. */
-        LOWER
-    }
+    AT_LEAST_25(Bound.AT_LEAST, 25),
+    AT_LEAST_185_2(Bound.AT_LEAST, 185.2),
+    AT_LEAST_1111_2(Bound.AT_LEAST, 1111.2),
+    AT_LEAST_3704(Bound.AT_LEAST, 3704),
+    AT_LEAST_37040(Bound.AT_LEAST, 37040);
 
     /** The position integrity category is four bits wide, so this is every value it can carry. */
     private static final int MAX_PIC = 15;
@@ -128,7 +115,7 @@ public enum ContainmentRadius {
      * @return the guaranteed upper bound in meters, {@code POSITIVE_INFINITY}, or {@code NaN}
      */
     public double getGuaranteedUpperBound() {
-        return bound == Bound.LOWER ? Double.POSITIVE_INFINITY : meters;
+        return bound.isLower() ? Double.POSITIVE_INFINITY : meters;
     }
 
     /**
@@ -221,6 +208,6 @@ public enum ContainmentRadius {
             return UNKNOWN;
         if (first.meters != second.meters)
             return first.meters > second.meters ? first : second;
-        return first.bound == Bound.LOWER ? first : second;
+        return first.bound.isLower() ? first : second;
     }
 }

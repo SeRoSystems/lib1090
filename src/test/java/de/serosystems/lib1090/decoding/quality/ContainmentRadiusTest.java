@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.decoding.quality;
 
+import de.serosystems.lib1090.decoding.Bound;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +41,7 @@ class ContainmentRadiusTest {
                 continue;
 
             String name = radius.name();
-            ContainmentRadius.Bound expectedBound = name.startsWith("BELOW_")
-                    ? ContainmentRadius.Bound.UPPER
-                    : ContainmentRadius.Bound.LOWER;
+            Bound expectedBound = name.startsWith("BELOW_") ? Bound.BELOW : Bound.AT_LEAST;
             double expectedMeters = Double.parseDouble(
                     name.replaceFirst("^(BELOW|AT_LEAST)_", "").replace('_', '.'));
 
@@ -65,7 +65,7 @@ class ContainmentRadiusTest {
     @Test
     void testUnknownReportsNothing() {
         assertTrue(ContainmentRadius.UNKNOWN.isUnknown());
-        assertEquals(ContainmentRadius.Bound.NONE, ContainmentRadius.UNKNOWN.getBound());
+        assertEquals(Bound.NONE, ContainmentRadius.UNKNOWN.getBound());
         assertTrue(Double.isNaN(ContainmentRadius.UNKNOWN.getMeters()));
         assertTrue(Double.isNaN(ContainmentRadius.UNKNOWN.getGuaranteedUpperBound()));
     }
@@ -146,7 +146,7 @@ class ContainmentRadiusTest {
         for (int pic = 1; pic <= 14; pic++) {
             ContainmentRadius radius = ContainmentRadius.forPIC((byte) pic);
 
-            assertEquals(ContainmentRadius.Bound.UPPER, radius.getBound(), "PIC " + pic);
+            assertEquals(Bound.BELOW, radius.getBound(), "PIC " + pic);
             assertEquals(upperBounds[pic - 1], radius.getMeters(), "PIC " + pic);
         }
     }

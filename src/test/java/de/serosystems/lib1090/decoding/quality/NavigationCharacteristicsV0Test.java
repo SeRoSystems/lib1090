@@ -140,7 +140,7 @@ class NavigationCharacteristicsV0Test {
     void testSILAgreesWithTheContainmentRadiusBound() {
         for (NavigationCharacteristicsV0 characteristics : NavigationCharacteristicsV0.values()) {
             boolean guaranteesRadius =
-                    characteristics.getContainmentRadius().getBound() == ContainmentRadius.Bound.UPPER;
+                    characteristics.getContainmentRadius().getBound().isUpper();
 
             assertEquals(guaranteesRadius ? (byte) 2 : (byte) 0, characteristics.getSILEncoded(),
                     characteristics.name());
