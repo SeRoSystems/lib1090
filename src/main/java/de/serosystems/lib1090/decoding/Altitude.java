@@ -44,7 +44,8 @@ public final class Altitude {
      * Transmission Code)
      *
      * @param altitudeCode as provided in most Mode S replies (13 bits)
-     * @return altitude in feet or null if altitude is not available or has an invalid encoding
+     * @return altitude in feet or null if altitude is not available or has an invalid encoding, which
+     * includes every code with the M bit set; see {@link #valid13BitAltitude(short)}
      */
     public static Integer decode13BitAltitude(short altitudeCode) {
         // altitude not available or not valid
@@ -86,9 +87,9 @@ public final class Altitude {
      * Pressure-Altitude Transmission Code)
      *
      * @param altitudeCode as provided in most Mode S replies (13 bits)
-     * @return value of the Q bit, null if MBit is set or altitude is not available
+     * @return value of the Q bit, false if the M bit is set
      */
-    public static Boolean decode13BitQBit(short altitudeCode) {
+    public static boolean decode13BitQBit(short altitudeCode) {
         boolean Mbit = (altitudeCode & 0x40) != 0;
         return !Mbit && ((altitudeCode & 0x10) != 0);
     }
@@ -98,12 +99,14 @@ public final class Altitude {
      * Check if a given 13 bit altitude code is valid.
      * <ul>
      *     <li>a code of 0 is invalid</li>
-     *     <li>a code with the M bit set (see {@link #decode13BitQBit(short)}) is invalid (unspecified metric encoding)</li>
+     *     <li>a code with the M bit set is invalid: DO-181E §2.2.13.1.2 a.(2)(i) reserves M equals ONE "for
+     *     possible future use to indicate that the altitude reporting is in metric units", so there is no
+     *     metric coding to decode</li>
      *     <li>a code without the Q bit set is invalid for certain combinations that are unused</li>
      * </ul>
      *
      * @param altitudeCode as provided in most Mode S replies (13 bits)
-     * @return true if altitude code is considered value, false otherwise
+     * @return true if altitude code is considered valid, false otherwise
      */
     public static boolean valid13BitAltitude(short altitudeCode) {
         if (altitudeCode == 0) // fast path for explicit "invalid value"
@@ -183,7 +186,7 @@ public final class Altitude {
      * </ul>
      *
      * @param altitudeCode 12 bit encoded altitude
-     * @return true if altitude code is considered value, false otherwise
+     * @return true if altitude code is considered valid, false otherwise
      */
     public static boolean valid12BitAltitude(short altitudeCode) {
         if (altitudeCode == 0) // fast path for explicit "invalid value"
