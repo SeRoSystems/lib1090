@@ -211,9 +211,9 @@ public class CommBAltitudeReply extends ModeSDownlinkMsg implements Serializable
     /**
      * Decode Q bit for the altitude according to ICAO Annex 10 Volume IV §3.1.2.6.5.4
      *
-     * @return value of the Q bit, null if altitude is not available or M bit is set
+     * @return value of the Q bit, false if altitude is not available or the M bit is set
      */
-    public Boolean hasQBit() {
+    public boolean hasQBit() {
         return Altitude.decode13BitQBit(altitude_code);
     }
 
