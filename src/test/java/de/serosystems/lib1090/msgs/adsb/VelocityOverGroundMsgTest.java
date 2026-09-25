@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
@@ -59,7 +60,7 @@ abstract class VelocityOverGroundMsgTest {
     public void testGeoMinusBaro_485020() throws Exception {
         VelocityOverGroundMsg msg = create("8D485020994409940838175B284F");
         assertTrue(msg.hasDiffBaroAlt());
-        assertEquals(550, msg.getDiffBaroAlt().intValue());
+        assertEquals(550, msg.getDiffBaroAlt().getValue().intValue());
     }
 
     @Test
@@ -83,7 +84,7 @@ abstract class VelocityOverGroundMsgTest {
     @Test
     public void testGeoMinusBaroNegative_45AC2D() throws Exception {
         VelocityOverGroundMsg msg = create("8d45ac2d9904d910613f94ba81b5");
-        assertEquals(-475, msg.getDiffBaroAlt().intValue());
+        assertEquals(-475, msg.getDiffBaroAlt().getValue().intValue());
     }
 
     @Test
@@ -97,14 +98,14 @@ abstract class VelocityOverGroundMsgTest {
     public void testVerticalRate64_3461cf_a() throws Exception {
         VelocityOverGroundMsg msg = create("8d3461cf9908388930080f948ea1");
         assertEquals(64, msg.getVerticalRate().intValue());
-        assertEquals(350, msg.getDiffBaroAlt().intValue());
+        assertEquals(350, msg.getDiffBaroAlt().getValue().intValue());
     }
 
     @Test
     public void testVerticalRate128_3461cf_b() throws Exception {
         VelocityOverGroundMsg msg = create("8d3461cf9908558e100c1071eb67");
         assertEquals(128, msg.getVerticalRate().intValue());
-        assertEquals(375, msg.getDiffBaroAlt().intValue());
+        assertEquals(375, msg.getDiffBaroAlt().getValue().intValue());
     }
 
     @Test
@@ -117,7 +118,7 @@ abstract class VelocityOverGroundMsgTest {
     public void testVerticalRateNeg64_394c0f() throws Exception {
         VelocityOverGroundMsg msg = create("8d394c0f990c4932780838866883");
         assertEquals(-64, msg.getVerticalRate().intValue());
-        assertEquals(1375, msg.getDiffBaroAlt().intValue());
+        assertEquals(1375, msg.getDiffBaroAlt().getValue().intValue());
     }
 
     @Test
@@ -135,34 +136,35 @@ abstract class VelocityOverGroundMsgTest {
     }
 
     /**
-     * Only 127, "&gt; 3137.5 ft", saturates the 7-bit field of versions 0 to 2, and it does so whatever
-     * the sign; 0 means the difference is unavailable and so is not saturated either.
+     * The 7-bit coding of versions 0 to 2: code L is (L - 1) * 25 ft rounded, 1 covers [0, 12.5] ft, and
+     * only 127 is unbounded, as every difference above 3137.5 ft; 0 reports nothing. The sign mirrors it.
      */
-    static void assertDiffBaroAltSaturation(AirborneVelocityMsg unavailable, AirborneVelocityMsg smallest,
-                                            AirborneVelocityMsg largestExact, AirborneVelocityMsg saturated,
-                                            AirborneVelocityMsg saturatedNegative) {
+    static void assertDiffBaroAltCoding(AirborneVelocityMsg unavailable, AirborneVelocityMsg smallest,
+                                        AirborneVelocityMsg largestBounded, AirborneVelocityMsg highest,
+                                        AirborneVelocityMsg highestNegative) {
         assertFalse(unavailable.hasDiffBaroAlt());
-        assertFalse(unavailable.isDiffBaroAltSaturated());
+        assertNull(unavailable.getDiffBaroAlt().getDifference());
 
         assertTrue(smallest.hasDiffBaroAlt());
-        assertFalse(smallest.isDiffBaroAltSaturated());
+        assertEquals(0., smallest.getDiffBaroAlt().getValue());
+        assertEquals(0., smallest.getDiffBaroAlt().getDifference().getLower());
+        assertEquals(12.5, smallest.getDiffBaroAlt().getDifference().getUpper());
 
-        assertTrue(largestExact.hasDiffBaroAlt());
-        assertFalse(largestExact.isDiffBaroAltSaturated());
-        assertEquals(3125., largestExact.getDiffBaroAlt());
+        assertEquals(3125., largestBounded.getDiffBaroAlt().getValue());
+        assertEquals(3137.5, largestBounded.getDiffBaroAlt().getDifference().getUpper());
 
-        assertTrue(saturated.hasDiffBaroAlt());
-        assertTrue(saturated.isDiffBaroAltSaturated());
-        assertEquals(3137.5, saturated.getDiffBaroAltMidpoint());
+        assertEquals(Bound.NONE, highest.getDiffBaroAlt().getDifference().getUpperBound());
+        assertEquals(3137.5, highest.getDiffBaroAlt().getDifference().getLower());
+        assertEquals(3137.5, highest.getDiffBaroAlt().getValue());
 
-        assertTrue(saturatedNegative.isDiffBaroAltSaturated());
-        assertEquals(-3137.5, saturatedNegative.getDiffBaroAltMidpoint());
+        assertEquals(Bound.NONE, highestNegative.getDiffBaroAlt().getDifference().getLowerBound());
+        assertEquals(-3137.5, highestNegative.getDiffBaroAlt().getDifference().getUpper());
     }
 
     @Test
-    public void testDiffBaroAltSaturation() throws Exception {
+    public void testDiffBaroAltCoding() throws Exception {
         String hex = "8D485020994409940838175B284F";
-        assertDiffBaroAltSaturation(
+        assertDiffBaroAltCoding(
                 create(withDiffBaroAlt(hex, false, 0)),
                 create(withDiffBaroAlt(hex, false, 1)),
                 create(withDiffBaroAlt(hex, false, 126)),

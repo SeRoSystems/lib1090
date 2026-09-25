@@ -71,7 +71,7 @@ abstract class AirspeedHeadingMsgTest {
     @Test
     public void testGeoMinusBaroReturnsNullWhenUnavailable() throws Exception {
         AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
-        assertNull(msg.getDiffBaroAlt(), "getDiffBaroAlt() should return null when unavailable");
+        assertNull(msg.getDiffBaroAlt().getDifference(), "getDiffBaroAlt() should return null when unavailable");
     }
 
     @Test
@@ -95,9 +95,9 @@ abstract class AirspeedHeadingMsgTest {
     }
 
     @Test
-    public void testDiffBaroAltSaturation() throws Exception {
+    public void testDiffBaroAltCoding() throws Exception {
         String hex = "8DA05F219B06B6AF189400CBC33F";
-        VelocityOverGroundMsgTest.assertDiffBaroAltSaturation(
+        VelocityOverGroundMsgTest.assertDiffBaroAltCoding(
                 create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 0)),
                 create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 1)),
                 create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 126)),

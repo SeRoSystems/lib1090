@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.diffbaroalt.ADSRDiffBaroAltV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.squitter.NACvMsg;
@@ -49,7 +50,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
     private boolean diffBaroAltNegative;
     private short diffBaroAltEncoded; // raw encoded geometric minus barometric altitude difference field
     private byte nicSupplementD; // only present if diffBaroAltEncoded == 0
-    private short extendedDiffBaroAltEncoded; // only present if diffBaroAltEncoded != 0; 10-bit value, see getter
+    private int extendedDiffBaroAltEncoded; // ME bits 10, 47-48 and 50-56
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -110,19 +111,14 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
 
         // In ADS-B version 3, ME bits 47-48 are re-purposed: if the Difference from Barometric
         // Altitude is unavailable (i.e. its encoded field is 0), they carry NIC supplement D
-        // instead. If it is available, they contribute to an extended, 11-bit encoding of the
-        // Difference from Barometric Altitude, together with ME bits 9 and 10. For ADS-R, ME bit
-        // 9 is redefined as the IMF flag (see above), so this extended encoding effectively loses
-        // its least significant bit, leaving a 10-bit encoding with reduced resolution.
-        if (diffBaroAltEncoded == 0) {
+        // instead. Otherwise they contribute to an extended encoding of the Difference from
+        // Barometric Altitude, together with ME bit 10. ADS-R redefines ME bit 9 as the IMF flag
+        // (see above), so its extended encoding lacks that least significant bit: 10 bits.
+        if (diffBaroAltEncoded == 0)
             nicSupplementD = br.readByte(47, 48);
-        } else {
-            extendedDiffBaroAltEncoded = (short) (
-                    (br.readByte(10, 10) << 9) |
-                            (br.readByte(47, 48) << 7) |
-                            diffBaroAltEncoded
-            );
-        }
+        extendedDiffBaroAltEncoded = br.readShort(10, 10) << 9
+                | br.readShort(47, 48) << 7
+                | diffBaroAltEncoded;
     }
 
     @Override
@@ -135,50 +131,12 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
         return verticalRateEncoded != 0;
     }
 
+    /**
+     * @return the difference as the 10-bit extended coding of ED-102B TABLE 2-186 reports it
+     */
     @Override
-    public boolean hasDiffBaroAlt() {
-        if (hasNICSupplementD()) return false;
-        // the top 3 bits are a reserved, must-be-zero combination only in the compat zone;
-        // in the extended zone (diffBaroAltEncoded == 0x7F) they carry legitimate data
-        return diffBaroAltEncoded == 0x7F || (extendedDiffBaroAltEncoded & 0x380) == 0;
-    }
-
-    @Override
-    public Double getDiffBaroAlt() {
-        if (!hasDiffBaroAlt()) return null;
-
-        double diffBaroAlt;
-        if (diffBaroAltEncoded != 0x7F) {
-            diffBaroAlt = (extendedDiffBaroAltEncoded - 1) * 25.0;
-        } else {
-            int upper = (extendedDiffBaroAltEncoded >>> 7) & 0x7;
-            diffBaroAlt = upper * 200 + 3150;
-        }
-
-        return isDiffBaroAltNegative() ? -diffBaroAlt : diffBaroAlt;
-    }
-
-    @Override
-    public boolean isDiffBaroAltSaturated() {
-        if (!hasDiffBaroAlt()) return false;
-        return extendedDiffBaroAltEncoded == 0x3ff;
-    }
-
-    @Override
-    public Double getDiffBaroAltMidpoint() {
-        if (!hasDiffBaroAlt()) return null;
-        if (isDiffBaroAltSaturated()) return 4450.;
-
-        double diffBaroAlt;
-        int upper = (extendedDiffBaroAltEncoded >>> 7) & 0x7;
-        if (extendedDiffBaroAltEncoded == 0x7f)
-            diffBaroAlt = 3193.75;
-        else if (diffBaroAltEncoded != 0x7F || upper == 0)
-            diffBaroAlt = (extendedDiffBaroAltEncoded - 1) * 25.0;
-        else
-            diffBaroAlt = upper * 200 + 3150;
-
-        return isDiffBaroAltNegative() ? -diffBaroAlt : diffBaroAlt;
+    public ADSRDiffBaroAltV3 getDiffBaroAlt() {
+        return ADSRDiffBaroAltV3.of(diffBaroAltNegative, extendedDiffBaroAltEncoded);
     }
 
     @Override
@@ -255,9 +213,10 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
      * across ME bit 10, ME bits 47-48 and the regular {@link #getDiffBaroAltEncoded()} field. For
      * ADS-B, this field has an eleventh, least significant bit contributed by ME bit 9; for ADS-R,
      * ME bit 9 is redefined as the IMF flag, so that bit is unavailable here, halving the
-     * resolution of this field. Only meaningful if {@link #hasDiffBaroAlt()}
+     * resolution of this field. Bits 47-48 are NIC supplement D where {@link #getDiffBaroAltEncoded()}
+     * is 0.
      */
-    public short getExtendedDiffBaroAltEncoded() {
+    public int getExtendedDiffBaroAltEncoded() {
         return extendedDiffBaroAltEncoded;
     }
 

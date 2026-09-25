@@ -20,6 +20,7 @@ package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
+import de.serosystems.lib1090.decoding.diffbaroalt.DiffBaroAlt;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -711,9 +712,9 @@ public class StatefulModeSDecoder {
      * value.
      *
      * @param reply a Mode S message
-     * @return the difference between geometric and barometric altitude in feet or null if not present
+     * @return the difference between geometric and barometric altitude, or null if none has been reported
      */
-    public Double getDiffBaroAlt(ModeSDownlinkMsg reply) {
+    public DiffBaroAlt getDiffBaroAlt(ModeSDownlinkMsg reply) {
         if (reply == null) return null;
         DecoderData dd = getDecoderData(reply.getAddress());
         return dd.geoMinusBaro;
@@ -751,7 +752,7 @@ public class StatefulModeSDecoder {
     private static class DecoderData {
         byte adsbVersion;
         NICSupplements nicSupplements = NICSupplements.none();
-        Double geoMinusBaro;
+        DiffBaroAlt geoMinusBaro;
         Instant lastUsed;
         PositionDecoder posDec;
 

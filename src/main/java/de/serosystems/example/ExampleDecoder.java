@@ -21,6 +21,7 @@ package de.serosystems.example;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.diffbaroalt.DiffBaroAlt;
 import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -103,9 +104,9 @@ public class ExampleDecoder {
                     System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
                 }
 
-                Double geoMinusBaro = decoder.getDiffBaroAlt(msg);
+                DiffBaroAlt geoMinusBaro = decoder.getDiffBaroAlt(msg);
                 if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
-                    System.out.println("          Height (geom.): " + ap.getAltitude() + geoMinusBaro + " ft");
+                    System.out.println("          Height (geom.): " + (ap.getAltitude() + geoMinusBaro.getValue()) + " ft");
                 }
 
                 System.out.println("          Navigation Integrity Category: " + ap.getNICEncoded());

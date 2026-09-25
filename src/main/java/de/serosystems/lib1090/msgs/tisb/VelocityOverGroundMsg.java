@@ -139,11 +139,6 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
     }
 
     @Override
-    public boolean hasDiffBaroAlt() {
-        return hasGeoFlag() && diffBaroAltEncoded != 0;
-    }
-
-    @Override
     public short getDiffBaroAltEncoded() {
         return diffBaroAltEncoded;
     }
