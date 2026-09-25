@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
-import de.serosystems.lib1090.decoding.OperationalStatus;
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSize;
 
 /**
  * Common API for ADS-B surface operational status messages.
@@ -46,22 +46,13 @@ public interface SurfaceOperationalStatusMsg extends OperationalStatusMsg, SILMs
     byte getAircraftVehicleLengthAndWidthEncoded();
 
     /**
-     * ED-102B §2.2.3.2.7.2.11 TABLE 2-71. Compatible with ADS-B version 1 and 2
+     * The length and width the encoded code reports, as the transmitting version's table defines them:
+     * ED-102B §N.3.3.3 TABLE N-18 for version 1, ED-102A §2.2.3.2.7.2.11 TABLE 2-74 for version 2 and
+     * ED-102B §2.2.3.2.7.2.11 TABLE 2-71 for version 3.
      *
-     * @return the airplane's length in meters; -1 for unknown
+     * @return the aircraft or vehicle dimensions, never null
      */
-    default int getAirplaneLength() {
-        return OperationalStatus.decodeAirplaneLength(getAircraftVehicleLengthAndWidthEncoded());
-    }
-
-    /**
-     * ED-102B §2.2.3.2.7.2.11 TABLE 2-71. Compatible with ADS-B version 1 and 2.
-     *
-     * @return the airplane's width in meters
-     */
-    default double getAirplaneWidth() {
-        return OperationalStatus.decodeAirplaneWidth(getAircraftVehicleLengthAndWidthEncoded());
-    }
+    AircraftVehicleSize getAircraftVehicleSize();
 
     /**
      * @return the Track Angle/Heading allows correct interpretation of the data

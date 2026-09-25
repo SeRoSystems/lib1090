@@ -19,14 +19,10 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV1V2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
-import de.serosystems.lib1090.msgs.squitter.CapabilityClassCodeV2V3;
-import de.serosystems.lib1090.msgs.squitter.KnownCapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.OperationalModeCodeV2V3;
-import de.serosystems.lib1090.msgs.squitter.SurfaceCapabilityClassCodeV2V3;
-import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalModeCodeV2V3;
 import de.serosystems.lib1090.msgs.SurfaceOperationalStatusMsgTest;
+import de.serosystems.lib1090.msgs.squitter.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +40,11 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
     @Override
     protected SurfaceOperationalStatusV2Msg create(byte[] msg) throws Exception {
         return new SurfaceOperationalStatusV2Msg(msg);
+    }
+
+    @Override
+    protected AircraftVehicleSizeV1V2 aircraftVehicleSize(byte encoded) {
+        return AircraftVehicleSizeV1V2.forEncoded(encoded);
     }
 
     @Test

@@ -211,8 +211,8 @@ public class ExampleDecoder {
                     System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
                     System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getEstimatedPositionUncertainty());
                     System.out.println("          Has NIC supplement A: " + opstatS.getNICSupplementA());
-                    System.out.println("          Airplane length: " + opstatS.getAirplaneLength() + "m");
-                    System.out.println("          Airplane width: " + opstatS.getAirplaneWidth() + "m");
+                    System.out.println("          Aircraft/vehicle length: " + opstatS.getAircraftVehicleSize().getLength());
+                    System.out.println("          Aircraft/vehicle width: " + opstatS.getAircraftVehicleSize().getWidth());
                     System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
                     System.out.println("          Horizontal reference: " + (opstatS.isHeadingReferencedToMagneticNorth() ? "magnetic north" : "true north"));
                 }

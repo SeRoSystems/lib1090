@@ -19,11 +19,13 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV1V2;
 import de.serosystems.lib1090.msgs.SurfaceOperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
  * Runs the shared surface operational status assertions against the ADS-R version 1 message.
@@ -48,6 +50,11 @@ class SurfaceOperationalStatusV1MsgTest extends SurfaceOperationalStatusMsgTest 
     @Override
     protected SurfaceOperationalStatusMsg create(byte[] msg) throws Exception {
         return new SurfaceOperationalStatusV1Msg(msg);
+    }
+
+    @Override
+    protected AircraftVehicleSizeV1V2 aircraftVehicleSize(byte encoded) {
+        return AircraftVehicleSizeV1V2.forEncoded(encoded);
     }
 
     @Test
