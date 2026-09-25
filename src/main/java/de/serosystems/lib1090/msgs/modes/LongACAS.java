@@ -195,7 +195,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return whether a/c has operating ACARS (derived from reply information)
+     * @return whether a/c has operating ACAS (derived from reply information)
      * @see #getReplyInformation()
      */
     public boolean hasOperatingACAS() {

@@ -113,7 +113,8 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 
     /**
      * This field is used to report the aircraft's maximum cruising
-     * true airspeed capability and TCAS capabilities. Capabilities are:<br>
+     * true airspeed capability and TCAS capabilities. Capabilities are, as ICAO Annex 10 Volume IV
+     * §4.3.8.4.1.2 defines them:<br>
      * <ul>
      *     <li>code 2: On-board TCAS with resolution capability inhibited</li>
      *     <li>code 3: On-board TCAS with vertical-only resolution capability</li>
@@ -131,7 +132,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return whether a/c has operating ACARS (derived from reply information)
+     * @return whether a/c has operating ACAS (derived from reply information)
      * @see #getReplyInformation()
      */
     public boolean hasOperatingACAS() {
@@ -166,14 +167,16 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
+     * Derived from the reply information codes 0–7, ICAO Annex 10 Volume IV §4.3.8.4.1.2.
+     *
      * @return true if vertical resolution capability announced; false if explicitly not available; null if information
      * not provided in this reply
-     *
      */
     public Boolean hasVerticalResolutionCapability() {
         switch (reply_information) {
             case 0:
             case 1:
+            case 2:
                 return false;
             case 3:
             case 4:
@@ -184,14 +187,16 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
+     * Derived from the reply information codes 0–7, ICAO Annex 10 Volume IV §4.3.8.4.1.2.
+     *
      * @return true if horizontal resolution capability announced; false if explicitly not available; null if
      * information not provided in this reply
-     *
      */
     public Boolean hasHorizontalResolutionCapability() {
         switch (reply_information) {
             case 0:
             case 1:
+            case 2:
             case 3:
                 return false;
             case 4:
