@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -36,7 +37,7 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
 
     private byte[] message;
     private boolean ack;
-    private byte seqno;
+    private byte sequenceNumber;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -75,10 +76,12 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
         if (getDownlinkFormat() != 24)
             throw new BadFormatException("Message is not an extended length message");
 
+        BitReader b = getBitReader();
+        ack = b.readBoolean(4);
+        sequenceNumber = b.readByte(5, 8);
+
         // extract Comm-D extended length message
         message = getPayload();
-        ack = (getFirstField() & 0x10) != 0;
-        seqno = (byte) (getFirstField() & 0x0F);
     }
 
     /**
@@ -100,15 +103,15 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
      * field, 0 to 15
      */
     public byte getSequenceNumber() {
-        return seqno;
+        return sequenceNumber;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tCommDExtendedLengthMsg{" +
-                "message=" + Tools.toHexString(message) +
+        return "CommDExtendedLengthMsg{" + super.toString() +
                 ", ack=" + ack +
-                ", seqno=" + seqno +
+                ", sequenceNumber=" + sequenceNumber +
+                ", message=" + Tools.toHexString(message) +
                 '}';
     }
 

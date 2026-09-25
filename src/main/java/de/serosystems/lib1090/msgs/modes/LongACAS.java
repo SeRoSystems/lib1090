@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.decoding.Altitude;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -33,15 +34,15 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 
     private static final long serialVersionUID = 1052613416840618986L;
 
-    private boolean airborne;
-    private byte sensitivity_level;
-    private byte reply_information;
-    private short altitude_code;
-    private boolean valid_rac;
-    private short active_resolution_advisories;
-    private byte racs_record; // RAC = resolution advisory complement
-    private boolean ra_terminated;
-    private boolean multiple_threat_encounter;
+    private boolean verticalStatus; // 0 = airborne, 1 = on the ground
+    private byte sensitivityLevel;
+    private byte replyInformationEncoded;
+    private short altitudeEncoded;
+    private byte vds; // V-definition subfield of MV, 0x30 for a resolution advisory report
+    private short activeResolutionAdvisories;
+    private byte racRecordEncoded; // RAC = resolution advisory complement
+    private boolean raTerminated;
+    private boolean multipleThreatEncounter;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -80,18 +81,18 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
         if (getDownlinkFormat() != 16)
             throw new BadFormatException("Message is not a long ACAS (air-air) message");
 
-        byte[] payload = getPayload();
-        airborne = (getFirstField() & 0x4) == 0;
-        sensitivity_level = (byte) ((payload[0] >>> 5) & 0x7);
-        reply_information = (byte) ((payload[0] & 0x7) << 1 | (payload[1] >>> 7) & 0x1);
-        altitude_code = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
+        BitReader b = getBitReader();
+        verticalStatus = b.readBoolean(6);
+        sensitivityLevel = b.readByte(9, 11);
+        replyInformationEncoded = b.readByte(14, 17);
+        altitudeEncoded = b.readShort(20, 32);
 
-        // extract MV/air-air coordination info; see ICAO Annex 10 Volume IV §4.3.8.4.2.4
-        valid_rac = payload[3] == 0x30;
-        active_resolution_advisories = (short) ((payload[4] << 6 | (payload[5] >>> 2) & 0x3F) & 0x3FFF);
-        racs_record = (byte) ((payload[5] << 2 | (payload[6] >>> 6) & 0x3) & 0xF);
-        ra_terminated = ((payload[6] >>> 5) & 0x1) == 1;
-        multiple_threat_encounter = ((payload[6] >>> 4) & 0x1) == 1;
+        // MV/air-air coordination info; see ICAO Annex 10 Volume IV §4.3.8.4.2.4
+        vds = b.readByte(33, 40);
+        activeResolutionAdvisories = b.readShort(41, 54);
+        racRecordEncoded = b.readByte(55, 58);
+        raTerminated = b.readBoolean(59);
+        multipleThreatEncounter = b.readBoolean(60);
     }
 
     /**
@@ -104,7 +105,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @return true if resolution advisory complement is valid
      */
     public boolean hasValidRAC() {
-        return valid_rac;
+        return vds == 0x30;
     }
 
     /**
@@ -112,7 +113,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * resolution advisories, see ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.1
      */
     public short getActiveResolutionAdvisories() {
-        return active_resolution_advisories;
+        return activeResolutionAdvisories;
     }
 
     /**
@@ -122,64 +123,64 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @see #noTurnLeft()
      * @see #noTurnRight()
      */
-    public byte getResolutionAdvisoryComplement() {
-        return racs_record;
+    public byte getResolutionAdvisoryComplementEncoded() {
+        return racRecordEncoded;
     }
 
     /**
      * @return true iff do not pass below advisory is active
      */
     public boolean noPassBelow() {
-        return (racs_record & 8) == 8;
+        return (racRecordEncoded & 8) == 8;
     }
 
     /**
      * @return true iff do not pass above advisory is active
      */
     public boolean noPassAbove() {
-        return (racs_record & 4) == 4;
+        return (racRecordEncoded & 4) == 4;
     }
 
     /**
      * @return true iff do not turn left advisory is active
      */
     public boolean noTurnLeft() {
-        return (racs_record & 2) == 2;
+        return (racRecordEncoded & 2) == 2;
     }
 
     /**
      * @return true iff do not turn right advisory is active
      */
     public boolean noTurnRight() {
-        return (racs_record & 1) == 1;
+        return (racRecordEncoded & 1) == 1;
     }
 
     /**
      * @return true if aircraft is airborne, false if it is on the ground
      */
     public boolean isAirborne() {
-        return airborne;
+        return !verticalStatus;
     }
 
     /**
      * @return true iff the RA from {@link #getActiveResolutionAdvisories()} has been terminated
      */
     public boolean hasTerminated() {
-        return ra_terminated;
+        return raTerminated;
     }
 
     /**
      * @return true iff two or more threats are being processed
      */
     public boolean hasMultipleThreats() {
-        return multiple_threat_encounter;
+        return multipleThreatEncounter;
     }
 
     /**
      * @return the sensitivity level at which ACAS is currently operating
      */
     public byte getSensitivityLevel() {
-        return sensitivity_level;
+        return sensitivityLevel;
     }
 
     /**
@@ -190,16 +191,16 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @see #getMaximumAirspeed()
      * @see #hasOperatingACAS()
      */
-    public byte getReplyInformation() {
-        return reply_information;
+    public byte getReplyInformationEncoded() {
+        return replyInformationEncoded;
     }
 
     /**
      * @return whether a/c has operating ACAS (derived from reply information)
-     * @see #getReplyInformation()
+     * @see #getReplyInformationEncoded()
      */
     public boolean hasOperatingACAS() {
-        return getReplyInformation() != 0;
+        return getReplyInformationEncoded() != 0;
     }
 
     /**
@@ -207,21 +208,21 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * null if unknown<br>Integer.MAX_VALUE if unbound
      */
     public Integer getMaximumAirspeed() {
-        return ShortACAS.decodeMaximumAirspeed(getReplyInformation());
+        return ShortACAS.decodeMaximumAirspeed(getReplyInformationEncoded());
     }
 
     /**
      * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
-    public short getAltitudeCode() {
-        return altitude_code;
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
     }
 
     /**
      * @return the decoded altitude in feet or null if not available
      */
     public Integer getAltitude() {
-        return Altitude.decode13BitAltitude(altitude_code);
+        return Altitude.decode13BitAltitude(altitudeEncoded);
     }
 
     /**
@@ -230,21 +231,21 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      * @return value of the Q bit, false if altitude is not available or the M bit is set
      */
     public boolean hasQBit() {
-        return Altitude.decode13BitQBit(altitude_code);
+        return Altitude.decode13BitQBit(altitudeEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tLongACAS{" +
-                "airborne=" + airborne +
-                ", sensitivity_level=" + sensitivity_level +
-                ", reply_information=" + reply_information +
-                ", altitude_code=" + altitude_code +
-                ", valid_rac=" + valid_rac +
-                ", active_resolution_advisories=" + active_resolution_advisories +
-                ", racs_record=" + racs_record +
-                ", ra_terminated=" + ra_terminated +
-                ", multiple_threat_encounter=" + multiple_threat_encounter +
+        return "LongACAS{" + super.toString() +
+                ", verticalStatus=" + verticalStatus +
+                ", sensitivityLevel=" + sensitivityLevel +
+                ", replyInformationEncoded=" + replyInformationEncoded +
+                ", altitudeEncoded=" + altitudeEncoded +
+                ", vds=" + vds +
+                ", activeResolutionAdvisories=" + activeResolutionAdvisories +
+                ", racRecordEncoded=" + racRecordEncoded +
+                ", raTerminated=" + raTerminated +
+                ", multipleThreatEncounter=" + multipleThreatEncounter +
                 '}';
     }
 

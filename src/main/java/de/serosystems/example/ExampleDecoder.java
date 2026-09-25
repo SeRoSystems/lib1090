@@ -443,7 +443,7 @@ public class ExampleDecoder {
                 System.out.println("          A/C is " + (long_acas.isAirborne() ? "airborne" : "on the ground") +
                         " and sensitivity level is " + long_acas.getSensitivityLevel());
                 System.out.println("          RAC is " + (long_acas.hasValidRAC() ? "valid" : "not valid") +
-                        " and is " + long_acas.getResolutionAdvisoryComplement() + " (MTE=" + long_acas.hasMultipleThreats() + ")");
+                        " and is " + long_acas.getResolutionAdvisoryComplementEncoded() + " (MTE=" + long_acas.hasMultipleThreats() + ")");
                 System.out.println("          Maximum airspeed is " + long_acas.getMaximumAirspeed() + "kn.");
             } else if (msg instanceof MilitaryExtendedSquitter) {
                 MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter) msg;

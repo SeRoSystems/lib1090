@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.decoding.Altitude;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -34,10 +35,10 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
 
     private static final long serialVersionUID = 190338580932294046L;
 
-    private byte flight_status;
-    private byte downlink_request;
-    private byte utility_msg;
-    private short altitude_code;
+    private byte flightStatusEncoded;
+    private byte downlinkRequest;
+    private byte utilityMsgEncoded;
+    private short altitudeEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -76,11 +77,11 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
         if (getDownlinkFormat() != 4)
             throw new BadFormatException("Message is not an altitude reply");
 
-        byte[] payload = getPayload();
-        flight_status = getFirstField();
-        downlink_request = (byte) ((payload[0] >>> 3) & 0x1F);
-        utility_msg = (byte) ((payload[0] & 0x7) << 3 | (payload[1] >>> 5) & 0x7);
-        altitude_code = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
+        BitReader b = getBitReader();
+        flightStatusEncoded = b.readByte(6, 8);
+        downlinkRequest = b.readByte(9, 13);
+        utilityMsgEncoded = b.readByte(14, 19);
+        altitudeEncoded = b.readShort(20, 32);
     }
 
     /**
@@ -101,22 +102,22 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @see #hasSPI()
      * @see #isAirborne()
      */
-    public byte getFlightStatus() {
-        return flight_status;
+    public byte getFlightStatusEncoded() {
+        return flightStatusEncoded;
     }
 
     /**
      * @return whether flight status indicates alert
      */
     public boolean hasAlert() {
-        return flight_status >= 2 && flight_status <= 4;
+        return flightStatusEncoded >= 2 && flightStatusEncoded <= 4;
     }
 
     /**
      * @return whether flight status indicates special purpose indicator
      */
     public boolean hasSPI() {
-        return flight_status == 4 || flight_status == 5;
+        return flightStatusEncoded == 4 || flightStatusEncoded == 5;
     }
 
     /**
@@ -125,9 +126,9 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @return true if airborne, false if on ground or null if ground status is unknown
      */
     public Boolean isAirborne() {
-        if (flight_status == 0 || flight_status == 2) {
+        if (flightStatusEncoded == 0 || flightStatusEncoded == 2) {
             return true;
-        } else if (flight_status == 1 || flight_status == 3) {
+        } else if (flightStatusEncoded == 1 || flightStatusEncoded == 3) {
             return false;
         }
         return null;
@@ -151,14 +152,14 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * </ul>
      */
     public byte getDownlinkRequest() {
-        return downlink_request;
+        return downlinkRequest;
     }
 
     /**
      * @return The 6 bits utility message, see ICAO Annex 10 Volume IV §3.1.2.6.5.3
      */
-    public byte getUtilityMsg() {
-        return utility_msg;
+    public byte getUtilityMsgEncoded() {
+        return utilityMsgEncoded;
     }
 
     /**
@@ -169,7 +170,7 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * interrogator that is reserved for multisite communications.
      */
     public byte getInterrogatorIdentifier() {
-        return (byte) ((utility_msg >>> 2) & 0xF);
+        return (byte) ((utilityMsgEncoded >>> 2) & 0xF);
     }
 
     /**
@@ -185,21 +186,21 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * {@link #getInterrogatorIdentifier() getInterrogatorIdentifier}.
      */
     public byte getIdentifierDesignator() {
-        return (byte) (utility_msg & 0x3);
+        return (byte) (utilityMsgEncoded & 0x3);
     }
 
     /**
      * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
-    public short getAltitudeCode() {
-        return altitude_code;
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
     }
 
     /**
      * @return the decoded altitude in feet or null if not available
      */
     public Integer getAltitude() {
-        return Altitude.decode13BitAltitude(altitude_code);
+        return Altitude.decode13BitAltitude(altitudeEncoded);
     }
 
     /**
@@ -208,16 +209,16 @@ public class AltitudeReply extends ModeSDownlinkMsg implements Serializable {
      * @return value of the Q bit, false if altitude is not available or the M bit is set
      */
     public boolean hasQBit() {
-        return Altitude.decode13BitQBit(altitude_code);
+        return Altitude.decode13BitQBit(altitudeEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tAltitudeReply{" +
-                "flight_status=" + flight_status +
-                ", downlink_request=" + downlink_request +
-                ", utility_msg=" + utility_msg +
-                ", altitude_code=" + altitude_code +
+        return "AltitudeReply{" + super.toString() +
+                ", flightStatusEncoded=" + flightStatusEncoded +
+                ", downlinkRequest=" + downlinkRequest +
+                ", utilityMsgEncoded=" + utilityMsgEncoded +
+                ", altitudeEncoded=" + altitudeEncoded +
                 '}';
     }
 

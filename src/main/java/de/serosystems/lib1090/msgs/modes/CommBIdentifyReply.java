@@ -19,12 +19,14 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identity;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Decoder for the Mode S surveillance identity reply with Comm-B message (DF=21),
@@ -35,10 +37,10 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
 
     private static final long serialVersionUID = -1623942073259152603L;
 
-    private byte flight_status;
-    private byte downlink_request;
-    private byte utility_msg;
-    private short identity;
+    private byte flightStatusEncoded;
+    private byte downlinkRequest;
+    private byte utilityMsgEncoded;
+    private short identityEncoded;
     private byte[] message;
 
     /**
@@ -78,15 +80,14 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
         if (getDownlinkFormat() != 21)
             throw new BadFormatException("Message is not a comm-b identify reply");
 
-        byte[] payload = getPayload();
-        flight_status = getFirstField();
-        downlink_request = (byte) ((payload[0] >>> 3) & 0x1F);
-        utility_msg = (byte) ((payload[0] & 0x7) << 3 | (payload[1] >>> 5) & 0x7);
-        identity = (short) ((payload[1] << 8 | (payload[2] & 0xFF)) & 0x1FFF);
+        BitReader b = getBitReader();
+        flightStatusEncoded = b.readByte(6, 8);
+        downlinkRequest = b.readByte(9, 13);
+        utilityMsgEncoded = b.readByte(14, 19);
+        identityEncoded = b.readShort(20, 32);
 
         // extract Comm-B message
-        message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
+        message = Arrays.copyOfRange(getPayload(), 3, 10);
     }
 
     /**
@@ -107,22 +108,22 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @see #hasSPI()
      * @see #isAirborne()
      */
-    public byte getFlightStatus() {
-        return flight_status;
+    public byte getFlightStatusEncoded() {
+        return flightStatusEncoded;
     }
 
     /**
      * @return whether flight status indicates alert
      */
     public boolean hasAlert() {
-        return flight_status >= 2 && flight_status <= 4;
+        return flightStatusEncoded >= 2 && flightStatusEncoded <= 4;
     }
 
     /**
      * @return whether flight status indicates special purpose indicator
      */
     public boolean hasSPI() {
-        return flight_status == 4 || flight_status == 5;
+        return flightStatusEncoded == 4 || flightStatusEncoded == 5;
     }
 
     /**
@@ -131,9 +132,9 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * @return true if airborne, false if on ground or null if ground status is unknown
      */
     public Boolean isAirborne() {
-        if (flight_status == 0 || flight_status == 2) {
+        if (flightStatusEncoded == 0 || flightStatusEncoded == 2) {
             return true;
-        } else if (flight_status == 1 || flight_status == 3) {
+        } else if (flightStatusEncoded == 1 || flightStatusEncoded == 3) {
             return false;
         }
         return null;
@@ -157,14 +158,14 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * </ul>
      */
     public byte getDownlinkRequest() {
-        return downlink_request;
+        return downlinkRequest;
     }
 
     /**
      * @return The 6 bits utility message, see ICAO Annex 10 Volume IV §3.1.2.6.5.3
      */
-    public byte getUtilityMsg() {
-        return utility_msg;
+    public byte getUtilityMsgEncoded() {
+        return utilityMsgEncoded;
     }
 
     /**
@@ -175,7 +176,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * interrogator that is reserved for multisite communications.
      */
     public byte getInterrogatorIdentifier() {
-        return (byte) ((utility_msg >>> 2) & 0xF);
+        return (byte) ((utilityMsgEncoded >>> 2) & 0xF);
     }
 
     /**
@@ -192,14 +193,14 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * </ul>
      */
     public byte getIdentifierDesignator() {
-        return (byte) (utility_msg & 0x3);
+        return (byte) (utilityMsgEncoded & 0x3);
     }
 
     /**
      * @return The 13 bits identity code (Mode A code), see ICAO Annex 10 Volume IV §3.1.2.6.7.1
      */
-    public short getIdentityCode() {
-        return identity;
+    public short getIdentityEncoded() {
+        return identityEncoded;
     }
 
     /**
@@ -222,16 +223,16 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
      * </ul>
      */
     public String getIdentity() {
-        return Identity.decodeIdentity(identity);
+        return Identity.decodeIdentity(identityEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tCommBIdentifyReply{" +
-                "flight_status=" + flight_status +
-                ", downlink_request=" + downlink_request +
-                ", utility_msg=" + utility_msg +
-                ", identity=" + identity +
+        return "CommBIdentifyReply{" + super.toString() +
+                ", flightStatusEncoded=" + flightStatusEncoded +
+                ", downlinkRequest=" + downlinkRequest +
+                ", utilityMsgEncoded=" + utilityMsgEncoded +
+                ", identityEncoded=" + identityEncoded +
                 ", message=" + Tools.toHexString(message) +
                 '}';
     }

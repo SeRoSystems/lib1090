@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.decoding.Altitude;
+import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -33,11 +34,11 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
 
     private static final long serialVersionUID = -8867923868755627826L;
 
-    private boolean airborne;
-    private boolean cross_link_capability;
-    private byte sensitivity_level;
-    private byte reply_information;
-    private short altitude_code;
+    private boolean verticalStatus; // 0 = airborne, 1 = on the ground
+    private boolean crossLinkCapability;
+    private byte sensitivityLevel;
+    private byte replyInformationEncoded;
+    private short altitudeEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -76,19 +77,19 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
         if (getDownlinkFormat() != 0)
             throw new BadFormatException("Message is not a short ACAS (air-air) message");
 
-        byte[] payload = getPayload();
-        airborne = (getFirstField() & 0x4) == 0;
-        cross_link_capability = (getFirstField() & 0x2) != 0;
-        sensitivity_level = (byte) ((payload[0] >>> 5) & 0x7);
-        reply_information = (byte) ((payload[0] & 0x7) << 1 | (payload[1] >>> 7) & 0x1);
-        altitude_code = (short) ((payload[1] << 8 | payload[2] & 0xFF) & 0x1FFF);
+        BitReader b = getBitReader();
+        verticalStatus = b.readBoolean(6);
+        crossLinkCapability = b.readBoolean(7);
+        sensitivityLevel = b.readByte(9, 11);
+        replyInformationEncoded = b.readByte(14, 17);
+        altitudeEncoded = b.readShort(20, 32);
     }
 
     /**
      * @return true if aircraft is airborne, false if it is on the ground
      */
     public boolean isAirborne() {
-        return airborne;
+        return !verticalStatus;
     }
 
     /**
@@ -101,14 +102,14 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      *
      */
     public boolean hasCrossLinkCapability() {
-        return cross_link_capability;
+        return crossLinkCapability;
     }
 
     /**
      * @return the sensitivity level at which ACAS is currently operating
      */
     public byte getSensitivityLevel() {
-        return sensitivity_level;
+        return sensitivityLevel;
     }
 
     /**
@@ -127,16 +128,16 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @see #hasHorizontalResolutionCapability()
      * @see #hasVerticalResolutionCapability()
      */
-    public byte getReplyInformation() {
-        return reply_information;
+    public byte getReplyInformationEncoded() {
+        return replyInformationEncoded;
     }
 
     /**
      * @return whether a/c has operating ACAS (derived from reply information)
-     * @see #getReplyInformation()
+     * @see #getReplyInformationEncoded()
      */
     public boolean hasOperatingACAS() {
-        return getReplyInformation() != 0;
+        return getReplyInformationEncoded() != 0;
     }
 
     /**
@@ -144,11 +145,11 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * null if unknown<br>Integer.MAX_VALUE if unbound
      */
     public Integer getMaximumAirspeed() {
-        return decodeMaximumAirspeed(getReplyInformation());
+        return decodeMaximumAirspeed(getReplyInformationEncoded());
     }
 
-    static Integer decodeMaximumAirspeed(byte reply_information) {
-        switch (reply_information) {
+    static Integer decodeMaximumAirspeed(byte replyInformationEncoded) {
+        switch (replyInformationEncoded) {
             case 9:
                 return 75;
             case 10:
@@ -173,7 +174,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * not provided in this reply
      */
     public Boolean hasVerticalResolutionCapability() {
-        switch (reply_information) {
+        switch (replyInformationEncoded) {
             case 0:
             case 1:
             case 2:
@@ -193,7 +194,7 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * information not provided in this reply
      */
     public Boolean hasHorizontalResolutionCapability() {
-        switch (reply_information) {
+        switch (replyInformationEncoded) {
             case 0:
             case 1:
             case 2:
@@ -209,15 +210,15 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
     /**
      * @return The 13 bits altitude code, see ICAO Annex 10 Volume IV §3.1.2.6.5.4
      */
-    public short getAltitudeCode() {
-        return altitude_code;
+    public short getAltitudeEncoded() {
+        return altitudeEncoded;
     }
 
     /**
      * @return the decoded altitude in feet or null if not available
      */
     public Integer getAltitude() {
-        return Altitude.decode13BitAltitude(altitude_code);
+        return Altitude.decode13BitAltitude(altitudeEncoded);
     }
 
     /**
@@ -226,17 +227,17 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
      * @return value of the Q bit, false if altitude is not available or the M bit is set
      */
     public boolean hasQBit() {
-        return Altitude.decode13BitQBit(altitude_code);
+        return Altitude.decode13BitQBit(altitudeEncoded);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tShortACAS{" +
-                "airborne=" + airborne +
-                ", cross_link_capability=" + cross_link_capability +
-                ", sensitivity_level=" + sensitivity_level +
-                ", reply_information=" + reply_information +
-                ", altitude_code=" + altitude_code +
+        return "ShortACAS{" + super.toString() +
+                ", verticalStatus=" + verticalStatus +
+                ", crossLinkCapability=" + crossLinkCapability +
+                ", sensitivityLevel=" + sensitivityLevel +
+                ", replyInformationEncoded=" + replyInformationEncoded +
+                ", altitudeEncoded=" + altitudeEncoded +
                 '}';
     }
 

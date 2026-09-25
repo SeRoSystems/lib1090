@@ -24,6 +24,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Decoder for the Mode S extended squitter envelope (DF=17/18/19), as defined in
@@ -38,7 +39,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
     private static final long serialVersionUID = 8396282390353645782L;
 
     private byte[] message;
-    private byte format_type_code;
+    private byte formatTypeCode;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -79,13 +80,9 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
                 (getDownlinkFormat() == 19 && getFirstField() > 0))
             throw new BadFormatException("Message is not an extended squitter");
 
-        byte[] payload = getPayload();
-
-        // extract ADS-B message
-        message = new byte[7];
-        System.arraycopy(payload, 3, message, 0, 7);
-
-        format_type_code = (byte) ((message[0] >>> 3) & 0x1F);
+        // extract the ME field, message bits 33-88
+        message = Arrays.copyOfRange(getPayload(), 3, 10);
+        formatTypeCode = getBitReader().readByte(33, 37);
     }
 
     /**
@@ -97,14 +94,14 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
         super(squitter);
 
         message = squitter.getMessage();
-        format_type_code = squitter.getFormatTypeCode();
+        formatTypeCode = squitter.getFormatTypeCode();
     }
 
     /**
      * @return The message's format type code, see ICAO Annex 10 Volume IV §3.1.2.8.6
      */
     public byte getFormatTypeCode() {
-        return format_type_code;
+        return formatTypeCode;
     }
 
     /**
@@ -116,9 +113,9 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
 
     @Override
     public String toString() {
-        return super.toString() + "\n\tExtendedSquitter{" +
-                "message=" + Tools.toHexString(message) +
-                ", format_type_code=" + format_type_code +
+        return "ExtendedSquitter{" + super.toString() +
+                ", message=" + Tools.toHexString(message) +
+                ", formatTypeCode=" + formatTypeCode +
                 '}';
     }
 

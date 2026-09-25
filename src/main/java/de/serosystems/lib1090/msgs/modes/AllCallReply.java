@@ -32,9 +32,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
     private static final long serialVersionUID = 2459589933570219472L;
 
-    private byte capabilities;
-    private int parity_interrogator;
-    private byte code_label;
+    private byte capabilitiesEncoded;
+    private int parityInterrogator; // the parity field with the CRC removed: code label and interrogator code
+    private byte codeLabelEncoded;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -73,19 +73,19 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
         if (getDownlinkFormat() != 11)
             throw new BadFormatException("Message is not an all-call reply");
 
-        capabilities = getFirstField();
+        capabilitiesEncoded = getBitReader().readByte(6, 8);
 
         // extract interrogator ID
-        this.parity_interrogator = calcParityInt() ^ getParity();
+        parityInterrogator = calcParityInt() ^ getParity();
 
-        code_label = (byte) ((parity_interrogator >> 4) & 0x7);
+        codeLabelEncoded = (byte) ((parityInterrogator >> 4) & 0x7);
     }
 
     /**
      * @return The emitter's capabilities, see ICAO Annex 10 Volume IV §3.1.2.5.2.2.1
      */
-    public byte getCapabilities() {
-        return capabilities;
+    public byte getCapabilitiesEncoded() {
+        return capabilitiesEncoded;
     }
 
     /**
@@ -94,9 +94,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @return true if airborne, false if on ground or null if ground status is unknown
      */
     public Boolean isAirborne() {
-        if (capabilities == 5) {
+        if (capabilitiesEncoded == 5) {
             return true;
-        } else if (capabilities == 4) {
+        } else if (capabilitiesEncoded == 4) {
             return false;
         }
         return null;
@@ -112,16 +112,16 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * Check {@link #isSurveillanceID()} for interpretation of the result.
      */
     public byte getInterrogatorCode() {
-        switch (code_label) {
+        switch (codeLabelEncoded) {
             case 0:
             case 1:
-                return (byte) (parity_interrogator & 0xF);
+                return (byte) (parityInterrogator & 0xF);
             case 2:
-                return (byte) ((parity_interrogator & 0xF) + 16);
+                return (byte) ((parityInterrogator & 0xF) + 16);
             case 3:
-                return (byte) ((parity_interrogator & 0xF) + 32);
+                return (byte) ((parityInterrogator & 0xF) + 32);
             default: // 4 and >= 4 (illegal)
-                return (byte) ((parity_interrogator & 0xF) + 48);
+                return (byte) ((parityInterrogator & 0xF) + 48);
         }
 
     }
@@ -132,7 +132,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * @return true if the interrogator has a surveillance identifier, false if it has an interrogator identifier.
      */
     public boolean isSurveillanceID() {
-        return code_label > 0;
+        return codeLabelEncoded > 0;
     }
 
     /**
@@ -147,8 +147,8 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      *
      * @return code label
      */
-    public byte getCodeLabel() {
-        return code_label;
+    public byte getCodeLabelEncoded() {
+        return codeLabelEncoded;
     }
 
     /**
@@ -161,7 +161,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
     public boolean hasValidInterrogatorCode() {
         // ICAO Annex 10 Volume IV §3.1.2.3.3.2
         // the first 17 bits have to be zero
-        if (parity_interrogator > 127) return false;
+        if (parityInterrogator > 127) return false;
 
         // Note: seems to be used by ACAS
         //int ii = interrogator[2] & 0xF;
@@ -171,15 +171,15 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
         // ICAO Annex 10 Volume IV §3.1.2.5.2.1.3
         // code label is only defined for 0-4
-        return code_label <= 4;
+        return codeLabelEncoded <= 4;
     }
 
     @Override
     public String toString() {
-        return "AllCallReply{" +
-                "capabilities=" + capabilities +
-                ", interrogator_id=" + getInterrogatorCode() + (isSurveillanceID() ? "/SI" : "/II") +
-                ", code_label=" + code_label +
+        return "AllCallReply{" + super.toString() +
+                ", capabilitiesEncoded=" + capabilitiesEncoded +
+                ", interrogatorCode=" + getInterrogatorCode() + (isSurveillanceID() ? "/SI" : "/II") +
+                ", codeLabelEncoded=" + codeLabelEncoded +
                 '}';
     }
 
