@@ -33,7 +33,7 @@ public class ModeSDownlinkMsg implements Serializable {
     private static final long serialVersionUID = 4487016880104756846L;
 
     private byte downlink_format; // 0-24
-    private byte first_field; // the 3 bits after downlink format
+    private byte first_field; // the 3 bits after downlink format, the 5 bits after DF and spare for DF 24
     private byte[] payload; // 3 or 10 bytes
     private int parity; // 3 bytes
     private boolean noCRC;
@@ -219,14 +219,16 @@ public class ModeSDownlinkMsg implements Serializable {
         first_field = (byte) (downlink_format & 0x7);
         downlink_format = (byte) (downlink_format >>> 3 & 0x1F);
 
-        // DF 24 is a special case
+        // DF 24 is a special case: its DF field is only the two bits 11, followed by a spare bit and the
+        // KE and ND fields, which first_field keeps so that the first byte can be rebuilt from both fields
         if (downlink_format > 23) {
             // verify that the third most significant bit is 0 (DF=24 is 11000)
             if ((downlink_format & 0b00000100) != 0) {
-                throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 1");
+                throw new BadFormatException("Third MSB of Comm-D Extended Length Message must be 0");
             }
 
             downlink_format = 24;
+            first_field = (byte) (reply[0] & 0x1F);
         }
 
         if (reply.length != getExpectedLength(downlink_format)) {
@@ -396,8 +398,10 @@ public class ModeSDownlinkMsg implements Serializable {
      * - if 17: CA (capability) field<br>
      * - if 18: CF (TIS-B coarse format) field<br>
      * - if 19: AF (application) field<br>
+     * - if 24: KE (control, ELM) and ND (number of D-segment) fields, the five bits after the two-bit
+     * DF field and the spare bit<br>
      *
-     * @return the first field (three bits after downlink format)
+     * @return the first field (three bits after downlink format, five for DF 24)
      */
     public byte getFirstField() {
         return first_field;
