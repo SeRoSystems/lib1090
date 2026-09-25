@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.decoding;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.decoding.movement.Movement;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 
 import java.time.Instant;
@@ -43,18 +44,26 @@ public final class SurfacePosition {
 
     /**
      * Extract the CPR-encoded surface position from the message payload.
+     * <p>
+     * The position also records whether the ground speed may exceed 25 knots, which ED-102B
+     * §2.2.10.3.2 uses to shorten the window in which an even and an odd surface position message may
+     * be paired from 50 to 25 seconds: "unless the Ground Speed in either Surface Position Message is
+     * greater than 25 knots, or is unknown". A speed that cannot be shown to be at most 25 knots counts
+     * as greater, since the shorter window is the safe one. Versions 2 and 3 decide it exactly; the
+     * version 0 and 1 code for [25, 26) knots cannot, and counts as greater.
      *
      * @param br        bit reader positioned over the 7-byte extended squitter payload
-     * @param movement  encoded movement field
+     * @param movement  the message's movement, as its version's table defines it
      * @param timestamp timestamp for the position message
      * @return the encoded surface position
      */
-    public static CPREncodedPosition extractCPREncodedPosition(BitReader br, byte movement, Instant timestamp) {
+    public static CPREncodedPosition extractCPREncodedPosition(BitReader br, Movement movement, Instant timestamp) {
         Objects.requireNonNull(timestamp, "timestamp");
         boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
-        boolean highGroundSpeed = movement == 0 || movement > 49;
+        Interval groundSpeed = movement.getGroundSpeed();
+        boolean highGroundSpeed = groundSpeed == null || groundSpeed.getGuaranteedUpperBound() > 25;
         return CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon, timestamp);
     }
 }

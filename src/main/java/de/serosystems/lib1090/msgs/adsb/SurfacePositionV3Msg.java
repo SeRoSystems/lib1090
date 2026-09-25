@@ -90,7 +90,7 @@ public class SurfacePositionV3Msg extends ExtendedSquitter implements Serializab
         movement = br.readByte(6, 12);
         headingStatus = br.readBoolean(13);
         groundTrack = br.readByte(14, 20);
-        position = SurfacePosition.extractCPREncodedPosition(br, movement, Objects.requireNonNull(timestamp, "timestamp"));
+        position = SurfacePosition.extractCPREncodedPosition(br, getMovement(), Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
