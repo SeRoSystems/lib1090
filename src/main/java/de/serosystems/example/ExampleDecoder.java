@@ -142,8 +142,7 @@ public class ExampleDecoder {
                 System.out.println("          Airplane is on the ground.");
 
                 if (surfacePosition.hasGroundSpeed()) {
-                    System.out.println("          Ground speed: " + surfacePosition.getGroundSpeed() + "kt");
-                    System.out.println("          Ground speed resolution: " + surfacePosition.getGroundSpeedResolution() + "kt");
+                    System.out.println("          Ground speed: " + surfacePosition.getMovement().getGroundSpeed());
                 }
 
                 System.out.println("          Horizontal containment radius limit/protection level: " +

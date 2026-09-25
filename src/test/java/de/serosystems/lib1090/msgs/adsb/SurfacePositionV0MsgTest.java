@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
+import de.serosystems.lib1090.decoding.movement.MovementV0V1;
 import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
@@ -37,6 +38,11 @@ class SurfacePositionV0MsgTest extends SurfacePositionMsgTest {
     @Override
     protected SurfacePositionMsg create(String hex) throws Exception {
         return new SurfacePositionV0Msg(hex, Instant.EPOCH);
+    }
+
+    @Override
+    protected MovementV0V1 movement(byte encoded) {
+        return MovementV0V1.forEncoded(encoded);
     }
 
     @Test
