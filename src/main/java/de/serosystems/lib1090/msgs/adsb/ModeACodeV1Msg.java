@@ -27,12 +27,14 @@ import de.serosystems.lib1090.msgs.squitter.ModeACodeMsg;
 import java.io.Serializable;
 
 /**
- * Decoder for ADS-B version 1 Mode A code messages. The standards-defined Mode A Code field
- * lives in the Extended Squitter Aircraft Status Message, TYPE=28 Subtype=1 (Emergency/Priority
- * Status Message), ED-102B §2.2.3.2.7.8.1 Figure 2-20; the "Mode A Code" subfield itself is
- * specified in §2.2.3.2.7.8.1.2. See the constructors below for why this class instead decodes
- * an out-of-specification TYPE=23 Subtype=7 field. (ED-102B §2.2.19 "Traffic Uplink Management
- * Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover this field.)
+ * Decoder for the ADS-B version 1 "Regional Mode A Broadcast", TYPE=23 Subtype=7, as ED-102B Appendix
+ * N §N.1.3 TABLE N-1 (Format Type Codes for Version 0 through Version 3 Messages) lists it. Versions 2
+ * and 3 define only Subtype 0 of TYPE 23, the test message, so the decoder dispatches this class for
+ * version 1 targets only. ED-102B does not give the message's layout; the Mode A (4096) code is read
+ * from ME bits 9-21 in the Mode A reply pulse order.
+ * <p>
+ * From version 2 onwards the Mode A code is broadcast in the Aircraft Status Message, TYPE=28
+ * Subtype=1, ED-102B §2.2.3.2.7.8.1 Figure 2-20.
  */
 public class ModeACodeV1Msg extends ExtendedSquitter implements Serializable, ModeACodeMsg, ADSBMsg {
 
