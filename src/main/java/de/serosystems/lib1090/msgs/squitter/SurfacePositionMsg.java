@@ -19,7 +19,7 @@
 package de.serosystems.lib1090.msgs.squitter;
 
 import de.serosystems.lib1090.Position;
-import de.serosystems.lib1090.decoding.SurfacePosition;
+import de.serosystems.lib1090.decoding.movement.Movement;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
 
@@ -66,23 +66,16 @@ public interface SurfacePositionMsg extends PositionMsg, NavigationCharacteristi
      * @return whether ground speed is available
      */
     default boolean hasGroundSpeed() {
-        byte movement = getMovementEncoded();
-        return movement >= 1 && movement <= 124;
+        return getMovement().hasGroundSpeed();
     }
 
     /**
-     * @return speed in knots or null if ground speed is not available
+     * The movement code as the transmitting version's table defines it, which is what reports the
+     * ground speed: an interval whose ends and bounds differ between versions 0/1 and 2/3.
+     *
+     * @return the movement, never null
      */
-    default Double getGroundSpeed() {
-        return SurfacePosition.groundSpeed(getMovementEncoded());
-    }
-
-    /**
-     * @return speed resolution in knots or null if ground speed is not available
-     */
-    default Double getGroundSpeedResolution() {
-        return SurfacePosition.groundSpeedResolution(getMovementEncoded());
-    }
+    Movement getMovement();
 
     /**
      * @return whether valid heading is available

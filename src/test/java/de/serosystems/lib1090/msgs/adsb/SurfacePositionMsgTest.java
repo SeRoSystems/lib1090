@@ -19,10 +19,12 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.Position;
+import de.serosystems.lib1090.decoding.movement.Movement;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class SurfacePositionMsgTest {
@@ -49,13 +51,17 @@ abstract class SurfacePositionMsgTest {
 
     protected abstract SurfacePositionMsg create(String hex) throws Exception;
 
+    /** The movement table of the version under test, keyed on the encoded movement. */
+    protected abstract Movement movement(byte encoded);
+
     @Test
     void testDecodeSurfacePosition() throws Exception {
         final SurfacePositionMsg sPos = create(SURF_POS);
 
         assertTrue(sPos.hasGroundSpeed());
-        assertEquals(0, sPos.getGroundSpeed());
-        assertEquals(0.125, sPos.getGroundSpeedResolution());
+        assertEquals(1, sPos.getMovementEncoded());
+        assertSame(movement((byte) 1), sPos.getMovement());
+        assertEquals(0, sPos.getMovement().getGroundSpeed().getLower());
         assertTrue(sPos.hasValidHeading());
         assertEquals(64 * 360D / 128D, sPos.getHeading());
         assertTrue(sPos.hasValidPosition());

@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.movement.MovementV0V1;
 import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
@@ -130,6 +131,11 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
     @Override
     public byte getMovementEncoded() {
         return movement;
+    }
+
+    @Override
+    public MovementV0V1 getMovement() {
+        return MovementV0V1.forEncoded(movement);
     }
 
     @Override
