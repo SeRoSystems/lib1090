@@ -20,14 +20,14 @@ package de.serosystems.lib1090.msgs.tisb;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
 /**
  * Decoder for TIS-B/ADS-R Management Message, as defined in ED-102B §2.2.19.2 Figure 2-67.
  */
-public class ManagementMessage extends ExtendedSquitter implements Serializable, TISBMsg {
+public class ManagementMessage extends TypeCodedExtendedSquitter implements Serializable, TISBMsg {
 
     private static final long serialVersionUID = 6266047064873866100L;
 
@@ -43,7 +43,7 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ManagementMessage(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -52,14 +52,14 @@ public class ManagementMessage extends ExtendedSquitter implements Serializable,
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ManagementMessage(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter containing the identity and category message
      * @throws BadFormatException if message has wrong format
      */
-    public ManagementMessage(ExtendedSquitter squitter) throws BadFormatException {
+    public ManagementMessage(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18)

@@ -21,10 +21,10 @@ package de.serosystems.lib1090.msgs.tisb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 
 import java.io.Serializable;
 
@@ -36,7 +36,7 @@ import java.io.Serializable;
  * ED-102A §2.2.17.3.4 Figure 2-30 (TIS-B Velocity Message, Subtypes 3 &amp; 4) — Figure 2-29 in the
  * same section instead covers Subtypes 1 &amp; 2 (Velocity Over Ground).
  */
-public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, TISBMsg, NACpMsg {
+public class AirspeedHeadingMsg extends TypeCodedExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg, TISBMsg, NACpMsg {
 
     private static final long serialVersionUID = -8123616227800921480L;
 
@@ -73,7 +73,7 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -83,14 +83,14 @@ public class AirspeedHeadingMsg extends ExtendedSquitter implements Serializable
      *                                subtype 3/4 is no longer specified in ED-102B
      */
     public AirspeedHeadingMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter containing the velocity message
      * @throws BadFormatException if message has wrong format
      */
-    public AirspeedHeadingMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirspeedHeadingMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18)

@@ -21,16 +21,12 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.AirbornePosition;
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
-import de.serosystems.lib1090.decoding.quality.NICSupplements;
-import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
-import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV0;
-import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
+import de.serosystems.lib1090.decoding.quality.*;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.squitter.NACpMsg;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
+import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
 
@@ -42,7 +38,7 @@ import java.util.Objects;
  * Decoder for ADS-B airborne position messages (version 0), as defined in ED-102B Appendix N §N.5.1 Figure N-1 (legacy format retained for backward compatibility).
  */
 @SuppressWarnings("unused")
-public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg, NACpMsg {
+public class AirbornePositionV0Msg extends TypeCodedExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, SingleAntennaMsg, ADSBMsg, NACpMsg {
 
     private static final long serialVersionUID = 8440428954946862126L;
 
@@ -67,7 +63,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirbornePositionV0Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -77,7 +73,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirbornePositionV0Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -85,7 +81,7 @@ public class AirbornePositionV0Msg extends ExtendedSquitter implements Serializa
      * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public AirbornePositionV0Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+    public AirbornePositionV0Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         byte formatTypeCode = getFormatTypeCode();

@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 
 import java.io.Serializable;
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * which gives the differences from the ADS-B format of ED-102B Appendix N
  * §N.5.3 Figure N-18.
  */
-public class IdentificationV2Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
+public class IdentificationV2Msg extends TypeCodedExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
 
     private static final long serialVersionUID = -2519046115623747280L;
 
@@ -51,7 +51,7 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -60,14 +60,14 @@ public class IdentificationV2Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this identification msg
      * @throws BadFormatException if message has the wrong typecode
      */
-    public IdentificationV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public IdentificationV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)

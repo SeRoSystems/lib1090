@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * introduced with typecode 25 in ADS-B version 3, as defined in ED-102B §2.2.3.2.7.5.4
  * Figure 2-16.
  */
-public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
+public class HVAVelocityMsg extends TypeCodedExtendedSquitter implements Serializable, HVAMsg, ADSBMsg {
 
     private static final long serialVersionUID = -1934875602817346095L;
 
@@ -55,7 +55,7 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAVelocityMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -64,14 +64,14 @@ public class HVAVelocityMsg extends ExtendedSquitter implements Serializable, HV
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public HVAVelocityMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this HVA velocity message
      * @throws BadFormatException if message has wrong format
      */
-    public HVAVelocityMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public HVAVelocityMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 25)

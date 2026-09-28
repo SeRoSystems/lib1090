@@ -22,13 +22,13 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV1V2;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
-import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 
 import java.io.Serializable;
 
@@ -36,7 +36,7 @@ import java.io.Serializable;
  * Decoder for the ADS-B operational status message (version 1), subtype 1 (surface), as defined in
  * ED-102B Appendix N §N.5.2 Figure N-15 (legacy format retained for backward compatibility).
  */
-public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg, ADSBMsg {
+public class SurfaceOperationalStatusV1Msg extends TypeCodedExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV1Msg, ADSBMsg {
 
     private static final long serialVersionUID = 8147881968690095670L;
 
@@ -61,7 +61,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfaceOperationalStatusV1Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -70,7 +70,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfaceOperationalStatusV1Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -78,7 +78,7 @@ public class SurfaceOperationalStatusV1Msg extends ExtendedSquitter implements S
      * @throws BadFormatException if message has the wrong typecode or ADS-B version or is not a surface
      *                            operational status message.
      */
-    public SurfaceOperationalStatusV1Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public SurfaceOperationalStatusV1Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 31)

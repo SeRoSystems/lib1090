@@ -21,10 +21,10 @@ package de.serosystems.lib1090.msgs.tisb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV1Msg;
 import de.serosystems.lib1090.msgs.adsb.AirborneOperationalStatusV2Msg;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
+import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 
 import java.io.Serializable;
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Decoder for TIS-B velocity message, Subtypes 1 and 2 (velocity over ground), as defined in
  * ED-102B §2.2.17.3.4 Figure 2-55.
  */
-public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg, NACpMsg {
+public class VelocityOverGroundMsg extends TypeCodedExtendedSquitter implements Serializable, AirborneVelocityMsg, de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg, TISBMsg, NACpMsg {
 
     private static final long serialVersionUID = -2121820203874488709L;
 
@@ -66,7 +66,7 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public VelocityOverGroundMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -75,14 +75,14 @@ public class VelocityOverGroundMsg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public VelocityOverGroundMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter containing the velocity message
      * @throws BadFormatException if message has wrong format
      */
-    public VelocityOverGroundMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public VelocityOverGroundMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18)

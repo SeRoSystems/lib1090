@@ -34,7 +34,7 @@ import java.util.Objects;
 
 /**
  * Decoder for TIS-B coarse position, formerly ED-102A §2.2.17.3.5 Figure 2-31. This TIS-B
- * message format has been removed from ED-102B.
+ * message format has been removed from ED-102B. Its ME field has no format type code.
  */
 public class CoarsePositionMsg extends ExtendedSquitter implements Serializable, PositionMsg, IMFMsg, TISBMsg {
 

@@ -65,7 +65,7 @@ cannot be determined. We consider this a defect in the specification rather than
 `lib1090` reports `QualifiedAddress.Type.UNKNOWN` for these. Since the decoder keys its per-target state on the
 qualified address *including its type*, such a message neither contributes to nor reads that state. For ADS-R, whose
 decoding needs the version established by an earlier operational status message, this means the message is not decoded
-further and is returned as a plain `ExtendedSquitter`.
+further and is returned as a plain `TypeCodedExtendedSquitter`.
 
 Affected format type codes are 0, 23, 24, 25, 27 and 30. Apart from 25 these are either reserved or not decoded by this
 library in any case, so 25 is the only one where the limitation costs anything today.

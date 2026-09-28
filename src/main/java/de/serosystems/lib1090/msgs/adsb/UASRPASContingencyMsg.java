@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Decoder for 1090ES UAS/RPAS Contingency Messages (Extended Squitter Aircraft Status Message,
  * TYPE=28 Subtype=4, Optional), as defined in ED-102B §2.2.3.2.8.1.3 Figure 2-23.
  */
-public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
+public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 4187522897452638491L;
 
@@ -53,7 +53,7 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public UASRPASContingencyMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -62,14 +62,14 @@ public class UASRPASContingencyMsg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public UASRPASContingencyMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this UAS/RPAS contingency msg
      * @throws BadFormatException if message has wrong format
      */
-    public UASRPASContingencyMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public UASRPASContingencyMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)

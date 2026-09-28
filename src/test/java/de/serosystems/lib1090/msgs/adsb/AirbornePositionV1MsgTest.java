@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.SingleAntennaMsg;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
     @Test
     void v1UsesExplicitNicSupplement() throws Exception {
         AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
-                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
+                new TypeCodedExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
         assertEquals(9, msg.getNavigationCharacteristics(NICSupplements.none().withA(true)).getNICEncoded());
         assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNICEncoded());
@@ -61,7 +61,7 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
     void v1WithoutSupplementReportsTheWorstCase() throws Exception {
         // the message above with its type code changed from 11 to 13
         AirbornePositionV1Msg msg = new AirbornePositionV1Msg(
-                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")), Instant.EPOCH);
+                new TypeCodedExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")), Instant.EPOCH);
 
         assertEquals(13, msg.getFormatTypeCode());
 
@@ -79,7 +79,7 @@ class AirbornePositionV1MsgTest extends AirbornePositionMsgTest {
     @Test
     void v1WithSupplementReportsTheSelectedRow() throws Exception {
         AirbornePositionV1Msg msg = new AirbornePositionV1Msg.WithNICSupplements(
-                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")),
+                new TypeCodedExtendedSquitter(Tools.hexStringToByteArray("8D40058B68C901375147EFD09357")),
                 Instant.EPOCH, NICSupplements.none().withA(false));
 
         assertEquals(ContainmentRadius.BELOW_926, msg.getContainmentRadius());

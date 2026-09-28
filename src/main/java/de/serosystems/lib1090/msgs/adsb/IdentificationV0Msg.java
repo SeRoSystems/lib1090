@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 
 import java.io.Serializable;
@@ -33,7 +33,7 @@ import java.io.Serializable;
  * decoded by {@link Identification#identificationDigits(long)}, whose 6-bit IA-5 alphabet
  * is cited in ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8.
  */
-public class IdentificationV0Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSBMsg {
+public class IdentificationV0Msg extends TypeCodedExtendedSquitter implements Serializable, IdentificationMsg, ADSBMsg {
 
     private static final long serialVersionUID = 3475444849066416732L;
 
@@ -52,7 +52,7 @@ public class IdentificationV0Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -61,14 +61,14 @@ public class IdentificationV0Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this identification msg
      * @throws BadFormatException if message has the wrong typecode
      */
-    public IdentificationV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public IdentificationV0Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)

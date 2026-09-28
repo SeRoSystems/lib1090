@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.WxAIREPWeatherMsg;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for the weather state subtype (1) of the ADS-B Wx AIREP message, as defined in ED-102B §2.2.3.2.7.6.4 Figure 2-18, introduced in ADS-B version 3.
  */
-public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializable, WxAIREPWeatherMsg, ADSBMsg {
+public class WxAIREPWeatherStateMsg extends TypeCodedExtendedSquitter implements Serializable, WxAIREPWeatherMsg, ADSBMsg {
 
     private static final long serialVersionUID = 4198327560981723649L;
 
@@ -54,7 +54,7 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public WxAIREPWeatherStateMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -63,14 +63,14 @@ public class WxAIREPWeatherStateMsg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public WxAIREPWeatherStateMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this Wx AIREP weather state message
      * @throws BadFormatException if message has wrong format
      */
-    public WxAIREPWeatherStateMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public WxAIREPWeatherStateMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 26)

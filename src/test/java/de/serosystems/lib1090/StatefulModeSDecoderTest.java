@@ -22,7 +22,7 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.adsb.*;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +44,7 @@ public class StatefulModeSDecoderTest {
         // decoder assumes ADS-B v0 and should not decode TSS
         final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
-        assertEquals(ExtendedSquitter.class, reply.getClass());
+        assertEquals(TypeCodedExtendedSquitter.class, reply.getClass());
         assertFalse(reply instanceof TargetStateAndStatusV1Msg);
         assertFalse(reply instanceof TargetStateAndStatusV2Msg);
     }

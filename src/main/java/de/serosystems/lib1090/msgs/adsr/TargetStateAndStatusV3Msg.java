@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Decoder for ADS-R target state and status messages (version 3), as defined in ED-102B §2.2.18.4.6
  * Figure 2-61.
  */
-public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg, ADSRMsg {
+public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = -8618117963376758290L;
 
@@ -65,7 +65,7 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -74,14 +74,14 @@ public class TargetStateAndStatusV3Msg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException if message has the wrong typecode or if reserved bits are set
      */
-    public TargetStateAndStatusV3Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public TargetStateAndStatusV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 29)

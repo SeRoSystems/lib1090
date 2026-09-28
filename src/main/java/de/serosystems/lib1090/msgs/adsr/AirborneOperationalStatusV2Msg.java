@@ -21,12 +21,10 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
-import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
-import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
-import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.*;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
+import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
 
 import java.io.Serializable;
 
@@ -35,7 +33,7 @@ import java.io.Serializable;
  * defined in ED-102B §2.2.18.4.7, which gives the differences from the ADS-B format of
  * ED-102B Appendix N §N.5.3 Figure N-24.
  */
-public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
+public class AirborneOperationalStatusV2Msg extends TypeCodedExtendedSquitter implements Serializable, AirborneOperationalStatusV1V2Msg, AirborneOperationalStatusV2V3Msg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 2841937650192837465L;
 
@@ -63,7 +61,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneOperationalStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -72,7 +70,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneOperationalStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -80,7 +78,7 @@ public class AirborneOperationalStatusV2Msg extends ExtendedSquitter implements 
      * @throws BadFormatException if message has the wrong typecode or ADS-R version or is not an airborne
      *                            operational status message.
      */
-    public AirborneOperationalStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirborneOperationalStatusV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 31)

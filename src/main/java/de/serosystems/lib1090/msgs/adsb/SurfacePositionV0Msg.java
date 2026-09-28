@@ -20,16 +20,12 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.movement.MovementV0V1;
-import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
-import de.serosystems.lib1090.decoding.quality.NICSupplements;
-import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
-import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV0;
-import de.serosystems.lib1090.decoding.quality.SourceIntegrityLevel;
 import de.serosystems.lib1090.decoding.SurfacePosition;
+import de.serosystems.lib1090.decoding.movement.MovementV0V1;
+import de.serosystems.lib1090.decoding.quality.*;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.NACpMsg;
 import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
@@ -41,7 +37,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-B surface position messages (version 0), as defined in ED-102B Appendix N §N.5.1 Figure N-2 (legacy format retained for backward compatibility).
  */
-public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime, ADSBMsg, NACpMsg {
+public class SurfacePositionV0Msg extends TypeCodedExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime, ADSBMsg, NACpMsg {
 
     private static final long serialVersionUID = 7290522585963455918L;
 
@@ -65,7 +61,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV0Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -75,7 +71,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV0Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -83,7 +79,7 @@ public class SurfacePositionV0Msg extends ExtendedSquitter implements Serializab
      * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public SurfacePositionV0Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+    public SurfacePositionV0Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         byte formatTypeCode = getFormatTypeCode();

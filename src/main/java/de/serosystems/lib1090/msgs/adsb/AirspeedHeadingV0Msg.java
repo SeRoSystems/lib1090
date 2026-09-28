@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ import java.io.Serializable;
 /**
  * Decoder for ADS-B version 0 airspeed and heading messages, as defined in ED-102B Appendix N §N.5.1 Figure N-5 (legacy format retained for backward compatibility).
  */
-public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializable, AirspeedHeadingMsg, AirborneVelocityV0Msg, ADSBMsg {
+public class AirspeedHeadingV0Msg extends TypeCodedExtendedSquitter implements Serializable, AirspeedHeadingMsg, AirborneVelocityV0Msg, ADSBMsg {
 
     private static final long serialVersionUID = 8734902156237845102L;
 
@@ -59,7 +59,7 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirspeedHeadingV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -68,14 +68,14 @@ public class AirspeedHeadingV0Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirspeedHeadingV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter containing the airspeed and heading msg
      * @throws BadFormatException if message has wrong format
      */
-    public AirspeedHeadingV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirspeedHeadingV0Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 19)

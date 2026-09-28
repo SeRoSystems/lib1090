@@ -20,15 +20,15 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.decoding.movement.MovementV0V1;
 import de.serosystems.lib1090.decoding.quality.ContainmentRadius;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV1;
-import de.serosystems.lib1090.decoding.SurfacePosition;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
@@ -39,7 +39,7 @@ import java.util.Objects;
 /**
  * Decoder for ADS-B surface position messages (version 1), as defined in ED-102B Appendix N §N.5.2 Figure N-9 (legacy format retained for backward compatibility).
  */
-public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime, ADSBMsg {
+public class SurfacePositionV1Msg extends TypeCodedExtendedSquitter implements Serializable, SurfacePositionMsg, PositionMsgWithTime, ADSBMsg {
 
     private static final long serialVersionUID = 5381651494408125465L;
 
@@ -63,7 +63,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV1Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -73,7 +73,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public SurfacePositionV1Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -81,7 +81,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
      * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public SurfacePositionV1Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+    public SurfacePositionV1Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         byte formatTypeCode = getFormatTypeCode();
@@ -195,7 +195,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(String rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -206,7 +206,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(byte[] rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -215,7 +215,7 @@ public class SurfacePositionV1Msg extends ExtendedSquitter implements Serializab
          * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException if message has wrong format
          */
-        public WithNICSupplements(ExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
+        public WithNICSupplements(TypeCodedExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
             super(squitter, timestamp);
             this.nicSupplements = nicSupplements;
         }

@@ -416,8 +416,8 @@ public class ExampleDecoder {
                         (wxAltWeather.hasAirTemperature() ? ">= " + wxAltWeather.getAirTemperature() : "unknown") + "°C");
                 System.out.println("          Airspeed (" + (wxAltWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
                         (wxAltWeather.hasAirspeed() ? ">= " + wxAltWeather.getAirspeed() : "unknown") + " kt");
-            } else if (msg instanceof ExtendedSquitter) {
-                System.out.println("[" + icao24 + "]: Unknown extended squitter with type code " + ((ExtendedSquitter) msg).getFormatTypeCode() + "!");
+            } else if (msg instanceof TypeCodedExtendedSquitter) {
+                System.out.println("[" + icao24 + "]: Unknown extended squitter with type code " + ((TypeCodedExtendedSquitter) msg).getFormatTypeCode() + "!");
             }
         } else if (msg.getDownlinkFormat() != 17) { // CRC failed
             if (msg instanceof ShortACAS) {

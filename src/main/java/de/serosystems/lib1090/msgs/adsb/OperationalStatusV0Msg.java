@@ -21,11 +21,11 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
-import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
 import de.serosystems.lib1090.msgs.squitter.opstatus.UndefinedOperationalModeCode;
 
 import java.io.Serializable;
@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Decoder for the ADS-B operational status message (version 0), as defined in
  * ED-102B Appendix N §N.5.1 Figure N-7 (legacy format retained for backward compatibility).
  */
-public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializable, OperationalStatusMsg, ADSBMsg {
+public class OperationalStatusV0Msg extends TypeCodedExtendedSquitter implements Serializable, OperationalStatusMsg, ADSBMsg {
 
     private static final long serialVersionUID = 4280693148589377648L;
 
@@ -53,7 +53,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public OperationalStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -62,7 +62,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public OperationalStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -70,7 +70,7 @@ public class OperationalStatusV0Msg extends ExtendedSquitter implements Serializ
      * @throws BadFormatException if message has the wrong typecode or ADS-B version or enroute capabilities
      *                            are invalid
      */
-    public OperationalStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public OperationalStatusV0Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 31)

@@ -28,7 +28,7 @@ import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV1;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
@@ -39,7 +39,7 @@ import java.util.Objects;
 /**
  * Decoder for TIS-B fine surface position, as defined in ED-102B §2.2.17.3.2 Figure 2-53.
  */
-public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
+public class FineSurfacePositionMsg extends TypeCodedExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
 
     private static final long serialVersionUID = -8306226295512272609L;
 
@@ -62,7 +62,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineSurfacePositionMsg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -72,7 +72,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public FineSurfacePositionMsg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -80,7 +80,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
      * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public FineSurfacePositionMsg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+    public FineSurfacePositionMsg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18)
@@ -206,7 +206,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(String rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -217,7 +217,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(byte[] rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -226,7 +226,7 @@ public class FineSurfacePositionMsg extends ExtendedSquitter implements Serializ
          * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException if message has wrong format
          */
-        public WithNICSupplements(ExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
+        public WithNICSupplements(TypeCodedExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
             super(squitter, timestamp);
             this.nicSupplements = nicSupplements;
         }

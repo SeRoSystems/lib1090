@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.diffbaroalt.DiffBaroAltV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.NACvMsg;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
@@ -34,7 +34,7 @@ import java.io.Serializable;
  * the only variant that remains valid in ADS-B version 3). The airspeed-and-heading variant (Subtypes 3 and 4) is reserved and no longer specified starting
  * with ED-102B §2.2.3.2.6.5, having last been specified by ED-102A §2.2.3.2.6.3/§2.2.3.2.6.4.
  */
-public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, NACvMsg, ADSBMsg {
+public class AirborneVelocityV3Msg extends TypeCodedExtendedSquitter implements Serializable, VelocityOverGroundMsg, NACvMsg, ADSBMsg {
 
     private static final long serialVersionUID = -5216437408671309124L;
 
@@ -64,7 +64,7 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneVelocityV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -73,14 +73,14 @@ public class AirborneVelocityV3Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirborneVelocityV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this velocity over ground msg
      * @throws BadFormatException if message has wrong format
      */
-    public AirborneVelocityV3Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public AirborneVelocityV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 19)

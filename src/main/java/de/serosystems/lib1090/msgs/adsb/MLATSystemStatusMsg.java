@@ -22,7 +22,7 @@ import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import java.util.Arrays;
  * Management Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover
  * this message; it is not TYPE=28 in any subtype.)
  */
-public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
+public class MLATSystemStatusMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 4597102504845213202L;
 
@@ -55,7 +55,7 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MLATSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -64,14 +64,14 @@ public class MLATSystemStatusMsg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public MLATSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this MLAT/Surface System Status msg
      * @throws BadFormatException if message has the wrong typecode
      */
-    public MLATSystemStatusMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public MLATSystemStatusMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 24)

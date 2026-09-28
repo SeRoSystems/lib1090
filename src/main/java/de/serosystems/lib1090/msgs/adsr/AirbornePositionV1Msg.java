@@ -27,7 +27,7 @@ import de.serosystems.lib1090.decoding.quality.NavigationCharacteristics;
 import de.serosystems.lib1090.decoding.quality.NavigationCharacteristicsV1;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.PositionMsgWithTime;
@@ -41,7 +41,7 @@ import java.util.Objects;
  * which gives the differences from the ADS-B format of ED-102B Appendix N
  * §N.5.2 Figure N-8.
  */
-public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg, ADSRMsg {
+public class AirbornePositionV1Msg extends TypeCodedExtendedSquitter implements Serializable, AirbornePositionMsg, PositionMsgWithTime, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = 2487388116642019598L;
 
@@ -65,7 +65,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirbornePositionV1Msg(String rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -75,7 +75,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public AirbornePositionV1Msg(byte[] rawMessage, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage), timestamp);
+        this(new TypeCodedExtendedSquitter(rawMessage), timestamp);
     }
 
     /**
@@ -83,7 +83,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
      * @param timestamp timestamp for this position message
      * @throws BadFormatException if message has wrong format
      */
-    public AirbornePositionV1Msg(ExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
+    public AirbornePositionV1Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
 
         byte formatTypeCode = getFormatTypeCode();
@@ -192,7 +192,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(String rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -203,7 +203,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
          * @throws UnspecifiedFormatError if message format is not further specified
          */
         public WithNICSupplements(byte[] rawMessage, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException, UnspecifiedFormatError {
-            this(new ExtendedSquitter(rawMessage), timestamp, nicSupplements);
+            this(new TypeCodedExtendedSquitter(rawMessage), timestamp, nicSupplements);
         }
 
         /**
@@ -212,7 +212,7 @@ public class AirbornePositionV1Msg extends ExtendedSquitter implements Serializa
          * @param nicSupplements what is known of the target's NIC supplements
          * @throws BadFormatException if message has wrong format
          */
-        public WithNICSupplements(ExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
+        public WithNICSupplements(TypeCodedExtendedSquitter squitter, Instant timestamp, NICSupplements nicSupplements) throws BadFormatException {
             super(squitter, timestamp);
             this.nicSupplements = nicSupplements;
         }

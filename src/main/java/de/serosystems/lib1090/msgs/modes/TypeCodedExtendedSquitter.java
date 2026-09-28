@@ -18,32 +18,29 @@
 
 package de.serosystems.lib1090.msgs.modes;
 
-import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
- * Decoder for the Mode S extended squitter envelope (DF=17/18/19), as defined in
- * ICAO Annex 10 Volume IV §3.1.2.8.6 (DF=17), §3.1.2.8.7 (DF=18) and §3.1.2.8.8 (DF=19).
- * <p>
- * Most extended squitters carry an ME field that starts with a format type code; they are
- * {@link TypeCodedExtendedSquitter}s. Those that don't, such as military extended squitters and the
- * TIS-B coarse position, extend this class directly.
+ * Decoder for extended squitters whose ME field starts with a format type code: ADS-B (DF=17, DF=18 with
+ * CF=0/1 and DF=19 with AF=0), fine TIS-B (DF=18 with CF=2/5) and ADS-R (DF=18 with CF=6).
+ * The format type code decoded here is the "TC"/"Subtype" subfield defined in ED-102B
+ * §2.2.3.2.2 TABLE 2-9; payload content is specified per format type code in ED-102B §2.2.3.2.3
+ * through §2.2.3.2.7.
  */
-public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
+public class TypeCodedExtendedSquitter extends ExtendedSquitter implements Serializable {
 
-    private static final long serialVersionUID = 3142071849543499458L;
+    private static final long serialVersionUID = 8396282390353645782L;
 
-    private byte[] message;
+    private byte formatTypeCode;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected ExtendedSquitter() {
+    protected TypeCodedExtendedSquitter() {
     }
 
     /**
@@ -52,7 +49,7 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      *                                contains wrong values.
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public ExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TypeCodedExtendedSquitter(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
     }
 
@@ -62,47 +59,47 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
      *                                contains wrong values.
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public ExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public TypeCodedExtendedSquitter(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new ModeSDownlinkMsg(rawMessage));
     }
 
     /**
      * @param reply Mode S reply containing this extended squitter
-     * @throws BadFormatException if message is not extended squitter or
+     * @throws BadFormatException if message is not extended squitter with a format type code or
      *                            contains wrong values.
      */
-    public ExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
+    public TypeCodedExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if (getDownlinkFormat() < 17 || getDownlinkFormat() > 19)
-            throw new BadFormatException("Message is not an extended squitter");
+        if ((getDownlinkFormat() == 18 && (getFirstField() == 3 || getFirstField() == 7)) ||
+                (getDownlinkFormat() == 19 && getFirstField() > 0))
+            throw new BadFormatException("Message is not an extended squitter with a format type code");
 
-        // message bits 33-88
-        message = Arrays.copyOfRange(getPayload(), 3, 10);
+        formatTypeCode = getBitReader().readByte(33, 37);
     }
 
     /**
      * Copy constructor for subclasses
      *
-     * @param squitter instance of ExtendedSquitter to copy from
+     * @param squitter instance of TypeCodedExtendedSquitter to copy from
      */
-    public ExtendedSquitter(ExtendedSquitter squitter) {
+    public TypeCodedExtendedSquitter(TypeCodedExtendedSquitter squitter) {
         super(squitter);
 
-        message = squitter.getMessage();
+        formatTypeCode = squitter.getFormatTypeCode();
     }
 
     /**
-     * @return message bits 33-88 as 7-byte array, which are the ME field for most extended squitters
+     * @return The message's format type code, see ICAO Annex 10 Volume IV §3.1.2.8.6
      */
-    public byte[] getMessage() {
-        return message;
+    public byte getFormatTypeCode() {
+        return formatTypeCode;
     }
 
     @Override
     public String toString() {
-        return "ExtendedSquitter{" + super.toString() +
-                ", message=" + Tools.toHexString(message) +
+        return "TypeCodedExtendedSquitter{" + super.toString() +
+                ", formatTypeCode=" + formatTypeCode +
                 '}';
     }
 

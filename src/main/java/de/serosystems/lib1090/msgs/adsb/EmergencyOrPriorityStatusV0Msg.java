@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.emergency.EmergencyStateV0;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.EmergencyOrPriorityStatusMsg;
 
 import java.io.Serializable;
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Decoder for ADS-B emergency and priority status messages (version 0), as defined in
  * ED-102B Appendix N §N.5.1 Figure N-6 (legacy format retained for backward compatibility).
  */
-public class EmergencyOrPriorityStatusV0Msg extends ExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ADSBMsg {
+public class EmergencyOrPriorityStatusV0Msg extends TypeCodedExtendedSquitter implements Serializable, EmergencyOrPriorityStatusMsg, ADSBMsg {
 
     private static final long serialVersionUID = 7380235047641841128L;
 
@@ -51,7 +51,7 @@ public class EmergencyOrPriorityStatusV0Msg extends ExtendedSquitter implements 
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public EmergencyOrPriorityStatusV0Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -60,14 +60,14 @@ public class EmergencyOrPriorityStatusV0Msg extends ExtendedSquitter implements 
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public EmergencyOrPriorityStatusV0Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this emergency or priority status msg
      * @throws BadFormatException if message has wrong format
      */
-    public EmergencyOrPriorityStatusV0Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public EmergencyOrPriorityStatusV0Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)

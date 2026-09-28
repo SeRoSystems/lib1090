@@ -121,7 +121,7 @@ public class StatefulModeSDecoder {
                     return es1090;
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
                     // TIS-B or ADS-R Management Message
-                    return new ManagementMessage(new ExtendedSquitter(modes));
+                    return new ManagementMessage(new TypeCodedExtendedSquitter(modes));
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
                     return decodeADSR(modes, timestamp);
                 } else if (modes.getDownlinkFormat() == 19) {
@@ -143,9 +143,9 @@ public class StatefulModeSDecoder {
     // §2.2.3.2.2 TABLE 2-9, as required for ADS-R Message Processing, ED-102B §2.2.18.4;
     // UnspecifiedFormatError is declared for signature consistency, no combination reachable
     // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
-    private ExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+    private TypeCodedExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as ADS-R
-        ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+        TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
         // ADS-R has not been specified for version 0 at all; version 2 and any
         // higher (not yet defined) version is decoded as version 2, since, per
@@ -289,7 +289,7 @@ public class StatefulModeSDecoder {
                         break;
                 }
                 if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
-                return (ExtendedSquitter) velocity;
+                return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 1:
@@ -352,9 +352,9 @@ public class StatefulModeSDecoder {
         return es1090;
     }
 
-    private ExtendedSquitter decodeTISB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
+    private TypeCodedExtendedSquitter decodeTISB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
         // interpret ME field as standard ADS-B
-        ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+        TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
         DecoderData dd = getDecoderData(modes.getAddress());
 
@@ -394,9 +394,9 @@ public class StatefulModeSDecoder {
     // dispatches on FTC per ED-102B §2.2.3.2.2 TABLE 2-9 (message-type determination table);
     // UnspecifiedFormatError is declared for signature consistency, no combination reachable
     // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
-    private ExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+    private TypeCodedExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         // interpret ME field as standard ADS-B
-        ExtendedSquitter es1090 = new ExtendedSquitter(modes);
+        TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
         // only (assumed or confirmed) version 0 is decoded as such; version 3 and any
         // higher (not yet defined) version is decoded as version 3, since, per
@@ -489,7 +489,7 @@ public class StatefulModeSDecoder {
                         break;
                 }
                 if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
-                return (ExtendedSquitter) velocity;
+                return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 0:

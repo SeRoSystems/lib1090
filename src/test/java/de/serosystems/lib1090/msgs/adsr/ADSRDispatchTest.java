@@ -3,7 +3,7 @@ package de.serosystems.lib1090.msgs.adsr;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -79,7 +79,7 @@ class ADSRDispatchTest {
     private static void assertDispatch(int version, byte[] raw, Class<?> expected) throws Exception {
         ModeSDownlinkMsg msg = decodeAtVersion(version, 0, raw);
         assertEquals(expected, msg.getClass(), "version " + version + " -> " + expected.getSimpleName());
-        if (expected != ExtendedSquitter.class)
+        if (expected != TypeCodedExtendedSquitter.class)
             assertInstanceOf(ADSRMsg.class, msg, "every decoded ADS-R message carries the marker");
     }
 
@@ -102,12 +102,14 @@ class ADSRDispatchTest {
     @Test
     void versionZeroIsNotDecoded() throws Exception {
         StatefulModeSDecoder d = new StatefulModeSDecoder();
-        assertEquals(ExtendedSquitter.class, d.decode(opStatus(0, 0), T).getClass());
+        assertEquals(TypeCodedExtendedSquitter.class, d.decode(opStatus(0, 0), T).getClass());
         // and with no version established, neither is anything that follows
-        assertEquals(ExtendedSquitter.class, d.decode(message(11, 0), T).getClass());
+        assertEquals(TypeCodedExtendedSquitter.class, d.decode(message(11, 0), T).getClass());
     }
 
-    /** Versions above 3 are decoded as version 3, newer versions being backward compatible. */
+    /**
+     * Versions above 3 are decoded as version 3, newer versions being backward compatible.
+     */
     @Test
     void unknownVersionsDecodeAsVersion3() throws Exception {
         StatefulModeSDecoder d = new StatefulModeSDecoder();
@@ -125,7 +127,7 @@ class ADSRDispatchTest {
             // there — but only after the address type has been resolved, which is why it decodes at
             // versions 1 and 2 rather than being lost for all of them
             assertDispatch(3, message(ftc, 0),
-                    ftc == 1 ? ExtendedSquitter.class : IdentificationV3Msg.class);
+                    ftc == 1 ? TypeCodedExtendedSquitter.class : IdentificationV3Msg.class);
         }
     }
 
@@ -172,14 +174,14 @@ class ADSRDispatchTest {
         assertDispatch(2, message(28, 1), EmergencyOrPriorityStatusV2Msg.class);
         assertDispatch(3, message(28, 1), EmergencyOrPriorityStatusV3Msg.class);
         // only subtype 1 is handled
-        assertDispatch(2, message(28, 2), ExtendedSquitter.class);
+        assertDispatch(2, message(28, 2), TypeCodedExtendedSquitter.class);
     }
 
     @Test
     void targetStateAndStatus() throws Exception {
         assertDispatch(2, messageSubtypeInME67(29, 1), TargetStateAndStatusV2Msg.class);
         assertDispatch(3, messageSubtypeInME67(29, 1), TargetStateAndStatusV3Msg.class);
-        assertDispatch(2, messageSubtypeInME67(29, 0), ExtendedSquitter.class);
+        assertDispatch(2, messageSubtypeInME67(29, 0), TypeCodedExtendedSquitter.class);
     }
 
     @Test
@@ -188,9 +190,9 @@ class ADSRDispatchTest {
         assertDispatch(3, messageSubtypeInME67(26, 1), WxAIREPWeatherStateMsg.class);
         assertDispatch(3, messageSubtypeInME67(26, 2), WxAIREPAlternateWeatherStateMsg.class);
         // subtype 3 is not assigned
-        assertDispatch(3, messageSubtypeInME67(26, 3), ExtendedSquitter.class);
+        assertDispatch(3, messageSubtypeInME67(26, 3), TypeCodedExtendedSquitter.class);
         // new in version 3; earlier versions leave it undecoded
-        assertDispatch(2, messageSubtypeInME67(26, 0), ExtendedSquitter.class);
+        assertDispatch(2, messageSubtypeInME67(26, 0), TypeCodedExtendedSquitter.class);
     }
 
     /**
@@ -208,7 +210,7 @@ class ADSRDispatchTest {
 
         // version 3 discards identification at format type code 1, yet the address is still qualified
         ModeSDownlinkMsg identification = d.decode(message(1, 0), T);
-        assertEquals(ExtendedSquitter.class, identification.getClass());
+        assertEquals(TypeCodedExtendedSquitter.class, identification.getClass());
         assertEquals(de.serosystems.lib1090.msgs.QualifiedAddress.Type.ICAO24,
                 identification.getAddress().getType());
 
@@ -227,7 +229,7 @@ class ADSRDispatchTest {
     @Test
     void unassignedFormatTypeCodes() throws Exception {
         for (int ftc : new int[]{0, 23, 24, 25, 27, 30}) {
-            assertDispatch(2, message(ftc, 0), ExtendedSquitter.class);
+            assertDispatch(2, message(ftc, 0), TypeCodedExtendedSquitter.class);
         }
     }
 }

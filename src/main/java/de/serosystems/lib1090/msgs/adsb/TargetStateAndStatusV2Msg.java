@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for the ADS-B version 2 target state and status message, as defined in ED-102B
  * Appendix N §N.5.3 Figure N-23 (legacy format retained for backward compatibility).
  */
-public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Serializable, TargetStateAndStatusMsg, ADSBMsg {
+public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter implements Serializable, TargetStateAndStatusMsg, ADSBMsg {
 
     private static final long serialVersionUID = 8402350306532746670L;
 
@@ -64,7 +64,7 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -73,14 +73,14 @@ public class TargetStateAndStatusV2Msg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TargetStateAndStatusV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this message
      * @throws BadFormatException if message has the wrong typecode or if reserved bits are set
      */
-    public TargetStateAndStatusV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public TargetStateAndStatusV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 29)

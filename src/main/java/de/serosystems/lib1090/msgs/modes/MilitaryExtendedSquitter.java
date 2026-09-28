@@ -33,7 +33,7 @@ import java.io.Serializable;
  * for civil extended squitter formats, 1 = reserved for formation flight,
  * 2 = reserved for military applications, 3-7 = reserved.
  */
-public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serializable {
+public class MilitaryExtendedSquitter extends TypeCodedExtendedSquitter implements Serializable {
 
     private static final long serialVersionUID = 2459913562133769670L;
 

@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * broadcast of the Operational Coordination Message"; the format is defined for a future version
  * of the MOPS, with content intended to be filled from transponder Registers 33(hex)-37(hex).
  */
-public class CASOperationalCoordinationMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
+public class CASOperationalCoordinationMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = -3269481672107864825L;
 
@@ -59,7 +59,7 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CASOperationalCoordinationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -68,14 +68,14 @@ public class CASOperationalCoordinationMsg extends ExtendedSquitter implements S
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public CASOperationalCoordinationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this CAS operational coordination msg
      * @throws BadFormatException if message has wrong format
      */
-    public CASOperationalCoordinationMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public CASOperationalCoordinationMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)

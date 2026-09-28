@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
 
 import java.io.Serializable;
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * which carries no figure of its own and refers to the ADS-B identification
  * format of ED-102B §2.2.3.2.5 Figure 2-7.
  */
-public class IdentificationV3Msg extends ExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
+public class IdentificationV3Msg extends TypeCodedExtendedSquitter implements Serializable, IdentificationMsg, ADSRMsg {
 
     private static final long serialVersionUID = 4553186778210878582L;
 
@@ -51,7 +51,7 @@ public class IdentificationV3Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV3Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -60,14 +60,14 @@ public class IdentificationV3Msg extends ExtendedSquitter implements Serializabl
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationV3Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this identification msg
      * @throws BadFormatException if message has the wrong typecode
      */
-    public IdentificationV3Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public IdentificationV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         // type code 1 is no longer defined for identification messages in version 3

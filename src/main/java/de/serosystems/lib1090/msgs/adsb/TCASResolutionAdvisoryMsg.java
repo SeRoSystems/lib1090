@@ -23,7 +23,7 @@ import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Figure 2-21 for version 3, and in ED-102B Appendix N §N.5.3 Figure N-22 for version 2.<br>
  * Note: This format only exists in ADS-B versions &gt;= 2
  */
-public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Serializable, ADSBMsg {
+public class TCASResolutionAdvisoryMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 2288992169091753527L;
 
@@ -58,7 +58,7 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TCASResolutionAdvisoryMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -67,14 +67,14 @@ public class TCASResolutionAdvisoryMsg extends ExtendedSquitter implements Seria
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public TCASResolutionAdvisoryMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this TCAS resolution advisory msg
      * @throws BadFormatException if message has wrong format
      */
-    public TCASResolutionAdvisoryMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public TCASResolutionAdvisoryMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 28)

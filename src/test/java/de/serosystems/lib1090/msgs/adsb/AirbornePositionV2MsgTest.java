@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.quality.NICSupplements;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirbornePositionMsg;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +40,7 @@ class AirbornePositionV2MsgTest extends AirbornePositionMsgTest {
     @Test
     void v2RemainsIndependentFromV1() throws Exception {
         AirbornePositionV2Msg msg = new AirbornePositionV2Msg(
-                new ExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
+                new TypeCodedExtendedSquitter(Tools.hexStringToByteArray("8D40058B58C901375147EFD09357")), Instant.EPOCH);
 
         assertEquals(8, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getNICEncoded());
         assertEquals(185.2, msg.getNavigationCharacteristics(NICSupplements.none().withA(false)).getHorizontalContainmentRadiusLimit());

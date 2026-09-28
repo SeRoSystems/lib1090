@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for TIS-B Identification and Category Message, as defined in ED-102B §2.2.17.3.3
  * Figure 2-54.
  */
-public class IdentificationMsg extends ExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg, TISBMsg {
+public class IdentificationMsg extends TypeCodedExtendedSquitter implements Serializable, de.serosystems.lib1090.msgs.squitter.IdentificationMsg, TISBMsg {
 
     private static final long serialVersionUID = 6991597271679287771L;
 
@@ -49,7 +49,7 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -58,14 +58,14 @@ public class IdentificationMsg extends ExtendedSquitter implements Serializable,
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public IdentificationMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter containing the identity and category message
      * @throws BadFormatException if message has wrong format
      */
-    public IdentificationMsg(ExtendedSquitter squitter) throws BadFormatException {
+    public IdentificationMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getDownlinkFormat() != 18)

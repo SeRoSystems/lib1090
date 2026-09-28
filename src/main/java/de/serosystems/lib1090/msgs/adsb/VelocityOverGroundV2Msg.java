@@ -21,7 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.VelocityOverGroundMsg;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for ADS-B version 2 velocity-over-ground messages (Subtypes 1 and 2), as defined in
  * ED-102B Appendix N §N.5.3 Figure N-19 (legacy format retained for backward compatibility).
  */
-public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV2Msg, ADSBMsg {
+public class VelocityOverGroundV2Msg extends TypeCodedExtendedSquitter implements Serializable, VelocityOverGroundMsg, AirborneVelocityV2Msg, ADSBMsg {
 
     private static final long serialVersionUID = 3067581442639572810L;
 
@@ -59,7 +59,7 @@ public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Seriali
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public VelocityOverGroundV2Msg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
@@ -68,14 +68,14 @@ public class VelocityOverGroundV2Msg extends ExtendedSquitter implements Seriali
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public VelocityOverGroundV2Msg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(new ExtendedSquitter(rawMessage));
+        this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
      * @param squitter extended squitter which contains this velocity over ground msg
      * @throws BadFormatException if message has wrong format
      */
-    public VelocityOverGroundV2Msg(ExtendedSquitter squitter) throws BadFormatException {
+    public VelocityOverGroundV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 19)

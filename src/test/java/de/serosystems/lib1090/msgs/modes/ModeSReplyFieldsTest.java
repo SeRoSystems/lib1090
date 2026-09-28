@@ -182,6 +182,9 @@ class ModeSReplyFieldsTest {
         assertTrue(new CommDExtendedLengthMsg(new byte[]{(byte) 0xD5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).toString()
                 .startsWith("CommDExtendedLengthMsg{ModeSReply{downlinkFormat=24, firstField=21, "));
         assertTrue(new ExtendedSquitter("8D485020994409940838175B284F").toString()
-                .matches("ExtendedSquitter\\{ModeSReply\\{.*}, message=99440994083817, formatTypeCode=19}"));
+                .matches("ExtendedSquitter\\{ModeSReply\\{.*}, message=99440994083817}"));
+        assertTrue(new TypeCodedExtendedSquitter("8D485020994409940838175B284F").toString()
+                .matches("TypeCodedExtendedSquitter\\{ExtendedSquitter\\{ModeSReply\\{.*}, message=99440994083817}, " +
+                        "formatTypeCode=19}"));
     }
 }

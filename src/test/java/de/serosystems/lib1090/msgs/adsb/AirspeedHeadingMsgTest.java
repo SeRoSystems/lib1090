@@ -18,7 +18,7 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
+import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.AirborneVelocityMsg;
 import de.serosystems.lib1090.msgs.squitter.AirspeedHeadingMsg;
 import org.junit.jupiter.api.Test;
@@ -77,8 +77,8 @@ abstract class AirspeedHeadingMsgTest {
     @Test
     public void testIcaoExtraction() throws Exception {
         AirspeedHeadingMsg msg = create("8DA05F219B06B6AF189400CBC33F");
-        assertInstanceOf(ExtendedSquitter.class, msg);
-        assertEquals("a05f21", ((ExtendedSquitter) msg).getAddress().getHexAddress());
+        assertInstanceOf(TypeCodedExtendedSquitter.class, msg);
+        assertEquals("a05f21", ((TypeCodedExtendedSquitter) msg).getAddress().getHexAddress());
     }
 
     @Test
