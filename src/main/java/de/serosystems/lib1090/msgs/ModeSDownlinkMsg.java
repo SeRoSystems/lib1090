@@ -270,8 +270,6 @@ public class ModeSDownlinkMsg implements Serializable {
                     throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented");
                 else if (downlinkFormat == 18 && firstField == 7)
                     throw new UnspecifiedFormatError("Got invalid (reserved) format");
-                else if (downlinkFormat == 19 && firstField != 0)
-                    throw new UnspecifiedFormatError("Military frame not implemented");
 
                 break;
 

@@ -32,8 +32,12 @@ import java.io.Serializable;
  * applications") records the AF values actually assigned in practice: 0 = reserved
  * for civil extended squitter formats, 1 = reserved for formation flight,
  * 2 = reserved for military applications, 3-7 = reserved.
+ * <p>
+ * Every DF=19 message is decoded as this, whatever its application field, unless the decoder is enabled
+ * to read DF=19 with AF=0 as ADS-B. Only that application field has the extended squitter ME layout;
+ * otherwise {@link #getMessage()} holds the 56 bits after the address as transmitted.
  */
-public class MilitaryExtendedSquitter extends TypeCodedExtendedSquitter implements Serializable {
+public class MilitaryExtendedSquitter extends ExtendedSquitter implements Serializable {
 
     private static final long serialVersionUID = 2459913562133769670L;
 
@@ -81,6 +85,18 @@ public class MilitaryExtendedSquitter extends TypeCodedExtendedSquitter implemen
      */
     public MilitaryExtendedSquitter(MilitaryExtendedSquitter squitter) {
         super(squitter);
+    }
+
+    /**
+     * @return the application field (AF), ICAO Annex 10 Volume IV §3.1.2.8.8.2
+     */
+    public byte getApplicationField() {
+        return getFirstField();
+    }
+
+    @Override
+    public String toString() {
+        return "MilitaryExtendedSquitter{" + super.toString() + '}';
     }
 
 }

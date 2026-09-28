@@ -447,7 +447,7 @@ public class ExampleDecoder {
                 System.out.println("          Maximum airspeed is " + long_acas.getMaximumAirspeed() + "kn.");
             } else if (msg instanceof MilitaryExtendedSquitter) {
                 MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter) msg;
-                System.out.println("[" + icao24 + "]: Military ES of application " + mil.getFirstField());
+                System.out.println("[" + icao24 + "]: Military ES of application " + mil.getApplicationField());
                 System.out.println("          Message is 0x" + Tools.toHexString(mil.getMessage()));
             } else if (msg instanceof CommBAltitudeReply) {
                 CommBAltitudeReply commBaltitude = (CommBAltitudeReply) msg;
