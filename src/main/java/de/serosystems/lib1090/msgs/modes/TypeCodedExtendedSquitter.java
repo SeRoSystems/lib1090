@@ -71,7 +71,7 @@ public class TypeCodedExtendedSquitter extends ExtendedSquitter implements Seria
     public TypeCodedExtendedSquitter(ModeSDownlinkMsg reply) throws BadFormatException {
         super(reply);
 
-        if ((getDownlinkFormat() == 18 && (getFirstField() == 3 || getFirstField() == 7)) ||
+        if ((getDownlinkFormat() == 18 && (getFirstField() == 3 || getFirstField() == 4 || getFirstField() == 7)) ||
                 (getDownlinkFormat() == 19 && getFirstField() > 0))
             throw new BadFormatException("Message is not an extended squitter with a format type code");
 

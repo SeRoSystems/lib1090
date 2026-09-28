@@ -121,7 +121,7 @@ public class StatefulModeSDecoder {
                     return es1090;
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 4) {
                     // TIS-B or ADS-R Management Message
-                    return new ManagementMessage(new TypeCodedExtendedSquitter(modes));
+                    return new ManagementMessage(modes);
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 6) {
                     return decodeADSR(modes, timestamp);
                 } else if (modes.getDownlinkFormat() == 19) {

@@ -266,9 +266,7 @@ public class ModeSDownlinkMsg implements Serializable {
                 System.arraycopy(payload, 0, rawAddress, 0, 3);
                 addr = rawAPToInt(rawAddress);
 
-                if (downlinkFormat == 18 && firstField == 4)
-                    throw new UnspecifiedFormatError("TIS-B/ADS-R management frames not implemented");
-                else if (downlinkFormat == 18 && firstField == 7)
+                if (downlinkFormat == 18 && firstField == 7)
                     throw new UnspecifiedFormatError("Got invalid (reserved) format");
 
                 break;
