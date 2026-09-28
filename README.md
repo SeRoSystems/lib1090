@@ -93,3 +93,10 @@ We have also published this project on Maven Central. Just include the following
 ```
 
 Get the latest version number [here](https://search.maven.org/artifact/de.sero-systems/lib1090).
+
+### Code style
+
+The code style is pinned in `.editorconfig`, exported from IntelliJ IDEA with its default settings, so that formatting
+does not depend on the IDE version at hand. IntelliJ applies every setting of it when reformatting code; other editors
+with EditorConfig support pick up at least the general rules: UTF-8, LF line endings, indentation by 4 spaces, lines of
+at most 120 characters, no trailing whitespace and a final newline.
