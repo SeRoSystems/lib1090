@@ -70,8 +70,20 @@ public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
     short getHeadingEncoded();
 
     /**
-     * @return heading in decimal degrees ([0, 360]). 0° = geographic north or null if not available.
-     * The latter can also be checked using {@link #hasHeadingStatusFlag()}.
+     * The heading is measured clockwise from true or magnetic north, depending on the message:
+     * <ul>
+     *     <li>version 0: always magnetic north, ED-102B §N.2.3.11 TABLE N-11 NOTE 3</li>
+     *     <li>versions 1 and 2, ADS-B and ADS-R: the horizontal reference direction of the aircraft
+     *     operational status message, see
+     *     {@link AirborneOperationalStatusV1V2Msg#isHeadingReferencedToMagneticNorth()}, ED-102A
+     *     §2.2.3.2.6.3.7 NOTE 3</li>
+     *     <li>TIS-B: the true/magnetic heading type of this message, see
+     *     {@link de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg#isMagneticHeading()}, ED-102A
+     *     §2.2.17.3.4.7</li>
+     * </ul>
+     *
+     * @return heading in decimal degrees ([0, 360]) or null if not available. The latter can also be
+     * checked using {@link #hasHeadingStatusFlag()}.
      */
     default Double getHeading() {
         if (!hasHeadingStatusFlag()) return null;
