@@ -78,7 +78,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
 
     /**
      * @param squitter extended squitter which contains this message
-     * @throws BadFormatException if message has the wrong typecode or if reserved bits are set
+     * @throws BadFormatException if message has the wrong typecode
      */
     public TargetStateAndStatusV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
@@ -117,10 +117,6 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
 
         // this is always set and valid
         operationalTcas = b.readBoolean(53);
-
-        // ED-102B §2.2.3.2.7.1.3.19
-        if (b.readByte(55, 56) != 0)
-            throw new BadFormatException("Target state and status message reserved bits must be 0");
     }
 
     /**

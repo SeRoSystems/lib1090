@@ -98,8 +98,8 @@ public class TargetStateAndStatusV2MsgTest {
                     // parity bits (invalid, not tested here)
                     "6472e1";
 
-    // Modified message from above with reserved bits set
-    public static final String INVALID_TSS =
+    // TSS_WITHOUT_HEADING with the reserved bits set
+    public static final String TSS_WITH_RESERVED_BITS_SET =
             // see above
             "8d" +
                     "89653e" +
@@ -220,9 +220,24 @@ public class TargetStateAndStatusV2MsgTest {
         assertTrue(tss.hasOperationalTCAS());
     }
 
+    /**
+     * ED-102B §2.2.3.2.7.1.3.19: the reserved ME bits 55-56 are ignored, so the message decodes as it would with them
+     * clear.
+     */
     @Test
-    public void testInvalidReservedBits_shouldThrowBadFormatException() {
-        assertThrows(BadFormatException.class, () -> new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(INVALID_TSS)));
+    public void testReservedBitsSet_areIgnored() throws UnspecifiedFormatError, BadFormatException {
+        final TargetStateAndStatusV2Msg clear =
+                new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(TSS_WITHOUT_HEADING));
+        final TargetStateAndStatusV2Msg set =
+                new TargetStateAndStatusV2Msg(Tools.hexStringToByteArray(TSS_WITH_RESERVED_BITS_SET));
+
+        assertEquals(clear.getSelectedAltitude(), set.getSelectedAltitude());
+        assertEquals(clear.getBarometricPressureSetting(), set.getBarometricPressureSetting());
+        assertEquals(clear.getNACpEncoded(), set.getNACpEncoded());
+        assertEquals(clear.getSILEncoded(), set.getSILEncoded());
+        assertEquals(clear.hasAutopilotEngaged(), set.hasAutopilotEngaged());
+        assertEquals(clear.hasVNAVModeEngaged(), set.hasVNAVModeEngaged());
+        assertEquals(clear.hasOperationalTCAS(), set.hasOperationalTCAS());
     }
 
 }
