@@ -370,7 +370,8 @@ public class ExampleDecoder {
             System.out.println("          Aircraft configuration: " + wxState.getAircraftConfigurationEncoded());
             System.out.println("          Aircraft type: " + (wxState.hasAircraftType() ? String.valueOf(wxState.getAircraftType()) : "unknown"));
             System.out.println("          Gross weight: " + (wxState.hasGrossWeight() ? ">= " + wxState.getGrossWeight() : "unknown") + " lbs");
-            System.out.println("          Wingspan: " + (wxState.hasWingspan() ? ">= " + wxState.getWingspan() : "unknown") + " ft");
+            System.out.println("          Wingspan: "
+                    + (wxState.hasWingspan() ? wxState.getWingspan() + " ft" : "unknown"));
         } else if (msg instanceof WxAIREPWeatherStateMsg) {
             WxAIREPWeatherStateMsg wxWeather = (WxAIREPWeatherStateMsg) msg;
             System.out.println("[" + icao24 + "]: Wx AIREP Weather State reported");

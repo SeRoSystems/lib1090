@@ -19,7 +19,9 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.decoding.InternationalAlphabet5;
+import de.serosystems.lib1090.decoding.Interval;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -178,17 +180,26 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
     }
 
     /**
-     * Decode the wingspan field.
+     * The wingspan as the interval its code stands for, ED-102B §2.2.3.2.7.6.3.5: the encoding truncates, so
+     * code N covers [W(N), W(N + 1)) with W(N) = ((1 + (N - 2) * 0.004)² - 0.952) / 0.008 ft; code 1 is any
+     * wingspan less than 6 ft, and code 255 any of 387.018 ft or more.
      *
-     * @return the wingspan in feet, {@code 387.018} meaning "equal to or greater than 387.018 ft"
-     * (encoded field {@code 0xFF}), or {@code null} if unavailable
+     * @return the interval of the wingspan in feet, or {@code null} if unavailable
      */
-    public Double getWingspan() {
+    public Interval getWingspan() {
         if (!hasWingspan()) return null;
+        if (wingspanEncoded == 1) return Interval.of(Bound.AT_LEAST, 0, Bound.BELOW, 6);
+        if (wingspanEncoded == 255) return Interval.of(Bound.AT_LEAST, wingspanLowerEnd(255), Bound.NONE, Double.NaN);
+        return Interval.of(Bound.AT_LEAST, wingspanLowerEnd(wingspanEncoded),
+                Bound.BELOW, wingspanLowerEnd(wingspanEncoded + 1));
+    }
 
-        if (wingspanEncoded == 255) return 387.018;
-
-        double t = 1 + (wingspanEncoded - 2) * 0.004;
+    /**
+     * @param code a wingspan code from 2 to 255
+     * @return the smallest wingspan in feet the encoding formula maps to {@code code}
+     */
+    private static double wingspanLowerEnd(int code) {
+        double t = 1 + (code - 2) * 0.004;
         return (t * t - 0.952) / 0.008;
     }
 
