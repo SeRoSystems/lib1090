@@ -26,10 +26,28 @@ package de.serosystems.lib1090.msgs.squitter;
 public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
 
     /**
-     * @return whether velocity is available
+     * @return whether both velocity components are available, which ground speed and track need; each
+     * component on its own is available as {@link #hasWestToEastVelocity()} resp.
+     * {@link #hasSouthToNorthVelocity()} says
      */
     default boolean hasVelocity() {
-        return getWestToEastVelocityEncoded() != 0 && getSouthToNorthVelocityEncoded() != 0;
+        return hasWestToEastVelocity() && hasSouthToNorthVelocity();
+    }
+
+    /**
+     * @return whether the velocity from west to east is available, i.e. not coded "no velocity information",
+     * ED-102B §2.2.3.2.6.1.7 TABLE 2-20
+     */
+    default boolean hasWestToEastVelocity() {
+        return getWestToEastVelocityEncoded() != 0;
+    }
+
+    /**
+     * @return whether the velocity from south to north is available, i.e. not coded "no velocity information",
+     * ED-102B §2.2.3.2.6.1.9 TABLE 2-22
+     */
+    default boolean hasSouthToNorthVelocity() {
+        return getSouthToNorthVelocityEncoded() != 0;
     }
 
     /**
@@ -38,7 +56,7 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
      * see {@link #isWestToEastVelocitySaturated()}
      */
     default Integer getWestToEastVelocity() {
-        if (!hasVelocity()) return null;
+        if (!hasWestToEastVelocity()) return null;
         int velocityToEast = (getWestToEastVelocityEncoded() - 1) * (isSupersonic() ? 4 : 1);
         return isVelocityToEastNegative() ? -velocityToEast : velocityToEast;
     }
@@ -49,20 +67,22 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
      * see {@link #isSouthToNorthVelocitySaturated()}
      */
     default Integer getSouthToNorthVelocity() {
-        if (!hasVelocity()) return null;
+        if (!hasSouthToNorthVelocity()) return null;
         int velocityToNorth = (getSouthToNorthVelocityEncoded() - 1) * (isSupersonic() ? 4 : 1);
         return isVelocityToNorthNegative() ? -velocityToNorth : velocityToNorth;
     }
 
     /**
-     * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if not available.
-     * The latter can also be checked with {@link #hasVelocity()}. Only approximate if a component is saturated,
-     * see {@link #isWestToEastVelocitySaturated()} and {@link #isSouthToNorthVelocitySaturated()}.
+     * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north, or null if not
+     * available ({@link #hasVelocity()}) or if the target is not moving, both components being 0 kt, which leaves
+     * the track undefined. Only approximate if a component is saturated, see
+     * {@link #isWestToEastVelocitySaturated()} and {@link #isSouthToNorthVelocitySaturated()}.
      */
     default Double getTrueTrackAngle() {
         if (!hasVelocity()) return null;
         Integer westToEastVelocity = getWestToEastVelocity();
         Integer southToNorthVelocity = getSouthToNorthVelocity();
+        if (westToEastVelocity == 0 && southToNorthVelocity == 0) return null;
         double angle = Math.toDegrees(Math.atan2(
                 westToEastVelocity,
                 southToNorthVelocity));
