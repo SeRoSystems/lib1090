@@ -194,6 +194,10 @@ class ADSRDispatchTest {
         assertDispatch(2, messageSubtypeInME67(29, 1), TargetStateAndStatusV2Msg.class);
         assertDispatch(3, messageSubtypeInME67(29, 1), TargetStateAndStatusV3Msg.class);
         assertDispatch(2, messageSubtypeInME67(29, 0), TypeCodedExtendedSquitter.class);
+        // ADS-R of version 1 targets uses subtype 1 in the version 2 format, ED-102A §2.2.18.4.6 NOTE 1, and not
+        // subtype 0, the version 1 ADS-B format
+        assertDispatch(1, messageSubtypeInME67(29, 1), TargetStateAndStatusV2Msg.class);
+        assertDispatch(1, messageSubtypeInME67(29, 0), TypeCodedExtendedSquitter.class);
     }
 
     @Test

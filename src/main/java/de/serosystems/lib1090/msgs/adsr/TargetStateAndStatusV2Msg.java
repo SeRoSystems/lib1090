@@ -31,6 +31,9 @@ import java.io.Serializable;
  * Decoder for ADS-R target state and status messages (version 2), as defined in ED-102B §2.2.18.4.6,
  * which gives the differences from the ADS-B format of ED-102B Appendix N
  * §N.5.3 Figure N-23.
+ * <p>
+ * Also the format of version 1 ADS-R target state and status messages, ED-102A §2.2.18.4.6 NOTE 1:
+ * unlike ADS-B, ADS-R does not use the version 1 format with subtype 0.
  */
 public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter implements Serializable, TargetStateAndStatusMsg, IMFMsg, ADSRMsg {
 
