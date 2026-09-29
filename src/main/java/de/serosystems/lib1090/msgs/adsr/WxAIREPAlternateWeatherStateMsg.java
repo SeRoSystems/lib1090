@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.WxAIREP;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -78,13 +79,8 @@ public class WxAIREPAlternateWeatherStateMsg extends TypeCodedExtendedSquitter i
         super(squitter);
         ADSRMsg.checkADSR(this);
 
-        if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26");
-
         BitReader br = BitReader.forBigEndian(getMessage());
-
-        if (br.readByte(6, 7) != 2)
-            throw new BadFormatException("Wx AIREP alternate weather state message must have subtype 2");
+        WxAIREP.validateFormat(getFormatTypeCode(), br, 2, "alternate weather state");
 
         icingStatusEncoded = br.readByte(8, 12);
         rollAngleEncoded = br.readShort(13, 22);
@@ -129,8 +125,7 @@ public class WxAIREPAlternateWeatherStateMsg extends TypeCodedExtendedSquitter i
      * @return the roll angle in degrees, or {@code null} if unavailable
      */
     public Double getRollAngle() {
-        if (!hasRollAngle()) return null;
-        return -90 + (rollAngleEncoded - 2) * 180. / 1021;
+        return WxAIREP.rollAngle(rollAngleEncoded);
     }
 
     /**
@@ -162,8 +157,7 @@ public class WxAIREPAlternateWeatherStateMsg extends TypeCodedExtendedSquitter i
      * @see #getHeadingType() to determine whether this is relative to true or magnetic north
      */
     public Double getHeading() {
-        if (!hasHeading()) return null;
-        return (headingEncoded - 1) * 360. / 4095;
+        return WxAIREP.heading(headingEncoded);
     }
 
     @Override

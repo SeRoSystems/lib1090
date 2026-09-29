@@ -45,7 +45,7 @@ class WxAIREPAircraftStateMsgTest {
 
     /**
      * ED-102B §2.2.3.2.7.6.3.5: code 1 is any wingspan below 6 ft, code 255 any of 387.018 ft or more, and each
-     * code in between the interval from its lower end up to the next code's.
+     * code in between the interval from its lower end up to the next code's, without a gap.
      */
     @Test
     void wingspanCodesAreIntervals() throws Exception {
@@ -56,7 +56,7 @@ class WxAIREPAircraftStateMsgTest {
 
             Interval two = isADSR ? adsr(2) : adsb(2);
             assertEquals(Bound.AT_LEAST, two.getLowerBound());
-            assertEquals(6, two.getLower(), 1e-9);
+            assertEquals(6.0, two.getLower()); // exactly where code 1 ends, so that 6.0 ft is in code 2
             assertEquals(Bound.BELOW, two.getUpperBound());
             assertEquals(7.002, two.getUpper(), 1e-9);
 
@@ -64,6 +64,13 @@ class WxAIREPAircraftStateMsgTest {
             assertEquals(Bound.AT_LEAST, top.getLowerBound());
             assertEquals(387.018, top.getLower(), 1e-9);
             assertEquals(Bound.NONE, top.getUpperBound());
+
+            // the intervals leave no gap: each code ends exactly where the next one starts
+            for (int code = 1; code < 255; code++) {
+                Interval lower = isADSR ? adsr(code) : adsb(code);
+                Interval upper = isADSR ? adsr(code + 1) : adsb(code + 1);
+                assertEquals(lower.getUpper(), upper.getLower(), "code " + code);
+            }
         }
     }
 
