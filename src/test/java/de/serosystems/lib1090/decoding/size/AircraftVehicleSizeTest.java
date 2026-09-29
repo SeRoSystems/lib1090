@@ -69,7 +69,9 @@ class AircraftVehicleSizeTest {
     }
 
     /**
-     * Versions 1 and 2 bound their two largest codes from above, ED-102B TABLE N-18 and ED-102A TABLE 2-74.
+     * Versions 1 and 2 bound code 14 from above, ED-102B TABLE N-18 and ED-102A TABLE 2-74. Code 15 is
+     * used for anything longer than 85 m or wider than 90 m, so it is reached by either dimension alone
+     * and guarantees nothing about both.
      */
     @Test
     void testVersion1And2LargestCodes() {
@@ -77,9 +79,10 @@ class AircraftVehicleSizeTest {
         assertEquals(Extent.atMost(85), AircraftVehicleSizeV1V2.LENGTH_85_WIDTH_80.getLength());
         assertEquals(Extent.atMost(80), AircraftVehicleSizeV1V2.LENGTH_85_WIDTH_80.getWidth());
 
-        assertSame(AircraftVehicleSizeV1V2.LENGTH_85_WIDTH_90, AircraftVehicleSizeV1V2.forEncoded((byte) 15));
-        assertEquals(Extent.atMost(85), AircraftVehicleSizeV1V2.LENGTH_85_WIDTH_90.getLength());
-        assertEquals(Extent.atMost(90), AircraftVehicleSizeV1V2.LENGTH_85_WIDTH_90.getWidth());
+        assertSame(AircraftVehicleSizeV1V2.LENGTH_ABOVE_85_OR_WIDTH_ABOVE_80,
+                AircraftVehicleSizeV1V2.forEncoded((byte) 15));
+        assertTrue(AircraftVehicleSizeV1V2.LENGTH_ABOVE_85_OR_WIDTH_ABOVE_80.getLength().isUnknown());
+        assertTrue(AircraftVehicleSizeV1V2.LENGTH_ABOVE_85_OR_WIDTH_ABOVE_80.getWidth().isUnknown());
     }
 
     /**

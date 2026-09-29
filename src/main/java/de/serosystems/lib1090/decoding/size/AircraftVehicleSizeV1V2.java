@@ -24,12 +24,19 @@ import static de.serosystems.lib1090.decoding.size.Extent.atMost;
  * The "Aircraft/Vehicle Length and Width Code" of ADS-B versions 1 and 2, ED-102B §N.3.3.3 TABLE N-18
  * for version 1 and ED-102A §2.2.3.2.7.2.11 TABLE 2-74 for version 2.
  * <p>
- * Every code but 0 states an upper bound for both dimensions; unlike version 3, the two largest codes
- * do too, at 85 m in length and 80 m or 90 m in width.
+ * Codes 1 to 14 state an upper bound for both dimensions; unlike version 3, code 14 does too, at 85 m
+ * in length and 80 m in width. {@link #LENGTH_ABOVE_85_OR_WIDTH_ABOVE_80}, code 15, is whatever does
+ * not fit code 14, and <b>nothing is guaranteed about either dimension</b>, although the tables print
+ * 85 m and 90 m there: ED-102A TABLE 2-74 adds that code 15 "shall be used" for anything longer than
+ * 85 m or wider than 90 m, and ICAO Doc 9871 Appendix B §B.2.3.10.11 says the same for version 1. So
+ * code 15 is reached by length or by width alone: an aircraft 100 m long with a 60 m wingspan
+ * transmits it, and so does one 73 m long with a 117 m wingspan. ED-102B TABLE N-18 and ED-102A
+ * TABLE N-13 omit that sentence for version 1, but transmitters following the ICAO SARPs have no other
+ * code to send.
  * <p>
  * ED-102B gives no table for version 2: §N.4.3 leaves every Mode Status parameter it does not address
  * to the version 3 decoding, and does not address this one. ED-102A, which defines version 2,
- * tabulates the field exactly as version 1 does, so version 2 shares this table.
+ * tabulates the field as version 1 does, so version 2 shares this table.
  * <p>
  * DO-260A defined code 0 as 15 m long and 11.5 m wide, but ED-102B has a version 1 code 0 reported as
  * "No Data or Unknown", since transmitters following the ICAO SARPs send it with that meaning.
@@ -51,7 +58,7 @@ public enum AircraftVehicleSizeV1V2 implements AircraftVehicleSize {
     LENGTH_75_WIDTH_72_5(12, atMost(75), atMost(72.5)),
     LENGTH_75_WIDTH_80(13, atMost(75), atMost(80)),
     LENGTH_85_WIDTH_80(14, atMost(85), atMost(80)),
-    LENGTH_85_WIDTH_90(15, atMost(85), atMost(90));
+    LENGTH_ABOVE_85_OR_WIDTH_ABOVE_80(15, Extent.UNKNOWN, Extent.UNKNOWN);
 
     /**
      * In declaration order, which is the order of the encoded values.
