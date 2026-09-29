@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Decoder for ADS-R operational status messages (version 3), subtype 1 (surface), as defined in
  * ED-102B §2.2.18.4.7 Figure 2-62.
  */
-public class SurfaceOperationalStatusV3Msg extends TypeCodedExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV2Msg, IMFMsg, ADSRMsg {
+public class SurfaceOperationalStatusV3Msg extends TypeCodedExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV2V3Msg, IMFMsg, ADSRMsg {
 
     private static final long serialVersionUID = -2039485716203948571L;
 

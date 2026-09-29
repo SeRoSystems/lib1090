@@ -25,7 +25,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.CapabilityClassCode;
 import de.serosystems.lib1090.msgs.squitter.OperationalModeCode;
-import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2Msg;
+import de.serosystems.lib1090.msgs.squitter.OperationalStatusV2V3Msg;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import de.serosystems.lib1090.msgs.squitter.opstatus.CapabilityClassCodes;
 import de.serosystems.lib1090.msgs.squitter.opstatus.OperationalModeCodes;
@@ -36,7 +36,7 @@ import java.io.Serializable;
  * Decoder for the ADS-B operational status message (version 3), subtype 1 (surface), as defined in
  * ED-102B §2.2.3.2.7.2 Figure 2-12.
  */
-public class SurfaceOperationalStatusV3Msg extends TypeCodedExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV2Msg, ADSBMsg {
+public class SurfaceOperationalStatusV3Msg extends TypeCodedExtendedSquitter implements Serializable, SurfaceOperationalStatusMsg, OperationalStatusV2V3Msg, ADSBMsg {
 
     private static final long serialVersionUID = -6412897503618274091L;
 
