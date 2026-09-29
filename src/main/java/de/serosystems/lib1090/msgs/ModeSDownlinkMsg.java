@@ -504,6 +504,11 @@ public class ModeSDownlinkMsg implements Serializable {
         return noCRC ? getParity() == 0 : calcParityInt() == getParity();
     }
 
+    /**
+     * Two replies are equal if they have the same downlink format and content, and the same parity field once the CRC
+     * is removed. Whether the CRC still has to be removed or already has been is taken from {@code noCRC} of the
+     * constructors.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
@@ -531,32 +536,8 @@ public class ModeSDownlinkMsg implements Serializable {
                 this.getFirstField() != other.getFirstField())
             return false;
 
-        // and finally the parity
-        if (this.getParity() == other.getParity())
-            return true;
-
-        // Note: the following checks are necessary since some receivers set
-        // the parity field to the remainder of the CRC (0 if correct)
-        // while others do not touch it. This combination should be extremely
-        // rare so the performance can be more or less neglected.
-
-        if (this.getParity() == other.calcParityInt())
-            return true;
-
-        if (this.calcParityInt() == other.getParity())
-            return true;
-
-        if (this.getDownlinkFormat() == 11) {
-            // check interrogator code
-            if ((getParity() ^ calcParityInt()) == other.getParity())
-                return true;
-
-            if ((other.getParity() ^ other.calcParityInt()) == this.getParity())
-                return true;
-        }
-
-        return this.getAddress().getAddress() == other.getParity() ||
-                this.getParity() == other.getAddress().getAddress();
+        // and finally the parity field once the CRC is removed, if it has not been already
+        return this.getOverlay() == other.getOverlay();
     }
 
     @Override
@@ -573,15 +554,12 @@ public class ModeSDownlinkMsg implements Serializable {
 
     @Override
     public int hashCode() {
+        // the address stands in for the parity field once the CRC is removed, which it is for the formats that overlay
+        // the address on the CRC; the parity field as received cannot take part, as it depends on noCRC
         int result = downlinkFormat;
         result = 31 * result + (int) firstField;
         result = 31 * result + Arrays.hashCode(payload);
-        result = 31 * result + address.getAddress();
-
-        int effectiveParity = parity;
-        if (noCRC) effectiveParity = parity ^ calcParityInt();
-        result = 31 * result + effectiveParity;
-
+        result = 31 * result + address.hashCode();
         return result;
     }
 }
