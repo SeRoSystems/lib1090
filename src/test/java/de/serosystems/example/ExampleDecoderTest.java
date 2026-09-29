@@ -44,6 +44,20 @@ class ExampleDecoderTest {
         assertEquals(1, out.split("Has IFR capability", -1).length - 1, out);
     }
 
+    /**
+     * A version 3 target state and status message is printed as such, not as an unknown extended squitter.
+     */
+    @Test
+    void version3TargetState_isPrinted() {
+        String out = decode(
+                "8D4840D6F80000000060009B04F1", // operational status, version 3
+                "8D4840D6EA7FE0000000005C03BC"); // target state and status, selected altitude 65440 ft
+
+        assertTrue(out.contains("Target State and Status reported"), out);
+        assertTrue(out.contains("Selected altitude: 65440 ft"), out);
+        assertFalse(out.contains("Unknown extended squitter"), out);
+    }
+
     private static String decode(String... messages) {
         ExampleDecoder decoder = new ExampleDecoder();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
