@@ -288,7 +288,11 @@ public final class CPREncodedPosition implements Serializable {
         if (isSurface && reference == null)
             throw new IllegalArgumentException("Reference must not be null for surface positions");
         if (timeCheck) {
-            Duration gap = Duration.between(timestamp, other.timestamp).abs();
+            // between the earlier and the later timestamp, so that the gap is never negative: Duration.abs() of a
+            // negative duration goes through BigDecimal on Java 8
+            Duration gap = timestamp.isAfter(other.timestamp)
+                    ? Duration.between(other.timestamp, timestamp)
+                    : Duration.between(timestamp, other.timestamp);
             if (gap.compareTo(maxGap(other)) > 0) return null;
         }
 

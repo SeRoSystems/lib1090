@@ -198,6 +198,23 @@ public class GlobalPositionDecodingTest {
         testAirborneTiming(Instant.EPOCH.plusMillis(10_001), Instant.EPOCH, false);
     }
 
+    /**
+     * The pairing window is checked to the nanosecond and whichever of the two positions is the earlier one: exactly
+     * at the window's end the pair is decoded, one nanosecond beyond it not.
+     */
+    @Test
+    void testTimingIsExactInBothOrders() {
+        Instant t0 = Instant.EPOCH;
+        for (Instant t1 : new Instant[]{t0.plusSeconds(10), t0.minusSeconds(10)}) {
+            testAirborneTiming(t0, t1, true);
+            testAirborneTiming(t1, t0, true);
+        }
+        for (Instant t1 : new Instant[]{t0.plusSeconds(10).plusNanos(1), t0.minusSeconds(10).minusNanos(1)}) {
+            testAirborneTiming(t0, t1, false);
+            testAirborneTiming(t1, t0, false);
+        }
+    }
+
     private static void testSurfaceTimingGap(boolean hs1, boolean hs2, Duration expect) {
         CPREncodedPosition cprEven = CPREncodedPosition.ofSurface(17, false, hs1, 0x1ABC2, 0x07058, Instant.EPOCH);
         CPREncodedPosition cprOdd = CPREncodedPosition.ofSurface(17, true, hs2, 0x11C19, 0x13560, Instant.EPOCH);
