@@ -21,8 +21,14 @@ package de.serosystems.lib1090.msgs;
 import de.serosystems.lib1090.Tools;
 
 /**
- * Represents a qualified 24-bit address (an address value together with its {@link Type}), as
- * defined in ED-102B §2.2.3.2.1.5 TABLE 2-8.
+ * Represents a qualified 24-bit address: an address value together with its {@link Type}, as
+ * defined in ED-102B §2.2.3.2.1.5 TABLE 2-8, and the {@link Source} it was received from.
+ * <p>
+ * The source is part of the identity: the same address received directly from a transponder, from a
+ * non-transponder device, via TIS-B or via ADS-R denotes separately tracked targets, see ED-102B
+ * §2.2.10.1.2 (ADS-B reports organized by address, address source and address qualifier),
+ * §2.2.17.4 (TIS-B processed independently of ADS-B) and §2.2.18.4 (ADS-R reports distinct from
+ * ADS-B reports).
  */
 public class QualifiedAddress {
     /**
@@ -49,8 +55,27 @@ public class QualifiedAddress {
         UNKNOWN
     }
 
+    /**
+     * Where an address was received from. The first two values are the Address Source of ED-102B
+     * §2.2.8.1.3.1 TABLE 2-146; the others extend it to the messages that table leaves out, since
+     * TIS-B and ADS-R are reported apart from ADS-B (NOTES 1 and 2 of that table).
+     */
+    public enum Source {
+        // Mode S transponder: DF=0, 4, 5, 11, 16, 17, 20, 21 and 24, as well as DF=19 (military
+        // extended squitter), which ED-102B does not specify
+        TRANSPONDER,
+        // Non-transponder (stand-alone) ADS-B device: DF=18 with CF=0 or CF=1
+        NON_TRANSPONDER,
+        // TIS-B: DF=18 with CF=2, 3 or 5, as well as the Traffic Uplink Management Message (CF=4),
+        // grouped with TIS-B by ED-102B §2.2.3.2.2 TABLE 2-10
+        TIS_B,
+        // ADS-R: DF=18 with CF=6
+        ADS_R
+    }
+
     private int address;
     private Type type;
+    private Source source;
 
     /**
      * protected no-arg constructor e.g. internal usage or for serialization with Kryo
@@ -58,17 +83,18 @@ public class QualifiedAddress {
     protected QualifiedAddress() {
     }
 
-    public QualifiedAddress(int address, Type type) {
+    public QualifiedAddress(int address, Type type, Source source) {
         this.address = address;
         this.type = type;
+        this.source = source;
     }
 
     public QualifiedAddress(QualifiedAddress other) {
-        this(other.address, other.type);
+        this(other.address, other.type, other.source);
     }
 
-    public QualifiedAddress(String address, Type type) {
-        this(Integer.parseInt(address, 16), type);
+    public QualifiedAddress(String address, Type type, Source source) {
+        this(Integer.parseInt(address, 16), type, source);
     }
 
     /**
@@ -76,6 +102,13 @@ public class QualifiedAddress {
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * @return where the address was received from (e.g. transponder or ADS-R)
+     */
+    public Source getSource() {
+        return source;
     }
 
     /**
@@ -100,13 +133,15 @@ public class QualifiedAddress {
         QualifiedAddress that = (QualifiedAddress) o;
 
         if (address != that.address) return false;
-        return type == that.type;
+        if (type != that.type) return false;
+        return source == that.source;
     }
 
     @Override
     public int hashCode() {
         int result = address;
         result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (source != null ? source.hashCode() : 0);
         return result;
     }
 
@@ -115,6 +150,7 @@ public class QualifiedAddress {
         return "QualifiedAddress{" +
                 "address=" + address +
                 ", type=" + type +
+                ", source=" + source +
                 '}';
     }
 }

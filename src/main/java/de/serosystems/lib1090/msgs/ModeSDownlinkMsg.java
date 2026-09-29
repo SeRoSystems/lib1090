@@ -278,19 +278,24 @@ public class ModeSDownlinkMsg implements Serializable {
         }
 
         // determine address type according to ED-102B §2.2.3.2.1.3 TABLE 2-7, "CF" Field Code
-        // Definitions in DF=18 ADS-B and TIS-B Messages
+        // Definitions in DF=18 ADS-B and TIS-B Messages, and address source as per
+        // QualifiedAddress.Source
+        QualifiedAddress.Source source;
         if (downlinkFormat == 18) {
             // check CF
             switch (firstField) {
                 case 0:
                     type = QualifiedAddress.Type.ICAO24;
+                    source = QualifiedAddress.Source.NON_TRANSPONDER;
                     break;
                 case 1:
                     type = QualifiedAddress.Type.ANONYMOUS;
+                    source = QualifiedAddress.Source.NON_TRANSPONDER;
                     break;
                 case 2:
                 case 5:
                 case 6:
+                    source = firstField == 6 ? QualifiedAddress.Source.ADS_R : QualifiedAddress.Source.TIS_B;
                     Boolean imf = extractIMF(payload);
                     if (imf == null)
                         type = QualifiedAddress.Type.UNKNOWN;
@@ -303,6 +308,7 @@ public class ModeSDownlinkMsg implements Serializable {
                     break;
                 case 3:
                     // coarse position
+                    source = QualifiedAddress.Source.TIS_B;
                     if ((payload[3] & 0x80) == 0) // IMF field
                         type = QualifiedAddress.Type.ICAO24;
                     else
@@ -311,21 +317,21 @@ public class ModeSDownlinkMsg implements Serializable {
                     break;
                 case 4:
                     type = QualifiedAddress.Type.TISB_MANAGEMENT_INFO;
+                    source = QualifiedAddress.Source.TIS_B;
                     break;
-                case 7:
-                    type = QualifiedAddress.Type.RESERVED;
-                    break;
-                default:
-                    type = QualifiedAddress.Type.UNKNOWN;
+                default: // CF=7 has been rejected above, so this cannot happen
+                    throw new IllegalStateException("unexpected CF " + firstField);
             }
         } else if (downlinkFormat == 19) {
             // check AF field
             type = firstField == 0 ? QualifiedAddress.Type.ICAO24 : QualifiedAddress.Type.RESERVED;
+            source = QualifiedAddress.Source.TRANSPONDER;
         } else {
             type = QualifiedAddress.Type.ICAO24;
+            source = QualifiedAddress.Source.TRANSPONDER;
         }
 
-        address = new QualifiedAddress(addr, type);
+        address = new QualifiedAddress(addr, type, source);
     }
 
     /**
