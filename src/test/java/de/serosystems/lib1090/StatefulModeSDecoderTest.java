@@ -337,6 +337,22 @@ public class StatefulModeSDecoderTest {
         assertEquals(2, decoder.getAdsbVersion(address));
     }
 
+    /**
+     * ED-102B §2.2.3.2.7.1.3.19: a target state and status message with its reserved ME bits 55-56 set decodes for
+     * every version it is defined in, instead of throwing out of decode().
+     */
+    @Test
+    public void targetStateWithReservedBitsSet_decodes() throws UnspecifiedFormatError, BadFormatException {
+        final String tss = "8D3C6586EA3E90000000022EB763"; // ME 55 set
+        decoder.decode("8D3C6586F8000000004000000000", Instant.EPOCH); // version 2
+        assertInstanceOf(TargetStateAndStatusV2Msg.class, decoder.decode(tss, Instant.EPOCH));
+        decoder.decode("8D3C6586F8000000006000000000", Instant.EPOCH); // version 3
+        assertInstanceOf(TargetStateAndStatusV3Msg.class, decoder.decode(tss, Instant.EPOCH));
+        decoder.decode("963C6586F8000000006000000000", Instant.EPOCH); // ADS-R, version 3
+        assertInstanceOf(de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV3Msg.class,
+                decoder.decode("963C6586EA3E90000000022EB763", Instant.EPOCH));
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);
