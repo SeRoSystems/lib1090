@@ -27,6 +27,48 @@ public final class Identification {
     }
 
     /**
+     * The category descriptions per TYPE Code, from 4 (set A) down to 1 (set D), in the version 2 mapping,
+     * ED-102B §2.2.3.2.5.2 TABLE 2-16; {@link #categoryDescription} applies the other versions' exceptions.
+     */
+    private static final String[][] CATEGORIES = {{
+            "No ADS-B Emitter Category Information",
+            "Light (< 15500 lbs)",
+            "Small (15500 to 75000 lbs)",
+            "Large (75000 to 300000 lbs)",
+            "High-Vortex Large (aircraft such as B-757)",
+            "Heavy (> 300000 lbs)",
+            "High Performance (> 5g acceleration and > 400 kts)",
+            "Rotorcraft"
+    }, {
+            "No ADS-B Emitter Category Information",
+            "Glider / sailplane",
+            "Lighter-than-air",
+            "Parachutist / Skydiver",
+            "Ultralight / hang-glider / paraglider",
+            "Reserved",
+            "Unmanned Aerial Vehicle",
+            "Space / Trans-atmospheric vehicle",
+    }, {
+            "No ADS-B Emitter Category Information",
+            "Surface Vehicle – Emergency Vehicle",
+            "Surface Vehicle – Service Vehicle",
+            "Point Obstacle (includes tethered balloons)",
+            "Cluster Obstacle",
+            "Line Obstacle",
+            "Reserved",
+            "Reserved"
+    }, {
+            "No ADS-B Emitter Category Information",
+            "Reserved",
+            "Reserved",
+            "Reserved",
+            "Reserved",
+            "Reserved",
+            "Reserved",
+            "Reserved"
+    }};
+
+    /**
      * Each of the 8 "Ident Character" subfields is encoded as a 6-bit subset of the
      * International Alphabet Number 5 (IA-5), ED-102B §2.2.3.2.5.3, which in turn cites ICAO
      * Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8 for the character coding.
@@ -43,55 +85,20 @@ public final class Identification {
      * @param emitterCategory reported emitter category
      * @param version         ADS-B version of the reporting aircraft
      * @return a textual description of the emitter's category according to ED-102B §2.2.3.2.5.2 TABLE 2-16
-     * @throws IllegalArgumentException if version is greater than 7
+     * @throws IllegalArgumentException if the TYPE Code is not 1 to 4, the emitter category not 0 to 7, or the
+     *                                  version not 0 to 7
      */
     public static String categoryDescription(byte typeCode, byte emitterCategory, int version) {
+        if (typeCode < 1 || typeCode > 4)
+            throw new IllegalArgumentException("Not an identification TYPE Code: " + typeCode);
+        if (emitterCategory < 0 || emitterCategory > 7)
+            throw new IllegalArgumentException("Unsupported emitter category: " + emitterCategory);
         if (version < 0 || version > 7)
             throw new IllegalArgumentException("Unsupported ADS-B version: " + version);
 
         // versions above 3 are decoded like version 3, per ED-102B §2.2.7.1
         // VN field itself specified at ED-102B §2.2.3.2.7.2.5 TABLE 2-66
         int effectiveVersion = Math.min(version, 3);
-
-        // category descriptions according
-        // to the ADS-B specification
-        String[][] categories = {{
-                "No ADS-B Emitter Category Information",
-                "Light (< 15500 lbs)",
-                "Small (15500 to 75000 lbs)",
-                "Large (75000 to 300000 lbs)",
-                "High-Vortex Large (aircraft such as B-757)",
-                "Heavy (> 300000 lbs)",
-                "High Performance (> 5g acceleration and > 400 kts)",
-                "Rotorcraft"
-        }, {
-                "No ADS-B Emitter Category Information",
-                "Glider / sailplane",
-                "Lighter-than-air",
-                "Parachutist / Skydiver",
-                "Ultralight / hang-glider / paraglider",
-                "Reserved",
-                "Unmanned Aerial Vehicle",
-                "Space / Trans-atmospheric vehicle",
-        }, {
-                "No ADS-B Emitter Category Information",
-                "Surface Vehicle – Emergency Vehicle",
-                "Surface Vehicle – Service Vehicle",
-                "Point Obstacle (includes tethered balloons)",
-                "Cluster Obstacle",
-                "Line Obstacle",
-                "Reserved",
-                "Reserved"
-        }, {
-                "No ADS-B Emitter Category Information",
-                "Reserved",
-                "Reserved",
-                "Reserved",
-                "Reserved",
-                "Reserved",
-                "Reserved",
-                "Reserved"
-        }};
 
         if (effectiveVersion == 0 && typeCode == 2) {
             // version 0 exceptions to the version 2 mapping for category set C
@@ -122,6 +129,6 @@ public final class Identification {
             }
         }
 
-        return categories[4 - typeCode][emitterCategory];
+        return CATEGORIES[4 - typeCode][emitterCategory];
     }
 }
