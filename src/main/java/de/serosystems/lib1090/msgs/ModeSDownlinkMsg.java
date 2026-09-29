@@ -277,9 +277,11 @@ public class ModeSDownlinkMsg implements Serializable {
                         String.format("Invalid downlink format %d detected.", downlinkFormat));
         }
 
-        // determine address type according to ED-102B §2.2.3.2.1.3 TABLE 2-7, "CF" Field Code
-        // Definitions in DF=18 ADS-B and TIS-B Messages, and address source as per
-        // QualifiedAddress.Source
+        // determine address type according to ED-102B §2.2.3.2.1.5 TABLE 2-8, "Determining the Type of
+        // Address in the AA Field", and address source as per QualifiedAddress.Source. For DF=18 with
+        // CF=2 and IMF=1, and with CF=3, which ED-102B reserves, the address type follows ED-102A
+        // Table 2-11 instead: only version 2 TIS-B sends them, and the decoder decodes them only in its
+        // TIS-B v2 compatibility mode (see StatefulModeSDecoder.Builder#tisbV2CompatibilityMode)
         QualifiedAddress.Source source;
         if (downlinkFormat == 18) {
             // check CF
