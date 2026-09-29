@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.squitter.opstatus;
 
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -191,13 +193,37 @@ class OperationalModeLayoutsTest {
         assertNull(new SurfaceOperationalModeCodeV3(0).getLateralAxisGPSAntennaOffset());
         assertNull(new SurfaceOperationalModeCodeV3(0).getLongitudinalAxisGPSAntennaOffset());
 
-        // ME 34-35 = 2, direction left => +4 m
-        assertEquals(4, new SurfaceOperationalModeCodeV3(0x40).getLateralAxisGPSAntennaOffset());
-        // ME 33 set (right), ME 34-35 = 2 => -4 m
-        assertEquals(-4, new SurfaceOperationalModeCodeV3(0xC0).getLateralAxisGPSAntennaOffset());
-        // ME 36-40 = 1 => 0 m, = 31 => 60 m ("or above")
-        assertEquals(0, new SurfaceOperationalModeCodeV3(0x1).getLongitudinalAxisGPSAntennaOffset());
-        assertEquals(60, new SurfaceOperationalModeCodeV3(0x1F).getLongitudinalAxisGPSAntennaOffset());
+        // ME 34-35 = 2, direction left => (2, 4] m
+        assertEquals(Interval.of(Bound.MORE_THAN, 2, Bound.AT_MOST, 4),
+                new SurfaceOperationalModeCodeV3(0x40).getLateralAxisGPSAntennaOffset());
+        // ME 33 set (right), ME 34-35 = 2 => [-4, -2) m
+        assertEquals(Interval.of(Bound.AT_LEAST, -4, Bound.BELOW, -2),
+                new SurfaceOperationalModeCodeV3(0xC0).getLateralAxisGPSAntennaOffset());
+        // ME 33 set (right) with zero magnitude is an offset of exactly 0 m
+        assertEquals(Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 0),
+                new SurfaceOperationalModeCodeV3(0x80).getLateralAxisGPSAntennaOffset());
+        // the top magnitude has no end: more than 4 m, in version 2 as in version 3
+        assertEquals(Interval.of(Bound.MORE_THAN, 4, Bound.NONE, Double.NaN),
+                new SurfaceOperationalModeCodeV3(0x60).getLateralAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.MORE_THAN, 4, Bound.NONE, Double.NaN),
+                new SurfaceOperationalModeCodeV2(0x60).getLateralAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.NONE, Double.NaN, Bound.BELOW, -4),
+                new SurfaceOperationalModeCodeV3(0xE0).getLateralAxisGPSAntennaOffset());
+
+        // ME 36-40 = 1 is no offset but "position offset applied"
+        assertNull(new SurfaceOperationalModeCodeV3(0x1).getLongitudinalAxisGPSAntennaOffset());
+        // = 2 => [0, 2] m, = 3 => (2, 4] m, = 30 => (56, 58] m
+        assertEquals(Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 2),
+                new SurfaceOperationalModeCodeV3(0x2).getLongitudinalAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.MORE_THAN, 2, Bound.AT_MOST, 4),
+                new SurfaceOperationalModeCodeV3(0x3).getLongitudinalAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.MORE_THAN, 56, Bound.AT_MOST, 58),
+                new SurfaceOperationalModeCodeV3(0x1E).getLongitudinalAxisGPSAntennaOffset());
+        // = 31 => more than 58 m, in version 2 as in version 3
+        assertEquals(Interval.of(Bound.MORE_THAN, 58, Bound.NONE, Double.NaN),
+                new SurfaceOperationalModeCodeV3(0x1F).getLongitudinalAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.MORE_THAN, 58, Bound.NONE, Double.NaN),
+                new SurfaceOperationalModeCodeV2(0x1F).getLongitudinalAxisGPSAntennaOffset());
 
         // the whole field reading exactly 1 is the Position Offset Applied encoding
         assertTrue(new SurfaceOperationalModeCodeV3(0x1).isPositionOffsetApplied());

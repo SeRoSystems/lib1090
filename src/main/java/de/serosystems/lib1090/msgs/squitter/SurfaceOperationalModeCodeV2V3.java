@@ -18,6 +18,9 @@
 
 package de.serosystems.lib1090.msgs.squitter;
 
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
+
 /**
  * Common API for the surface Operational Mode Code of ADS-B versions 2 and 3, format {@code 0}.
  */
@@ -40,41 +43,59 @@ public interface SurfaceOperationalModeCodeV2V3 extends OperationalModeCodeV2V3 
 
     /**
      * Lateral GPS antenna offset, derived from ME 33–35: ME 33 gives the direction and ME 34–35 the
-     * magnitude, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-59.
+     * magnitude, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-59 for version 3 and ED-102A §2.2.3.2.7.2.4.7
+     * Table 2-66 for version 2.
      * <ul>
      *     <li>measured from the longitudinal center line (roll axis) of the aircraft</li>
-     *     <li>in meters, at a resolution of 2 m, denoting an upper bound</li>
+     *     <li>in meters, in steps of 2 m</li>
      *     <li>positive toward the left wing tip, negative toward the right</li>
-     *     <li>capped at 6 m, i.e. 6 means "or above"</li>
      * </ul>
+     * The two versions mean the same: version 3 states the top magnitude as more than 4 m, and version 2,
+     * although it tabulates 6 m, encodes every larger offset with it too (NOTE 3 of Table 2-66). So the
+     * top magnitude has no end, e.g. (4, ∞) to the left and (−∞, −4) to the right. Zero magnitude to the
+     * right is an offset of exactly 0.
      *
-     * @return the lateral offset in meters, or {@code null} for "no data"
+     * @return the interval of the lateral offset in meters, or {@code null} for "no data"
      * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */
-    default Integer getLateralAxisGPSAntennaOffset() {
+    default Interval getLateralAxisGPSAntennaOffset() {
         boolean right = getMEBit(33);
         int magnitude = getMEBits(34, 35);
-        if (!right && magnitude == 0)
-            return null;
-        return 2 * (right ? -magnitude : magnitude);
+        if (magnitude == 0)
+            return right ? Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 0) : null;
+        Interval left = magnitude == 3
+                ? Interval.of(Bound.MORE_THAN, 4, Bound.NONE, Double.NaN)
+                : Interval.of(Bound.MORE_THAN, 2 * (magnitude - 1), Bound.AT_MOST, 2 * magnitude);
+        return right ? left.negated() : left;
     }
 
     /**
-     * Longitudinal GPS antenna offset, ME 36–40, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-60.
+     * Longitudinal GPS antenna offset, ME 36–40, ED-102B §2.2.3.2.7.2.4.7 TABLE 2-60 for version 3 and
+     * ED-102A §2.2.3.2.7.2.4.7 Table 2-67 for version 2.
      * <ul>
-     *     <li>measured from the nose of the aircraft</li>
-     *     <li>in meters, at a resolution of 2 m, denoting an upper bound</li>
-     *     <li>capped at 60 m, i.e. 60 means "or above"</li>
+     *     <li>measured aft from the nose of the aircraft</li>
+     *     <li>in meters, in steps of 2 m: [0, 2] for code 2, then (2, 4] for code 3 and so on</li>
      * </ul>
+     * As for the lateral offset, the two versions mean the same: version 3 states the top code as more
+     * than 58 m, and version 2, although it tabulates 60 m, encodes every larger offset with it too
+     * (NOTE 1 of Table 2-67). So code 31 is (58, ∞).
      *
-     * @return the longitudinal offset in meters, or {@code null} for "no data"
+     * @return the interval of the longitudinal offset in meters, or {@code null} for "no data" and for
+     * code 1, which reports no offset but that the position offset has been applied, see
+     * {@link #isPositionOffsetApplied()}
      * @see #isPositionOffsetApplied() if the aircraft already corrects for the offset, this is not
      * meaningful
      */
-    default Integer getLongitudinalAxisGPSAntennaOffset() {
+    default Interval getLongitudinalAxisGPSAntennaOffset() {
         int offset = getMEBits(36, 40);
-        return offset == 0 ? null : 2 * (offset - 1);
+        if (offset <= 1)
+            return null;
+        if (offset == 2)
+            return Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 2);
+        if (offset == 31)
+            return Interval.of(Bound.MORE_THAN, 58, Bound.NONE, Double.NaN);
+        return Interval.of(Bound.MORE_THAN, 2 * (offset - 2), Bound.AT_MOST, 2 * (offset - 1));
     }
 
     /**

@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090;
 
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -25,6 +27,7 @@ import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.PositionMsg;
+import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalModeCodeV2V3;
 import de.serosystems.lib1090.msgs.tisb.FineAirbornePositionMsg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -351,6 +354,19 @@ public class StatefulModeSDecoderTest {
         decoder.decode("963C6586F8000000006000000000", Instant.EPOCH); // ADS-R, version 3
         assertInstanceOf(de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV3Msg.class,
                 decoder.decode("963C6586EA3E90000000022EB763", Instant.EPOCH));
+    }
+
+    /**
+     * ED-102B TABLE 2-59 and TABLE 2-60: the top codes of the GPS antenna offset have no upper end.
+     */
+    @Test
+    public void gpsAntennaOffsetTopCodes_areOpenEnded() throws UnspecifiedFormatError, BadFormatException {
+        SurfaceOperationalStatusV3Msg status =
+                (SurfaceOperationalStatusV3Msg) decoder.decode("8D4840D6F9000F007F6000000000", Instant.EPOCH);
+        SurfaceOperationalModeCodeV2V3 om = (SurfaceOperationalModeCodeV2V3) status.getOperationalMode();
+        assertEquals(Interval.of(Bound.MORE_THAN, 4, Bound.NONE, Double.NaN), om.getLateralAxisGPSAntennaOffset());
+        assertEquals(Interval.of(Bound.MORE_THAN, 58, Bound.NONE, Double.NaN),
+                om.getLongitudinalAxisGPSAntennaOffset());
     }
 
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
