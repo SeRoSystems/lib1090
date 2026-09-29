@@ -19,6 +19,7 @@
 package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.msgs.tisb.FineSurfacePositionMsg;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -211,6 +212,48 @@ public class GlobalPositionDecodingTest {
         testSurfaceTimingGap(false, true, Duration.ofMillis(25_000));
         testSurfaceTimingGap(true, false, Duration.ofMillis(25_000));
         testSurfaceTimingGap(true, true, Duration.ofMillis(25_000));
+    }
+
+    /**
+     * ED-102B §2.2.17.4.2: TIS-B pairs even and odd positions only within 10 seconds, surface positions included,
+     * whereas the ADS-B surface window at low speed is 50 seconds.
+     */
+    @Test
+    void testTISBSurfaceTiming() {
+        Position ref = new Position(30., 80., 0.);
+        Duration tisb = Duration.ofSeconds(10);
+
+        CPREncodedPosition even = CPREncodedPosition.ofSurface(17, false, tisb, 0x1ABC2, 0x07058, Instant.EPOCH);
+        CPREncodedPosition oddAt10 = CPREncodedPosition.ofSurface(17, true, tisb, 0x11C19, 0x13560,
+                Instant.EPOCH.plusMillis(10_000));
+        CPREncodedPosition oddAt20 = CPREncodedPosition.ofSurface(17, true, tisb, 0x11C19, 0x13560,
+                Instant.EPOCH.plusMillis(20_000));
+
+        assertEquals(tisb, even.maxGap(oddAt20));
+        assertNotNull(even.decodeGlobal(oddAt10, ref));
+        assertNull(even.decodeGlobal(oddAt20, ref));
+        assertNull(oddAt20.decodeGlobal(even, ref));
+
+        // the same frames of ADS-B at low speed are still paired
+        CPREncodedPosition adsbEven = CPREncodedPosition.ofSurface(17, false, false, 0x1ABC2, 0x07058, Instant.EPOCH);
+        CPREncodedPosition adsbOdd = CPREncodedPosition.ofSurface(17, true, false, 0x11C19, 0x13560,
+                Instant.EPOCH.plusMillis(20_000));
+        assertNotNull(adsbEven.decodeGlobal(adsbOdd, ref));
+
+        // with windows of different length, the shorter one applies
+        assertEquals(tisb, even.maxGap(adsbOdd));
+        assertEquals(tisb, adsbOdd.maxGap(even));
+    }
+
+    /**
+     * A TIS-B fine surface position message creates its encoded position with the 10-second TIS-B window.
+     */
+    @Test
+    void testTISBFineSurfacePositionUsesTISBWindow() throws Exception {
+        // DF=18, CF=2 (TIS-B fine, ICAO address), format type code 7
+        FineSurfacePositionMsg msg = new FineSurfacePositionMsg("92A534363BFFF39B73400B6286F4", Instant.EPOCH);
+        CPREncodedPosition cpr = msg.getCPREncodedPosition();
+        assertEquals(Duration.ofSeconds(10), cpr.maxGap(cpr));
     }
 
     private static void testSurfaceTiming(Instant t1, boolean hs1, Instant t2, boolean hs2, boolean expectSuccess) {

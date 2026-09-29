@@ -22,6 +22,7 @@ import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.movement.Movement;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -58,12 +59,27 @@ public final class SurfacePosition {
      * @return the encoded surface position
      */
     public static CPREncodedPosition extractCPREncodedPosition(BitReader br, Movement movement, Instant timestamp) {
+        Interval groundSpeed = movement.getGroundSpeed();
+        boolean highGroundSpeed = groundSpeed == null || groundSpeed.getGuaranteedUpperBound() > 25;
+        return extractCPREncodedPosition(br, Duration.ofSeconds(highGroundSpeed ? 25 : 50), timestamp);
+    }
+
+    /**
+     * Extract the CPR-encoded surface position from the message payload, for a source with its own pairing
+     * window, see {@link CPREncodedPosition#ofSurface(int, boolean, Duration, int, int, Instant)}.
+     *
+     * @param br            bit reader positioned over the 7-byte extended squitter payload
+     * @param pairingWindow the longest time the position may be apart from one of the other format for global
+     *                      decoding
+     * @param timestamp     timestamp for the position message
+     * @return the encoded surface position
+     */
+    public static CPREncodedPosition extractCPREncodedPosition(BitReader br, Duration pairingWindow,
+                                                               Instant timestamp) {
         Objects.requireNonNull(timestamp, "timestamp");
         boolean cprFormat = br.readBoolean(22);
         int cprEncodedLat = br.readInt(23, 39);
         int cprEncodedLon = br.readInt(40, 56);
-        Interval groundSpeed = movement.getGroundSpeed();
-        boolean highGroundSpeed = groundSpeed == null || groundSpeed.getGuaranteedUpperBound() > 25;
-        return CPREncodedPosition.ofSurface(17, cprFormat, highGroundSpeed, cprEncodedLat, cprEncodedLon, timestamp);
+        return CPREncodedPosition.ofSurface(17, cprFormat, pairingWindow, cprEncodedLat, cprEncodedLon, timestamp);
     }
 }

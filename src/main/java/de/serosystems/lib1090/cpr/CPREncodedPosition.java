@@ -48,10 +48,10 @@ public final class CPREncodedPosition implements Serializable {
     private final boolean isSurface;
 
     /**
-     * Whether the corresponding surface position message indicated a high or unknown speed.
-     * False (and not applicable) if {@link #isSurface} is false.
+     * The longest time this position may be apart from one of the other format to be decoded globally
+     * with it, see {@link #maxGap(CPREncodedPosition)}.
      */
-    private final boolean isHighSurfaceSpeed;
+    private final Duration pairingWindow;
 
     /**
      * Y coordinate within CPR Zone.
@@ -76,18 +76,19 @@ public final class CPREncodedPosition implements Serializable {
     /**
      * New CPR Encoded Position.
      *
-     * @param nBits              number of bits for encoded latitude and longitude. Must be 12, 14, or 17
-     * @param isOdd              whether this encoded position originates from an odd position message
-     * @param isSurface          whether this encoded position originates from a surface position message
-     * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
-     * @param yz                 Y coordinate within CPR zone, i.e. encoded latitude as in position message
-     * @param xz                 X coordinate within CPR zone, i.e. encoded longitude as in position message
-     * @param timestamp          timestamp of position message, must not be null
+     * @param nBits         number of bits for encoded latitude and longitude. Must be 12, 14, or 17
+     * @param isOdd         whether this encoded position originates from an odd position message
+     * @param isSurface     whether this encoded position originates from a surface position message
+     * @param pairingWindow the longest time this position may be apart from one of the other format for global
+     *                      decoding, must not be null
+     * @param yz            Y coordinate within CPR zone, i.e. encoded latitude as in position message
+     * @param xz            X coordinate within CPR zone, i.e. encoded longitude as in position message
+     * @param timestamp     timestamp of position message, must not be null
      */
     private CPREncodedPosition(int nBits,
                                boolean isOdd,
                                boolean isSurface,
-                               boolean isHighSurfaceSpeed,
+                               Duration pairingWindow,
                                int yz,
                                int xz,
                                Instant timestamp) {
@@ -96,8 +97,7 @@ public final class CPREncodedPosition implements Serializable {
         this.nBits = nBits;
         this.isOdd = isOdd;
         this.isSurface = isSurface;
-        // note: setting to this to false if !isSurface makes equals/hashCode easier
-        this.isHighSurfaceSpeed = isSurface && isHighSurfaceSpeed;
+        this.pairingWindow = Objects.requireNonNull(pairingWindow, "pairingWindow");
         this.yz = yz;
         this.xz = xz;
         this.timestamp = Objects.requireNonNull(timestamp, "timestamp");
@@ -106,7 +106,8 @@ public final class CPREncodedPosition implements Serializable {
     }
 
     /**
-     * New CPR Encoded Position for an airborne position message.
+     * New CPR Encoded Position for an airborne position message. It is decoded globally only with one of the other
+     * format received within 10 seconds, ED-102B §2.2.10.3.1.
      *
      * @param nBits     number of bits for encoded latitude and longitude. Must be 12, 14, or 17
      * @param isOdd     whether this encoded position originates from an odd position message
@@ -120,15 +121,17 @@ public final class CPREncodedPosition implements Serializable {
                                                 int yz,
                                                 int xz,
                                                 Instant timestamp) {
-        return new CPREncodedPosition(nBits, isOdd, false, false, yz, xz, timestamp);
+        return new CPREncodedPosition(nBits, isOdd, false, Duration.ofSeconds(10), yz, xz, timestamp);
     }
 
     /**
-     * New CPR Encoded Position for a surface position message.
+     * New CPR Encoded Position for an ADS-B surface position message. It is decoded globally only with one of the
+     * other format received within 25 seconds, or within 50 seconds if the ground speed is at most 25 knots,
+     * ED-102B §2.2.10.3.2.
      *
      * @param nBits              number of bits for encoded latitude and longitude. Must be 12, 14, or 17
      * @param isOdd              whether this encoded position originates from an odd position message
-     * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed. Can be arbitrary if isSurface is false.
+     * @param isHighSurfaceSpeed whether the corresponding surface position message indicated a high or unknown speed
      * @param yz                 Y coordinate within CPR zone, i.e. encoded latitude as in position message
      * @param xz                 X coordinate within CPR zone, i.e. encoded longitude as in position message
      * @param timestamp          timestamp of position message
@@ -140,7 +143,29 @@ public final class CPREncodedPosition implements Serializable {
                                                int yz,
                                                int xz,
                                                Instant timestamp) {
-        return new CPREncodedPosition(nBits, isOdd, true, isHighSurfaceSpeed, yz, xz, timestamp);
+        return ofSurface(nBits, isOdd, Duration.ofSeconds(isHighSurfaceSpeed ? 25 : 50), yz, xz, timestamp);
+    }
+
+    /**
+     * New CPR Encoded Position for a surface position message whose source has its own pairing rule, e.g. TIS-B,
+     * whose even and odd messages must be received within 10 seconds, ED-102B §2.2.17.4.2.
+     *
+     * @param nBits         number of bits for encoded latitude and longitude. Must be 12, 14, or 17
+     * @param isOdd         whether this encoded position originates from an odd position message
+     * @param pairingWindow the longest time this position may be apart from one of the other format for global
+     *                      decoding, must not be null
+     * @param yz            Y coordinate within CPR zone, i.e. encoded latitude as in position message
+     * @param xz            X coordinate within CPR zone, i.e. encoded longitude as in position message
+     * @param timestamp     timestamp of position message
+     * @return CPR encoded position
+     */
+    public static CPREncodedPosition ofSurface(int nBits,
+                                               boolean isOdd,
+                                               Duration pairingWindow,
+                                               int yz,
+                                               int xz,
+                                               Instant timestamp) {
+        return new CPREncodedPosition(nBits, isOdd, true, pairingWindow, yz, xz, timestamp);
     }
 
     public int getNBits() {
@@ -194,9 +219,9 @@ public final class CPREncodedPosition implements Serializable {
     }
 
     /**
-     * Get maximum time gap between messages for global decoding, based on their type.
-     * See ED-102B §2.2.10.3.1 and ED-102B §2.2.10.3.2.
-     * This function is still applicable to surface position messages.
+     * Get maximum time gap between messages for global decoding: the shorter of the two pairing windows the
+     * positions were created with. See ED-102B §2.2.10.3.1 and ED-102B §2.2.10.3.2 for ADS-B, and ED-102B
+     * §2.2.17.4.2 for TIS-B.
      * For airborne position messages, it may be used, but it is stricter than the standard, see ED-102B §2.2.10.3.1.
      *
      * @param other other message, must not be null
@@ -204,14 +229,7 @@ public final class CPREncodedPosition implements Serializable {
      */
     public Duration maxGap(CPREncodedPosition other) {
         Objects.requireNonNull(other, "other must not be null");
-        if (isSurface && other.isSurface) {
-            if (isHighSurfaceSpeed || other.isHighSurfaceSpeed)
-                return Duration.ofMillis(25_000L);
-            else
-                return Duration.ofMillis(50_000L);
-        } else {
-            return Duration.ofMillis(10_000L);
-        }
+        return pairingWindow.compareTo(other.pairingWindow) <= 0 ? pairingWindow : other.pairingWindow;
     }
 
     /**
@@ -467,7 +485,7 @@ public final class CPREncodedPosition implements Serializable {
         return this.nBits == that.nBits &&
                 this.isOdd == that.isOdd &&
                 this.isSurface == that.isSurface &&
-                this.isHighSurfaceSpeed == that.isHighSurfaceSpeed &&
+                this.pairingWindow.equals(that.pairingWindow) &&
                 this.yz == that.yz &&
                 this.xz == that.xz &&
                 this.timestamp.equals(that.timestamp);
@@ -475,7 +493,7 @@ public final class CPREncodedPosition implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nBits, isOdd, isSurface, isHighSurfaceSpeed, yz, xz, timestamp);
+        return Objects.hash(nBits, isOdd, isSurface, pairingWindow, yz, xz, timestamp);
     }
 
     @Override
@@ -484,7 +502,7 @@ public final class CPREncodedPosition implements Serializable {
                 "nBits=" + nBits + ", " +
                 "isOdd=" + isOdd + ", " +
                 "isSurface=" + isSurface + ", " +
-                "isHighSurfaceSpeed=" + isHighSurfaceSpeed + ", " +
+                "pairingWindow=" + pairingWindow + ", " +
                 "yz=" + yz + ", " +
                 "xz=" + xz + ", " +
                 "timestamp=" + timestamp + ']';
