@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.ContingencyPlan;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -36,7 +37,7 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
     private static final byte SUBTYPE = 4;
 
     private byte contingencyPlan;
-    private boolean currentOrNext;
+    private boolean nextTCP;
     private short tcpAltitudeEncoded;
     private int tcpLatitudeEncoded;
     private int tcpLongitudeEncoded;
@@ -81,7 +82,7 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
             throw new BadFormatException("UAS/RPAS contingency reports have subtype 4");
 
         contingencyPlan = b.readByte(9, 12);
-        currentOrNext = b.readBoolean(13);
+        nextTCP = b.readBoolean(13);
         tcpAltitudeEncoded = b.readShort(14, 22);
         tcpLatitudeEncoded = b.readInt(23, 39);
         tcpLongitudeEncoded = b.readInt(40, 56);
@@ -95,18 +96,38 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
     }
 
     /**
-     * @return the contingency plan
+     * @return the encoded contingency plan, ED-102B §2.2.3.2.8.1.3.1 TABLE 2-104
      */
-    public byte getContingencyPlan() {
+    public byte getContingencyPlanEncoded() {
         return contingencyPlan;
     }
 
     /**
-     * @return true if the transmitted contingency location applies to the next contingency plan;
-     * false if it applies to the current one
+     * @return the contingency plan, ED-102B §2.2.3.2.8.1.3.1 TABLE 2-104
      */
-    public boolean isCurrentOrNext() {
-        return currentOrNext;
+    public ContingencyPlan getContingencyPlan() {
+        return ContingencyPlan.forEncoded(contingencyPlan);
+    }
+
+    /**
+     * Whether the message carries data: contingency plan 0 declares the whole message invalid or empty, ED-102B
+     * §2.2.3.2.8.1.3.1 TABLE 2-104, and the TCP getters then return {@code null}.
+     *
+     * @return false for contingency plan 0
+     */
+    public boolean isValid() {
+        return contingencyPlan != 0;
+    }
+
+    /**
+     * Which Trajectory Change Point (TCP) the altitude, latitude and longitude subfields encode, ED-102B
+     * §2.2.3.2.8.1.3.2 TABLE 2-105. The bit alternates with every transmission of the message until the last TCP
+     * has been sequenced, from when on it stays ZERO.
+     *
+     * @return true if the next TCP is encoded, false if the current one
+     */
+    public boolean isNextTCP() {
+        return nextTCP;
     }
 
     /**
@@ -125,10 +146,11 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
 
     /**
      * @return the uncorrected Barometric Pressure Altitude of the UAS/RPAS Trajectory Change Point (TCP) in feet,
-     * or null if no TCP altitude is available (see {@link #hasTcpAltitude()})
+     * or null if no TCP altitude is available (see {@link #hasTcpAltitude()}) or the message is not valid (see
+     * {@link #isValid()})
      */
     public Integer getTcpAltitude() {
-        return hasTcpAltitude() ? (tcpAltitudeEncoded - 3) * 500 : null;
+        return isValid() && hasTcpAltitude() ? (tcpAltitudeEncoded - 3) * 500 : null;
     }
 
     /**
@@ -139,9 +161,11 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
     }
 
     /**
-     * @return the latitude of the UAS/RPAS Trajectory Change Point (TCP) in degrees, north positive
+     * @return the latitude of the UAS/RPAS Trajectory Change Point (TCP) in degrees, north positive, or null if the
+     * message is not valid (see {@link #isValid()})
      */
-    public double getTcpLatitude() {
+    public Double getTcpLatitude() {
+        if (!isValid()) return null;
         int signed = (tcpLatitudeEncoded << 15) >> 15;
         return signed * 360. / (1 << 17);
     }
@@ -154,9 +178,11 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
     }
 
     /**
-     * @return the longitude of the UAS/RPAS Trajectory Change Point (TCP) in degrees, east positive
+     * @return the longitude of the UAS/RPAS Trajectory Change Point (TCP) in degrees, east positive, or null if the
+     * message is not valid (see {@link #isValid()})
      */
-    public double getTcpLongitude() {
+    public Double getTcpLongitude() {
+        if (!isValid()) return null;
         int signed = (tcpLongitudeEncoded << 15) >> 15;
         return signed * 360. / (1 << 17);
     }
@@ -165,7 +191,7 @@ public class UASRPASContingencyMsg extends TypeCodedExtendedSquitter implements 
     public String toString() {
         return "UASRPASContingencyMsg{" + super.toString() +
                 ", contingencyPlan=" + contingencyPlan +
-                ", currentOrNext=" + currentOrNext +
+                ", nextTCP=" + nextTCP +
                 ", tcpAltitudeEncoded=" + tcpAltitudeEncoded +
                 ", tcpLatitudeEncoded=" + tcpLatitudeEncoded +
                 ", tcpLongitudeEncoded=" + tcpLongitudeEncoded +
