@@ -20,8 +20,6 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 
-import java.io.Serializable;
-
 /**
  * Decoder for the data link capability report (BDS 1,0), following the layout of DO-181F Table
  * B-3-16a.
@@ -39,7 +37,7 @@ import java.io.Serializable;
  * </ul>
  */
 @SuppressWarnings("unused")
-public class DataLinkCapabilityReport extends BDSRegister implements Serializable {
+public class DataLinkCapabilityReport extends BDSRegister {
     private static final long serialVersionUID = 2607206512004324831L;
 
     private static final BDSCode BDS_CODE = new BDSCode(1, 0);

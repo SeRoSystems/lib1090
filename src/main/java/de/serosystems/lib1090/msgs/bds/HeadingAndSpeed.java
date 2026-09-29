@@ -20,14 +20,12 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 
-import java.io.Serializable;
-
 /**
  * Decoder for the heading and speed report (BDS 6,0), as defined in ICAO Doc 9871 (First
  * Edition, AN/464) §A.2 TABLE A-2-96.
  */
 @SuppressWarnings("unused")
-public class HeadingAndSpeed extends BDSRegister implements Serializable {
+public class HeadingAndSpeed extends BDSRegister {
     private static final long serialVersionUID = -4234774022351033835L;
 
     private static final BDSCode BDS_CODE = new BDSCode(6, 0);

@@ -19,13 +19,16 @@
 package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.StatefulModeSDecoder;
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.msgs.bds.*;
 import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -69,13 +72,45 @@ public class SerializationTest {
         }
     }
 
-    private static ModeSDownlinkMsg roundTrip(ModeSDownlinkMsg msg) throws IOException, ClassNotFoundException {
+    /**
+     * BDS registers keep their message through a round trip: it is held by {@link BDSRegister}, which the decoded
+     * fields of the subclasses do not replace, e.g. for the resolution advisories of BDS 3,0.
+     */
+    @Test
+    public void bdsRegisters_surviveRoundTrip() throws Exception {
+        BDSRegister[] registers = {
+                new ACASActiveResolutionAdvisoryReport(Tools.hexStringToByteArray("300003FC000000")),
+                new AircraftIdentification(Tools.hexStringToByteArray("202CC371C31DE0")),
+                new CommonUsageGICBCapabilityReport(Tools.hexStringToByteArray("FA81C100000000")),
+                new DataLinkCapabilityReport(Tools.hexStringToByteArray("10C003B3FD7260")),
+                new HeadingAndSpeed(Tools.hexStringToByteArray("A74A072BFDEFC1")),
+                new SelectedVerticalIntention(Tools.hexStringToByteArray("85E42F31300000")),
+                new TrackAndTurn(Tools.hexStringToByteArray("81951536E024D4")),
+        };
+        for (BDSRegister register : registers) {
+            BDSRegister back = roundTrip(register);
+            String name = register.getClass().getSimpleName();
+
+            assertEquals(register.getClass(), back.getClass(), name);
+            assertArrayEquals(register.getMessage(), back.getMessage(), name);
+            assertEquals(register.toString(), back.toString(), name);
+        }
+
+        ACASActiveResolutionAdvisoryReport ra = (ACASActiveResolutionAdvisoryReport) registers[0];
+        ACASActiveResolutionAdvisoryReport raBack = roundTrip(ra);
+        assertArrayEquals(ra.getActiveResolutionAdvisories(), raBack.getActiveResolutionAdvisories());
+        assertArrayEquals(ra.getResolutionAdvisoriesComplementsRecord(),
+                raBack.getResolutionAdvisoriesComplementsRecord());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Serializable> T roundTrip(T object) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
-            out.writeObject(msg);
+            out.writeObject(object);
         }
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-            return (ModeSDownlinkMsg) in.readObject();
+            return (T) in.readObject();
         }
     }
 
