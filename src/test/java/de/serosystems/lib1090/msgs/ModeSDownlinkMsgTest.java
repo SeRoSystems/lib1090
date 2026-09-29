@@ -57,6 +57,15 @@ class ModeSDownlinkMsgTest {
     }
 
     /**
+     * An unknown downlink format is rejected with its number in the reason.
+     */
+    @Test
+    void unknownDownlinkFormat_isBadFormat() {
+        BadFormatException e = assertThrows(BadFormatException.class, () -> new ModeSDownlinkMsg("38000000000000"));
+        assertTrue(e.getMessage().endsWith("Invalid downlink format 7 detected."), e.getMessage());
+    }
+
+    /**
      * Equal messages hash equally, also where the parity is overlaid with the address and one receiver reports it
      * with the CRC subtracted: here a DF=20 reply as received, and with its address as the parity field.
      */

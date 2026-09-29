@@ -273,8 +273,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
             default: // unknown downlink format
                 // throw exception
-                throw new BadFormatException(
-                        String.format("Invalid downlink format %d detected.", downlinkFormat));
+                throw new BadFormatException("Invalid downlink format " + downlinkFormat + " detected.");
         }
 
         // determine address type according to ED-102B §2.2.3.2.1.5 TABLE 2-8, "Determining the Type of
