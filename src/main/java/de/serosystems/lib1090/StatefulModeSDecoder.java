@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090;
 
+import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.cpr.PositionDecoder;
 import de.serosystems.lib1090.cpr.PositionDecoderSupplier;
 import de.serosystems.lib1090.decoding.diffbaroalt.DiffBaroAlt;
@@ -163,7 +164,7 @@ public class StatefulModeSDecoder {
 
         // we need stateful decoding, because ADS-R version > 0 can only be assumed
         // if matching version info in operational status has been found.
-        DecoderData dd = getDecoderData(modes.getAddress());
+        DecoderData dd = getDecoderData(modes.getAddress(), timestamp);
 
         // what kind of extended squitter?
         byte ftc = es1090.getFormatTypeCode();
@@ -365,7 +366,7 @@ public class StatefulModeSDecoder {
         // interpret ME field as standard ADS-B
         TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
-        DecoderData dd = getDecoderData(modes.getAddress());
+        DecoderData dd = getDecoderData(modes.getAddress(), timestamp);
 
         // what kind of extended squitter?
         byte ftc = es1090.getFormatTypeCode();
@@ -414,7 +415,7 @@ public class StatefulModeSDecoder {
 
         // we need stateful decoding, because ADS-B version > 0 can only be assumed
         // if matching version info in operational status has been found.
-        DecoderData dd = getDecoderData(modes.getAddress());
+        DecoderData dd = getDecoderData(modes.getAddress(), timestamp);
 
         // what kind of extended squitter?
         byte ftc = es1090.getFormatTypeCode();
@@ -695,8 +696,9 @@ public class StatefulModeSDecoder {
         if (msg == null || !msg.hasValidPosition())
             return null;
 
-        DecoderData dd = getDecoderData(address);
-        Position pos = dd.posDec.decodePosition(msg.getCPREncodedPosition(), receiver);
+        CPREncodedPosition cpr = msg.getCPREncodedPosition();
+        DecoderData dd = getDecoderData(address, cpr.getTimestamp());
+        Position pos = dd.posDec.decodePosition(cpr, receiver);
 
         if (pos != null && msg.hasValidAltitude()) {
             pos.setAltitude(Double.valueOf(msg.getAltitude()));
@@ -723,8 +725,8 @@ public class StatefulModeSDecoder {
      */
     public byte getAdsbVersion(QualifiedAddress address) {
         if (address == null) return 0;
-        DecoderData dd = getDecoderData(address);
-        return dd.adsbVersion;
+        DecoderData dd = decoderData.get(address);
+        return dd == null ? 0 : dd.adsbVersion;
     }
 
     /**
@@ -737,8 +739,8 @@ public class StatefulModeSDecoder {
      */
     public DiffBaroAlt getDiffBaroAlt(ModeSDownlinkMsg reply) {
         if (reply == null) return null;
-        DecoderData dd = getDecoderData(reply.getAddress());
-        return dd.geoMinusBaro;
+        DecoderData dd = decoderData.get(reply.getAddress());
+        return dd == null ? null : dd.geoMinusBaro;
     }
 
     /**
@@ -746,15 +748,17 @@ public class StatefulModeSDecoder {
      * every 1 Mio messages if more than 30000 targets are tracked.
      */
     public void clearDecoders() {
+        // nothing decoded yet, so no time to measure the age of an entry against
+        if (latestTimestamp == null) return;
         decoderData.values().removeIf(dd -> Duration.between(dd.lastUsed, latestTimestamp).compareTo(DECODER_TIMEOUT) > 0);
     }
 
-    private DecoderData getDecoderData(QualifiedAddress address) {
+    private DecoderData getDecoderData(QualifiedAddress address, Instant timestamp) {
         DecoderData dd = decoderData.computeIfAbsent(
                 address,
                 a -> positionDecoderSupplier.andThen(DecoderData::new).apply(a)
         );
-        dd.lastUsed = latestTimestamp;
+        dd.lastUsed = timestamp;
         return dd;
     }
 
@@ -779,7 +783,6 @@ public class StatefulModeSDecoder {
 
         DecoderData(PositionDecoder posDec) {
             adsbVersion = 0;
-            lastUsed = Instant.now();
             this.posDec = posDec;
         }
     }

@@ -230,6 +230,30 @@ public class StatefulModeSDecoderTest {
         assertNull(extractPosition(odd, t0.plusMillis(1_519)));
     }
 
+    /**
+     * A query before the first decode used to create an entry without a time, on which a later cleanup threw.
+     */
+    @Test
+    public void queryBeforeFirstDecode_doesNotBreakCleanup() throws UnspecifiedFormatError, BadFormatException {
+        assertEquals(0, decoder.getAdsbVersion(new ModeSDownlinkMsg("8DABCDEF2004200000000082AA9F")));
+        assertNull(decoder.getDiffBaroAlt(new ModeSDownlinkMsg("8DABCDEF2004200000000082AA9F")));
+        decoder.decode("8D4840D6202CC371C32CE0576098", Instant.EPOCH);
+        assertDoesNotThrow(decoder::clearDecoders);
+    }
+
+    /**
+     * A position extracted before the first decode gives its entry the time of its CPR frame.
+     */
+    @Test
+    public void extractPositionBeforeFirstDecode_doesNotBreakCleanup()
+            throws UnspecifiedFormatError, BadFormatException {
+        ModeSDownlinkMsg msg = new StatefulModeSDecoder().decode("8D40621D58C382D690C8AC2863A7", Instant.EPOCH);
+        assertNull(decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null));
+        assertDoesNotThrow(decoder::clearDecoders);
+        decoder.decode("8D4840D6202CC371C32CE0576098", Instant.EPOCH);
+        assertDoesNotThrow(decoder::clearDecoders);
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);
