@@ -21,6 +21,8 @@ package de.serosystems.lib1090.decoding;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BitReaderTest {
@@ -126,5 +128,39 @@ class BitReaderTest {
         // Read a 40-bit timestamp/value across middle bytes
         // Bits 9 to 48: 0x23456789AB
         assertEquals(0x23456789ABL, reader.readLong(9, 48));
+    }
+
+    @Test
+    @DisplayName("Read 64 bits spanning nine bytes (Big Endian)")
+    void testReadLongAcrossNineBytes() {
+        byte[] data = {(byte) 0xFF, 0, 0, 0, 0, 0, 0, 0, 0};
+        BitReader reader = BitReader.forBigEndian(data);
+
+        // bits 2-8 of the first byte, then 57 clear bits
+        assertEquals(0xFE00000000000000L, reader.readLong(2, 65));
+        assertEquals(0xFF00000000000000L, reader.readLong(1, 64));
+        assertEquals(0x8000000000000000L, reader.readLong(8, 71));
+    }
+
+    @Test
+    @DisplayName("Every Big Endian range agrees with a bit-by-bit read")
+    void testBigEndianAgreesWithBitByBit() {
+        Random random = new Random(42);
+        for (int n = 0; n < 5; n++) {
+            byte[] data = new byte[14];
+            random.nextBytes(data);
+            BitReader reader = BitReader.forBigEndian(data);
+
+            for (int from = 1; from <= data.length * 8; from++)
+                for (int to = from; to < from + 64 && to <= data.length * 8; to++)
+                    assertEquals(bitByBit(data, from, to), reader.readLong(from, to), from + "-" + to);
+        }
+    }
+
+    private static long bitByBit(byte[] data, int from, int to) {
+        long value = 0;
+        for (int bit = from; bit <= to; bit++)
+            value = (value << 1) | ((data[(bit - 1) / 8] >>> (7 - (bit - 1) % 8)) & 1);
+        return value;
     }
 }

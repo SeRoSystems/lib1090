@@ -107,7 +107,7 @@ public class BitReader {
             throw new IndexOutOfBoundsException("End of buffer");
 
         if (bigEndian)
-            return readBigEndian(from, to, numBits);
+            return readBigEndian(from, to);
         else
             return readLittleEndian(from, to);
     }
@@ -115,21 +115,24 @@ public class BitReader {
     /**
      * Optimized Byte-Block extraction for Big-Endian.
      */
-    private long readBigEndian(int from, int to, int numBits) {
+    private long readBigEndian(int from, int to) {
         int startBit0 = from - 1;
         int endBit0 = to - 1;
         int startByte = startBit0 / 8;
         int endByte = endBit0 / 8;
 
-        long value = 0;
-        for (int i = startByte; i <= endByte; i++) {
-            value = (value << 8) | (data[i] & 0xFFL);
-        }
+        // the bits of the range in its first byte
+        long value = data[startByte] & (0xFF >>> (startBit0 % 8));
+        if (startByte == endByte)
+            return value >>> (7 - endBit0 % 8);
 
-        int bitsInLastByte = 7 - (endBit0 % 8);
-        value >>>= bitsInLastByte;
-        long mask = (numBits == 64) ? -1L : (1L << numBits) - 1;
-        return value & mask;
+        for (int i = startByte + 1; i < endByte; i++)
+            value = (value << 8) | (data[i] & 0xFFL);
+
+        // and only those of its last byte, so that no more than the range's bits are ever held, even if the range
+        // touches nine bytes
+        int bitsInLastByte = endBit0 % 8 + 1;
+        return (value << bitsInLastByte) | ((data[endByte] & 0xFF) >>> (8 - bitsInLastByte));
     }
 
     /**
