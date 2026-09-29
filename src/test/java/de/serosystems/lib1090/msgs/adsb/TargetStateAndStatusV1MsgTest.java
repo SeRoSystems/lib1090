@@ -113,9 +113,24 @@ public class TargetStateAndStatusV1MsgTest {
             final TargetStateAndStatusV1Msg tss = decode(withTargetAltitudeCapability(TSS_V1, capability));
 
             assertFalse(tss.hasTargetAltitudeCapability(), "capability " + capability);
-            assertFalse(tss.hasSelectedAltitude(), "capability " + capability);
-            assertNull(tss.getSelectedAltitude(), "capability " + capability);
-            assertEquals(144, tss.getSelectedAltitudeEncoded(), "capability " + capability);
+            assertTrue(tss.hasSelectedAltitude(), "capability " + capability);
+            assertEquals(13400, tss.getSelectedAltitude(), "capability " + capability);
+        }
+    }
+
+    @Test
+    public void testVerticalDataAvailability() throws UnspecifiedFormatError, BadFormatException {
+        final TargetStateAndStatusV1Msg unavailable = decode(withVerticalDataIndicator(TSS_V1, 0));
+
+        assertFalse(unavailable.hasSelectedAltitude());
+        assertNull(unavailable.getSelectedAltitude());
+        assertEquals(144, unavailable.getSelectedAltitudeEncoded());
+
+        for (int indicator : new int[]{1, 2, 3}) {
+            final TargetStateAndStatusV1Msg tss = decode(withVerticalDataIndicator(TSS_V1, indicator));
+
+            assertTrue(tss.hasSelectedAltitude(), "indicator " + indicator);
+            assertEquals(13400, tss.getSelectedAltitude(), "indicator " + indicator);
         }
     }
 
@@ -129,7 +144,6 @@ public class TargetStateAndStatusV1MsgTest {
         for (int altitude : new int[]{1011, 1023}) {
             final TargetStateAndStatusV1Msg tss = decode(withTargetAltitude(TSS_V1, altitude));
 
-            assertTrue(tss.hasTargetAltitudeCapability(), "altitude " + altitude);
             assertFalse(tss.hasSelectedAltitude(), "altitude " + altitude);
             assertNull(tss.getSelectedAltitude(), "altitude " + altitude);
             assertEquals(altitude, tss.getSelectedAltitudeEncoded(), "altitude " + altitude);
@@ -139,6 +153,14 @@ public class TargetStateAndStatusV1MsgTest {
     private static TargetStateAndStatusV1Msg decode(String message)
             throws UnspecifiedFormatError, BadFormatException {
         return new TargetStateAndStatusV1Msg(Tools.hexStringToByteArray(message));
+    }
+
+    private static String withVerticalDataIndicator(String message, int indicator) {
+        byte[] raw = Tools.hexStringToByteArray(message);
+        // ME bits 8-9
+        raw[4] = (byte) ((raw[4] & ~0x01) | ((indicator >> 1) & 0x1));
+        raw[5] = (byte) ((raw[5] & ~0x80) | ((indicator & 0x1) << 7));
+        return withParity(raw);
     }
 
     private static String withTargetAltitudeCapability(String message, int capability) {

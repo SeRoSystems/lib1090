@@ -127,8 +127,8 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
 
     @Override
     public boolean hasSelectedAltitude() {
-        // rules from ED-129B
-        return hasTargetAltitudeCapability() && targetAltitude <= 1010;
+        // codes 1011-1023 are invalid (ICAO Doc 9871 Appendix B §B.2.3.9.7)
+        return verticalDataAvailableAndSourceIndicator != 0 && targetAltitude <= 1010;
     }
 
     @Override
