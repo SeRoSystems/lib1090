@@ -25,6 +25,7 @@ import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.adsb.*;
+import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalModeCodeV2V3;
@@ -367,6 +368,28 @@ public class StatefulModeSDecoderTest {
         assertEquals(Interval.of(Bound.MORE_THAN, 4, Bound.NONE, Double.NaN), om.getLateralAxisGPSAntennaOffset());
         assertEquals(Interval.of(Bound.MORE_THAN, 58, Bound.NONE, Double.NaN),
                 om.getLongitudinalAxisGPSAntennaOffset());
+    }
+
+    /**
+     * ED-102B TABLE 2-8 reserves DF=18 CF=2 with IMF=1, which ED-102A Table 2-11 uses for a TIS-B target addressed
+     * by its Mode A code and track file number: it is decoded as TIS-B only in TIS-B v2 compatibility mode.
+     */
+    @Test
+    public void tisbModeATrackAddress_isDecodedOnlyInCompatibilityMode()
+            throws UnspecifiedFormatError, BadFormatException {
+        final String modeATrack = "9240621D59C386435CC412692AD6"; // TIS-B fine airborne position, IMF=1
+        final String icao = "9240621D58C386435CC412692AD6"; // the same with IMF=0
+
+        ModeSDownlinkMsg compatible = decoder.decode(modeATrack, Instant.EPOCH);
+        assertInstanceOf(FineAirbornePositionMsg.class, compatible);
+        assertEquals(QualifiedAddress.Type.MODEA_TRACK, compatible.getAddress().getType());
+
+        StatefulModeSDecoder strict = StatefulModeSDecoder.builder()
+                .tisbV2CompatibilityMode(false)
+                .checkParity(false) // the synthetic messages carry no valid parity
+                .build();
+        assertEquals(ExtendedSquitter.class, strict.decode(modeATrack, Instant.EPOCH).getClass());
+        assertInstanceOf(FineAirbornePositionMsg.class, strict.decode(icao, Instant.EPOCH));
     }
 
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {

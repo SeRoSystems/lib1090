@@ -130,6 +130,11 @@ public class StatefulModeSDecoder {
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() < 2 ||
                         modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0 && decodeDf19Adsb) {
                     return decodeADSB(modes, timestamp);
+                } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 2 && !tisbV2CompatibilityMode &&
+                        modes.getAddress().getType() == QualifiedAddress.Type.MODEA_TRACK) {
+                    // CF=2 with IMF=1 (Mode A code and track file number) is reserved per ED-102B; still
+                    // decoded as TIS-B in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
+                    return new ExtendedSquitter(modes);
                 } else if (modes.getDownlinkFormat() == 18 && modes.getFirstField() == 2 ||
                         modes.getDownlinkFormat() == 18 && modes.getFirstField() == 5) {
                     return decodeTISB(modes, timestamp);
@@ -857,14 +862,15 @@ public class StatefulModeSDecoder {
         /**
          * Enables TIS-B version 2 compatibility mode.
          * <p>
-         * Per ED-102B, CF=3 (coarse TIS-B airborne position) and velocity message subtypes 3/4
-         * (airspeed and heading) are reserved and no longer used. In compatibility mode, they are
+         * Per ED-102B, CF=3 (coarse TIS-B airborne position), CF=2 with IMF=1 (a target addressed by
+         * its Mode A code and track file number, ED-102B §2.2.17.3.1.2) and velocity message subtypes
+         * 3/4 (airspeed and heading) are reserved and no longer used. In compatibility mode, they are
          * still decoded as such, as a fallback for TIS-B services that have not yet transitioned
          * away from them. TIS-B itself does not distinguish versions, so this is a purely
          * decoder-side compatibility switch, not a per-target version assumption.
          * Defaults to true.
          *
-         * @param tisbV2CompatibilityMode whether to decode CF=3 and velocity subtypes 3/4
+         * @param tisbV2CompatibilityMode whether to decode CF=3, CF=2 with IMF=1 and velocity subtypes 3/4
          * @return this builder
          */
         public Builder tisbV2CompatibilityMode(boolean tisbV2CompatibilityMode) {
