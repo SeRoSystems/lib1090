@@ -103,4 +103,18 @@ public class AirborneOperationalStatusV2MsgTest extends AirborneOperationalStatu
         assertFalse(((AirborneCapabilityClassCode) create(baseMessage()).getCapabilityClass()).isCollisionAvoidanceOperational());
         assertTrue(withCapabilityClassCode(0x2000).isCollisionAvoidanceOperational());
     }
+
+    /**
+     * The version 2 class decodes version 2 only: from version 3 on, the dispatcher uses the version 3 class, whose
+     * layout differs in bits the version 2 class would misread.
+     */
+    @Test
+    public void testRejectVersion3AndLaterAsV2() throws Exception {
+        for (byte version : new byte[]{(byte) 0x69, (byte) 0x89}) { // version 3 and 4
+            byte[] msg = Tools.hexStringToByteArray(A_OPSTAT_V2);
+            msg[9] = version;
+            assertThrows(BadFormatException.class, () -> new AirborneOperationalStatusV2Msg(msg));
+        }
+    }
+
 }

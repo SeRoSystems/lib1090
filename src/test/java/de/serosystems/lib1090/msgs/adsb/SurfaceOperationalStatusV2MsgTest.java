@@ -132,4 +132,18 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         msg[8] = (byte) operationalModeCode;
         return new SurfaceOperationalStatusV2Msg(msg);
     }
+
+    /**
+     * The version 2 class decodes version 2 only: from version 3 on, the dispatcher uses the version 3 class, whose
+     * layout differs in bits the version 2 class would misread.
+     */
+    @Test
+    public void testRejectVersion3AndLaterAsV2() throws Exception {
+        for (byte version : new byte[]{(byte) 0x60, (byte) 0x80}) { // version 3 and 4
+            byte[] msg = Tools.hexStringToByteArray(S_OPSTAT_V2);
+            msg[9] = version;
+            assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
+        }
+    }
+
 }

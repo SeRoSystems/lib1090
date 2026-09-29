@@ -20,12 +20,12 @@ package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.size.AircraftVehicleSizeV1V2;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.SurfaceOperationalStatusMsgTest;
 import de.serosystems.lib1090.msgs.squitter.SurfaceOperationalStatusMsg;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Runs the shared surface operational status assertions against the ADS-R version 2 message.
@@ -64,4 +64,18 @@ class SurfaceOperationalStatusV2MsgTest extends SurfaceOperationalStatusMsgTest 
         assertInstanceOf(ADSRMsg.class, msg);
         assertEquals(2, msg.getMOPSVersion());
     }
+
+    /**
+     * The version 2 class decodes version 2 only: from version 3 on, the dispatcher uses the version 3 class, whose
+     * layout differs in bits the version 2 class would misread.
+     */
+    @Test
+    public void testRejectVersion3AndLaterAsV2() throws Exception {
+        for (byte version : new byte[]{(byte) 0x60, (byte) 0x80}) { // version 3 and 4
+            byte[] msg = Tools.hexStringToByteArray(BASE_MESSAGE);
+            msg[9] = version;
+            assertThrows(BadFormatException.class, () -> new SurfaceOperationalStatusV2Msg(msg));
+        }
+    }
+
 }
