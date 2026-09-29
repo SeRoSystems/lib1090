@@ -20,6 +20,7 @@ package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.EmergencyOrPriorityStatus;
+import de.serosystems.lib1090.decoding.Interval;
 import de.serosystems.lib1090.decoding.emergency.EmergencyStateV3;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
@@ -140,11 +141,12 @@ public class EmergencyOrPriorityStatusV3Msg extends TypeCodedExtendedSquitter im
     }
 
     /**
-     * @return the upper bound of the mean eddy dissipation rate (EDR) in m^(2/3)/s;
-     * 0.850 denotes 0.850 or larger; or null if no mean EDR is available (see {@link #hasMeanEdr()})
+     * @return the interval of the mean eddy dissipation rate (EDR) in m^(2/3)/s its code stands for, (0.850, ∞)
+     * for the top code, see {@link EmergencyOrPriorityStatus#edr(int)}; or null if no mean EDR is available (see
+     * {@link #hasMeanEdr()})
      */
-    public Double getMeanEdr() {
-        return hasMeanEdr() ? EmergencyOrPriorityStatus.decodeEdr(meanEdrEncoded) : null;
+    public Interval getMeanEdr() {
+        return EmergencyOrPriorityStatus.edr(meanEdrEncoded);
     }
 
     /**
@@ -162,11 +164,12 @@ public class EmergencyOrPriorityStatusV3Msg extends TypeCodedExtendedSquitter im
     }
 
     /**
-     * @return the upper bound of the peak eddy dissipation rate (EDR) in m^(2/3)/s;
-     * 0.850 denotes 0.850 or larger; or null if no peak EDR is available (see {@link #hasPeakEdr()})
+     * @return the interval of the peak eddy dissipation rate (EDR) in m^(2/3)/s its code stands for, (0.850, ∞)
+     * for the top code, see {@link EmergencyOrPriorityStatus#edr(int)}; or null if no peak EDR is available (see
+     * {@link #hasPeakEdr()})
      */
-    public Double getPeakEdr() {
-        return hasPeakEdr() ? EmergencyOrPriorityStatus.decodeEdr(peakEdrEncoded) : null;
+    public Interval getPeakEdr() {
+        return EmergencyOrPriorityStatus.edr(peakEdrEncoded);
     }
 
     /**
@@ -177,11 +180,12 @@ public class EmergencyOrPriorityStatusV3Msg extends TypeCodedExtendedSquitter im
     }
 
     /**
-     * @return the upper bound of the peak EDR offset in seconds, indicating how long before the
-     * current time the peak EDR value occurred
+     * @return the interval of the peak EDR offset in seconds, i.e. how long before this message the peak EDR
+     * occurred, see {@link EmergencyOrPriorityStatus#peakEdrOffset(int)}; or null if no peak EDR is available
+     * (see {@link #hasPeakEdr()}). Code 0 is also transmitted when only the offset is not available.
      */
-    public double getPeakEdrOffset() {
-        return peakEdrOffsetEncoded * -7.5;
+    public Interval getPeakEdrOffset() {
+        return hasPeakEdr() ? EmergencyOrPriorityStatus.peakEdrOffset(peakEdrOffsetEncoded) : null;
     }
 
     /**
@@ -199,11 +203,12 @@ public class EmergencyOrPriorityStatusV3Msg extends TypeCodedExtendedSquitter im
     }
 
     /**
-     * @return the water vapor value in kg/kg, or null if no water vapor value is available
-     * (see {@link #hasWaterVapor()})
+     * @return the interval of the water vapor in kg/kg its code stands for, [0.04094, ∞) for the top code, see
+     * {@link EmergencyOrPriorityStatus#waterVapor(int)}; or null if no water vapor value is available (see
+     * {@link #hasWaterVapor()})
      */
-    public Double getWaterVapor() {
-        return hasWaterVapor() ? (waterVaporEncoded - 1) / 1e5 : null;
+    public Interval getWaterVapor() {
+        return EmergencyOrPriorityStatus.waterVapor(waterVaporEncoded);
     }
 
     @Override
