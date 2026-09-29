@@ -50,6 +50,8 @@ public class StatefulModeSDecoder {
     private final PositionDecoderSupplier positionDecoderSupplier;
     private final boolean decodeDf19Adsb;
     private final boolean tisbV2CompatibilityMode;
+    // keyed by the qualified address including its source, so that ADS-B, ADS-R and TIS-B receptions
+    // for the same address never share version, NIC supplements or CPR state (see QualifiedAddress)
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
     private int afterLastCleanup;
     private Instant latestTimestamp;
@@ -702,7 +704,17 @@ public class StatefulModeSDecoder {
      */
     public byte getAdsbVersion(ModeSDownlinkMsg reply) {
         if (reply == null) return 0;
-        DecoderData dd = getDecoderData(reply.getAddress());
+        return getAdsbVersion(reply.getAddress());
+    }
+
+    /**
+     * @param address a qualified address
+     * @return the ADS-B version as tracked by the decoder. Version 0 is assumed until an Operational Status message
+     * for a higher version is received for the given target
+     */
+    public byte getAdsbVersion(QualifiedAddress address) {
+        if (address == null) return 0;
+        DecoderData dd = getDecoderData(address);
         return dd.adsbVersion;
     }
 
