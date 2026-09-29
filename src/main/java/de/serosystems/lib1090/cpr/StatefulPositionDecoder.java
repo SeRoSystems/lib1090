@@ -95,7 +95,7 @@ public class StatefulPositionDecoder implements PositionDecoder {
 
         // check if it's realistic that the target covered this distance (faster than 1000 knots?)
         if (!disableSpeedTest && lastPosition != null && lastTime != null) {
-            double td = Duration.between(lastTime, cpr.getTimestamp()).abs().toMillis() / 1_000.;
+            double td = Math.abs(Duration.between(lastTime, cpr.getTimestamp()).toMillis()) / 1_000.;
             double groundSpeed = newPosition.haversine(lastPosition) / td; // in meters per second
 
             if (groundSpeed > 514.4)
