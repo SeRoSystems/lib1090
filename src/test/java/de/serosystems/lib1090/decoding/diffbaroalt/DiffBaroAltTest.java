@@ -175,4 +175,22 @@ class DiffBaroAltTest {
         assertThrows(IllegalArgumentException.class, () -> DiffBaroAltV0V2.of(false, 0x80));
         assertThrows(IllegalArgumentException.class, () -> DiffBaroAltV0V2.of(false, -1));
     }
+
+    /**
+     * Two values of the same coding, code and sign are equal and hash alike, so a consumer comparing successive
+     * values of getDiffBaroAlt() sees a change only when there is one.
+     */
+    @Test
+    void equalCodesAreEqual() {
+        assertEquals(DiffBaroAltV0V2.of(false, 10), DiffBaroAltV0V2.of(false, 10));
+        assertEquals(DiffBaroAltV0V2.of(false, 10).hashCode(), DiffBaroAltV0V2.of(false, 10).hashCode());
+        assertEquals(DiffBaroAltV3.of(true, 200), DiffBaroAltV3.of(true, 200));
+        assertEquals(DiffBaroAltV3.of(true, 200).hashCode(), DiffBaroAltV3.of(true, 200).hashCode());
+
+        assertNotEquals(DiffBaroAltV0V2.of(false, 10), DiffBaroAltV0V2.of(true, 10));
+        assertNotEquals(DiffBaroAltV0V2.of(false, 10), DiffBaroAltV0V2.of(false, 11));
+        // the same code of another coding may mean another difference
+        assertNotEquals(DiffBaroAltV0V2.of(false, 10), DiffBaroAltV3.of(false, 10));
+        assertNotEquals(DiffBaroAltV3.of(false, 10), ADSRDiffBaroAltV3.of(false, 10));
+    }
 }

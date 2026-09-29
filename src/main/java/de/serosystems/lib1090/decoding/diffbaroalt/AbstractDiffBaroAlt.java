@@ -77,6 +77,23 @@ abstract class AbstractDiffBaroAlt implements DiffBaroAlt {
         return negative ? 0 - magnitudeValue : magnitudeValue;
     }
 
+    /**
+     * Equal if of the same coding with the same code and sign, which determine everything else; the same code
+     * of another coding may mean another difference.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractDiffBaroAlt that = (AbstractDiffBaroAlt) o;
+        return encoded == that.encoded && negative == that.negative;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * (31 * getClass().hashCode() + encoded) + Boolean.hashCode(negative);
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{encoded=" + encoded + ", negative=" + negative
