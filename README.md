@@ -55,6 +55,14 @@ If required, users of this library need to explicitly call the correct Comm-B me
 The Comm-D data link and military ES are not parsed.
 
 
+### Decoding on several threads
+
+`StatefulModeSDecoder` is not thread-safe. It keeps state per target — the ADS-B version, NIC supplements and the CPR
+frames for position decoding — and that state depends on the order in which a target's messages are decoded, so
+locking alone would not make concurrent use of one instance meaningful. To decode on several threads, use one decoder
+per thread and route each message to a decoder by its address. A target's messages then always reach the same decoder
+in the order they were received, and the decoders share no state.
+
 ### Known limitations
 
 **Address type of some TIS-B and ADS-R messages.** For DF=18 the target's address type is derived from the ICAO/Mode A

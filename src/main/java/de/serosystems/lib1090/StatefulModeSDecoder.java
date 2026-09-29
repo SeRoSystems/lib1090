@@ -42,6 +42,13 @@ import java.util.Objects;
 
 /**
  * Generic stateful decoder for Mode S Messages.
+ * <p>
+ * The decoder keeps state per target, such as its ADS-B version, NIC supplements and the CPR frames for position
+ * decoding, and that state depends on the order in which a target's messages are decoded. It is not thread-safe:
+ * an instance must only be used by one thread at a time, including {@link #extractPosition} and the other getters,
+ * which read and update the same state. To decode on several threads, use one instance per thread and route each
+ * message to an instance by its address, e.g. {@code Math.floorMod(msg.getAddress().getAddress(), n)} for
+ * {@code n} instances, so that a target's messages always reach the same instance in the order they were received.
  */
 @SuppressWarnings("unused")
 public class StatefulModeSDecoder {
