@@ -294,6 +294,49 @@ public class StatefulModeSDecoderTest {
         assertThrows(BadFormatException.class, () -> checking.decode("8DABCDEFF8000000004930000000", Instant.EPOCH));
     }
 
+    /**
+     * ED-102B TABLE 2-9 and TABLE 2-46: TYPE Code 31 subtypes 2 to 7 are reserved and carry no version, so they leave
+     * the tracked version alone. The decoder skips the parity check, the messages being synthetic.
+     */
+    @Test
+    public void reservedOperationalStatusSubtypes_leaveVersionAlone()
+            throws UnspecifiedFormatError, BadFormatException {
+        QualifiedAddress address = decoder.decode("8D4840D9F8000000004000000000", Instant.EPOCH).getAddress();
+        assertEquals(2, decoder.getAdsbVersion(address));
+
+        decoder.decode("8D4840D9FA000000000000000000", Instant.EPOCH); // subtype 2, version bits 0
+        assertEquals(2, decoder.getAdsbVersion(address));
+        decoder.decode("8D4840D9FF000000008000000000", Instant.EPOCH); // subtype 7, version bits 4
+        assertEquals(2, decoder.getAdsbVersion(address));
+        assertInstanceOf(IdentificationV2Msg.class, decoder.decode("8D4840D920042000000000000000", Instant.EPOCH));
+    }
+
+    /**
+     * The same holds for ADS-R.
+     */
+    @Test
+    public void reservedOperationalStatusSubtypes_leaveADSRVersionAlone()
+            throws UnspecifiedFormatError, BadFormatException {
+        QualifiedAddress address = decoder.decode("964840D9F8000000004000000000", Instant.EPOCH).getAddress();
+        assertEquals(2, decoder.getAdsbVersion(address));
+
+        decoder.decode("964840D9FA000000000000000000", Instant.EPOCH);
+        assertEquals(2, decoder.getAdsbVersion(address));
+        decoder.decode("964840D9FF000000008000000000", Instant.EPOCH);
+        assertEquals(2, decoder.getAdsbVersion(address));
+    }
+
+    /**
+     * Version 0 defines no surface operational status, so subtype 1 with version 0 leaves the version alone too.
+     */
+    @Test
+    public void surfaceOperationalStatusOfVersion0_leavesVersionAlone()
+            throws UnspecifiedFormatError, BadFormatException {
+        QualifiedAddress address = decoder.decode("8D4840D9F8000000004000000000", Instant.EPOCH).getAddress();
+        decoder.decode("8D4840D9F9000000000000000000", Instant.EPOCH);
+        assertEquals(2, decoder.getAdsbVersion(address));
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);

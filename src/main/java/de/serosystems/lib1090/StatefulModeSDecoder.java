@@ -181,8 +181,10 @@ public class StatefulModeSDecoder {
 
         if (ftc == 31) { // operational status message, determines the assumed version
             int subtype = es1090.getMessage()[0] & 0x7;
+            byte version = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+            if (!carriesVersion(subtype, version)) return es1090;
 
-            dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+            dd.adsbVersion = version;
             if (dd.adsbVersion == 0) return es1090; // ADS-R is not specified for version 0
             if (subtype == 0) {
                 // airborne
@@ -596,8 +598,10 @@ public class StatefulModeSDecoder {
 
         if (ftc == 31) { // operational status message
             int subtype = es1090.getMessage()[0] & 0x7;
+            byte version = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+            if (!carriesVersion(subtype, version)) return es1090;
 
-            dd.adsbVersion = (byte) ((es1090.getMessage()[5] >>> 5) & 0x7);
+            dd.adsbVersion = version;
             if (subtype == 0) {
                 // airborne
                 switch (dd.adsbVersion) {
@@ -620,8 +624,6 @@ public class StatefulModeSDecoder {
             } else if (subtype == 1) {
                 // surface
                 switch (dd.adsbVersion) {
-                    case 0: // undefined subtype for v0, handle like any other undefined subtype
-                        break;
                     case 1:
                         SurfaceOperationalStatusV1Msg s1 = new SurfaceOperationalStatusV1Msg(es1090);
                         dd.nicSupplements = dd.nicSupplements.withA(s1.getNICSupplementA());
@@ -893,6 +895,15 @@ public class StatefulModeSDecoder {
         public StatefulModeSDecoder build() {
             return new StatefulModeSDecoder(this);
         }
+    }
+
+    /**
+     * Whether a TYPE Code 31 message is an operational status, and so carries the ADS-B version: subtype 0
+     * (airborne) in every version, subtype 1 (surface) from version 1 on. Subtypes 2 to 7 are reserved, ED-102B
+     * §2.2.3.2.2 TABLE 2-9 and §2.2.3.2.7.2.2 TABLE 2-46, and version 0 defines no surface subtype.
+     */
+    private static boolean carriesVersion(int subtype, byte version) {
+        return subtype == 0 || subtype == 1 && version != 0;
     }
 
     /**
