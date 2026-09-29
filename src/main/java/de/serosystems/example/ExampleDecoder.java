@@ -70,10 +70,8 @@ public class ExampleDecoder {
             System.out.println("Malformed message! Skipping it. Message: " + e.getMessage());
             return;
         } catch (UnspecifiedFormatError e) {
-            // raised by StatefulModeSDecoder#decode for an ADS-B format type code not covered by
-            // ED-102B §2.2.3.2.2 TABLE 2-9, a DF=18 TIS-B/ADS-R management frame not covered by
-            // ED-102B §2.2.17.2 TABLE 2-184, or a DF=19 military extended squitter per ICAO Annex
-            // 10 Volume IV §3.1.2.8 — see StatefulModeSDecoder and ModeSDownlinkMsg
+            // raised while reading the raw message for DF=18 with CF=7, which ED-102B §2.2.3.2.1.3
+            // TABLE 2-7 reserves; the decoder returns every other unknown format as an undecoded message
             System.out.println("Unspecified message! Skipping it...");
             return;
         }
@@ -314,62 +312,42 @@ public class ExampleDecoder {
             // the IFR capability flag is carried by the version 0 and 1 velocity messages
             if (veloc instanceof IFRCapabilityMsg)
                 System.out.println("          Has IFR capability: " + ((IFRCapabilityMsg) veloc).hasIFRCapability());
-        } else if (msg instanceof TargetStateAndStatusV1Msg || msg instanceof TargetStateAndStatusV2Msg) {
+        } else if (msg instanceof TargetStateAndStatusMsg) {
+            TargetStateAndStatusMsg tStatus = (TargetStateAndStatusMsg) msg;
             System.out.println("[" + icao24 + "]: Target State and Status reported");
-            if (msg instanceof TargetStateAndStatusV1Msg) {
-                TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
-                System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
-                System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                System.out.println("          Surveillance/Source Integrity Level (SIL): "
-                        + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
-                System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
-                if (tStatus.hasSelectedAltitude()) {
-                    System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
-                } else {
-                    System.out.println("          No selected altitude info");
-                }
-                if (tStatus.hasSelectedHeading()) {
-                    System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
-                } else {
-                    System.out.println("          No selected heading info");
-                }
+            System.out.println("          Navigation Accuracy Category for position (NACp): "
+                    + tStatus.getNACpEncoded());
+            System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
+            System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                    + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
+            System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
+            System.out.println("          Barometric altitude cross-checked: "
+                    + tStatus.getBarometricAltitudeIntegrityCode());
+            if (tStatus.hasSelectedAltitude()) {
+                System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
             } else {
+                System.out.println("          No selected altitude info");
+            }
+            if (tStatus.hasSelectedHeading()) {
+                System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
+            } else {
+                System.out.println("          No selected heading info");
+            }
 
-                TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
-                System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
-                System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                System.out.println("          Surveillance/Source Integrity Level (SIL): "
-                        + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
-                System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
-                System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
-
-                System.out.printf("          Selected altitude is derived from %s\n", tStatus.isFMSSelectedAltitude() ? "FMS" : "MCP/FCU");
-                if (tStatus.hasSelectedAltitude()) {
-                    System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
-                } else {
-                    System.out.println("          No selected altitude info");
-                }
-
-                if (tStatus.hasBarometricPressureSetting()) {
-                    System.out.println("          Barometric pressure setting (minus 800 mbar): " + tStatus.getBarometricPressureSetting() + " mbar");
-                } else {
-                    System.out.println("          No barometric pressure setting info");
-                }
-
-                if (tStatus.hasSelectedHeading()) {
-                    System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
-                } else {
-                    System.out.println("          No selected heading info");
-                }
-                if (tStatus.hasMode()) {
-                    System.out.printf("          Autopilot is%s enganged\n", tStatus.hasAutopilotEngaged() ? "" : " not");
-                    System.out.printf("          VNAV mode is%s enganged\n", tStatus.hasVNAVModeEngaged() ? "" : " not");
-                    System.out.printf("          Altitude hold mode is%s enganged\n", tStatus.hasActiveAltitudeHoldMode() ? "" : " not");
-                    System.out.printf("          Approach mode is%s enganged\n", tStatus.hasActiveApproachMode() ? "" : " not");
-                    System.out.printf("          LNAV mode is%s enganged\n", tStatus.hasLNAVModeEngaged() ? "" : " not");
-                } else {
-                    System.out.println("          No MCP/FCU mode info");
-                }
+            // versions 2 and 3 add the source of the selected altitude, the barometric pressure setting and
+            // the autopilot and navigation modes
+            if (msg instanceof TargetStateAndStatusV2Msg) {
+                TargetStateAndStatusV2Msg v2 = (TargetStateAndStatusV2Msg) msg;
+                printSelectedAltitudeSourceAndPressure(v2.isFMSSelectedAltitude(), v2.hasBarometricPressureSetting(),
+                        v2.getBarometricPressureSetting());
+                printModes(v2.hasMode(), v2.hasAutopilotEngaged(), v2.hasVNAVModeEngaged(),
+                        v2.hasActiveAltitudeHoldMode(), v2.hasActiveApproachMode(), v2.hasLNAVModeEngaged());
+            } else if (msg instanceof TargetStateAndStatusV3Msg) {
+                TargetStateAndStatusV3Msg v3 = (TargetStateAndStatusV3Msg) msg;
+                printSelectedAltitudeSourceAndPressure(v3.isFMSSelectedAltitude(), v3.hasBarometricPressureSetting(),
+                        v3.getBarometricPressureSetting());
+                printModes(v3.hasMode(), v3.hasAutopilotEngaged(), v3.hasVNAVModeEngaged(),
+                        v3.hasActiveAltitudeHoldMode(), v3.hasActiveApproachMode(), v3.hasLNAVModeEngaged());
             }
         } else if (msg instanceof HVAPositionMsg) {
             HVAPositionMsg hvaPos = (HVAPositionMsg) msg;
@@ -459,6 +437,28 @@ public class ExampleDecoder {
             System.out.println("          Message is 0x" + Tools.toHexString(commDELM.getMessage()));
         } else if (msg.getClass() == ModeSDownlinkMsg.class) {
             System.out.println("[" + icao24 + "]: Unknown message with DF " + msg.getDownlinkFormat());
+        }
+    }
+
+    private static void printSelectedAltitudeSourceAndPressure(boolean fms, boolean hasPressure, Float pressure) {
+        System.out.printf("          Selected altitude is derived from %s\n", fms ? "FMS" : "MCP/FCU");
+        if (hasPressure) {
+            System.out.println("          Barometric pressure setting (minus 800 mbar): " + pressure + " mbar");
+        } else {
+            System.out.println("          No barometric pressure setting info");
+        }
+    }
+
+    private static void printModes(boolean hasMode, Boolean autopilot, Boolean vnav, Boolean altitudeHold,
+                                   Boolean approach, Boolean lnav) {
+        if (hasMode) {
+            System.out.printf("          Autopilot is%s engaged\n", autopilot ? "" : " not");
+            System.out.printf("          VNAV mode is%s engaged\n", vnav ? "" : " not");
+            System.out.printf("          Altitude hold mode is%s engaged\n", altitudeHold ? "" : " not");
+            System.out.printf("          Approach mode is%s engaged\n", approach ? "" : " not");
+            System.out.printf("          LNAV mode is%s engaged\n", lnav ? "" : " not");
+        } else {
+            System.out.println("          No MCP/FCU mode info");
         }
     }
 
