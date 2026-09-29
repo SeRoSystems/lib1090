@@ -306,7 +306,9 @@ public class ExampleDecoder {
         } else if (msg instanceof VelocityOverGroundMsg) {
             VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
             System.out.println("[" + icao24 + "]: Ground Speed: " + (veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown") + " kt");
-            System.out.println("          True Track: " + (veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown") + " °");
+            Double track = veloc.getTrueTrackAngle();
+            System.out.println("          True Track: " + (track != null ? track + " °"
+                    : veloc.hasVelocity() ? "undefined, not moving" : "unknown"));
             System.out.println("          Vertical rate: " + (veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown") + " ft/min");
 
             // the IFR capability flag is carried by the version 0 and 1 velocity messages

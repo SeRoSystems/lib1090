@@ -189,4 +189,36 @@ abstract class VelocityOverGroundMsgTest {
         assertFalse(below.isWestToEastVelocitySaturated());
         assertFalse(below.isVerticalRateSaturated());
     }
+
+    /**
+     * ED-102B TABLE 2-20 and TABLE 2-22 code each component's availability on its own: one missing component
+     * leaves the other, but not ground speed and track, which need both.
+     */
+    @Test
+    public void testComponentsAreAvailableOnTheirOwn() throws Exception {
+        VelocityOverGroundMsg northSouthMissing = create("8D4840D699006500000400000000"); // E/W 100 kt, N/S unavailable
+        assertTrue(northSouthMissing.hasWestToEastVelocity());
+        assertFalse(northSouthMissing.hasSouthToNorthVelocity());
+        assertFalse(northSouthMissing.hasVelocity());
+        assertEquals(100, northSouthMissing.getWestToEastVelocity().intValue());
+        assertNull(northSouthMissing.getSouthToNorthVelocity());
+        assertNull(northSouthMissing.getGroundSpeed());
+        assertNull(northSouthMissing.getTrueTrackAngle());
+
+        VelocityOverGroundMsg eastWestMissing = create("8D4840D699000006600400000000"); // E/W unavailable, N/S 50 kt
+        assertNull(eastWestMissing.getWestToEastVelocity());
+        assertEquals(50, eastWestMissing.getSouthToNorthVelocity().intValue());
+        assertFalse(eastWestMissing.hasVelocity());
+    }
+
+    /**
+     * A target not moving has a ground speed of 0 kt but no track.
+     */
+    @Test
+    public void testStationaryTargetHasNoTrack() throws Exception {
+        VelocityOverGroundMsg still = create("8D4840D699000100200400000000"); // both components 0 kt
+        assertTrue(still.hasVelocity());
+        assertEquals(0.0, still.getGroundSpeed(), 0.0);
+        assertNull(still.getTrueTrackAngle());
+    }
 }
