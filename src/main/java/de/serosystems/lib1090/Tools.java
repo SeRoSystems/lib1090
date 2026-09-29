@@ -60,25 +60,19 @@ public class Tools {
     }
 
     /**
-     * Converts an integer in a hex string ensuring a minimum number of digits
+     * Converts an integer in a hex string ensuring a minimum number of digits. The integer is read as an unsigned
+     * 32-bit value, as {@code String.format("%x")} reads it, so {@code -1} is {@code ffffffff}.
      *
      * @param input     value to be converted
      * @param minDigits minimum number of digits the result shall contain
-     * @return hex representation of input integer
+     * @return hex representation of input integer, in lower case, padded with leading zeros to minDigits
      */
     public static String toHexString(int input, int minDigits) {
-        StringBuilder hex = new StringBuilder();
-        while (input > 0) {
-            int digit = input % 16;
-            hex.insert(0, hexDigits[digit]);
-            input = input / 16;
-        }
-        // ensures leading zeros based on min digits
-        while (hex.length() < minDigits) {
-            hex.insert(0, "0");
-        }
-
-        return hex.toString();
+        String hex = Integer.toHexString(input);
+        StringBuilder padded = new StringBuilder(Math.max(minDigits, hex.length()));
+        for (int i = hex.length(); i < minDigits; i++)
+            padded.append('0');
+        return padded.append(hex).toString();
     }
 
     /**
