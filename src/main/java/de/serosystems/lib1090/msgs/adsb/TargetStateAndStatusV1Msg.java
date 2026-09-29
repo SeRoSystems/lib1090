@@ -127,8 +127,7 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
 
     @Override
     public boolean hasSelectedAltitude() {
-        // rules from ED-129B
-        return hasTargetAltitudeCapability() && targetAltitude <= 1010;
+        return verticalDataAvailableAndSourceIndicator != 0;
     }
 
     @Override
