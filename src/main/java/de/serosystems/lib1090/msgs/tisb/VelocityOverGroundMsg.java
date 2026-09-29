@@ -225,8 +225,9 @@ public class VelocityOverGroundMsg extends TypeCodedExtendedSquitter implements 
     }
 
     /**
-     * Navigation accuracy category according to ED-102B §N.2.3.7 TABLE N-9. In ADS-B version 1+ this information is contained
-     * in the operational status message. For version 0 it is derived from the format type code.
+     * The Navigation Accuracy Category for Position, ME bits 10-13, ED-102B §2.2.17.3.4.4: TIS-B carries it in the
+     * velocity message for the target's airborne and surface position messages, and it is decoded as the NACp of the
+     * aircraft operational status message, TABLE 2-68.
      *
      * @return the raw encoded NACp (no unit), comparable to NACp in {@link AirborneOperationalStatusV2Msg} and
      * {@link AirborneOperationalStatusV1Msg}
