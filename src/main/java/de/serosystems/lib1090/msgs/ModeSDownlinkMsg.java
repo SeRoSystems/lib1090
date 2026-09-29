@@ -46,19 +46,6 @@ public class ModeSDownlinkMsg implements Serializable {
      */
 
     /**
-     * polynomial for the cyclic redundancy check<br>
-     * Note: we assume that the degree of the polynomial
-     * is divisible by 8 (holds for Mode S) and the msb is left out<br>
-     * Deprecated, kept for compatibility. Use {@link #CRC_POLYNOMIAL} instead.
-     */
-    @Deprecated
-    public static final byte[] CRC_polynomial = {
-            (byte) 0xFF,
-            (byte) 0xF4,
-            (byte) 0x09 // according to ICAO Annex 10 Volume IV
-    };
-
-    /**
      * CRC Polynomial as of ICAO Annex 10 Volume IV, without leading coefficient.
      */
     public static final int CRC_POLYNOMIAL = 0xfff409;
