@@ -66,10 +66,21 @@ public class AircraftIdentification extends BDSRegister {
     }
 
     /**
-     * @return the call sign as an array of 8 characters
+     * @return the call sign as an array of 8 characters; a character whose code is not defined is decoded as a
+     * space, see {@link #hasValidAircraftIdentification()}
      */
     public char[] getAircraftIdentification() {
         return InternationalAlphabet5.mapChar(getAircraftIdentificationDigits());
+    }
+
+    /**
+     * Whether every character has a code that ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8 defines. As a
+     * Comm-B reply does not say which register it carries, this is one indication of whether it is BDS 2,0.
+     *
+     * @return true if every character of the call sign can be decoded
+     */
+    public boolean hasValidAircraftIdentification() {
+        return InternationalAlphabet5.isDefined(getAircraftIdentificationDigits());
     }
 
     @Override

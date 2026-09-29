@@ -52,7 +52,28 @@ public final class InternationalAlphabet5 {
     }
 
     /**
-     * Maps an IA5 encoded digit to a readable character.
+     * Whether a 6-bit code is one TABLE 3-8 defines: A to Z (1 to 26), space (32) and 0 to 9 (48 to 57).
+     *
+     * @param digit encoded digit
+     * @return true if the code is defined
+     */
+    public static boolean isDefined(byte digit) {
+        return digit > 0 && digit < 27 || digit == 32 || digit > 47 && digit < 58;
+    }
+
+    /**
+     * @param digits array of encoded digits
+     * @return true if every code is one TABLE 3-8 defines, see {@link #isDefined(byte)}
+     */
+    public static boolean isDefined(byte[] digits) {
+        for (byte digit : digits)
+            if (!isDefined(digit)) return false;
+        return true;
+    }
+
+    /**
+     * Maps an IA5 encoded digit to a readable character. A code TABLE 3-8 does not define is mapped to a
+     * space, like the space itself; use {@link #isDefined(byte)} to tell them apart.
      *
      * @param digit encoded digit
      * @return readable character
