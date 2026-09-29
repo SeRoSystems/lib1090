@@ -360,7 +360,7 @@ public final class CPREncodedPosition implements Serializable {
         int nLon = Math.max(1, RlatL.NL() - (isOdd ? 1 : 0));
 
         // decode position longitude
-        double Rlon = reconstructLocal(angle, nLon, reference.getLongitude(), xz);
+        double Rlon = normalize(reconstructLocal(angle, nLon, reference.getLongitude(), xz));
 
         return new Position(Rlon, Rlat, 0.);
     }
