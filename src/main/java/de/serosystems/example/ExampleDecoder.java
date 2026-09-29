@@ -364,6 +364,8 @@ public class ExampleDecoder {
             if (hvaVel.hasPIC())
                 System.out.println("          Radius of Containment: " + hvaVel.getContainmentRadius()
                         + " (" + hvaVel.getContainmentRadius().getGuaranteedUpperBound() + " m)");
+            else
+                System.out.println("          Radius of Containment: unknown");
         } else if (msg instanceof WxAIREPAircraftStateMsg) {
             WxAIREPAircraftStateMsg wxState = (WxAIREPAircraftStateMsg) msg;
             System.out.println("[" + icao24 + "]: Wx AIREP Aircraft State reported");

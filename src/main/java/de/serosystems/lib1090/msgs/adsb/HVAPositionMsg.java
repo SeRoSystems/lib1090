@@ -134,7 +134,11 @@ public class HVAPositionMsg extends TypeCodedExtendedSquitter implements Seriali
     /**
      * Decode the HVA latitude field into WGS-84 degrees.
      * <p>
-     * Only valid if {@link HVAVelocityMsg#hasPIC()} is true for the corresponding velocity message.
+     * All ZEROs is a valid location, so the position is unavailable only if the latitude and longitude are coded
+     * as ZERO and the PIC of the HVA velocity message and the NACp of the operational status message are ZERO
+     * too, ED-102B §2.2.3.2.7.5.3.3 and §2.2.3.2.7.5.3.4 NOTE. This message alone cannot tell, see
+     * {@link #isPositionAllZeros()}; and a PIC of ZERO alone does not invalidate the position, which is sent with
+     * PIC and NACp ZERO on an FDE fault.
      *
      * @return the latitude in WGS-84 degrees [-90°,90°]
      */
@@ -161,7 +165,11 @@ public class HVAPositionMsg extends TypeCodedExtendedSquitter implements Seriali
     /**
      * Decode the HVA longitude field into WGS-84 degrees.
      * <p>
-     * Only valid if {@link HVAVelocityMsg#hasPIC()} is true for the corresponding velocity message.
+     * All ZEROs is a valid location, so the position is unavailable only if the latitude and longitude are coded
+     * as ZERO and the PIC of the HVA velocity message and the NACp of the operational status message are ZERO
+     * too, ED-102B §2.2.3.2.7.5.3.3 and §2.2.3.2.7.5.3.4 NOTE. This message alone cannot tell, see
+     * {@link #isPositionAllZeros()}; and a PIC of ZERO alone does not invalidate the position, which is sent with
+     * PIC and NACp ZERO on an FDE fault.
      *
      * @return the longitude in WGS-84 degrees [-180°,180°]
      */
@@ -169,6 +177,16 @@ public class HVAPositionMsg extends TypeCodedExtendedSquitter implements Seriali
         int n = hvaLongitudeEncoded & 0x3FFFF;
         double longitude = 180. * n / ((1 << 18) - 1);
         return isHVALongitudeNegative() ? -longitude : longitude;
+    }
+
+    /**
+     * Whether the latitude and longitude are both coded as ZERO, which, together with a PIC and NACp of ZERO, marks
+     * the position as unavailable, see {@link #getHVALatitude()}.
+     *
+     * @return true if the latitude and longitude fields, sign bits included, are all ZEROs
+     */
+    public boolean isPositionAllZeros() {
+        return hvaLatitudeEncoded == 0 && hvaLongitudeEncoded == 0;
     }
 
     @Override
