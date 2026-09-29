@@ -20,7 +20,6 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,7 +29,7 @@ import java.util.Map;
  * (First Edition, AN/464) §A.2 TABLE A-2-23.
  */
 @SuppressWarnings("unused")
-public class CommonUsageGICBCapabilityReport extends BDSRegister implements Serializable {
+public class CommonUsageGICBCapabilityReport extends BDSRegister {
     private static final long serialVersionUID = 2537138385702205527L;
 
     private static final BDSCode BDS_CODE = new BDSCode(1, 7);

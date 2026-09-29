@@ -20,14 +20,12 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 
-import java.io.Serializable;
-
 /**
  * Decoder for the selected vertical intention report (BDS 4,0), as defined in ICAO Doc 9871
  * (First Edition, AN/464) §A.2 TABLE A-2-64.
  */
 @SuppressWarnings("unused")
-public class SelectedVerticalIntention extends BDSRegister implements Serializable {
+public class SelectedVerticalIntention extends BDSRegister {
     private static final long serialVersionUID = 4359765861426574750L;
 
     private static final BDSCode BDS_CODE = new BDSCode(4, 0);

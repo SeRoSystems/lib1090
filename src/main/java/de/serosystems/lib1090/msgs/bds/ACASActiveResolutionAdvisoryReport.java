@@ -22,15 +22,13 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 
-import java.io.Serializable;
-
 /**
  * Decoder for the ACAS active resolution advisory report (BDS 3,0), as defined in ICAO Doc 9871
  * (First Edition, AN/464) §A.2 TABLE A-2-48, for the register layout; field semantics per
  * ICAO Annex 10 Volume IV §4.3.8.4.2.2.
  */
 @SuppressWarnings("unused")
-public class ACASActiveResolutionAdvisoryReport extends BDSRegister implements Serializable {
+public class ACASActiveResolutionAdvisoryReport extends BDSRegister {
     private static final long serialVersionUID = -5637418816699536015L;
 
     private static final BDSCode BDS_CODE = new BDSCode(3, 0);

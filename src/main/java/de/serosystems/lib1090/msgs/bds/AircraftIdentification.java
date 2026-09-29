@@ -22,8 +22,6 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 
-import java.io.Serializable;
-
 /**
  * Decoder for aircraft identification (BDS 2,0), as defined in ICAO Doc 9871 (First Edition,
  * AN/464) §A.2 TABLE A-2-32. Individual callsign characters are decoded by
@@ -31,7 +29,7 @@ import java.io.Serializable;
  * ICAO Annex 10 Volume IV §3.1.2.9.1.2 TABLE 3-8.
  */
 @SuppressWarnings("unused")
-public class AircraftIdentification extends BDSRegister implements Serializable {
+public class AircraftIdentification extends BDSRegister {
     private static final long serialVersionUID = -8005492828828163576L;
 
     private static final BDSCode BDS_CODE = new BDSCode(2, 0);

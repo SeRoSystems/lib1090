@@ -20,13 +20,17 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.Tools;
 
+import java.io.Serializable;
+
 /**
  * Base class for BDS (Comm-B Data Selector) register decoders, as defined in ICAO Doc 9871
  * (First Edition, AN/464) §A.2.1 Register Allocation, for the register-numbering scheme
  * (register TABLE A-2-X where X is the decimal equivalent of the BDS1,BDS2 code pair).
  */
 @SuppressWarnings("unused")
-public abstract class BDSRegister {
+public abstract class BDSRegister implements Serializable {
+
+    private static final long serialVersionUID = 1089747986665440871L;
 
     private byte[] message;
 
