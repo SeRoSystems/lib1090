@@ -33,6 +33,7 @@ import de.serosystems.lib1090.msgs.squitter.IMFMsg;
 import de.serosystems.lib1090.msgs.squitter.SurfacePositionMsg;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -42,6 +43,12 @@ import java.util.Objects;
 public class FineSurfacePositionMsg extends TypeCodedExtendedSquitter implements Serializable, SurfacePositionMsg, IMFMsg, TISBMsg {
 
     private static final long serialVersionUID = -8306226295512272609L;
+
+    /**
+     * TIS-B pairs an even and an odd position for global decoding only if they are received within 10 seconds,
+     * ED-102B §2.2.17.4.2, surface positions included.
+     */
+    private static final Duration PAIRING_WINDOW = Duration.ofSeconds(10);
 
     private byte movement;
     private boolean headingStatus; // is heading valid?
@@ -100,7 +107,8 @@ public class FineSurfacePositionMsg extends TypeCodedExtendedSquitter implements
         groundTrack = br.readByte(14, 20);
 
         imf = br.readBoolean(21);
-        position = SurfacePosition.extractCPREncodedPosition(br, getMovement(), Objects.requireNonNull(timestamp, "timestamp"));
+        position = SurfacePosition.extractCPREncodedPosition(br, PAIRING_WINDOW,
+                Objects.requireNonNull(timestamp, "timestamp"));
     }
 
     /**
