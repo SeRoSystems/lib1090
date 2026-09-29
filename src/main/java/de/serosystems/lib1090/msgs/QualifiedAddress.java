@@ -88,7 +88,16 @@ public class QualifiedAddress implements Serializable {
     protected QualifiedAddress() {
     }
 
+    /**
+     * @param address the 24-bit address, 0 to 0xFFFFFF, as every address in the AA field is (ED-102B §2.2.3.2.1.5
+     *                TABLE 2-8)
+     * @param type    the type of address
+     * @param source  where the address was received from
+     * @throws IllegalArgumentException if the address does not fit in 24 bits
+     */
     public QualifiedAddress(int address, Type type, Source source) {
+        if ((address & ~0xFFFFFF) != 0)
+            throw new IllegalArgumentException("Address " + Integer.toHexString(address) + " does not fit in 24 bits");
         this.address = address;
         this.type = type;
         this.source = source;
@@ -98,6 +107,12 @@ public class QualifiedAddress implements Serializable {
         this(other.address, other.type, other.source);
     }
 
+    /**
+     * @param address the 24-bit address as a hex string, 0 to FFFFFF
+     * @param type    the type of address
+     * @param source  where the address was received from
+     * @throws IllegalArgumentException if the address is no hex number or does not fit in 24 bits
+     */
     public QualifiedAddress(String address, Type type, Source source) {
         this(Integer.parseInt(address, 16), type, source);
     }

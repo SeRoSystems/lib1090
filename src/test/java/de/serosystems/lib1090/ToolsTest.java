@@ -42,6 +42,19 @@ class ToolsTest {
         }
     }
 
+    /**
+     * Negative values are read as unsigned 32-bit values, as String.format reads them.
+     */
+    @Test
+    void toHexString_readsNegativeValuesUnsigned() {
+        int[] inputs = {-1, -16, Integer.MIN_VALUE, 0x80000000, 0};
+        for (int input : inputs)
+            for (int minDigits : new int[]{1, 6, 8, 12})
+                assertEquals(String.format("%0" + minDigits + "x", input), Tools.toHexString(input, minDigits),
+                        input + " / " + minDigits);
+        assertEquals("ffffffff", Tools.toHexString(-1, 6));
+    }
+
     @Test
     public void testHexStringToByteArray() {
         byte[] result = Tools.hexStringToByteArray("8D406B902015A678D4D220AA4BDA");
