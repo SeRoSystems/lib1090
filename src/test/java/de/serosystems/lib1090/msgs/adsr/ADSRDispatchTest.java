@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Which class the decoder produces for an ADS-R message, across every format type code and version the
@@ -163,9 +162,22 @@ class ADSRDispatchTest {
         for (int subtype : new int[]{3, 4}) {
             assertDispatch(1, message(19, subtype), AirspeedHeadingV1Msg.class);
             assertDispatch(2, message(19, subtype), AirspeedHeadingV2Msg.class);
-            // version 3 has no airspeed/heading class of its own and falls back to version 2
-            assertDispatch(3, message(19, subtype), AirspeedHeadingV2Msg.class);
+            // not available from version 3 on, ED-102B §2.2.18.4.4 NOTE 3, as in the ADS-B path
+            assertDispatch(3, message(19, subtype), TypeCodedExtendedSquitter.class);
         }
+    }
+
+    /**
+     * A version 3 airspeed/heading message stays undecoded and so leaves the difference from barometric altitude
+     * alone. Unlike the synthetic messages above, these frames carry a valid parity.
+     */
+    @Test
+    void airspeedHeadingOfVersion3LeavesDiffBaroAltAlone() throws Exception {
+        StatefulModeSDecoder d = new StatefulModeSDecoder();
+        d.decode("96123456F80000000060005505AA", T); // ADS-R operational status, version 3
+        ModeSDownlinkMsg msg = d.decode("961234569B052C9F401400281C9D", T);
+        assertEquals(TypeCodedExtendedSquitter.class, msg.getClass());
+        assertNull(d.getDiffBaroAlt(msg));
     }
 
     @Test
