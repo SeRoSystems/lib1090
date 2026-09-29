@@ -32,7 +32,7 @@ import de.serosystems.lib1090.decoding.AbstractMEField;
  * The interface of the same simple name lives in {@code msgs.squitter} and is referenced here by its
  * fully qualified name: a compilation unit cannot import a type named like the class it declares.
  * <p>
- * Subfields, ED-102B §2.2.3.2.7.2.3 TABLE 2-49: CA Operational (ME 11), 1090ES IN (12), ADS-B Receiver
+ * Subfields, ED-102B §2.2.3.2.7.2.3 TABLE 2-47: CA Operational (ME 11), 1090ES IN (12), ADS-B Receiver
  * Version (13–14), Transponder Side Indication (15–16), Transmit Power (17–18), UAT IN (19),
  * Reduced Capability Equipment (21–22), Detect and Avoid (23–24). ME 20 is reserved; ADS-R defines it
  * as NIC supplement B.
