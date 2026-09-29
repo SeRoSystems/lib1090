@@ -62,6 +62,11 @@ public abstract class BDSRegister implements Serializable {
     public abstract BDSCode getBDSCode();
 
     /**
+     * The Comm-B message (BDS register).
+     * <p>
+     * <b>The array is not a copy and must not be modified:</b> it is the one passed to the constructor, shared
+     * with that caller and with every register copied from this one. It is not copied for performance.
+     *
      * @return the 7-byte comm-b message (BDS register)
      */
     public byte[] getMessage() {

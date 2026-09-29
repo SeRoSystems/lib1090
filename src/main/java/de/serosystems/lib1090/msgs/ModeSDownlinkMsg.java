@@ -414,8 +414,13 @@ public class ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return payload as 3- or 10-byte array containing the Mode S
-     * reply without the first and the last three bytes.
+     * The payload, the Mode S reply without its first and last three bytes.
+     * <p>
+     * <b>The array is not a copy and must not be modified:</b> it is this message's own, shared with every
+     * message decoded or copied from it, so a change would alter all of them. It is not copied for
+     * performance.
+     *
+     * @return payload as 3- or 10-byte array
      */
     public byte[] getPayload() {
         return payload;

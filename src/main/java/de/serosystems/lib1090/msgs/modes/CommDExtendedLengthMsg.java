@@ -85,6 +85,12 @@ public class CommDExtendedLengthMsg extends ModeSDownlinkMsg implements Serializ
     }
 
     /**
+     * The Comm-D extended length message.
+     * <p>
+     * <b>The array is not a copy and must not be modified:</b> it is this message's own, shared with every
+     * message decoded or copied from it, so a change would alter all of them. It is not copied for
+     * performance.
+     *
      * @return the 10-byte Comm-D extended length message
      */
     public byte[] getMessage() {
