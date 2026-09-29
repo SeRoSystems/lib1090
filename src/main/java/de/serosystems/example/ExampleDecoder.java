@@ -309,8 +309,8 @@ public class ExampleDecoder {
             System.out.println("          True Track: " + (veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown") + " °");
             System.out.println("          Vertical rate: " + (veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown") + " ft/min");
 
-            // the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
-            if (decoder.getAdsbVersion(msg) == 1)
+            // the IFR capability flag is carried by the version 0 and 1 velocity messages
+            if (veloc instanceof IFRCapabilityMsg)
                 System.out.println("          Has IFR capability: " + ((IFRCapabilityMsg) veloc).hasIFRCapability());
         } else if (msg instanceof TargetStateAndStatusV1Msg || msg instanceof TargetStateAndStatusV2Msg) {
             System.out.println("[" + icao24 + "]: Target State and Status reported");
