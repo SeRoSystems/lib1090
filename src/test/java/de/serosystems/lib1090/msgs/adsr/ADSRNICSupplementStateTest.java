@@ -106,11 +106,11 @@ class ADSRNICSupplementStateTest {
 
     @Test
     void supplementBReachesTheFollowingPosition() throws Exception {
-        StatefulModeSDecoder withB = new StatefulModeSDecoder();
+        StatefulModeSDecoder withB = newDecoder();
         withB.decode(airborneStatus(true), T);
         assertEquals(9, nicOfFollowingPosition(withB), "supplements A and B both set");
 
-        StatefulModeSDecoder withoutB = new StatefulModeSDecoder();
+        StatefulModeSDecoder withoutB = newDecoder();
         withoutB.decode(airborneStatus(false), T);
         assertEquals(8, nicOfFollowingPosition(withoutB), "supplement A only");
     }
@@ -120,7 +120,7 @@ class ADSRNICSupplementStateTest {
      */
     @Test
     void withoutAnOperationalStatusThereIsNoPositionToRead() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         assertFalse(decoder.decode(airbornePosition(), T) instanceof AirbornePositionV3Msg);
     }
 
@@ -131,7 +131,7 @@ class ADSRNICSupplementStateTest {
      */
     @Test
     void aLayoutWithoutSupplementBLeavesItAlone() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(airborneStatus(true), T);
         decoder.decode(surfaceStatus(), T);
         assertEquals(9, nicOfFollowingPosition(decoder), "surface status must not clear supplement B");
@@ -144,7 +144,7 @@ class ADSRNICSupplementStateTest {
      */
     @Test
     void anUnknownSelectorLeavesSupplementBAlone() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(airborneStatus(true), T);
         decoder.decode(airborneStatusWithUnknownSelector(), T);
         assertEquals(9, nicOfFollowingPosition(decoder), "unknown selector must not clear supplement B");
@@ -155,7 +155,7 @@ class ADSRNICSupplementStateTest {
      */
     @Test
     void supplementsAreHeldPerTarget() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(airborneStatus(true), T);
 
         byte[] otherStatus = airborneStatus(false);
@@ -171,5 +171,12 @@ class ADSRNICSupplementStateTest {
         assertEquals(8, other.getNICEncoded(), "the second target never reported supplement B");
 
         assertEquals(9, nicOfFollowingPosition(decoder), "the first target still has it");
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

@@ -95,7 +95,7 @@ class NICSupplementDStateTest {
     }
 
     private static StatefulModeSDecoder decoderAtVersion3() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(operationalStatus(), T);
         return decoder;
     }
@@ -143,5 +143,12 @@ class NICSupplementDStateTest {
         decoder.decode(velocityWithoutSupplementD(), T);
 
         assertEquals((byte) 11, positionAfter(decoder).getNICEncoded());
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

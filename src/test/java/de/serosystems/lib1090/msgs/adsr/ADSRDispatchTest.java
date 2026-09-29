@@ -71,7 +71,7 @@ class ADSRDispatchTest {
      */
     private static ModeSDownlinkMsg decodeAtVersion(int version, int opStatusSubtype, byte[] raw)
             throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(opStatus(opStatusSubtype, version), T);
         return decoder.decode(raw, T);
     }
@@ -87,7 +87,7 @@ class ADSRDispatchTest {
 
     @Test
     void operationalStatus() throws Exception {
-        StatefulModeSDecoder d = new StatefulModeSDecoder();
+        StatefulModeSDecoder d = newDecoder();
         assertEquals(AirborneOperationalStatusV1Msg.class, d.decode(opStatus(0, 1), T).getClass());
         assertEquals(AirborneOperationalStatusV2Msg.class, d.decode(opStatus(0, 2), T).getClass());
         assertEquals(AirborneOperationalStatusV3Msg.class, d.decode(opStatus(0, 3), T).getClass());
@@ -101,7 +101,7 @@ class ADSRDispatchTest {
      */
     @Test
     void versionZeroIsNotDecoded() throws Exception {
-        StatefulModeSDecoder d = new StatefulModeSDecoder();
+        StatefulModeSDecoder d = newDecoder();
         assertEquals(TypeCodedExtendedSquitter.class, d.decode(opStatus(0, 0), T).getClass());
         // and with no version established, neither is anything that follows
         assertEquals(TypeCodedExtendedSquitter.class, d.decode(message(11, 0), T).getClass());
@@ -112,7 +112,7 @@ class ADSRDispatchTest {
      */
     @Test
     void unknownVersionsDecodeAsVersion3() throws Exception {
-        StatefulModeSDecoder d = new StatefulModeSDecoder();
+        StatefulModeSDecoder d = newDecoder();
         assertEquals(AirborneOperationalStatusV3Msg.class, d.decode(opStatus(0, 7), T).getClass());
     }
 
@@ -205,7 +205,7 @@ class ADSRDispatchTest {
      */
     @Test
     void addressTypeResolvesIndependentlyOfWhetherTheMessageIsDefined() throws Exception {
-        StatefulModeSDecoder d = new StatefulModeSDecoder();
+        StatefulModeSDecoder d = newDecoder();
         d.decode(opStatus(0, 3), T);
 
         // version 3 discards identification at format type code 1, yet the address is still qualified
@@ -231,5 +231,12 @@ class ADSRDispatchTest {
         for (int ftc : new int[]{0, 23, 24, 25, 27, 30}) {
             assertDispatch(2, message(ftc, 0), TypeCodedExtendedSquitter.class);
         }
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

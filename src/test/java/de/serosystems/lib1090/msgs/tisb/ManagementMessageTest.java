@@ -46,7 +46,7 @@ class ManagementMessageTest {
      */
     @Test
     void testDecodes() throws Exception {
-        ModeSDownlinkMsg msg = new StatefulModeSDecoder().decode(management(5), Instant.EPOCH);
+        ModeSDownlinkMsg msg = newDecoder().decode(management(5), Instant.EPOCH);
 
         assertInstanceOf(ManagementMessage.class, msg);
         assertInstanceOf(ExtendedSquitter.class, msg);
@@ -89,5 +89,12 @@ class ManagementMessageTest {
         String s = new ManagementMessage(management(3)).toString();
         assertTrue(s.startsWith("ManagementMessage{ExtendedSquitter{ModeSReply{"), s);
         assertTrue(s.endsWith("}, managementMessageBitFieldEncoded=3}"), s);
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

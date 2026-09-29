@@ -39,7 +39,7 @@ public class StatefulModeSDecoderTest {
 
     @BeforeEach
     public void setUp() {
-        decoder = new StatefulModeSDecoder();
+        decoder = newDecoder();
     }
 
     @Test
@@ -185,7 +185,7 @@ public class StatefulModeSDecoderTest {
         AirbornePositionV2Msg adsb = (AirbornePositionV2Msg) decoder.decode(position(DF17), Instant.EPOCH);
         assertEquals((byte) 8, adsb.getNICEncoded());
 
-        decoder = new StatefulModeSDecoder();
+        decoder = newDecoder();
         decoder.decode(opStatus(DF17, 2, true), Instant.EPOCH);
         FineAirbornePositionMsg tisb = (FineAirbornePositionMsg) decoder.decode(position(DF18_TISB), Instant.EPOCH);
         assertEquals((byte) 8, tisb.getNICEncoded());
@@ -210,7 +210,7 @@ public class StatefulModeSDecoderTest {
         assertEquals(52.2658, both.getLatitude(), 1e-4);
         assertEquals(3.9389, both.getLongitude(), 1e-4);
 
-        decoder = new StatefulModeSDecoder();
+        decoder = newDecoder();
         assertNull(extractPosition(even, t0));
         assertNull(extractPosition(oddViaTisb, t1));
     }
@@ -247,16 +247,63 @@ public class StatefulModeSDecoderTest {
     @Test
     public void extractPositionBeforeFirstDecode_doesNotBreakCleanup()
             throws UnspecifiedFormatError, BadFormatException {
-        ModeSDownlinkMsg msg = new StatefulModeSDecoder().decode("8D40621D58C382D690C8AC2863A7", Instant.EPOCH);
+        ModeSDownlinkMsg msg = newDecoder().decode("8D40621D58C382D690C8AC2863A7", Instant.EPOCH);
         assertNull(decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null));
         assertDoesNotThrow(decoder::clearDecoders);
         decoder.decode("8D4840D6202CC371C32CE0576098", Instant.EPOCH);
         assertDoesNotThrow(decoder::clearDecoders);
     }
 
+    /**
+     * ED-102B §2.2.4.5 a: a corrupted extended squitter is rejected before it reaches the per-target state. Here, one
+     * flipped ME bit turns a version 2 operational status into a version 0 one.
+     */
+    @Test
+    public void corruptedExtendedSquitter_isRejected() throws UnspecifiedFormatError, BadFormatException {
+        StatefulModeSDecoder checking = new StatefulModeSDecoder();
+        QualifiedAddress address = checking.decode("8DABCDEFF8000000004930CF8AD4", Instant.EPOCH).getAddress();
+        assertEquals(2, checking.getAdsbVersion(address));
+
+        assertThrows(BadFormatException.class, () -> checking.decode("8DABCDEFF8000000000930CF8AD4", Instant.EPOCH));
+        assertEquals(2, checking.getAdsbVersion(address));
+        assertInstanceOf(IdentificationV2Msg.class, checking.decode("8DABCDEF2004200000000082AA9F", Instant.EPOCH));
+    }
+
+    /**
+     * With the parity check disabled, the corrupted message is decoded and changes the state.
+     */
+    @Test
+    public void corruptedExtendedSquitter_isDecodedWithoutParityCheck()
+            throws UnspecifiedFormatError, BadFormatException {
+        StatefulModeSDecoder unchecked = StatefulModeSDecoder.builder().checkParity(false).build();
+        QualifiedAddress address = unchecked.decode("8DABCDEFF8000000004930CF8AD4", Instant.EPOCH).getAddress();
+        unchecked.decode("8DABCDEFF8000000000930CF8AD4", Instant.EPOCH);
+        assertEquals(0, unchecked.getAdsbVersion(address));
+    }
+
+    /**
+     * If the CRC has already been subtracted from the parity field, an intact message has a parity field of 0.
+     */
+    @Test
+    public void parityCheck_respectsNoCRC() throws UnspecifiedFormatError, BadFormatException {
+        StatefulModeSDecoder checking = new StatefulModeSDecoder();
+        assertInstanceOf(AirborneOperationalStatusV2Msg.class,
+                checking.decode("8DABCDEFF8000000004930000000", true, Instant.EPOCH));
+        assertThrows(BadFormatException.class,
+                () -> checking.decode("8DABCDEFF8000000004930CF8AD4", true, Instant.EPOCH));
+        assertThrows(BadFormatException.class, () -> checking.decode("8DABCDEFF8000000004930000000", Instant.EPOCH));
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 
 }

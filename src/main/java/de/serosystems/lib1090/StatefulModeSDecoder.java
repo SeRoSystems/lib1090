@@ -58,6 +58,7 @@ public class StatefulModeSDecoder {
     private final PositionDecoderSupplier positionDecoderSupplier;
     private final boolean decodeDf19Adsb;
     private final boolean tisbV2CompatibilityMode;
+    private final boolean checkParity;
     // keyed by the qualified address including its source, so that ADS-B, ADS-R and TIS-B receptions
     // for the same address never share version, NIC supplements or CPR state (see QualifiedAddress)
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
@@ -76,6 +77,7 @@ public class StatefulModeSDecoder {
         this.positionDecoderSupplier = builder.positionDecoderSupplier;
         this.decodeDf19Adsb = builder.decodeDf19Adsb;
         this.tisbV2CompatibilityMode = builder.tisbV2CompatibilityMode;
+        this.checkParity = builder.checkParity;
     }
 
     /**
@@ -87,10 +89,18 @@ public class StatefulModeSDecoder {
      * @param timestamp time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError declared for signature consistency with the other decode() overloads; the format of {@code modes} has already been validated by its own ModeSDownlinkMsg constructor by the time it reaches this method
-     * @throws BadFormatException     if format contains error
+     * @throws BadFormatException     if format contains error, or if the parity check is enabled (see
+     *                                {@link Builder#checkParity(boolean)}) and an extended squitter fails it
      */
     public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
         Objects.requireNonNull(timestamp, "timestamp");
+
+        // reject corrupted extended squitters before they reach the per-target state, see ED-102B §2.2.4.5 a; the
+        // other formats overlay their parity with the address or the interrogator code and keep no state here
+        if (checkParity && (modes.getDownlinkFormat() == 17 || modes.getDownlinkFormat() == 18 ||
+                modes.getDownlinkFormat() == 19 && modes.getFirstField() == 0 && decodeDf19Adsb) &&
+                !modes.checkParity())
+            throw new BadFormatException("Parity check failed", modes.getHexMessage());
 
         if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
 
@@ -794,6 +804,7 @@ public class StatefulModeSDecoder {
         private PositionDecoderSupplier positionDecoderSupplier = PositionDecoderSupplier.statefulPositionDecoder();
         private boolean decodeDf19Adsb = false;
         private boolean tisbV2CompatibilityMode = true;
+        private boolean checkParity = true;
 
         private Builder() {
         }
@@ -854,6 +865,25 @@ public class StatefulModeSDecoder {
          */
         public Builder tisbV2CompatibilityMode(boolean tisbV2CompatibilityMode) {
             this.tisbV2CompatibilityMode = tisbV2CompatibilityMode;
+            return this;
+        }
+
+        /**
+         * Enables the parity check of extended squitters (DF=17, DF=18, and DF=19 if decoded as ADS-B, see
+         * {@link #decodeDf19Adsb(boolean)}).
+         * <p>
+         * With the check enabled, {@link #build() the decoder} throws {@link BadFormatException} for an extended
+         * squitter whose parity does not match, before it reaches the per-target state. Disable it only if the input
+         * has already been checked, e.g. by the receiver: without the check, a corrupted message can change the
+         * target's ADS-B version, NIC supplements and CPR frames, and create state for a garbage address.
+         * Defaults to true.
+         *
+         * @param checkParity whether to reject extended squitters that fail the parity check
+         * @return this builder
+         * @see ModeSDownlinkMsg#checkParity()
+         */
+        public Builder checkParity(boolean checkParity) {
+            this.checkParity = checkParity;
             return this;
         }
 

@@ -80,391 +80,383 @@ public class ExampleDecoder {
 
         String icao24 = msg.getAddress().getHexAddress();
 
-        // check for erroneous messages; some receivers set
-        // parity field to the result of the CRC polynomial division
-        if (msg.getParity() == 0 || msg.checkParity()) { // CRC is ok
+        // now check the message type; extended squitters that fail the parity check have already been
+        // rejected by the decoder
+        if (msg instanceof AirbornePositionMsg) {
+            AirbornePositionMsg ap = (AirbornePositionMsg) msg;
+            System.out.print("[" + icao24 + "]: ");
 
-            // now check the message type
-            if (msg instanceof AirbornePositionMsg) {
-                AirbornePositionMsg ap = (AirbornePositionMsg) msg;
-                System.out.print("[" + icao24 + "]: ");
+            // use CPR to decode position
+            // CPR needs at least 2 positions or a reference, otherwise we get null here
+            Position c0 = decoder.extractPosition(msg.getAddress(), ap, receiver);
+            if (c0 == null)
+                System.out.println("Cannot decode position yet.");
+            else
+                System.out.println("Now at position (" + c0.getLatitude() + "," + c0.getLongitude() + ")");
+            System.out.println("          Horizontal containment radius limit/protection level: " +
+                    ap.getContainmentRadius() + " (" + ap.getHorizontalContainmentRadiusLimit() + " m)");
 
-                // use CPR to decode position
-                // CPR needs at least 2 positions or a reference, otherwise we get null here
-                Position c0 = decoder.extractPosition(msg.getAddress(), ap, receiver);
-                if (c0 == null)
-                    System.out.println("Cannot decode position yet.");
-                else
-                    System.out.println("Now at position (" + c0.getLatitude() + "," + c0.getLongitude() + ")");
-                System.out.println("          Horizontal containment radius limit/protection level: " +
-                        ap.getContainmentRadius() + " (" + ap.getHorizontalContainmentRadiusLimit() + " m)");
-
-                if (ap.hasValidAltitude()) {
-                    System.out.println("          Altitude: " + ap.getAltitude() + " ft");
-                    System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
-                }
-
-                DiffBaroAlt geoMinusBaro = decoder.getDiffBaroAlt(msg);
-                if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
-                    System.out.println("          Height (geom.): " + (ap.getAltitude() + geoMinusBaro.getValue()) + " ft");
-                }
-
-                System.out.println("          Navigation Integrity Category: " + ap.getNICEncoded());
-                System.out.println("          Surveillance status: " + ap.getSurveillanceStatusDescription());
-
-                // we want to inspect fields for ADS-B of different versions
-                if (msg instanceof AirbornePositionV0Msg) {
-                    AirbornePositionV0Msg ap0 = (AirbornePositionV0Msg) msg;
-                    // NACp and SIL for newer ADS-B versions contained in operational status message
-                    byte nacP = ap0.getNACpEncoded();
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
-                    System.out.println("          Position Uncertainty (based on NACp): " + ap0.getEstimatedPositionUncertainty());
-                    System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSourceIntegrityLevel());
-                } else if (msg instanceof AirbornePositionV2Msg) {
-                    AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
-                    System.out.println("          NIC supplement B set: " + ap2.getNICSupplementB());
-                } else if (msg instanceof AirbornePositionV3Msg) {
-                    AirbornePositionV3Msg ap3 = (AirbornePositionV3Msg) msg;
-                    System.out.println("          NIC supplement B set: " + ap3.getNICSupplementB());
-                }
-            } else if (msg instanceof SurfacePositionMsg) {
-                SurfacePositionMsg surfacePosition = (SurfacePositionMsg) msg;
-                System.out.print("[" + icao24 + "]: ");
-
-                Position sPos0 = decoder.extractPosition(msg.getAddress(), surfacePosition, receiver);
-                // decode the position if possible; prior position needed
-                if (sPos0 == null)
-                    System.out.println("Cannot decode position yet or no reference available (yet).");
-                else
-                    System.out.println("Now at position (" + sPos0.getLatitude() + "," + sPos0.getLongitude() + ")");
-
-                if (surfacePosition.hasValidHeading())
-                    System.out.println("          Heading: " + surfacePosition.getHeading() + "°");
-                System.out.println("          Airplane is on the ground.");
-
-                if (surfacePosition.hasGroundSpeed()) {
-                    System.out.println("          Ground speed: " + surfacePosition.getMovement().getGroundSpeed());
-                }
-
-                System.out.println("          Horizontal containment radius limit/protection level: " +
-                        surfacePosition.getContainmentRadius() + " ("
-                        + surfacePosition.getHorizontalContainmentRadiusLimit() + " m)");
-                System.out.println("          Navigation Integrity Category: " + surfacePosition.getNICEncoded());
-
-                // we want to inspect fields for ADS-B of different versions
-                if (msg instanceof SurfacePositionV0Msg) {
-                    SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
-                    // NACp and SIL for newer ADS-B versions contained in operational status message
-                    // Use the following only with version 0 as the others are more accurate
-                    byte nacP = sp0.getNACpEncoded();
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
-                    System.out.println("          Position Uncertainty (based on NACp): " + sp0.getEstimatedPositionUncertainty());
-                    System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSourceIntegrityLevel());
-                }
-            } else if (msg instanceof EmergencyOrPriorityStatusMsg) {
-                EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
-                System.out.println("[" + icao24 + "]: " + status.getReportedEmergencyState().getText());
-                if (status instanceof ModeACodeMsg) {
-                    System.out.println("          Mode A code is " + ((ModeACodeMsg) status).getIdentity());
-                }
-            } else if (msg instanceof ModeACodeV1Msg) {
-                ModeACodeV1Msg modeACode = (ModeACodeV1Msg) msg;
-                System.out.println("[" + icao24 + "]: Mode A code is " + modeACode.getIdentity());
-            } else if (msg instanceof AirspeedHeadingMsg) {
-                AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;
-                System.out.println("[" + icao24 + "]: Airspeed: " +
-                        (airspeed.hasAirspeed() ? airspeed.getAirspeed() + " kt" : "unknown"));
-
-                if (decoder.getAdsbVersion(msg) == 0) {
-                    // version 0 flag indicates true or magnetic north
-                    System.out.println("          Heading: " + airspeed.getHeading() + "° relative to " +
-                            (airspeed.hasHeadingStatusFlag() ? "magnetic north" : "true north"));
-                } else {
-                    // version 1+ flag indicates if heading is available at all
-                    System.out.println("          Heading: " +
-                            (airspeed.hasHeadingStatusFlag() ? airspeed.getHeading() + "°" : "unknown"));
-                }
-
-                if (airspeed.hasVerticalRate())
-                    System.out.println("          Vertical rate: " +
-                            (airspeed.hasVerticalRate() ? airspeed.getVerticalRate() + " ft/min" : "unknown"));
-            } else if (msg instanceof IdentificationMsg) {
-                IdentificationMsg ident = (IdentificationMsg) msg;
-                System.out.println("[" + icao24 + "]: Callsign: " + new String(ident.getIdentification()));
-                System.out.println("          Category: " + ident.getEmitterCategory());
-            } else if (msg instanceof OperationalStatusMsg) {
-                OperationalStatusMsg opstat = (OperationalStatusMsg) msg;
-                System.out.println("[" + icao24 + "]: Using ADS-B version " + opstat.getMOPSVersion());
-
-                // Subfields outside the capability class and operational mode fields sit on the message
-                // itself, since their position does not depend on any format selector.
-                if (msg instanceof AirborneOperationalStatusMsg) {
-                    AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
-                    System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getEstimatedPositionUncertainty());
-                    System.out.println("          Has NIC supplement A: " + opstatA.getNICSupplementA());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
-                            + opstatA.getSILEncoded() + " (" + opstatA.getSourceIntegrityLevel() + ")");
-                }
-                if (msg instanceof SurfaceOperationalStatusMsg) {
-                    SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
-                    System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getEstimatedPositionUncertainty());
-                    System.out.println("          Has NIC supplement A: " + opstatS.getNICSupplementA());
-                    System.out.println("          Aircraft/vehicle length: " + opstatS.getAircraftVehicleSize().getLength());
-                    System.out.println("          Aircraft/vehicle width: " + opstatS.getAircraftVehicleSize().getWidth());
-                    System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
-                    System.out.println("          Horizontal reference: " + (opstatS.isHeadingReferencedToMagneticNorth() ? "magnetic north" : "true north"));
-                }
-                if (msg instanceof AirborneOperationalStatusV2V3Msg) {
-                    AirborneOperationalStatusV2V3Msg v2v3 = (AirborneOperationalStatusV2V3Msg) msg;
-                    System.out.println("          Geometric vertical accuracy: " + v2v3.getGVAEncoded()
-                            + " (" + v2v3.getGeometricVerticalAccuracy() + ")");
-                }
-                if (msg instanceof OperationalStatusV2V3Msg) {
-                    System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).getSILSupplement());
-                }
-
-                // The capability class and operational mode fields each begin with a format selector
-                // that decides the layout of the rest of the field, so their subfields are reached
-                // through an object rather than off the message. Test it with instanceof and cast to
-                // whichever interfaces the layout you care about implements.
-                CapabilityClassCode cc = opstat.getCapabilityClass();
-                System.out.println("          Capability class code: 0x" + Integer.toHexString(cc.getEncoded())
-                        + " (format " + cc.getFormatSelector() + ")");
-                if (cc instanceof KnownCapabilityClassCode) {
-                    System.out.println("          Has 1090 ES In: " + ((KnownCapabilityClassCode) cc).has1090ESIn());
-                }
-                if (cc instanceof AirborneCapabilityClassCode) {
-                    System.out.println("          Collision avoidance operational: "
-                            + ((AirborneCapabilityClassCode) cc).isCollisionAvoidanceOperational());
-                }
-                if (cc instanceof SurfaceCapabilityClassCode) {
-                    System.out.println("          Low (<70W) TX power: " + ((SurfaceCapabilityClassCode) cc).isB2Low());
-                }
-                if (cc instanceof CapabilityClassCodeV2V3) {
-                    System.out.println("          Has UAT in: " + ((CapabilityClassCodeV2V3) cc).hasUATIn());
-                }
-                if (cc instanceof AirborneCapabilityClassCodeV1V2) {
-                    System.out.println("          Supports air-referenced velocity reports: "
-                            + ((AirborneCapabilityClassCodeV1V2) cc).supportsARVReport());
-                }
-                if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
-                    SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
-                    System.out.println("          Has NIC supplement C: " + surface.getNICSupplementC());
-                    System.out.println("          Navigation Accuracy Category for velocity (NACv): "
-                            + surface.getNACvEncoded() + " (" + surface.getHorizontalVelocityError() + ")");
-                }
-                if (cc instanceof AirborneCapabilityClassCodeV3) {
-                    AirborneCapabilityClassCodeV3 v3 = (AirborneCapabilityClassCodeV3) cc;
-                    System.out.println("          Transponder side indication: " + v3.getTransponderSideIndicationEncoded());
-                    System.out.println("          Tx power: " + v3.getTxPowerEncoded());
-                    System.out.println("          Reduced Capability Equipment: " + v3.getReducedCapabilityEquipmentEncoded());
-                    System.out.println("          Detect and Avoid: " + v3.getDetectAndAvoidEncoded());
-                }
-
-                // Every operational status message has this field. Version 0 defines no layout for
-                // it, and says so through the object it returns rather than by lacking the accessor.
-                OperationalModeCode om = opstat.getOperationalMode();
-                System.out.println("          Operational mode code: 0x" + Integer.toHexString(om.getEncoded())
-                        + " (format " + om.getFormatSelector() + ")");
-                // one test for "did we understand this layout?", then the subfields every
-                // defined layout answers
-                if (om instanceof KnownOperationalModeCode) {
-                    KnownOperationalModeCode known = (KnownOperationalModeCode) om;
-                    System.out.println("          IDENT switch active: " + known.isIDENTSwitchActive());
-                    System.out.println("          Has TCAS resolution advisory: " + known.isCollisionAvoidanceResolutionAdvisoryActive());
-                }
-                if (om instanceof OperationalModeCodeV2V3) {
-                    OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;
-                    SystemDesignAssurance sda = v2v3.getSystemDesignAssurance();
-                    System.out.println("          System design assurance: " + v2v3.getSDAEncoded()
-                            + " (" + sda.getSupportedFailureCondition()
-                            + ", " + sda.getUndetectedFaultProbability()
-                            + " per flight hour, " + sda.getDesignAssuranceLevel() + ")");
-                    System.out.println("          Uses single antenna: " + v2v3.hasSingleAntenna());
-                }
-                if (om instanceof SurfaceOperationalModeCodeV2V3) {
-                    System.out.println("          Encoded GPS antenna offset: "
-                            + ((SurfaceOperationalModeCodeV2V3) om).getGPSAntennaOffsetEncoded());
-                }
-                if (om instanceof OperationalModeCodeV3) {
-                    System.out.println("          Mode S reply rate limiting: "
-                            + ((OperationalModeCodeV3) om).isModeSReplyRateLimitingActive());
-                }
-            } else if (msg instanceof TCASResolutionAdvisoryMsg) {
-                TCASResolutionAdvisoryMsg tcas = (TCASResolutionAdvisoryMsg) msg;
-                System.out.println("[" + icao24 + "]: TCAS Resolution Advisory completed: " + tcas.hasRATerminated());
-                System.out.println("          Threat type is " + tcas.getThreatType());
-                if (tcas.getThreatType() == 1) // it's a icao24 address
-                    System.out.println("          Threat identity is 0x" + String.format("%06x", tcas.getThreatIdentity()));
-            } else if (msg instanceof CASOperationalCoordinationMsg) {
-                CASOperationalCoordinationMsg cas = (CASOperationalCoordinationMsg) msg;
-                System.out.println("[" + icao24 + "]: CAS Operational Coordination, multiple threat: " + cas.isMultipleThreatBit());
-                System.out.println("          Threat identity is 0x" + String.format("%06x", cas.getThreatIdentityAircraftAddress()));
-            } else if (msg instanceof UASRPASContingencyMsg) {
-                UASRPASContingencyMsg uas = (UASRPASContingencyMsg) msg;
-                System.out.println("[" + icao24 + "]: UAS/RPAS Contingency, TCP altitude is " + uas.getTcpAltitude() + "ft");
-                System.out.println("          TCP position is " + uas.getTcpLatitude() + ", " + uas.getTcpLongitude());
-            } else if (msg instanceof VelocityOverGroundMsg) {
-                VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
-                System.out.println("[" + icao24 + "]: Ground Speed: " + (veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown") + " kt");
-                System.out.println("          True Track: " + (veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown") + " °");
-                System.out.println("          Vertical rate: " + (veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown") + " ft/min");
-
-                // the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
-                if (decoder.getAdsbVersion(msg) == 1)
-                    System.out.println("          Has IFR capability: " + ((IFRCapabilityMsg) veloc).hasIFRCapability());
-            } else if (msg instanceof TargetStateAndStatusV1Msg || msg instanceof TargetStateAndStatusV2Msg) {
-                System.out.println("[" + icao24 + "]: Target State and Status reported");
-                if (msg instanceof TargetStateAndStatusV1Msg) {
-                    TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
-                    System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
-                            + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
-                    System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
-                    if (tStatus.hasSelectedAltitude()) {
-                        System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
-                    } else {
-                        System.out.println("          No selected altitude info");
-                    }
-                    if (tStatus.hasSelectedHeading()) {
-                        System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
-                    } else {
-                        System.out.println("          No selected heading info");
-                    }
-                } else {
-
-                    TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
-                    System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
-                    System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
-                    System.out.println("          Surveillance/Source Integrity Level (SIL): "
-                            + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
-                    System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
-                    System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
-
-                    System.out.printf("          Selected altitude is derived from %s\n", tStatus.isFMSSelectedAltitude() ? "FMS" : "MCP/FCU");
-                    if (tStatus.hasSelectedAltitude()) {
-                        System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
-                    } else {
-                        System.out.println("          No selected altitude info");
-                    }
-
-                    if (tStatus.hasBarometricPressureSetting()) {
-                        System.out.println("          Barometric pressure setting (minus 800 mbar): " + tStatus.getBarometricPressureSetting() + " mbar");
-                    } else {
-                        System.out.println("          No barometric pressure setting info");
-                    }
-
-                    if (tStatus.hasSelectedHeading()) {
-                        System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
-                    } else {
-                        System.out.println("          No selected heading info");
-                    }
-                    if (tStatus.hasMode()) {
-                        System.out.printf("          Autopilot is%s enganged\n", tStatus.hasAutopilotEngaged() ? "" : " not");
-                        System.out.printf("          VNAV mode is%s enganged\n", tStatus.hasVNAVModeEngaged() ? "" : " not");
-                        System.out.printf("          Altitude hold mode is%s enganged\n", tStatus.hasActiveAltitudeHoldMode() ? "" : " not");
-                        System.out.printf("          Approach mode is%s enganged\n", tStatus.hasActiveApproachMode() ? "" : " not");
-                        System.out.printf("          LNAV mode is%s enganged\n", tStatus.hasLNAVModeEngaged() ? "" : " not");
-                    } else {
-                        System.out.println("          No MCP/FCU mode info");
-                    }
-                }
-            } else if (msg instanceof HVAPositionMsg) {
-                HVAPositionMsg hvaPos = (HVAPositionMsg) msg;
-                System.out.println("[" + icao24 + "]: HVA Position reported");
-                System.out.println("          Geometric altitude (HAE): " + (hvaPos.hasHVAGeometricAltitude() ? hvaPos.getHVAGeometricAltitude() : "unknown") + " ft");
-                System.out.println("          Latitude: " + hvaPos.getHVALatitude() + "°");
-                System.out.println("          Longitude: " + hvaPos.getHVALongitude() + "°");
-            } else if (msg instanceof HVAVelocityMsg) {
-                HVAVelocityMsg hvaVel = (HVAVelocityMsg) msg;
-                System.out.println("[" + icao24 + "]: HVA Velocity reported");
-                System.out.println("          East/West velocity: " + (hvaVel.hasHVAEastWestVelocity() ? hvaVel.getHVAEastWestVelocity() : "unknown") + " kt");
-                System.out.println("          North/South velocity: " + (hvaVel.hasHVANorthSouthVelocity() ? hvaVel.getHVANorthSouthVelocity() : "unknown") + " kt");
-                System.out.println("          Vertical rate: " + (hvaVel.hasHVAVerticalRate() ? hvaVel.getHVAVerticalRate() : "unknown") + " ft/min");
-                if (hvaVel.hasPIC())
-                    System.out.println("          Radius of Containment: " + hvaVel.getContainmentRadius()
-                            + " (" + hvaVel.getContainmentRadius().getGuaranteedUpperBound() + " m)");
-            } else if (msg instanceof WxAIREPAircraftStateMsg) {
-                WxAIREPAircraftStateMsg wxState = (WxAIREPAircraftStateMsg) msg;
-                System.out.println("[" + icao24 + "]: Wx AIREP Aircraft State reported");
-                System.out.println("          Aircraft configuration: " + wxState.getAircraftConfigurationEncoded());
-                System.out.println("          Aircraft type: " + (wxState.hasAircraftType() ? String.valueOf(wxState.getAircraftType()) : "unknown"));
-                System.out.println("          Gross weight: " + (wxState.hasGrossWeight() ? ">= " + wxState.getGrossWeight() : "unknown") + " lbs");
-                System.out.println("          Wingspan: " + (wxState.hasWingspan() ? ">= " + wxState.getWingspan() : "unknown") + " ft");
-            } else if (msg instanceof WxAIREPWeatherStateMsg) {
-                WxAIREPWeatherStateMsg wxWeather = (WxAIREPWeatherStateMsg) msg;
-                System.out.println("[" + icao24 + "]: Wx AIREP Weather State reported");
-                System.out.println("          Icing status: " + wxWeather.getIcingStatusEncoded());
-                System.out.println("          Wind quality indicator: " + wxWeather.getWindQualityIndicatorEncoded());
-                System.out.println("          Wind speed: " + (wxWeather.hasWindSpeed() ? ">= " + wxWeather.getWindSpeed() : "unknown") + " kt");
-                System.out.println("          Wind direction: " + (wxWeather.hasWindDirection() ? ">= " + wxWeather.getWindDirection() : "unknown") + "°");
-                System.out.println("          Air temperature (" + (wxWeather.getAirTemperatureType() ? "static" : "total") + "): " +
-                        (wxWeather.hasAirTemperature() ? ">= " + wxWeather.getAirTemperature() : "unknown") + "°C");
-                System.out.println("          Airspeed (" + (wxWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
-                        (wxWeather.hasAirspeed() ? ">= " + wxWeather.getAirspeed() : "unknown") + " kt");
-            } else if (msg instanceof WxAIREPAlternateWeatherStateMsg) {
-                WxAIREPAlternateWeatherStateMsg wxAltWeather = (WxAIREPAlternateWeatherStateMsg) msg;
-                System.out.println("[" + icao24 + "]: Wx AIREP Alternate Weather State reported");
-                System.out.println("          Icing status: " + wxAltWeather.getIcingStatusEncoded());
-                System.out.println("          Roll angle: " + (wxAltWeather.hasRollAngle() ? wxAltWeather.getRollAngle() : "unknown") + "°");
-                System.out.println("          Heading (" + (wxAltWeather.getHeadingType() ? "magnetic" : "true") + "): " +
-                        (wxAltWeather.hasHeading() ? ">= " + wxAltWeather.getHeading() : "unknown") + "°");
-                System.out.println("          Air temperature (" + (wxAltWeather.getAirTemperatureType() ? "static" : "total") + "): " +
-                        (wxAltWeather.hasAirTemperature() ? ">= " + wxAltWeather.getAirTemperature() : "unknown") + "°C");
-                System.out.println("          Airspeed (" + (wxAltWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
-                        (wxAltWeather.hasAirspeed() ? ">= " + wxAltWeather.getAirspeed() : "unknown") + " kt");
-            } else if (msg instanceof TypeCodedExtendedSquitter) {
-                System.out.println("[" + icao24 + "]: Unknown extended squitter with type code " + ((TypeCodedExtendedSquitter) msg).getFormatTypeCode() + "!");
+            if (ap.hasValidAltitude()) {
+                System.out.println("          Altitude: " + ap.getAltitude() + " ft");
+                System.out.println("          Altitude Reference System: " + ap.getAltitudeType());
             }
-        } else if (msg.getDownlinkFormat() != 17) { // CRC failed
-            if (msg instanceof ShortACAS) {
-                ShortACAS acas = (ShortACAS) msg;
-                System.out.println("[" + icao24 + "]: Altitude is " + acas.getAltitude() + "ft and ACAS is " +
-                        (acas.hasOperatingACAS() ? "operating." : "not operating."));
-                System.out.println("          A/C is " + (acas.isAirborne() ? "airborne" : "on the ground") +
-                        " and sensitivity level is " + acas.getSensitivityLevel());
-            } else if (msg instanceof AltitudeReply) {
-                AltitudeReply alti = (AltitudeReply) msg;
-                System.out.println("[" + icao24 + "]: Short altitude reply: " + alti.getAltitude() + "ft");
-            } else if (msg instanceof IdentifyReply) {
-                IdentifyReply identify = (IdentifyReply) msg;
-                System.out.println("[" + icao24 + "]: Short identify reply: " + identify.getIdentity());
-            } else if (msg instanceof AllCallReply) {
-                AllCallReply allcall = (AllCallReply) msg;
-                System.out.println("[" + icao24 + "]: All-call reply for " + Tools.toHexString(allcall.getInterrogatorCode()) +
-                        " (" + (allcall.hasValidInterrogatorCode() ? "valid" : "invalid") + ")");
-            } else if (msg instanceof LongACAS) {
-                LongACAS long_acas = (LongACAS) msg;
-                System.out.println("[" + icao24 + "]: Altitude is " + long_acas.getAltitude() + "ft and ACAS is " +
-                        (long_acas.hasOperatingACAS() ? "operating." : "not operating."));
-                System.out.println("          A/C is " + (long_acas.isAirborne() ? "airborne" : "on the ground") +
-                        " and sensitivity level is " + long_acas.getSensitivityLevel());
-                System.out.println("          RAC is " + (long_acas.hasValidRAC() ? "valid" : "not valid") +
-                        " and is " + long_acas.getResolutionAdvisoryComplementEncoded() + " (MTE=" + long_acas.hasMultipleThreats() + ")");
-                System.out.println("          Maximum airspeed is " + long_acas.getMaximumAirspeed() + "kn.");
-            } else if (msg instanceof MilitaryExtendedSquitter) {
-                MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter) msg;
-                System.out.println("[" + icao24 + "]: Military ES of application " + mil.getApplicationField());
-                System.out.println("          Message is 0x" + Tools.toHexString(mil.getMessage()));
-            } else if (msg instanceof CommBAltitudeReply) {
-                CommBAltitudeReply commBaltitude = (CommBAltitudeReply) msg;
-                System.out.println("[" + icao24 + "]: Long altitude reply: " + commBaltitude.getAltitude() + "ft");
-            } else if (msg instanceof CommBIdentifyReply) {
-                CommBIdentifyReply commBidentify = (CommBIdentifyReply) msg;
-                System.out.println("[" + icao24 + "]: Long identify reply: " + commBidentify.getIdentity());
-            } else if (msg instanceof CommDExtendedLengthMsg) {
-                CommDExtendedLengthMsg commDELM = (CommDExtendedLengthMsg) msg;
-                System.out.println("[" + icao24 + "]: ELM message w/ sequence no " + commDELM.getSequenceNumber() +
-                        " (ACK: " + commDELM.isAck() + ")");
-                System.out.println("          Message is 0x" + Tools.toHexString(commDELM.getMessage()));
-            } else if (msg.getClass() == ModeSDownlinkMsg.class) {
-                System.out.println("[" + icao24 + "]: Unknown message with DF " + msg.getDownlinkFormat());
+
+            DiffBaroAlt geoMinusBaro = decoder.getDiffBaroAlt(msg);
+            if (ap.hasValidAltitude() && ap.getAltitudeType() == Position.AltitudeType.BAROMETRIC_ALTITUDE && geoMinusBaro != null) {
+                System.out.println("          Height (geom.): " + (ap.getAltitude() + geoMinusBaro.getValue()) + " ft");
             }
-        } else {
-            System.out.println("Message contains biterrors.");
+
+            System.out.println("          Navigation Integrity Category: " + ap.getNICEncoded());
+            System.out.println("          Surveillance status: " + ap.getSurveillanceStatusDescription());
+
+            // we want to inspect fields for ADS-B of different versions
+            if (msg instanceof AirbornePositionV0Msg) {
+                AirbornePositionV0Msg ap0 = (AirbornePositionV0Msg) msg;
+                // NACp and SIL for newer ADS-B versions contained in operational status message
+                byte nacP = ap0.getNACpEncoded();
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
+                System.out.println("          Position Uncertainty (based on NACp): " + ap0.getEstimatedPositionUncertainty());
+                System.out.println("          Surveillance Integrity Level (SIL): " + ap0.getSourceIntegrityLevel());
+            } else if (msg instanceof AirbornePositionV2Msg) {
+                AirbornePositionV2Msg ap2 = (AirbornePositionV2Msg) msg;
+                System.out.println("          NIC supplement B set: " + ap2.getNICSupplementB());
+            } else if (msg instanceof AirbornePositionV3Msg) {
+                AirbornePositionV3Msg ap3 = (AirbornePositionV3Msg) msg;
+                System.out.println("          NIC supplement B set: " + ap3.getNICSupplementB());
+            }
+        } else if (msg instanceof SurfacePositionMsg) {
+            SurfacePositionMsg surfacePosition = (SurfacePositionMsg) msg;
+            System.out.print("[" + icao24 + "]: ");
+
+            Position sPos0 = decoder.extractPosition(msg.getAddress(), surfacePosition, receiver);
+            // decode the position if possible; prior position needed
+            if (sPos0 == null)
+                System.out.println("Cannot decode position yet or no reference available (yet).");
+            else
+                System.out.println("Now at position (" + sPos0.getLatitude() + "," + sPos0.getLongitude() + ")");
+
+            if (surfacePosition.hasValidHeading())
+                System.out.println("          Heading: " + surfacePosition.getHeading() + "°");
+            System.out.println("          Airplane is on the ground.");
+
+            if (surfacePosition.hasGroundSpeed()) {
+                System.out.println("          Ground speed: " + surfacePosition.getMovement().getGroundSpeed());
+            }
+
+            System.out.println("          Horizontal containment radius limit/protection level: " +
+                    surfacePosition.getContainmentRadius() + " ("
+                    + surfacePosition.getHorizontalContainmentRadiusLimit() + " m)");
+            System.out.println("          Navigation Integrity Category: " + surfacePosition.getNICEncoded());
+
+            // we want to inspect fields for ADS-B of different versions
+            if (msg instanceof SurfacePositionV0Msg) {
+                SurfacePositionV0Msg sp0 = (SurfacePositionV0Msg) msg;
+                // NACp and SIL for newer ADS-B versions contained in operational status message
+                // Use the following only with version 0 as the others are more accurate
+                byte nacP = sp0.getNACpEncoded();
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + nacP);
+                System.out.println("          Position Uncertainty (based on NACp): " + sp0.getEstimatedPositionUncertainty());
+                System.out.println("          Surveillance Integrity Level (SIL): " + sp0.getSourceIntegrityLevel());
+            }
+        } else if (msg instanceof EmergencyOrPriorityStatusMsg) {
+            EmergencyOrPriorityStatusMsg status = (EmergencyOrPriorityStatusMsg) msg;
+            System.out.println("[" + icao24 + "]: " + status.getReportedEmergencyState().getText());
+            if (status instanceof ModeACodeMsg) {
+                System.out.println("          Mode A code is " + ((ModeACodeMsg) status).getIdentity());
+            }
+        } else if (msg instanceof ModeACodeV1Msg) {
+            ModeACodeV1Msg modeACode = (ModeACodeV1Msg) msg;
+            System.out.println("[" + icao24 + "]: Mode A code is " + modeACode.getIdentity());
+        } else if (msg instanceof AirspeedHeadingMsg) {
+            AirspeedHeadingMsg airspeed = (AirspeedHeadingMsg) msg;
+            System.out.println("[" + icao24 + "]: Airspeed: " +
+                    (airspeed.hasAirspeed() ? airspeed.getAirspeed() + " kt" : "unknown"));
+
+            if (decoder.getAdsbVersion(msg) == 0) {
+                // version 0 flag indicates true or magnetic north
+                System.out.println("          Heading: " + airspeed.getHeading() + "° relative to " +
+                        (airspeed.hasHeadingStatusFlag() ? "magnetic north" : "true north"));
+            } else {
+                // version 1+ flag indicates if heading is available at all
+                System.out.println("          Heading: " +
+                        (airspeed.hasHeadingStatusFlag() ? airspeed.getHeading() + "°" : "unknown"));
+            }
+
+            if (airspeed.hasVerticalRate())
+                System.out.println("          Vertical rate: " +
+                        (airspeed.hasVerticalRate() ? airspeed.getVerticalRate() + " ft/min" : "unknown"));
+        } else if (msg instanceof IdentificationMsg) {
+            IdentificationMsg ident = (IdentificationMsg) msg;
+            System.out.println("[" + icao24 + "]: Callsign: " + new String(ident.getIdentification()));
+            System.out.println("          Category: " + ident.getEmitterCategory());
+        } else if (msg instanceof OperationalStatusMsg) {
+            OperationalStatusMsg opstat = (OperationalStatusMsg) msg;
+            System.out.println("[" + icao24 + "]: Using ADS-B version " + opstat.getMOPSVersion());
+
+            // Subfields outside the capability class and operational mode fields sit on the message
+            // itself, since their position does not depend on any format selector.
+            if (msg instanceof AirborneOperationalStatusMsg) {
+                AirborneOperationalStatusMsg opstatA = (AirborneOperationalStatusMsg) msg;
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatA.getNACpEncoded());
+                System.out.println("          Position Uncertainty (based on NACp): " + opstatA.getEstimatedPositionUncertainty());
+                System.out.println("          Has NIC supplement A: " + opstatA.getNICSupplementA());
+                System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                        + opstatA.getSILEncoded() + " (" + opstatA.getSourceIntegrityLevel() + ")");
+            }
+            if (msg instanceof SurfaceOperationalStatusMsg) {
+                SurfaceOperationalStatusMsg opstatS = (SurfaceOperationalStatusMsg) msg;
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + opstatS.getNACpEncoded());
+                System.out.println("          Position Uncertainty (based on NACp): " + opstatS.getEstimatedPositionUncertainty());
+                System.out.println("          Has NIC supplement A: " + opstatS.getNICSupplementA());
+                System.out.println("          Aircraft/vehicle length: " + opstatS.getAircraftVehicleSize().getLength());
+                System.out.println("          Aircraft/vehicle width: " + opstatS.getAircraftVehicleSize().getWidth());
+                System.out.println("          Has track heading info: " + opstatS.hasTrackHeading());
+                System.out.println("          Horizontal reference: " + (opstatS.isHeadingReferencedToMagneticNorth() ? "magnetic north" : "true north"));
+            }
+            if (msg instanceof AirborneOperationalStatusV2V3Msg) {
+                AirborneOperationalStatusV2V3Msg v2v3 = (AirborneOperationalStatusV2V3Msg) msg;
+                System.out.println("          Geometric vertical accuracy: " + v2v3.getGVAEncoded()
+                        + " (" + v2v3.getGeometricVerticalAccuracy() + ")");
+            }
+            if (msg instanceof OperationalStatusV2V3Msg) {
+                System.out.println("          Has SIL supplement: " + ((OperationalStatusV2V3Msg) msg).getSILSupplement());
+            }
+
+            // The capability class and operational mode fields each begin with a format selector
+            // that decides the layout of the rest of the field, so their subfields are reached
+            // through an object rather than off the message. Test it with instanceof and cast to
+            // whichever interfaces the layout you care about implements.
+            CapabilityClassCode cc = opstat.getCapabilityClass();
+            System.out.println("          Capability class code: 0x" + Integer.toHexString(cc.getEncoded())
+                    + " (format " + cc.getFormatSelector() + ")");
+            if (cc instanceof KnownCapabilityClassCode) {
+                System.out.println("          Has 1090 ES In: " + ((KnownCapabilityClassCode) cc).has1090ESIn());
+            }
+            if (cc instanceof AirborneCapabilityClassCode) {
+                System.out.println("          Collision avoidance operational: "
+                        + ((AirborneCapabilityClassCode) cc).isCollisionAvoidanceOperational());
+            }
+            if (cc instanceof SurfaceCapabilityClassCode) {
+                System.out.println("          Low (<70W) TX power: " + ((SurfaceCapabilityClassCode) cc).isB2Low());
+            }
+            if (cc instanceof CapabilityClassCodeV2V3) {
+                System.out.println("          Has UAT in: " + ((CapabilityClassCodeV2V3) cc).hasUATIn());
+            }
+            if (cc instanceof AirborneCapabilityClassCodeV1V2) {
+                System.out.println("          Supports air-referenced velocity reports: "
+                        + ((AirborneCapabilityClassCodeV1V2) cc).supportsARVReport());
+            }
+            if (cc instanceof SurfaceCapabilityClassCodeV2V3) {
+                SurfaceCapabilityClassCodeV2V3 surface = (SurfaceCapabilityClassCodeV2V3) cc;
+                System.out.println("          Has NIC supplement C: " + surface.getNICSupplementC());
+                System.out.println("          Navigation Accuracy Category for velocity (NACv): "
+                        + surface.getNACvEncoded() + " (" + surface.getHorizontalVelocityError() + ")");
+            }
+            if (cc instanceof AirborneCapabilityClassCodeV3) {
+                AirborneCapabilityClassCodeV3 v3 = (AirborneCapabilityClassCodeV3) cc;
+                System.out.println("          Transponder side indication: " + v3.getTransponderSideIndicationEncoded());
+                System.out.println("          Tx power: " + v3.getTxPowerEncoded());
+                System.out.println("          Reduced Capability Equipment: " + v3.getReducedCapabilityEquipmentEncoded());
+                System.out.println("          Detect and Avoid: " + v3.getDetectAndAvoidEncoded());
+            }
+
+            // Every operational status message has this field. Version 0 defines no layout for
+            // it, and says so through the object it returns rather than by lacking the accessor.
+            OperationalModeCode om = opstat.getOperationalMode();
+            System.out.println("          Operational mode code: 0x" + Integer.toHexString(om.getEncoded())
+                    + " (format " + om.getFormatSelector() + ")");
+            // one test for "did we understand this layout?", then the subfields every
+            // defined layout answers
+            if (om instanceof KnownOperationalModeCode) {
+                KnownOperationalModeCode known = (KnownOperationalModeCode) om;
+                System.out.println("          IDENT switch active: " + known.isIDENTSwitchActive());
+                System.out.println("          Has TCAS resolution advisory: " + known.isCollisionAvoidanceResolutionAdvisoryActive());
+            }
+            if (om instanceof OperationalModeCodeV2V3) {
+                OperationalModeCodeV2V3 v2v3 = (OperationalModeCodeV2V3) om;
+                SystemDesignAssurance sda = v2v3.getSystemDesignAssurance();
+                System.out.println("          System design assurance: " + v2v3.getSDAEncoded()
+                        + " (" + sda.getSupportedFailureCondition()
+                        + ", " + sda.getUndetectedFaultProbability()
+                        + " per flight hour, " + sda.getDesignAssuranceLevel() + ")");
+                System.out.println("          Uses single antenna: " + v2v3.hasSingleAntenna());
+            }
+            if (om instanceof SurfaceOperationalModeCodeV2V3) {
+                System.out.println("          Encoded GPS antenna offset: "
+                        + ((SurfaceOperationalModeCodeV2V3) om).getGPSAntennaOffsetEncoded());
+            }
+            if (om instanceof OperationalModeCodeV3) {
+                System.out.println("          Mode S reply rate limiting: "
+                        + ((OperationalModeCodeV3) om).isModeSReplyRateLimitingActive());
+            }
+        } else if (msg instanceof TCASResolutionAdvisoryMsg) {
+            TCASResolutionAdvisoryMsg tcas = (TCASResolutionAdvisoryMsg) msg;
+            System.out.println("[" + icao24 + "]: TCAS Resolution Advisory completed: " + tcas.hasRATerminated());
+            System.out.println("          Threat type is " + tcas.getThreatType());
+            if (tcas.getThreatType() == 1) // it's a icao24 address
+                System.out.println("          Threat identity is 0x" + String.format("%06x", tcas.getThreatIdentity()));
+        } else if (msg instanceof CASOperationalCoordinationMsg) {
+            CASOperationalCoordinationMsg cas = (CASOperationalCoordinationMsg) msg;
+            System.out.println("[" + icao24 + "]: CAS Operational Coordination, multiple threat: " + cas.isMultipleThreatBit());
+            System.out.println("          Threat identity is 0x" + String.format("%06x", cas.getThreatIdentityAircraftAddress()));
+        } else if (msg instanceof UASRPASContingencyMsg) {
+            UASRPASContingencyMsg uas = (UASRPASContingencyMsg) msg;
+            System.out.println("[" + icao24 + "]: UAS/RPAS Contingency, TCP altitude is " + uas.getTcpAltitude() + "ft");
+            System.out.println("          TCP position is " + uas.getTcpLatitude() + ", " + uas.getTcpLongitude());
+        } else if (msg instanceof VelocityOverGroundMsg) {
+            VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
+            System.out.println("[" + icao24 + "]: Ground Speed: " + (veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown") + " kt");
+            System.out.println("          True Track: " + (veloc.hasVelocity() ? veloc.getTrueTrackAngle() : "unknown") + " °");
+            System.out.println("          Vertical rate: " + (veloc.hasVerticalRate() ? veloc.getVerticalRate() : "unknown") + " ft/min");
+
+            // the IFR flag is only used in ADS-B version 1. Although equipage is low, we still support it
+            if (decoder.getAdsbVersion(msg) == 1)
+                System.out.println("          Has IFR capability: " + ((IFRCapabilityMsg) veloc).hasIFRCapability());
+        } else if (msg instanceof TargetStateAndStatusV1Msg || msg instanceof TargetStateAndStatusV2Msg) {
+            System.out.println("[" + icao24 + "]: Target State and Status reported");
+            if (msg instanceof TargetStateAndStatusV1Msg) {
+                TargetStateAndStatusV1Msg tStatus = (TargetStateAndStatusV1Msg) msg;
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
+                System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
+                System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                        + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
+                System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
+                if (tStatus.hasSelectedAltitude()) {
+                    System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
+                } else {
+                    System.out.println("          No selected altitude info");
+                }
+                if (tStatus.hasSelectedHeading()) {
+                    System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
+                } else {
+                    System.out.println("          No selected heading info");
+                }
+            } else {
+
+                TargetStateAndStatusV2Msg tStatus = (TargetStateAndStatusV2Msg) msg;
+                System.out.println("          Navigation Accuracy Category for position (NACp): " + tStatus.getNACpEncoded());
+                System.out.println("          Has operational TCAS: " + tStatus.hasOperationalTCAS());
+                System.out.println("          Surveillance/Source Integrity Level (SIL): "
+                        + tStatus.getSILEncoded() + " (" + tStatus.getSourceIntegrityLevel() + ")");
+                System.out.println("          Has SIL supplement: " + tStatus.getSILSupplement());
+                System.out.println("          Barometric altitude cross-checked: " + tStatus.getBarometricAltitudeIntegrityCode());
+
+                System.out.printf("          Selected altitude is derived from %s\n", tStatus.isFMSSelectedAltitude() ? "FMS" : "MCP/FCU");
+                if (tStatus.hasSelectedAltitude()) {
+                    System.out.println("          Selected altitude: " + tStatus.getSelectedAltitude() + " ft");
+                } else {
+                    System.out.println("          No selected altitude info");
+                }
+
+                if (tStatus.hasBarometricPressureSetting()) {
+                    System.out.println("          Barometric pressure setting (minus 800 mbar): " + tStatus.getBarometricPressureSetting() + " mbar");
+                } else {
+                    System.out.println("          No barometric pressure setting info");
+                }
+
+                if (tStatus.hasSelectedHeading()) {
+                    System.out.println("          Selected heading: " + tStatus.getSelectedHeading() + "°");
+                } else {
+                    System.out.println("          No selected heading info");
+                }
+                if (tStatus.hasMode()) {
+                    System.out.printf("          Autopilot is%s enganged\n", tStatus.hasAutopilotEngaged() ? "" : " not");
+                    System.out.printf("          VNAV mode is%s enganged\n", tStatus.hasVNAVModeEngaged() ? "" : " not");
+                    System.out.printf("          Altitude hold mode is%s enganged\n", tStatus.hasActiveAltitudeHoldMode() ? "" : " not");
+                    System.out.printf("          Approach mode is%s enganged\n", tStatus.hasActiveApproachMode() ? "" : " not");
+                    System.out.printf("          LNAV mode is%s enganged\n", tStatus.hasLNAVModeEngaged() ? "" : " not");
+                } else {
+                    System.out.println("          No MCP/FCU mode info");
+                }
+            }
+        } else if (msg instanceof HVAPositionMsg) {
+            HVAPositionMsg hvaPos = (HVAPositionMsg) msg;
+            System.out.println("[" + icao24 + "]: HVA Position reported");
+            System.out.println("          Geometric altitude (HAE): " + (hvaPos.hasHVAGeometricAltitude() ? hvaPos.getHVAGeometricAltitude() : "unknown") + " ft");
+            System.out.println("          Latitude: " + hvaPos.getHVALatitude() + "°");
+            System.out.println("          Longitude: " + hvaPos.getHVALongitude() + "°");
+        } else if (msg instanceof HVAVelocityMsg) {
+            HVAVelocityMsg hvaVel = (HVAVelocityMsg) msg;
+            System.out.println("[" + icao24 + "]: HVA Velocity reported");
+            System.out.println("          East/West velocity: " + (hvaVel.hasHVAEastWestVelocity() ? hvaVel.getHVAEastWestVelocity() : "unknown") + " kt");
+            System.out.println("          North/South velocity: " + (hvaVel.hasHVANorthSouthVelocity() ? hvaVel.getHVANorthSouthVelocity() : "unknown") + " kt");
+            System.out.println("          Vertical rate: " + (hvaVel.hasHVAVerticalRate() ? hvaVel.getHVAVerticalRate() : "unknown") + " ft/min");
+            if (hvaVel.hasPIC())
+                System.out.println("          Radius of Containment: " + hvaVel.getContainmentRadius()
+                        + " (" + hvaVel.getContainmentRadius().getGuaranteedUpperBound() + " m)");
+        } else if (msg instanceof WxAIREPAircraftStateMsg) {
+            WxAIREPAircraftStateMsg wxState = (WxAIREPAircraftStateMsg) msg;
+            System.out.println("[" + icao24 + "]: Wx AIREP Aircraft State reported");
+            System.out.println("          Aircraft configuration: " + wxState.getAircraftConfigurationEncoded());
+            System.out.println("          Aircraft type: " + (wxState.hasAircraftType() ? String.valueOf(wxState.getAircraftType()) : "unknown"));
+            System.out.println("          Gross weight: " + (wxState.hasGrossWeight() ? ">= " + wxState.getGrossWeight() : "unknown") + " lbs");
+            System.out.println("          Wingspan: " + (wxState.hasWingspan() ? ">= " + wxState.getWingspan() : "unknown") + " ft");
+        } else if (msg instanceof WxAIREPWeatherStateMsg) {
+            WxAIREPWeatherStateMsg wxWeather = (WxAIREPWeatherStateMsg) msg;
+            System.out.println("[" + icao24 + "]: Wx AIREP Weather State reported");
+            System.out.println("          Icing status: " + wxWeather.getIcingStatusEncoded());
+            System.out.println("          Wind quality indicator: " + wxWeather.getWindQualityIndicatorEncoded());
+            System.out.println("          Wind speed: " + (wxWeather.hasWindSpeed() ? ">= " + wxWeather.getWindSpeed() : "unknown") + " kt");
+            System.out.println("          Wind direction: " + (wxWeather.hasWindDirection() ? ">= " + wxWeather.getWindDirection() : "unknown") + "°");
+            System.out.println("          Air temperature (" + (wxWeather.getAirTemperatureType() ? "static" : "total") + "): " +
+                    (wxWeather.hasAirTemperature() ? ">= " + wxWeather.getAirTemperature() : "unknown") + "°C");
+            System.out.println("          Airspeed (" + (wxWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
+                    (wxWeather.hasAirspeed() ? ">= " + wxWeather.getAirspeed() : "unknown") + " kt");
+        } else if (msg instanceof WxAIREPAlternateWeatherStateMsg) {
+            WxAIREPAlternateWeatherStateMsg wxAltWeather = (WxAIREPAlternateWeatherStateMsg) msg;
+            System.out.println("[" + icao24 + "]: Wx AIREP Alternate Weather State reported");
+            System.out.println("          Icing status: " + wxAltWeather.getIcingStatusEncoded());
+            System.out.println("          Roll angle: " + (wxAltWeather.hasRollAngle() ? wxAltWeather.getRollAngle() : "unknown") + "°");
+            System.out.println("          Heading (" + (wxAltWeather.getHeadingType() ? "magnetic" : "true") + "): " +
+                    (wxAltWeather.hasHeading() ? ">= " + wxAltWeather.getHeading() : "unknown") + "°");
+            System.out.println("          Air temperature (" + (wxAltWeather.getAirTemperatureType() ? "static" : "total") + "): " +
+                    (wxAltWeather.hasAirTemperature() ? ">= " + wxAltWeather.getAirTemperature() : "unknown") + "°C");
+            System.out.println("          Airspeed (" + (wxAltWeather.getAirspeedType() ? "TAS" : "IAS") + "): " +
+                    (wxAltWeather.hasAirspeed() ? ">= " + wxAltWeather.getAirspeed() : "unknown") + " kt");
+        } else if (msg instanceof TypeCodedExtendedSquitter) {
+            System.out.println("[" + icao24 + "]: Unknown extended squitter with type code " + ((TypeCodedExtendedSquitter) msg).getFormatTypeCode() + "!");
+        } else if (msg instanceof ShortACAS) {
+            ShortACAS acas = (ShortACAS) msg;
+            System.out.println("[" + icao24 + "]: Altitude is " + acas.getAltitude() + "ft and ACAS is " +
+                    (acas.hasOperatingACAS() ? "operating." : "not operating."));
+            System.out.println("          A/C is " + (acas.isAirborne() ? "airborne" : "on the ground") +
+                    " and sensitivity level is " + acas.getSensitivityLevel());
+        } else if (msg instanceof AltitudeReply) {
+            AltitudeReply alti = (AltitudeReply) msg;
+            System.out.println("[" + icao24 + "]: Short altitude reply: " + alti.getAltitude() + "ft");
+        } else if (msg instanceof IdentifyReply) {
+            IdentifyReply identify = (IdentifyReply) msg;
+            System.out.println("[" + icao24 + "]: Short identify reply: " + identify.getIdentity());
+        } else if (msg instanceof AllCallReply) {
+            AllCallReply allcall = (AllCallReply) msg;
+            System.out.println("[" + icao24 + "]: All-call reply for " + Tools.toHexString(allcall.getInterrogatorCode()) +
+                    " (" + (allcall.hasValidInterrogatorCode() ? "valid" : "invalid") + ")");
+        } else if (msg instanceof LongACAS) {
+            LongACAS long_acas = (LongACAS) msg;
+            System.out.println("[" + icao24 + "]: Altitude is " + long_acas.getAltitude() + "ft and ACAS is " +
+                    (long_acas.hasOperatingACAS() ? "operating." : "not operating."));
+            System.out.println("          A/C is " + (long_acas.isAirborne() ? "airborne" : "on the ground") +
+                    " and sensitivity level is " + long_acas.getSensitivityLevel());
+            System.out.println("          RAC is " + (long_acas.hasValidRAC() ? "valid" : "not valid") +
+                    " and is " + long_acas.getResolutionAdvisoryComplementEncoded() + " (MTE=" + long_acas.hasMultipleThreats() + ")");
+            System.out.println("          Maximum airspeed is " + long_acas.getMaximumAirspeed() + "kn.");
+        } else if (msg instanceof MilitaryExtendedSquitter) {
+            MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter) msg;
+            System.out.println("[" + icao24 + "]: Military ES of application " + mil.getApplicationField());
+            System.out.println("          Message is 0x" + Tools.toHexString(mil.getMessage()));
+        } else if (msg instanceof CommBAltitudeReply) {
+            CommBAltitudeReply commBaltitude = (CommBAltitudeReply) msg;
+            System.out.println("[" + icao24 + "]: Long altitude reply: " + commBaltitude.getAltitude() + "ft");
+        } else if (msg instanceof CommBIdentifyReply) {
+            CommBIdentifyReply commBidentify = (CommBIdentifyReply) msg;
+            System.out.println("[" + icao24 + "]: Long identify reply: " + commBidentify.getIdentity());
+        } else if (msg instanceof CommDExtendedLengthMsg) {
+            CommDExtendedLengthMsg commDELM = (CommDExtendedLengthMsg) msg;
+            System.out.println("[" + icao24 + "]: ELM message w/ sequence no " + commDELM.getSequenceNumber() +
+                    " (ACK: " + commDELM.isAck() + ")");
+            System.out.println("          Message is 0x" + Tools.toHexString(commDELM.getMessage()));
+        } else if (msg.getClass() == ModeSDownlinkMsg.class) {
+            System.out.println("[" + icao24 + "]: Unknown message with DF " + msg.getDownlinkFormat());
         }
     }
 
