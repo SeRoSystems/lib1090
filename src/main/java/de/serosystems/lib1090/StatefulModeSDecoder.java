@@ -543,7 +543,7 @@ public class StatefulModeSDecoder {
         if (ftc == 24) {
             int subtype = es1090.getMessage()[0] & 0x7;
             if (subtype == 1)
-                return new MLATSystemStatusMsg(es1090);
+                return new SurfaceSystemStatusMsg(es1090);
         }
 
         if (ftc == 25 && dd.adsbVersion >= 3) { // High Velocity and/or Altitude (HVA) message, check subtype

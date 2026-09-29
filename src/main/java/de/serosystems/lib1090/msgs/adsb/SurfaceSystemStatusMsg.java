@@ -18,79 +18,85 @@
 
 package de.serosystems.lib1090.msgs.adsb;
 
-import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Decoder for Surface System Status messages, as defined in ED-102B §2.2.3.2.7.4: TYPE Code=24, Subtype=1
- * ("Surface System Status (Allocated for national use)", ED-102B §2.2.3.2.7.4.2 TABLE 2-74). The
- * standard reserves this message for exclusive use by surface surveillance systems and states
- * "there is no provision in these MOPS to transmit or receive" it (ED-102B §2.2.3.2.7.4.3); the
- * class name reflects the field-observed use of TC=24/ST=1 by multilateration (MLAT) systems
- * rather than any ED-102B terminology for the message. (ED-102B §2.2.19 "Traffic Uplink
- * Management Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover
- * this message; it is not TYPE=28 in any subtype.)
+ * ("Surface System Status (Allocated for national use)", ED-102B §2.2.3.2.7.4.2 TABLE 2-74). Version 2
+ * named the same subtype "Multilateration System Status (Allocated for national use)", ED-102A Table 2-77.
+ * The standard reserves this message for exclusive use by surface surveillance systems and states "there
+ * is no provision in these MOPS to transmit or receive" it (ED-102B §2.2.3.2.7.4.3); its 48-bit content,
+ * ME bits 9-56, "may be defined by the system equipment manufacturer" (ED-102B §2.2.3.2.7.4.3.1), so it
+ * is available only raw, as {@link #getSurfaceSystemStatusEncoded()}. (ED-102B §2.2.19 "Traffic Uplink
+ * Management Message" is a distinct DF=18/CF=4 ground-uplink advisory service and does not cover this
+ * message; it is not TYPE=28 in any subtype.)
  */
-public class MLATSystemStatusMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
+public class SurfaceSystemStatusMsg extends TypeCodedExtendedSquitter implements Serializable, ADSBMsg {
 
     private static final long serialVersionUID = 4597102504845213202L;
 
-    private byte[] systemStatus;
+    private long surfaceSystemStatus;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
      **/
-    protected MLATSystemStatusMsg() {
+    protected SurfaceSystemStatusMsg() {
     }
 
     /**
-     * @param rawMessage the MLAT system status message in hex representation
+     * @param rawMessage the surface system status message in hex representation
      * @throws BadFormatException     if message has the wrong typecode
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public MLATSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceSystemStatusMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
-     * @param rawMessage the MLAT system status message as byte array
+     * @param rawMessage the surface system status message as byte array
      * @throws BadFormatException     if message has the wrong typecode
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public MLATSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
+    public SurfaceSystemStatusMsg(byte[] rawMessage) throws BadFormatException, UnspecifiedFormatError {
         this(new TypeCodedExtendedSquitter(rawMessage));
     }
 
     /**
-     * @param squitter extended squitter which contains this MLAT/Surface System Status msg
+     * @param squitter extended squitter which contains this surface system status message
      * @throws BadFormatException if message has the wrong typecode
      */
-    public MLATSystemStatusMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
+    public SurfaceSystemStatusMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
         if (getFormatTypeCode() != 24)
-            throw new BadFormatException("MLAT system status messages must have typecode of 24");
+            throw new BadFormatException("Surface System Status messages must have typecode of 24");
 
-        byte[] msg = getMessage();
-        BitReader b = BitReader.forBigEndian(msg);
+        BitReader b = BitReader.forBigEndian(getMessage());
 
         int messageSubtype = b.readByte(6, 8);
         if (messageSubtype != 1)
             throw new BadFormatException("Surface System Status messages must have subtype 1");
 
-        systemStatus = Arrays.copyOfRange(msg, 1, msg.length);
+        surfaceSystemStatus = b.readLong(9, 56);
+    }
+
+    /**
+     * @return the "Surface System Status" subfield, ME bits 9-56, as the lower 48 bits; its content is defined by
+     * the system equipment manufacturer, ED-102B §2.2.3.2.7.4.3.1
+     */
+    public long getSurfaceSystemStatusEncoded() {
+        return surfaceSystemStatus;
     }
 
     @Override
     public String toString() {
-        return "MLATSystemStatusMsg{" + super.toString() +
-                ", systemStatus=" + Tools.toHexString(systemStatus) +
+        return "SurfaceSystemStatusMsg{" + super.toString() +
+                ", surfaceSystemStatus=" + String.format("%012x", surfaceSystemStatus) +
                 '}';
     }
 
