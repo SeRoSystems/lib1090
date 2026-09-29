@@ -58,6 +58,26 @@ class ModeSDownlinkMsgTest {
     }
 
     /**
+     * An unknown downlink format is rejected with its number in the reason.
+     */
+    @Test
+    void unknownDownlinkFormat_isBadFormat() {
+        BadFormatException e = assertThrows(BadFormatException.class, () -> new ModeSDownlinkMsg("38000000000000"));
+        assertTrue(e.getMessage().endsWith("Invalid downlink format 7 detected."), e.getMessage());
+    }
+
+    /**
+     * A raw message of the wrong length for its downlink format is rejected with both lengths in the reason.
+     */
+    @Test
+    void wrongLength_isBadFormat() {
+        BadFormatException e = assertThrows(BadFormatException.class,
+                () -> new ModeSDownlinkMsg("2000000000000000000000000000"));
+        assertTrue(e.getMessage().endsWith("Downlink format 4 has length 7, but only 14 bytes provided"),
+                e.getMessage());
+    }
+
+    /**
      * Equal messages hash equally, also where the parity is overlaid with the address and one receiver reports it
      * with the CRC removed: here a DF=20 reply as received, and with its address as the parity field, which is the
      * same reply only if built with noCRC.

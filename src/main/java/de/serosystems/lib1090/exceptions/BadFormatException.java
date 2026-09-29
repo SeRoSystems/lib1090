@@ -19,9 +19,10 @@
 package de.serosystems.lib1090.exceptions;
 
 /**
- * Exception which is thrown when someone calls a getter but the information
- * is actually not available. The programmer has to check the subtype codes
- * to avoid this exception.
+ * Exception which is thrown when a message does not have the format a decoder expects: a raw message of invalid
+ * length, of an unknown downlink format, not a hex string, or failing the parity check of the stateful decoder, or
+ * a message given to a message class it is not, e.g. of another TYPE Code, subtype, version, or DF and CF. The
+ * reason says which; {@link #getMessage()} adds the raw message where it is known.
  */
 public class BadFormatException extends Exception {
     private static final long serialVersionUID = 5630832543039853589L;

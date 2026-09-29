@@ -232,10 +232,10 @@ public class ModeSDownlinkMsg implements Serializable {
             firstField = (byte) (reply[0] & 0x1F);
         }
 
-        if (reply.length != getExpectedLength(downlinkFormat)) {
-            throw new BadFormatException(
-                    String.format("Downlink format %d has length %d, but only %d bytes provided",
-                            downlinkFormat, getExpectedLength(downlinkFormat), reply.length));
+        int expectedLength = getExpectedLength(downlinkFormat);
+        if (reply.length != expectedLength) {
+            throw new BadFormatException("Downlink format " + downlinkFormat + " has length " + expectedLength +
+                    ", but only " + reply.length + " bytes provided");
         }
 
         // extract payload
@@ -273,8 +273,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
             default: // unknown downlink format
                 // throw exception
-                throw new BadFormatException(
-                        String.format("Invalid downlink format %d detected.", downlinkFormat));
+                throw new BadFormatException("Invalid downlink format " + downlinkFormat + " detected.");
         }
 
         // determine address type according to ED-102B §2.2.3.2.1.5 TABLE 2-8, "Determining the Type of
