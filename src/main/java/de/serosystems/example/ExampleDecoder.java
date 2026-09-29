@@ -299,8 +299,12 @@ public class ExampleDecoder {
             System.out.println("          Threat identity is 0x" + String.format("%06x", cas.getThreatIdentityAircraftAddress()));
         } else if (msg instanceof UASRPASContingencyMsg) {
             UASRPASContingencyMsg uas = (UASRPASContingencyMsg) msg;
-            System.out.println("[" + icao24 + "]: UAS/RPAS Contingency, TCP altitude is " + uas.getTcpAltitude() + "ft");
-            System.out.println("          TCP position is " + uas.getTcpLatitude() + ", " + uas.getTcpLongitude());
+            System.out.println("[" + icao24 + "]: UAS/RPAS Contingency, plan: " + uas.getContingencyPlan().getText());
+            if (uas.isValid()) {
+                System.out.println("          " + (uas.isNextTCP() ? "Next" : "Current") + " TCP altitude is "
+                        + uas.getTcpAltitude() + "ft");
+                System.out.println("          TCP position is " + uas.getTcpLatitude() + ", " + uas.getTcpLongitude());
+            }
         } else if (msg instanceof VelocityOverGroundMsg) {
             VelocityOverGroundMsg veloc = (VelocityOverGroundMsg) msg;
             System.out.println("[" + icao24 + "]: Ground Speed: " + (veloc.hasVelocity() ? veloc.getGroundSpeed() : "unknown") + " kt");
