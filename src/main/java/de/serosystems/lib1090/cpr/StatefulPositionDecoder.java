@@ -102,7 +102,9 @@ public class StatefulPositionDecoder implements PositionDecoder {
                 newPosition.setReasonable(false);
         }
 
-        lastPosition = newPosition;
+        // a copy of the coordinates, the reference for the next local decode, so that a caller changing the
+        // returned position cannot move it
+        lastPosition = new Position(newPosition.getLongitude(), newPosition.getLatitude(), null);
         lastTime = cpr.getTimestamp();
 
         if (!newPosition.isReasonable()) numReasonable = 0; // reset
