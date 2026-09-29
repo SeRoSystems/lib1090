@@ -104,10 +104,16 @@ public class HVAVelocityMsg extends TypeCodedExtendedSquitter implements Seriali
     }
 
     /**
-     * @return whether the PIC field is available
+     * Whether the PIC reports a containment radius, ED-102B §2.2.3.2.7.5.4.8 TABLE 2-82: PIC 1 to 14 do, PIC 0
+     * ("RC unknown") and the reserved PIC 15 do not, for which {@link #getContainmentRadius()} is
+     * {@link ContainmentRadius#UNKNOWN}.
+     * <p>
+     * PIC 0 does not by itself mean the HVA position is unavailable, see {@link HVAPositionMsg#getHVALatitude()}.
+     *
+     * @return true if the PIC is 1 to 14
      */
     public boolean hasPIC() {
-        return positionIntegrityCategory != 0;
+        return positionIntegrityCategory >= 1 && positionIntegrityCategory <= 14;
     }
 
     /**
