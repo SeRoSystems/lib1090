@@ -79,6 +79,7 @@ public class EmergencyOrPriorityStatusV3Msg extends TypeCodedExtendedSquitter im
      */
     public EmergencyOrPriorityStatusV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 28)
             throw new BadFormatException("Emergency and Priority Status messages must have typecode 28");

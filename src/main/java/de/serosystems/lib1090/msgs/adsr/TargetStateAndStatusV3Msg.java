@@ -83,6 +83,7 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
      */
     public TargetStateAndStatusV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 29)
             throw new BadFormatException("Target state and status messages must have typecode 29");

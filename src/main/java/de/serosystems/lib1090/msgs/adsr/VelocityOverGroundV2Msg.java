@@ -80,6 +80,7 @@ public class VelocityOverGroundV2Msg extends TypeCodedExtendedSquitter implement
      */
     public VelocityOverGroundV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 19)
             throw new BadFormatException("Airborne Velocity messages must have typecode 19");

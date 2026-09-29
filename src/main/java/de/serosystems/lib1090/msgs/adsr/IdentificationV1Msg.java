@@ -69,6 +69,7 @@ public class IdentificationV1Msg extends TypeCodedExtendedSquitter implements Se
      */
     public IdentificationV1Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() < 1 || getFormatTypeCode() > 4)
             throw new BadFormatException("Identification messages must have typecode of 1-4");

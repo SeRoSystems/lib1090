@@ -76,6 +76,7 @@ public class WxAIREPAlternateWeatherStateMsg extends TypeCodedExtendedSquitter i
      */
     public WxAIREPAlternateWeatherStateMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 26)
             throw new BadFormatException("Wx AIREP messages must have typecode 26");

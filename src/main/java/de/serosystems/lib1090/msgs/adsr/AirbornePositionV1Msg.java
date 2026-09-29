@@ -85,6 +85,7 @@ public class AirbornePositionV1Msg extends TypeCodedExtendedSquitter implements 
      */
     public AirbornePositionV1Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         byte formatTypeCode = getFormatTypeCode();
         AirbornePosition.validateAirbornePositionFormat(formatTypeCode);

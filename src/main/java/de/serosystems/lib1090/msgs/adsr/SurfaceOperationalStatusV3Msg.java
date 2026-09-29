@@ -80,6 +80,7 @@ public class SurfaceOperationalStatusV3Msg extends TypeCodedExtendedSquitter imp
      */
     public SurfaceOperationalStatusV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 31)
             throw new BadFormatException("Operational status messages must have typecode 31");
