@@ -353,19 +353,13 @@ public class StatefulModeSDecoder {
         }
 
         if (ftc == 29) {
+            // unlike ADS-B, ADS-R of version 1 targets uses subtype 1 in the version 2 format, ED-102A §2.2.18.4.6
+            // NOTE 1; the version 1 ADS-B format, subtype 0, is not used for ADS-R
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
-            // ED-102B §2.2.3.2.7.1: ignore for ADS-B v0 transponders if ME bit 11 != 0
-            boolean hasMe11Bit = (es1090.getMessage()[1] & 0x20) != 0;
-
-            if (subtype == 1 && (dd.adsbVersion > 0 || !hasMe11Bit)) {
-                switch (dd.adsbVersion) {
-                    case 2:
-                        return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV2Msg(es1090);
-                    case 3:
-                    default:
-                        return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV3Msg(es1090);
-                }
-            }
+            if (subtype == 1 && dd.adsbVersion <= 2)
+                return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV2Msg(es1090);
+            else if (subtype == 1 && dd.adsbVersion >= 3)
+                return new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV3Msg(es1090);
         }
 
         if (ftc == 26 && dd.adsbVersion >= 3) { // Wx AIREP message, check subtype
