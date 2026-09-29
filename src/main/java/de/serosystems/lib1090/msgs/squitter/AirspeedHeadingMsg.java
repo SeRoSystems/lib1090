@@ -48,12 +48,21 @@ public interface AirspeedHeadingMsg extends AirborneVelocityMsg {
 
     /**
      * @return airspeed in knots or null if not available. The latter can also be checked using
-     * {@link #hasAirspeed()}.
+     * {@link #hasAirspeed()}. For the top code, which means more than 1021.5 kt (supersonic: 4086 kt), the next
+     * step, 1022 kt (4088 kt), as a lower bound, see {@link #isAirspeedSaturated()}.
      */
     default Integer getAirspeed() {
         if (!hasAirspeed()) return null;
         int scale = isSupersonic() ? 4 : 1;
         return (getAirspeedEncoded() - 1) * scale;
+    }
+
+    /**
+     * @return true if the airspeed is the top code, which means more than 1021.5 kt (supersonic: 4086 kt),
+     * ED-102A §2.2.3.2.6.3.9 Table 2-37 resp. §2.2.3.2.6.4.9; {@link #getAirspeed()} is then only a lower bound
+     */
+    default boolean isAirspeedSaturated() {
+        return getAirspeedEncoded() == 1023;
     }
 
     /**

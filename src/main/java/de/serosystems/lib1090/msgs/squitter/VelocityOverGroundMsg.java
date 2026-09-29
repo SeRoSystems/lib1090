@@ -33,7 +33,9 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return velocity from west to east in knots or null if not available
+     * @return velocity from west to east in knots or null if not available; for the top code, which means more
+     * than 1021.5 kt (supersonic: 4086 kt), the next step, 1022 kt (4088 kt), as a lower bound of the magnitude,
+     * see {@link #isWestToEastVelocitySaturated()}
      */
     default Integer getWestToEastVelocity() {
         if (!hasVelocity()) return null;
@@ -42,7 +44,9 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
     }
 
     /**
-     * @return velocity from south to north in knots or null if not available
+     * @return velocity from south to north in knots or null if not available; for the top code, which means more
+     * than 1021.5 kt (supersonic: 4086 kt), the next step, 1022 kt (4088 kt), as a lower bound of the magnitude,
+     * see {@link #isSouthToNorthVelocitySaturated()}
      */
     default Integer getSouthToNorthVelocity() {
         if (!hasVelocity()) return null;
@@ -52,7 +56,8 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
 
     /**
      * @return track angle in decimal degrees ([0, 360]) clockwise from geographic north or null if not available.
-     * The latter can also be checked with {@link #hasVelocity()}.
+     * The latter can also be checked with {@link #hasVelocity()}. Only approximate if a component is saturated,
+     * see {@link #isWestToEastVelocitySaturated()} and {@link #isSouthToNorthVelocitySaturated()}.
      */
     default Double getTrueTrackAngle() {
         if (!hasVelocity()) return null;
@@ -69,11 +74,30 @@ public interface VelocityOverGroundMsg extends AirborneVelocityMsg {
 
     /**
      * @return speed over ground in knots or null if not available. The latter can also be checked
-     * with {@link #hasVelocity()}.
+     * with {@link #hasVelocity()}. Only a lower bound if a component is saturated, see
+     * {@link #isWestToEastVelocitySaturated()} and {@link #isSouthToNorthVelocitySaturated()}.
      */
     default Double getGroundSpeed() {
         if (!hasVelocity()) return null;
         return Math.hypot(getSouthToNorthVelocity(), getWestToEastVelocity());
+    }
+
+    /**
+     * @return true if the velocity from west to east is the top code, which means more than 1021.5 kt
+     * (supersonic: 4086 kt), ED-102B §2.2.3.2.6.1.7 TABLE 2-20 resp. §2.2.3.2.6.2.7; its magnitude is then only a
+     * lower bound
+     */
+    default boolean isWestToEastVelocitySaturated() {
+        return getWestToEastVelocityEncoded() == 1023;
+    }
+
+    /**
+     * @return true if the velocity from south to north is the top code, which means more than 1021.5 kt
+     * (supersonic: 4086 kt), ED-102B §2.2.3.2.6.1.9 resp. §2.2.3.2.6.2.9; its magnitude is then only a lower
+     * bound
+     */
+    default boolean isSouthToNorthVelocitySaturated() {
+        return getSouthToNorthVelocityEncoded() == 1023;
     }
 
     /**

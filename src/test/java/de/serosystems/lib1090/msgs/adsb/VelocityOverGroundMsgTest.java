@@ -171,4 +171,22 @@ abstract class VelocityOverGroundMsgTest {
                 create(withDiffBaroAlt(hex, false, 127)),
                 create(withDiffBaroAlt(hex, true, 127)));
     }
+
+    /**
+     * ED-102B TABLE 2-20 and TABLE 2-25: the top codes mean more than 1021.5 kt and more than 32608 ft/min, and
+     * are flagged as such; the codes below them are not.
+     */
+    @Test
+    public void testTopCodesAreSaturated() throws Exception {
+        VelocityOverGroundMsg top = create("8D4840D69903FF0027FC00000000"); // E/W 1023, N/S 1, vertical rate 511
+        assertTrue(top.isWestToEastVelocitySaturated());
+        assertFalse(top.isSouthToNorthVelocitySaturated());
+        assertTrue(top.isVerticalRateSaturated());
+        assertEquals(1022, top.getWestToEastVelocity().intValue());
+        assertEquals(32640, top.getVerticalRate().intValue());
+
+        VelocityOverGroundMsg below = create("8D4840D69903FE0027F800000000"); // E/W 1022, vertical rate 510
+        assertFalse(below.isWestToEastVelocitySaturated());
+        assertFalse(below.isVerticalRateSaturated());
+    }
 }
