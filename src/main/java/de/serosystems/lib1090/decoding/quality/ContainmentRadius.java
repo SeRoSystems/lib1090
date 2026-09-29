@@ -194,9 +194,9 @@ public enum ContainmentRadius {
      * The one of two reports that describes the poorer position, for picking the worst possibility
      * when it is not known which of several the transmitter means.
      * <p>
-     * A larger value is worse than a smaller one; at the same value a lower bound is worse than an
-     * upper bound, since it rules nothing out above it; and {@link #UNKNOWN} is worse than anything,
-     * having ruled nothing out at all.
+     * A lower bound is worse than any upper bound, since it rules nothing out above it: {@link #AT_LEAST_25}
+     * is worse than {@link #BELOW_37040}. Of two upper bounds, or of two lower bounds, the larger value is
+     * worse. And {@link #UNKNOWN} is worse than anything, having ruled nothing out at all.
      * <p>
      * This is deliberately not {@link Comparable}: the enum's declaration order is not a quality
      * ranking and must not become one, so the comparison lives here where it can be named.
@@ -210,8 +210,10 @@ public enum ContainmentRadius {
             return first;
         if (first.isUnknown() || second.isUnknown())
             return UNKNOWN;
-        if (first.meters != second.meters)
-            return first.meters > second.meters ? first : second;
-        return first.bound.isLower() ? first : second;
+        // a lower bound rules out nothing above it, so it is worse than any upper bound
+        if (first.bound.isLower() != second.bound.isLower())
+            return first.bound.isLower() ? first : second;
+        // of two upper bounds or two lower bounds, the larger value is worse
+        return first.meters >= second.meters ? first : second;
     }
 }
