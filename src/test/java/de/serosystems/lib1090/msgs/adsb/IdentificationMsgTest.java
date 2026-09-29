@@ -19,10 +19,9 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.msgs.squitter.IdentificationMsg;
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 abstract class IdentificationMsgTest {
 
@@ -56,5 +55,18 @@ abstract class IdentificationMsgTest {
     public void testTypeCodeIdentification() throws Exception {
         IdentificationMsg msg = create("8D406B902015A678D4D220AA4BDA");
         assertEquals(4, msg.getFormatTypeCode());
+    }
+
+    /**
+     * A character whose code TABLE 3-8 does not define is decoded as a space, as the space itself is, and marks
+     * the identification as not valid: here the trailing space of KLM1023 (code 32) replaced by code 63.
+     */
+    @Test
+    public void testUndefinedCharacterInvalidatesIdentification() throws Exception {
+        assertTrue(create("8D4840D6202CC371C32CE0576098").hasValidIdentification());
+
+        IdentificationMsg msg = create("8D4840D6202CC371C32CFF576098");
+        assertEquals("KLM1023 ", new String(msg.getIdentification()));
+        assertFalse(msg.hasValidIdentification());
     }
 }

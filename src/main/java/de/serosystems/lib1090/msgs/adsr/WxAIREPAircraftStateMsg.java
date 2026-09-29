@@ -118,11 +118,21 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
     /**
      * Decode the aircraft type field, which is IA5 encoded as 4 consecutive 6-bit characters.
      *
-     * @return the aircraft type as a 4 character array, or {@code null} if unavailable
+     * @return the aircraft type as a 4 character array, or {@code null} if unavailable; a character whose code
+     * is not defined is decoded as a space, see {@link #hasValidAircraftType()}
      */
     public char[] getAircraftType() {
         if (!hasAircraftType()) return null;
         return InternationalAlphabet5.mapChar(InternationalAlphabet5.toDigits(aircraftTypeEncoded, 4));
+    }
+
+    /**
+     * @return true if the aircraft type is available and every character has a code that ICAO Annex 10 Volume IV
+     * §3.1.2.9.1.2 TABLE 3-8 defines
+     */
+    public boolean hasValidAircraftType() {
+        return hasAircraftType()
+                && InternationalAlphabet5.isDefined(InternationalAlphabet5.toDigits(aircraftTypeEncoded, 4));
     }
 
     /**

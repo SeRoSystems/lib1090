@@ -39,6 +39,21 @@ public class AircraftIdentificationTest {
     }
 
     /**
+     * A character whose code TABLE 3-8 does not define makes the identification not valid, which also tells that
+     * a Comm-B reply is unlikely to carry BDS 2,0: here the trailing space (code 32) replaced by code 63.
+     */
+    @Test
+    public void undefinedCharacterInvalidatesIdentification() {
+        assertTrue(new AircraftIdentification(MSG).hasValidAircraftIdentification());
+
+        byte[] corrupted = MSG.clone();
+        corrupted[6] = (byte) 0b11111111;
+        AircraftIdentification id = new AircraftIdentification(corrupted);
+        assertEquals("KLM1017 ", String.valueOf(id.getAircraftIdentification()));
+        assertFalse(id.hasValidAircraftIdentification());
+    }
+
+    /**
      * Every register reports its raw message through the base class, as the ADS-B messages do.
      */
     @Test

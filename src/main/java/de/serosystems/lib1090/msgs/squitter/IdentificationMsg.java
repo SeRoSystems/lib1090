@@ -45,10 +45,19 @@ public interface IdentificationMsg {
     byte getEmitterCategoryEncoded();
 
     /**
-     * @return the call sign as 8 characters array
+     * @return the call sign as 8 characters array; a character whose code is not defined is decoded as a
+     * space, see {@link #hasValidIdentification()}
      */
     default char[] getIdentification() {
         return InternationalAlphabet5.mapChar(getIdentificationDigits());
+    }
+
+    /**
+     * @return true if every character of the call sign has a code that ICAO Annex 10 Volume IV
+     * §3.1.2.9.1.2 TABLE 3-8 defines, false if one or more cannot be decoded
+     */
+    default boolean hasValidIdentification() {
+        return InternationalAlphabet5.isDefined(getIdentificationDigits());
     }
 
     /**
