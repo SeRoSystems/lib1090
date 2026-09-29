@@ -110,7 +110,7 @@ public class VelocityOverGroundMsg extends TypeCodedExtendedSquitter implements 
         velocityToNorthNegative = br.readBoolean(25);
         velocityToNorthEncoded = br.readShort(26, 35);
 
-        // 0 = no geo data available, 1 = geo data available
+        // the GEO flag: the vertical rate source as in ADS-B, and the layout of ME bits 48-56
         geoFlag = br.readBoolean(36);
 
         verticalRateDown = br.readBoolean(37);
@@ -195,9 +195,17 @@ public class VelocityOverGroundMsg extends TypeCodedExtendedSquitter implements 
         return verticalRateDown;
     }
 
+    /**
+     * ME bit 36, which the TIS-B velocity message figure labels "GEO Flag" (ED-102B FIGURE 2-55, ED-102A
+     * Figure 2-29), and which ED-102B §2.2.17.3.4.1 decodes as the ADS-B "Source Bit for Vertical Rate": set
+     * means a barometric vertical rate, ED-102B TABLE 2-23. The same bit also selects what ME bits 48-56 carry, the
+     * difference from barometric altitude when set, NACv and SIL when clear.
+     *
+     * @return true if the vertical rate is from a barometric source
+     */
     @Override
     public boolean isBarometricVerticalSpeed() {
-        return false;
+        return geoFlag;
     }
 
     @Override
