@@ -82,6 +82,7 @@ public class AirborneVelocityV3Msg extends TypeCodedExtendedSquitter implements 
      */
     public AirborneVelocityV3Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 19)
             throw new BadFormatException("Velocity messages must have typecode 19");

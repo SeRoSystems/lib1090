@@ -85,6 +85,7 @@ public class SurfacePositionV2Msg extends TypeCodedExtendedSquitter implements S
      */
     public SurfacePositionV2Msg(TypeCodedExtendedSquitter squitter, Instant timestamp) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         byte formatTypeCode = getFormatTypeCode();
         SurfacePosition.validateSurfacePositionFormat(formatTypeCode);

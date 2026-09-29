@@ -83,6 +83,7 @@ public class AirspeedHeadingV2Msg extends TypeCodedExtendedSquitter implements S
      */
     public AirspeedHeadingV2Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 19)
             throw new BadFormatException("Airborne Velocity messages must have typecode 19");

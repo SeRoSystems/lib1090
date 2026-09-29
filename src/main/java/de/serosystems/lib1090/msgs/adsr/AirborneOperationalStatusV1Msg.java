@@ -78,6 +78,7 @@ public class AirborneOperationalStatusV1Msg extends TypeCodedExtendedSquitter im
      */
     public AirborneOperationalStatusV1Msg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
+        ADSRMsg.checkADSR(this);
 
         if (getFormatTypeCode() != 31)
             throw new BadFormatException("Operational status messages must have typecode 31");
