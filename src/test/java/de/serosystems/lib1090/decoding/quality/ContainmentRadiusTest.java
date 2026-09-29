@@ -106,6 +106,38 @@ class ContainmentRadiusTest {
                 ContainmentRadius.worseOf(ContainmentRadius.AT_LEAST_185_2, ContainmentRadius.BELOW_185_2));
     }
 
+    /**
+     * A lower bound rules nothing out above it, so it is poorer than any upper bound, even a larger one.
+     */
+    @Test
+    void testWorseOfPrefersALowerBoundOverAnyUpperBound() {
+        assertEquals(ContainmentRadius.AT_LEAST_25,
+                ContainmentRadius.worseOf(ContainmentRadius.AT_LEAST_25, ContainmentRadius.BELOW_37040));
+        assertEquals(ContainmentRadius.AT_LEAST_25,
+                ContainmentRadius.worseOf(ContainmentRadius.BELOW_37040, ContainmentRadius.AT_LEAST_25));
+        assertEquals(ContainmentRadius.AT_LEAST_37040,
+                ContainmentRadius.worseOf(ContainmentRadius.AT_LEAST_25, ContainmentRadius.AT_LEAST_37040));
+    }
+
+    /**
+     * Every pair against a rank derived from the three rules: upper bounds by value, then lower bounds by value,
+     * then unknown.
+     */
+    @Test
+    void testWorseOfFollowsTheRank() {
+        for (ContainmentRadius first : ContainmentRadius.values())
+            for (ContainmentRadius second : ContainmentRadius.values()) {
+                ContainmentRadius expected = rank(first) >= rank(second) ? first : second;
+                assertEquals(expected, ContainmentRadius.worseOf(first, second), first.name() + " / " + second.name());
+            }
+    }
+
+    private static double rank(ContainmentRadius radius) {
+        if (radius.isUnknown()) return Double.POSITIVE_INFINITY;
+        // lower bounds after every upper bound, the largest value tabulated being 37040 m
+        return radius.getBound().isLower() ? 100_000 + radius.getMeters() : radius.getMeters();
+    }
+
     @Test
     void testWorseOfTreatsUnknownAsTheWorst() {
         for (ContainmentRadius radius : ContainmentRadius.values()) {
