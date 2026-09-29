@@ -88,7 +88,14 @@ public interface TargetStateAndStatusMsg extends SILMsg, NACpMsg {
     byte getSILEncoded();
 
     /**
-     * @return true if TCAS is operational, false otherwise, ED-102B §2.2.3.2.7.1.3.17 TABLE 2-44
+     * Whether TCAS/ACAS, from version 3 on any collision avoidance system, is operational. <b>What
+     * {@code true} asserts depends on the version:</b> in versions 2 and 3, operational, since ME bit 53 is
+     * set only then (ED-102A Table 2-53, ED-102B §2.2.3.2.7.1.3.17 TABLE 2-44); in version 1, operational
+     * <i>or unknown</i>, since the "Capability/Mode Codes" subfield transmits ME bit 52 inverted and a
+     * clear bit means that (ICAO Doc 9871 First Edition §D.2.15). {@code false} means not operational in
+     * every version.
+     *
+     * @return true if TCAS is operational, in version 1 also if its state is unknown
      */
     boolean hasOperationalTCAS();
 }
