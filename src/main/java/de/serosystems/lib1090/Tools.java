@@ -85,15 +85,21 @@ public class Tools {
      * Converts a hex string to an array of bytes.<br>
      * Source: https://stackoverflow.com/a/140861/3485023
      *
-     * @param str the hex string to convert
+     * @param str the hex string to convert, of even length and hex digits only (either case)
      * @return the byte array
+     * @throws IllegalArgumentException if the string has an odd length or a character that is no hex digit
      */
     public static byte[] hexStringToByteArray(String str) {
         int len = str.length();
+        if (len % 2 != 0)
+            throw new IllegalArgumentException("Hex string of odd length " + len);
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(str.charAt(i), 16) << 4)
-                    + Character.digit(str.charAt(i + 1), 16));
+            int high = Character.digit(str.charAt(i), 16);
+            int low = Character.digit(str.charAt(i + 1), 16);
+            if (high < 0 || low < 0)
+                throw new IllegalArgumentException("No hex digit at position " + (high < 0 ? i : i + 1));
+            data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
     }

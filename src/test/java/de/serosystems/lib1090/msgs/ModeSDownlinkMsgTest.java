@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs;
 
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +43,17 @@ class ModeSDownlinkMsgTest {
         assertEquals(valid.hashCode(), subtracted.hashCode());
         assertEquals(valid, subtractedUnflagged);
         assertEquals(valid.hashCode(), subtractedUnflagged.hashCode());
+    }
+
+    /**
+     * A malformed hex string is a bad format, as the constructors document, rather than an unchecked exception or a
+     * message decoded from converted garbage.
+     */
+    @Test
+    void malformedHex_isBadFormat() {
+        assertThrows(BadFormatException.class, () -> new ModeSDownlinkMsg("8D4840D6202CC371C32CE057609"));
+        assertThrows(BadFormatException.class, () -> new ModeSDownlinkMsg("8D4840D6202CC371C32CE05760ZZ"));
+        assertThrows(BadFormatException.class, () -> new ModeSDownlinkMsg("8D4840D6202CC371C32CE05760ZZ", true));
     }
 
     /**

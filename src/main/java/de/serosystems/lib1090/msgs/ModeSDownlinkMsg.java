@@ -352,12 +352,12 @@ public class ModeSDownlinkMsg implements Serializable {
      * | DF (5) | FF (3) | Payload (24/80) | PI/AP (24) |
      *
      * @param rawMessage Mode S message in hex representation
-     * @throws BadFormatException     if message has invalid length or payload does
+     * @throws BadFormatException     if message is no hex string of even length, has invalid length or payload does
      *                                not match specification or parity has invalid length
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(String rawMessage) throws BadFormatException, UnspecifiedFormatError {
-        this(Tools.hexStringToByteArray(rawMessage), false);
+        this(parseHex(rawMessage), false);
     }
 
     /**
@@ -366,12 +366,20 @@ public class ModeSDownlinkMsg implements Serializable {
      *
      * @param rawMessage Mode S message in hex representation
      * @param noCRC      indicates whether the CRC has been subtracted from the parity field
-     * @throws BadFormatException     if message has invalid length or payload does
+     * @throws BadFormatException     if message is no hex string of even length, has invalid length or payload does
      *                                not match specification or parity has invalid length
      * @throws UnspecifiedFormatError if message format is not further specified
      */
     public ModeSDownlinkMsg(String rawMessage, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
-        this(Tools.hexStringToByteArray(rawMessage), noCRC);
+        this(parseHex(rawMessage), noCRC);
+    }
+
+    private static byte[] parseHex(String rawMessage) throws BadFormatException {
+        try {
+            return Tools.hexStringToByteArray(rawMessage);
+        } catch (IllegalArgumentException e) {
+            throw new BadFormatException(e.getMessage(), rawMessage);
+        }
     }
 
     /**

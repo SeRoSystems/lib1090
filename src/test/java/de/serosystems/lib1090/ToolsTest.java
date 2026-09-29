@@ -61,6 +61,14 @@ class ToolsTest {
     }
 
     @Test
+    public void testHexStringToByteArrayRejectsMalformedInput() {
+        assertThrows(IllegalArgumentException.class, () -> Tools.hexStringToByteArray("abc"));
+        assertThrows(IllegalArgumentException.class, () -> Tools.hexStringToByteArray("ZZ"));
+        assertThrows(IllegalArgumentException.class, () -> Tools.hexStringToByteArray("a "));
+        assertArrayEquals(new byte[0], Tools.hexStringToByteArray(""));
+    }
+
+    @Test
     public void testToHexString() {
         byte[] bytes = {(byte) 0x40, (byte) 0x6B, (byte) 0x90};
         assertEquals("406b90", Tools.toHexString(bytes));
