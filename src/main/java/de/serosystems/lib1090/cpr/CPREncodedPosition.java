@@ -400,12 +400,13 @@ public final class CPREncodedPosition {
      * @param other     the other CPR encoded position in complementary format (even/odd). Also surface positions can
      *                  only be combined with other surface positions. Use null for local decoding only.
      * @param reference reference point for plausibility, surface and local decoding. Must be within 175 NM of the
-     *                  true airborne position or within 42 NM for surface. Use null for global decoding only.
+     *                  true airborne position or within 42 NM for surface. Use null for global decoding only; a
+     *                  surface position cannot be decoded without a reference, so null yields null for it.
      * @return the decoded position or null if could not be decoded
      */
     public Position decodePosition(CPREncodedPosition other, Position reference) {
-        // apply global decoding
-        Position globalPos = other == null ? null : decodeGlobal(other, reference);
+        // apply global decoding; a surface position is ambiguous by a 90° quadrant without a reference
+        Position globalPos = other == null || (isSurface && reference == null) ? null : decodeGlobal(other, reference);
 
         // apply local decoding
         Position localPos = reference != null ? decodeLocal(reference) : null;

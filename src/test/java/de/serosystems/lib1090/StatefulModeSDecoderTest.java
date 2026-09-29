@@ -215,6 +215,21 @@ public class StatefulModeSDecoderTest {
         assertNull(extractPosition(oddViaTisb, t1));
     }
 
+    /**
+     * A surface position is ambiguous by a 90° quadrant without a reference, so without a receiver position and
+     * without a previous position of the target, an even/odd surface pair does not decode rather than throw.
+     */
+    @Test
+    public void surfacePair_withoutReference_doesNotDecode() throws UnspecifiedFormatError, BadFormatException {
+        // an even and an odd surface position of A53436, taken from the surface position test data
+        final String even = "8CA534363BFFF39B73400B6286F4";
+        final String odd = "8CA534363BBFE5E18CF64C90C79F";
+        final Instant t0 = Instant.ofEpochMilli(1_664_965_023_061L);
+
+        assertNull(extractPosition(even, t0));
+        assertNull(extractPosition(odd, t0.plusMillis(1_519)));
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);

@@ -673,11 +673,13 @@ public class StatefulModeSDecoder {
     }
 
     /**
-     * Decode CPR encoded position from airborne position messages.
+     * Decode CPR encoded position from airborne and surface position messages.
      *
      * @param address  the target's qualified address to decode position for
      * @param msg      which contains the encoded position
-     * @param receiver position for reasonableness test (can be null)
+     * @param receiver position for reasonableness test and as reference for surface positions (can be null); without
+     *                 it, a surface position decodes only once the target has a previous position, e.g. from its
+     *                 airborne phase
      * @return decoded WGS84 position or null if message doesn't have a valid position or decoding fails
      */
     public Position extractPosition(QualifiedAddress address, PositionMsg msg, Position receiver) {
