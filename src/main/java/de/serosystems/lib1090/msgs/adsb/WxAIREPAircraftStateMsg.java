@@ -19,9 +19,8 @@
 package de.serosystems.lib1090.msgs.adsb;
 
 import de.serosystems.lib1090.decoding.BitReader;
-import de.serosystems.lib1090.decoding.Bound;
-import de.serosystems.lib1090.decoding.InternationalAlphabet5;
 import de.serosystems.lib1090.decoding.Interval;
+import de.serosystems.lib1090.decoding.WxAIREP;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -72,13 +71,8 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
     public WxAIREPAircraftStateMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
 
-        if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26");
-
         BitReader br = BitReader.forBigEndian(getMessage());
-
-        if (br.readByte(6, 7) != 0)
-            throw new BadFormatException("Wx AIREP aircraft state message must have subtype 0");
+        WxAIREP.validateFormat(getFormatTypeCode(), br, 0, "aircraft state");
 
         aircraftConfigurationEncoded = br.readByte(8, 11);
         aircraftTypeEncoded = br.readInt(12, 35);
@@ -119,8 +113,7 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
      * is not defined is decoded as a space, see {@link #hasValidAircraftType()}
      */
     public char[] getAircraftType() {
-        if (!hasAircraftType()) return null;
-        return InternationalAlphabet5.mapChar(InternationalAlphabet5.toDigits(aircraftTypeEncoded, 4));
+        return WxAIREP.aircraftType(aircraftTypeEncoded);
     }
 
     /**
@@ -128,8 +121,7 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
      * §3.1.2.9.1.2 TABLE 3-8 defines
      */
     public boolean hasValidAircraftType() {
-        return hasAircraftType()
-                && InternationalAlphabet5.isDefined(InternationalAlphabet5.toDigits(aircraftTypeEncoded, 4));
+        return WxAIREP.isValidAircraftType(aircraftTypeEncoded);
     }
 
     /**
@@ -153,16 +145,7 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
      * greater than 1514015 lbs", or {@code null} if unavailable
      */
     public Double getGrossWeight() {
-        if (!hasGrossWeight()) return null;
-
-        if (grossWeightEncoded == 1) return 0.;
-        if (grossWeightEncoded <= 386) return 55. + (grossWeightEncoded - 2) * 40.;
-        if (grossWeightEncoded <= 1150) return 15455. + (grossWeightEncoded - 387) * 80.;
-        if (grossWeightEncoded <= 2546) return 76575. + (grossWeightEncoded - 1151) * 160.;
-        if (grossWeightEncoded <= 3536) return 299935. + (grossWeightEncoded - 2547) * 480.;
-        if (grossWeightEncoded <= 4005) return 775135. + (grossWeightEncoded - 3537) * 1120.;
-        if (grossWeightEncoded <= 4094) return 1300415. + (grossWeightEncoded - 4006) * 2400.;
-        return 1514015.;
+        return WxAIREP.grossWeight(grossWeightEncoded);
     }
 
     /**
@@ -187,20 +170,7 @@ public class WxAIREPAircraftStateMsg extends TypeCodedExtendedSquitter implement
      * @return the interval of the wingspan in feet, or {@code null} if unavailable
      */
     public Interval getWingspan() {
-        if (!hasWingspan()) return null;
-        if (wingspanEncoded == 1) return Interval.of(Bound.AT_LEAST, 0, Bound.BELOW, 6);
-        if (wingspanEncoded == 255) return Interval.of(Bound.AT_LEAST, wingspanLowerEnd(255), Bound.NONE, Double.NaN);
-        return Interval.of(Bound.AT_LEAST, wingspanLowerEnd(wingspanEncoded),
-                Bound.BELOW, wingspanLowerEnd(wingspanEncoded + 1));
-    }
-
-    /**
-     * @param code a wingspan code from 2 to 255
-     * @return the smallest wingspan in feet the encoding formula maps to {@code code}
-     */
-    private static double wingspanLowerEnd(int code) {
-        double t = 1 + (code - 2) * 0.004;
-        return (t * t - 0.952) / 0.008;
+        return WxAIREP.wingspan(wingspanEncoded);
     }
 
     @Override

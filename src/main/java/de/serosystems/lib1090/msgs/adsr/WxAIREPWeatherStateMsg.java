@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.adsr;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.WxAIREP;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -77,13 +78,8 @@ public class WxAIREPWeatherStateMsg extends TypeCodedExtendedSquitter implements
         super(squitter);
         ADSRMsg.checkADSR(this);
 
-        if (getFormatTypeCode() != 26)
-            throw new BadFormatException("Wx AIREP messages must have typecode 26");
-
         BitReader br = BitReader.forBigEndian(getMessage());
-
-        if (br.readByte(6, 7) != 1)
-            throw new BadFormatException("Wx AIREP weather state message must have subtype 1");
+        WxAIREP.validateFormat(getFormatTypeCode(), br, 1, "weather state");
 
         icingStatusEncoded = br.readByte(8, 12);
         windQualityIndicatorEncoded = br.readByte(13, 15);
@@ -134,8 +130,7 @@ public class WxAIREPWeatherStateMsg extends TypeCodedExtendedSquitter implements
      * @return a lower bound for the wind speed in knots, or {@code null} if unavailable
      */
     public Short getWindSpeed() {
-        if (!hasWindSpeed()) return null;
-        return (short) (windSpeedEncoded - 1);
+        return WxAIREP.windSpeed(windSpeedEncoded);
     }
 
     /**
@@ -159,8 +154,7 @@ public class WxAIREPWeatherStateMsg extends TypeCodedExtendedSquitter implements
      * or {@code null} if unavailable
      */
     public Double getWindDirection() {
-        if (!hasWindDirection()) return null;
-        return (windDirectionEncoded - 1) / 1023. * 360;
+        return WxAIREP.windDirection(windDirectionEncoded);
     }
 
     @Override
