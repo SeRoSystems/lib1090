@@ -20,6 +20,7 @@ package de.serosystems.lib1090.cpr;
 
 import de.serosystems.lib1090.Position;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -27,7 +28,10 @@ import java.util.Objects;
 /**
  * CPR encoded position with decoding functions.
  */
-public final class CPREncodedPosition {
+public final class CPREncodedPosition implements Serializable {
+
+    private static final long serialVersionUID = 5081730583999422576L;
+
     /**
      * Number of bits in {@link #yz} and {@link #xz}.
      */

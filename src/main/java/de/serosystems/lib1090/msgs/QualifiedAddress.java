@@ -20,6 +20,8 @@ package de.serosystems.lib1090.msgs;
 
 import de.serosystems.lib1090.Tools;
 
+import java.io.Serializable;
+
 /**
  * Represents a qualified 24-bit address: an address value together with its {@link Type}, as
  * defined in ED-102B §2.2.3.2.1.5 TABLE 2-8, and the {@link Source} it was received from.
@@ -30,7 +32,10 @@ import de.serosystems.lib1090.Tools;
  * §2.2.17.4 (TIS-B processed independently of ADS-B) and §2.2.18.4 (ADS-R reports distinct from
  * ADS-B reports).
  */
-public class QualifiedAddress {
+public class QualifiedAddress implements Serializable {
+
+    private static final long serialVersionUID = 1352093244882739883L;
+
     /**
      * Different types of addresses in the AA field, see ED-102B §2.2.3.2.1.5 TABLE 2-8,
      * "Determining the Type of Address in the AA Field" (the CF field itself, which this
