@@ -204,9 +204,15 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
     }
 
     /**
-     * @return the 7-byte Comm-B message (BDS register; register numbering and content per
-     * ICAO Doc 9871 (First Edition, AN/464) §A.2.1 Register Allocation — individual
-     * registers are decoded in package de.serosystems.lib1090.msgs.bds)
+     * The Comm-B message (BDS register; register numbering and content per ICAO Doc 9871 (First Edition,
+     * AN/464) §A.2.1 Register Allocation — individual registers are decoded in package
+     * de.serosystems.lib1090.msgs.bds).
+     * <p>
+     * <b>The array is not a copy and must not be modified:</b> it is this message's own, shared with every
+     * message decoded or copied from it, so a change would alter all of them. It is not copied for
+     * performance.
+     *
+     * @return the 7-byte Comm-B message
      */
     public byte[] getMessage() {
         return message;

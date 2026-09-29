@@ -93,7 +93,13 @@ public class ExtendedSquitter extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return message bits 33-88 as 7-byte array, which are the ME field for most extended squitters
+     * Message bits 33-88, which are the ME field for most extended squitters.
+     * <p>
+     * <b>The array is not a copy and must not be modified:</b> it is this message's own, shared with every
+     * message decoded or copied from it, so a change would alter all of them. It is not copied for
+     * performance.
+     *
+     * @return message bits 33-88 as 7-byte array
      */
     public byte[] getMessage() {
         return message;
