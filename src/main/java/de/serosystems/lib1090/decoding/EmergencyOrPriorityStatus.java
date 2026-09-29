@@ -24,19 +24,54 @@ public final class EmergencyOrPriorityStatus {
     }
 
     /**
-     * Decodes the upper bound of an eddy dissipation rate (EDR) value in m^(2/3)/s;
-     * the top range is unbounded, so 0.850 denotes an EDR of 0.850 or larger.
-     * Shared by both the "Mean EDR" subfield, coded per ED-102B §2.2.3.2.7.8.1.4 TABLE 2-100,
-     * and the "Peak EDR" subfield, coded per ED-102B §2.2.3.2.7.8.1.5 TABLE 2-101 — the two use
-     * the same coding and resolution.
+     * The eddy dissipation rate (EDR) in m^(2/3)/s as the interval its code stands for, shared by the "Mean EDR"
+     * subfield, ED-102B §2.2.3.2.7.8.1.4 TABLE 2-100, and the "Peak EDR" subfield, §2.2.3.2.7.8.1.5 TABLE 2-101,
+     * which use the same coding. The encoding rounds up, so each code covers the step up to and including its
+     * value: code 1 is [0, 0.002], codes 2 to 126 run in steps of 0.002, 0.005 and 0.010 up to 0.850, and code 127
+     * is any EDR above 0.850.
      *
-     * @param n the encoded EDR value; must not be 0 (i.e. only call when EDR is available)
-     * @return the upper bound of the eddy dissipation rate (EDR) in m^(2/3)/s
+     * @param n the encoded EDR value, 0 meaning "no data"
+     * @return the interval of the EDR, or {@code null} for code 0
      */
-    public static double decodeEdr(int n) {
+    public static Interval edr(int n) {
+        if (n == 0) return null;
+        if (n == 1) return Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 0.002);
+        if (n == 127) return Interval.of(Bound.MORE_THAN, 0.850, Bound.NONE, Double.NaN);
+        return Interval.of(Bound.MORE_THAN, edrUpperEnd(n - 1), Bound.AT_MOST, edrUpperEnd(n));
+    }
+
+    /**
+     * @param n an EDR code from 1 to 126
+     * @return the largest EDR the code stands for
+     */
+    private static double edrUpperEnd(int n) {
         if (n <= 10) return n * 0.002;
-        else if (n <= 76) return (n - 10) * 0.005 + 0.02;
-        else if (n <= 126) return (n - 76) * 0.01 + 0.35;
-        else return 0.850;
+        if (n <= 76) return 0.020 + (n - 10) * 0.005;
+        return 0.350 + (n - 76) * 0.010;
+    }
+
+    /**
+     * The Relative Time of Peak Window Closure of the peak EDR in seconds, ED-102B §2.2.3.2.7.8.1.6 TABLE 2-102:
+     * code n is (-7.5 (n + 1), -7.5 n]. Code 0, (-7.5, 0], is also what is transmitted when the offset is not
+     * available, which the code alone cannot tell apart.
+     *
+     * @param n the encoded peak EDR offset, 0 to 7
+     * @return the interval of the offset in seconds before the message
+     */
+    public static Interval peakEdrOffset(int n) {
+        return Interval.of(Bound.MORE_THAN, -7.5 * (n + 1), Bound.AT_MOST, 0 - 7.5 * n);
+    }
+
+    /**
+     * The water vapor in kg/kg as the interval its code stands for, ED-102B §2.2.3.2.7.8.1.7 TABLE 2-103: code 1
+     * is less than 0.00001, code n up to 4094 is [0.00001 (n - 1), 0.00001 n), and code 4095 is 0.04094 or more.
+     *
+     * @param n the encoded water vapor, 0 meaning "no data"
+     * @return the interval of the water vapor, or {@code null} for code 0
+     */
+    public static Interval waterVapor(int n) {
+        if (n == 0) return null;
+        if (n == 4095) return Interval.of(Bound.AT_LEAST, 4094 / 1e5, Bound.NONE, Double.NaN);
+        return Interval.of(Bound.AT_LEAST, (n - 1) / 1e5, Bound.BELOW, n / 1e5);
     }
 }
