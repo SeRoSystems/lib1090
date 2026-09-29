@@ -75,10 +75,10 @@ public class AirborneCapabilityClassCodeV2 extends AbstractMEField
      * collision avoidance system is — but it loses the fact that the system in question is specifically
      * TCAS/ACAS.
      * <p>
-     * As with the unified accessor, {@code true} means operational <i>or unknown</i>; only {@code false}
-     * asserts that it is not operational.
+     * Set means TCAS is operational, clear that it is not, ED-102A Table 2-53; unlike the "Not-TCAS" bit of
+     * versions 0 and 1, neither value leaves the state open.
      *
-     * @return true if TCAS is operational or its state is unknown, ME bit 11
+     * @return true if TCAS is operational, false if it is not, ME bit 11
      */
     public boolean isTCASOperational() {
         return getMEBit(11);

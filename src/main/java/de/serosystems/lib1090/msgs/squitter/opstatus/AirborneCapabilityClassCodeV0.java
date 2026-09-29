@@ -102,7 +102,8 @@ public class AirborneCapabilityClassCodeV0 extends AbstractMEField
      * the subfield: <b>"CDTI Traffic Display"</b>. Renamed to "1090ES IN" from version 1 onwards, which
      * is what {@link #has1090ESIn()} reports.
      *
-     * @return true if CDTI is operational or its state is unknown, ME bit 12
+     * @return true if CDTI is operational, false if it is not or its state is unknown (ED-102B TABLE N-8),
+     * ME bit 12
      */
     public boolean hasOperationalCDTI() {
         return getMEBit(12);

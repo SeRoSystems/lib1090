@@ -35,7 +35,8 @@ public interface AirborneCapabilityClassCodeV2V3 extends AirborneCapabilityClass
      * ADS-B versions 2 and 3 transmit this bit as "CA Operational", so it is read directly. Versions 0
      * and 1 transmit its negation as "Not-TCAS" and invert it in their own layouts.
      *
-     * @return true if collision avoidance is operational or its state is unknown, ME bit 11
+     * @return true if collision avoidance is operational, false if it is not, ME bit 11 (ED-102A Table 2-53,
+     * ED-102B TABLE 2-44)
      */
     @Override
     default boolean isCollisionAvoidanceOperational() {

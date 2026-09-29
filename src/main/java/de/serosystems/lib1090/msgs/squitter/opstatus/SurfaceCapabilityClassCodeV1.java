@@ -97,7 +97,8 @@ public class SurfaceCapabilityClassCodeV1 extends AbstractMEField
      * gives the subfield: <b>"CDTI Traffic Display"</b>. Renamed to "1090ES IN" from version 2 onwards,
      * which is what {@link #has1090ESIn()} reports.
      *
-     * @return true if CDTI is operational or its state is unknown, ME bit 12
+     * @return true if CDTI is operational, false if it is not (ICAO Doc 9871 First Edition §B.2.3.10.3),
+     * ME bit 12
      */
     public boolean hasOperationalCDTI() {
         return getMEBit(12);

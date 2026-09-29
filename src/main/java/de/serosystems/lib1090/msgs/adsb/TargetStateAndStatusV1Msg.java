@@ -181,6 +181,12 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
         return false;
     }
 
+    /**
+     * ME bit 52 of the "Capability/Mode Codes" subfield, inverted: clear means "TCAS/ACAS operational or
+     * unknown", set "TCAS/ACAS not operational", ICAO Doc 9871 First Edition §D.2.15.
+     *
+     * @return true if TCAS/ACAS is operational or its state is unknown, false if it is not operational
+     */
     @Override
     public boolean hasOperationalTCAS() {
         return !capabilityNotTcas;

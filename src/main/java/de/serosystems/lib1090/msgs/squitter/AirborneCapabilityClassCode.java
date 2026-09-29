@@ -28,16 +28,18 @@ public interface AirborneCapabilityClassCode extends KnownCapabilityClassCode {
      * Whether the collision avoidance system is operational. The subfield is called "CA Operational"
      * in ADS-B version 3 and "Not-TCAS" in versions 0 and 1, where the bit is transmitted inverted.
      * <p>
-     * <b>The value overstates what the bit asserts:</b> a clear bit means "operational <i>or
-     * unknown</i>", only a set bit means "not operational". The version 0/1 name is the more honest of
-     * the two for that reason; use the era-accurate accessor on the concrete layout to read the bit as
-     * transmitted.
+     * <b>What {@code true} asserts depends on the version:</b> in versions 2 and 3, operational, since
+     * the bit is "CA Operational" or "TCAS Operational" and set only then; in versions 0 and 1, operational
+     * <i>or unknown</i>, since a clear "Not-TCAS" bit means that (ED-102B TABLE N-8). {@code false} means
+     * not operational in every version. Use the era-accurate accessor on the concrete layout to read the
+     * bit as transmitted.
      *
      * <b>Declared here rather than implemented</b>, because the polarity differs: versions 2 and 3
      * transmit the bit as "CA Operational", versions 0 and 1 as its negation. A shared default would
      * silently return inverted values for any layout that forgot to override it.
      *
-     * @return true if collision avoidance is operational or its state is unknown, ME bit 11
+     * @return true if collision avoidance is operational, in versions 0 and 1 also if its state is unknown,
+     * ME bit 11
      */
     boolean isCollisionAvoidanceOperational();
 }
