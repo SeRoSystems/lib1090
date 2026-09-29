@@ -167,10 +167,10 @@ public class StatefulModeSDecoder {
         // interpret ME field as ADS-R
         TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
-        // ADS-R has not been specified for version 0 at all; version 2 and any
-        // higher (not yet defined) version is decoded as version 2, since, per
+        // ADS-R has not been specified for version 0 at all; version 3 and any
+        // higher (not yet defined) version is decoded as version 3, since, per
         // ED-102B §2.2.7.1, newer versions are expected to be backward compatible
-        // with version 2
+        // with version 3
 
         // we need stateful decoding, because ADS-R version > 0 can only be assumed
         // if matching version info in operational status has been found.
@@ -320,11 +320,13 @@ public class StatefulModeSDecoder {
                         if (a1.hasDiffBaroAlt()) dd.geoMinusBaro = a1.getDiffBaroAlt();
                         return a1;
                     case 2:
-                    default:
                         de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg a2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg(es1090);
                         if (a2.hasDiffBaroAlt()) dd.geoMinusBaro = a2.getDiffBaroAlt();
                         return a2;
+                    case 3:
+                    default:
+                        break; // subtypes 3/4 are not defined for version 3 and up, ED-102B §2.2.18.4.4 NOTE 3
                 }
             }
         }
