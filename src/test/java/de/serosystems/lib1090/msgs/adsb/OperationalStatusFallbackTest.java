@@ -45,7 +45,7 @@ class OperationalStatusFallbackTest {
 
     @Test
     void decoderKeepsTheMessageWhenTheCapabilityClassSelectorIsUnknown() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         Object msg = decoder.decode(Tools.hexStringToByteArray(UNKNOWN_CC), T);
 
         // before the refactor this threw BadFormatException and the message was lost entirely
@@ -68,11 +68,18 @@ class OperationalStatusFallbackTest {
 
     @Test
     void rawFieldStaysAvailableWhicheverLayoutApplies() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         AirborneOperationalStatusV2Msg opstat = (AirborneOperationalStatusV2Msg)
                 decoder.decode(Tools.hexStringToByteArray(UNKNOWN_CC), T);
         assertEquals(0x8000, opstat.getCapabilityClassCodeEncoded());
         assertEquals(opstat.getCapabilityClassCodeEncoded(), opstat.getCapabilityClass().getEncoded());
         assertEquals(opstat.getOperationalModeCodeEncoded(), opstat.getOperationalMode().getEncoded());
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

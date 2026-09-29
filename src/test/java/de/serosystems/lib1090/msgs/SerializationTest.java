@@ -49,7 +49,7 @@ public class SerializationTest {
     @Test
     public void messages_surviveRoundTrip() throws Exception {
         for (String raw : MESSAGES) {
-            ModeSDownlinkMsg msg = new StatefulModeSDecoder().decode(raw, Instant.ofEpochSecond(1_600_000_000L));
+            ModeSDownlinkMsg msg = newDecoder().decode(raw, Instant.ofEpochSecond(1_600_000_000L));
             ModeSDownlinkMsg back = roundTrip(msg);
 
             assertEquals(msg.getClass(), back.getClass(), raw);
@@ -77,6 +77,13 @@ public class SerializationTest {
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
             return (ModeSDownlinkMsg) in.readObject();
         }
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 
 }

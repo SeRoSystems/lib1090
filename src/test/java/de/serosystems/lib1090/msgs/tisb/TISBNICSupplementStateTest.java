@@ -81,7 +81,7 @@ class TISBNICSupplementStateTest {
      */
     @Test
     void testSupplementAReachesTheFollowingPosition() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(velocity(true), T);
 
         FineAirbornePositionMsg position = positionAfter(decoder);
@@ -94,7 +94,7 @@ class TISBNICSupplementStateTest {
      */
     @Test
     void testAClearSupplementReachesItToo() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(velocity(false), T);
 
         FineAirbornePositionMsg position = positionAfter(decoder);
@@ -108,7 +108,7 @@ class TISBNICSupplementStateTest {
      */
     @Test
     void testWithoutAVelocityMessageTheWorstRowIsReported() throws Exception {
-        FineAirbornePositionMsg position = positionAfter(new StatefulModeSDecoder());
+        FineAirbornePositionMsg position = positionAfter(newDecoder());
 
         assertEquals((byte) 8, position.getNICEncoded());
         assertEquals(ContainmentRadius.BELOW_185_2, position.getContainmentRadius());
@@ -121,9 +121,16 @@ class TISBNICSupplementStateTest {
      */
     @Test
     void testTheSetSupplementIsNoLongerLostToTheVersionZeroTable() throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(velocity(true), T);
 
         assertEquals(ContainmentRadius.BELOW_75, positionAfter(decoder).getContainmentRadius());
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

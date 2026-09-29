@@ -82,7 +82,7 @@ class ADSRDeltaTest {
     }
 
     private static ModeSDownlinkMsg decode(byte[] raw) throws Exception {
-        return new StatefulModeSDecoder().decode(raw, T);
+        return newDecoder().decode(raw, T);
     }
 
     // ------------------------------------------------------------------ the one difference
@@ -203,5 +203,12 @@ class ADSRDeltaTest {
         byte[] field = me(0, 3, 0, 0);
         assertInstanceOf(ADSRMsg.class, decode(adsr(field)));
         assertFalse(decode(adsb(field)) instanceof ADSRMsg);
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

@@ -59,12 +59,18 @@ class ExtendedSquitterTest {
 
     @Test
     void testCoarsePositionIsNotTypeCoded() throws Exception {
-        ModeSDownlinkMsg compatible = StatefulModeSDecoder.builder().tisbV2CompatibilityMode(true).build()
+        ModeSDownlinkMsg compatible = StatefulModeSDecoder.builder()
+                .tisbV2CompatibilityMode(true)
+                .checkParity(false) // the synthetic message carries no valid parity
+                .build()
                 .decode(COARSE_POSITION, Instant.EPOCH);
         assertInstanceOf(CoarsePositionMsg.class, compatible);
         assertFalse(compatible instanceof TypeCodedExtendedSquitter);
 
-        ModeSDownlinkMsg strict = StatefulModeSDecoder.builder().tisbV2CompatibilityMode(false).build()
+        ModeSDownlinkMsg strict = StatefulModeSDecoder.builder()
+                .tisbV2CompatibilityMode(false)
+                .checkParity(false) // the synthetic message carries no valid parity
+                .build()
                 .decode(COARSE_POSITION, Instant.EPOCH);
         assertEquals(ExtendedSquitter.class, strict.getClass());
     }

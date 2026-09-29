@@ -58,7 +58,7 @@ class EmergencyOrPriorityStatusDispatchTest {
     }
 
     private static Class<?> decodedAtVersion(int version) throws Exception {
-        StatefulModeSDecoder decoder = new StatefulModeSDecoder();
+        StatefulModeSDecoder decoder = newDecoder();
         decoder.decode(operationalStatus(version), T);
         return decoder.decode(emergencyOrPriorityStatus(), T).getClass();
     }
@@ -66,10 +66,17 @@ class EmergencyOrPriorityStatusDispatchTest {
     @Test
     void testDispatch() throws Exception {
         assertEquals(EmergencyOrPriorityStatusV0Msg.class,
-                new StatefulModeSDecoder().decode(emergencyOrPriorityStatus(), T).getClass());
+                newDecoder().decode(emergencyOrPriorityStatus(), T).getClass());
         assertEquals(EmergencyOrPriorityStatusV0Msg.class, decodedAtVersion(0));
         assertEquals(EmergencyOrPriorityStatusV1Msg.class, decodedAtVersion(1));
         assertEquals(EmergencyOrPriorityStatusV2Msg.class, decodedAtVersion(2));
         assertEquals(EmergencyOrPriorityStatusV3Msg.class, decodedAtVersion(3));
+    }
+
+    /**
+     * The synthetic messages of these tests carry no valid parity, so the parity check is disabled.
+     */
+    private static StatefulModeSDecoder newDecoder() {
+        return StatefulModeSDecoder.builder().checkParity(false).build();
     }
 }

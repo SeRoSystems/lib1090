@@ -494,11 +494,14 @@ public class ModeSDownlinkMsg implements Serializable {
      * squitter/ADS-B messages (DF 17, 18) only! Other messages may have
      * their parity field XORed with an ICAO24 transponder address
      * or an interrogator ID.
+     * <p>
+     * If the CRC has already been subtracted from the parity field (see {@code noCRC} of the constructors), the
+     * field of an intact message is 0.
      *
      * @return true if parity in message matched calculated parity
      */
     public boolean checkParity() {
-        return calcParityInt() == getParity();
+        return noCRC ? getParity() == 0 : calcParityInt() == getParity();
     }
 
     @Override
