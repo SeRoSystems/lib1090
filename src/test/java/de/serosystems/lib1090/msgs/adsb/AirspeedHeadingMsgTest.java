@@ -104,4 +104,15 @@ abstract class AirspeedHeadingMsgTest {
                 create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, false, 127)),
                 create(VelocityOverGroundMsgTest.withDiffBaroAlt(hex, true, 127)));
     }
+
+    /**
+     * The top airspeed code means more than 1021.5 kt and is flagged as such; the code below it is not.
+     */
+    @Test
+    public void testTopAirspeedCodeIsSaturated() throws Exception {
+        AirspeedHeadingMsg top = create("8D4840D69B04647FE00400000000"); // airspeed 1023
+        assertTrue(top.isAirspeedSaturated());
+        assertEquals(1022, top.getAirspeed().intValue());
+        assertFalse(create("8D4840D69B04647FC00400000000").isAirspeedSaturated()); // airspeed 1022
+    }
 }

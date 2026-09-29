@@ -56,12 +56,22 @@ public interface AirborneVelocityMsg {
     boolean isBarometricVerticalSpeed();
 
     /**
-     * @return the vertical rate in feet/min, or {@code null} if unavailable
+     * @return the vertical rate in feet/min, or {@code null} if unavailable; for the top code, which means more
+     * than 32608 ft/min, the next step, 32640 ft/min, as a lower bound of the magnitude, see
+     * {@link #isVerticalRateSaturated()}
      */
     default Integer getVerticalRate() {
         if (!hasVerticalRate()) return null;
         int verticalRate = (getVerticalRateEncoded() - 1) * 64;
         return isVerticalRateDown() ? -verticalRate : verticalRate;
+    }
+
+    /**
+     * @return true if the vertical rate is the top code, which means more than 32608 ft/min, ED-102B
+     * §2.2.3.2.6.1.12 TABLE 2-25; {@link #getVerticalRate()} is then only a lower bound of the magnitude
+     */
+    default boolean isVerticalRateSaturated() {
+        return getVerticalRateEncoded() == 511;
     }
 
     /**

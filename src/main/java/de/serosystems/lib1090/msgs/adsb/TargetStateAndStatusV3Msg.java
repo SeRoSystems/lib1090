@@ -133,9 +133,22 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
         return selectedAltitude > 0;
     }
 
+    /**
+     * For the top code, which means 65456 ft or more, the next step, 65472 ft, as a lower bound, see
+     * {@link #isSelectedAltitudeSaturated()}.
+     */
     @Override
     public Integer getSelectedAltitude() {
         return selectedAltitude != 0 ? (selectedAltitude - 1) * 32 : null;
+    }
+
+    /**
+     * @return true if the selected altitude is the top code, which in version 3 means 65456 ft or more, ED-102B
+     * §2.2.3.2.7.1.3.3 TABLE 2-34; {@link #getSelectedAltitude()} is then only a lower bound. Version 2 has the
+     * top code at exactly 65472 ft.
+     */
+    public boolean isSelectedAltitudeSaturated() {
+        return selectedAltitude == 2047;
     }
 
     @Override
