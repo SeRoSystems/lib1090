@@ -18,7 +18,6 @@
 
 package de.serosystems.lib1090.decoding;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.bds.ThreatIdentityData;
 
 /**
@@ -97,7 +96,7 @@ public class TCASResolutionAdvisory {
         return new boolean[]{doNotPassBelow, doNotPassAbove, doNotTurnLef, doNotTurnRight};
     }
 
-    public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, BitReader reader) throws BadFormatException {
+    public static ThreatIdentityData extractThreatIdentityData(short threatTypeIndicator, BitReader reader) {
         ThreatIdentityData threatIdentityData = null;
 
         switch (threatTypeIndicator) {

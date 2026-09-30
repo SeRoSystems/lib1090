@@ -476,6 +476,21 @@ public class StatefulModeSDecoderTest {
         }
     }
 
+    /**
+     * An ES TCAS RA broadcast with an unassigned threat bearing (code 61) decodes instead of throwing out of
+     * decode().
+     */
+    @Test
+    public void tcasRAWithUnassignedBearing_decodes() throws UnspecifiedFormatError, BadFormatException {
+        StatefulModeSDecoder d = StatefulModeSDecoder.builder().build(); // the frames carry valid parity
+        d.decode("8D4840D6F800020049490034BAFF", Instant.EPOCH); // version 2 operational status
+
+        ModeSDownlinkMsg msg = d.decode("8D4840D6E28000094282BDD2CD09", Instant.EPOCH);
+
+        assertInstanceOf(TCASResolutionAdvisoryMsg.class, msg);
+        assertNull(((TCASResolutionAdvisoryMsg) msg).getThreatIdentityData().getBearing());
+    }
+
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {
         ModeSDownlinkMsg msg = decoder.decode(raw, timestamp);
         return decoder.extractPosition(msg.getAddress(), (PositionMsg) msg, null);
