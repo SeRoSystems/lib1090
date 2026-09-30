@@ -165,15 +165,25 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
     }
 
     /**
-     * The barometric pressure setting (minus 800 millibars) according to ED-102B §2.2.3.2.7.1.3.4
+     * The barometric pressure setting as transmitted, which is the setting minus 800 mb, ED-102B
+     * §2.2.3.2.7.1.3.4 TABLE 2-35: 0 means no or invalid data, code n stands for (n - 1) * 0.8 mb.
+     *
+     * @return the encoded barometric pressure setting
+     */
+    public int getBarometricPressureSettingEncoded() {
+        return barometricPressureSetting;
+    }
+
+    /**
+     * The barometric pressure setting in millibars, according to ED-102B §2.2.3.2.7.1.3.4. The message carries the
+     * setting minus 800 mb at a resolution of 0.8 mb (TABLE 2-35), so the setting is in the range [800, 1208] mb.
      * <p>
      * Availability of this information can also be checked with {@link #hasBarometricPressureSetting()}.
      *
-     * @return the barometric pressure settings that has been adjusted by subtracting 800 millibars from the pressure
-     * source (in millibars), or null if not available.
+     * @return the barometric pressure setting in millibars, or null if not available
      */
     public Float getBarometricPressureSetting() {
-        return barometricPressureSetting != 0 ? (barometricPressureSetting - 1) * 0.8F : null;
+        return barometricPressureSetting != 0 ? (float) (800 + (barometricPressureSetting - 1) * 0.8) : null;
     }
 
     @Override

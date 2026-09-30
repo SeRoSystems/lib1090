@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs.adsb;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
+import de.serosystems.lib1090.msgs.bds.SelectedVerticalIntention;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -147,7 +148,7 @@ public class TargetStateAndStatusV2MsgTest {
 
         assertEquals(1220, tss.getSelectedAltitudeEncoded());
         assertEquals(39008, tss.getSelectedAltitude().intValue());
-        assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
+        assertEquals(1012.8, tss.getBarometricPressureSetting(), 0.0001);
         assertFalse(tss.hasSelectedHeading());
         assertNull(tss.getSelectedHeading());
 
@@ -176,7 +177,7 @@ public class TargetStateAndStatusV2MsgTest {
 
         assertEquals(1220, tss.getSelectedAltitudeEncoded());
         assertEquals(39008, tss.getSelectedAltitude().intValue());
-        assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
+        assertEquals(1012.8, tss.getBarometricPressureSetting(), 0.0001);
         assertTrue(tss.hasSelectedHeading());
         assertEquals(32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
@@ -205,7 +206,7 @@ public class TargetStateAndStatusV2MsgTest {
 
         assertEquals(1220, tss.getSelectedAltitudeEncoded());
         assertEquals(39008, tss.getSelectedAltitude().intValue());
-        assertEquals(212.8, tss.getBarometricPressureSetting(), 0.0001);
+        assertEquals(1012.8, tss.getBarometricPressureSetting(), 0.0001);
         assertTrue(tss.hasSelectedHeading());
         assertEquals(180 + 32 * (180. / 256), tss.getSelectedHeading(), 0.0001);
 
@@ -238,6 +239,28 @@ public class TargetStateAndStatusV2MsgTest {
         assertEquals(clear.hasAutopilotEngaged(), set.hasAutopilotEngaged());
         assertEquals(clear.hasVNAVModeEngaged(), set.hasVNAVModeEngaged());
         assertEquals(clear.hasOperationalTCAS(), set.hasOperationalTCAS());
+    }
+
+    /**
+     * The same setting of 1012.8 mb gives the same value in every class that carries it: target state and status
+     * versions 2 and 3, ADS-B and ADS-R (the setting minus 800 mb, 0.8 mb steps, ED-102B TABLE 2-35) and BDS 4,0
+     * (the setting minus 800 mb, 0.1 mb steps, ICAO Doc 9871 Table A-2-64).
+     */
+    @Test
+    public void barometricPressureSetting_isTheSettingInEveryClass() throws BadFormatException, UnspecifiedFormatError {
+        final String me = "ea000858000000"; // code 267: (267 - 1) * 0.8 = 212.8 mb above 800 mb
+        final float setting = 1012.8f;
+
+        assertEquals(setting, new TargetStateAndStatusV2Msg("8dabcdef" + me + "4be997").getBarometricPressureSetting(),
+                0.0001);
+        assertEquals(setting, new TargetStateAndStatusV3Msg("8dabcdef" + me + "4be997").getBarometricPressureSetting(),
+                0.0001);
+        assertEquals(setting, new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV2Msg("96abcdef" + me + "000000")
+                .getBarometricPressureSetting(), 0.0001);
+        assertEquals(setting, new de.serosystems.lib1090.msgs.adsr.TargetStateAndStatusV3Msg("96abcdef" + me + "000000")
+                .getBarometricPressureSetting(), 0.0001);
+        assertEquals(setting, new SelectedVerticalIntention(Tools.hexStringToByteArray("00000030a00000"))
+                .getBarometricPressureSetting(), 0.0001);
     }
 
 }
