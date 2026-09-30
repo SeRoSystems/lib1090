@@ -48,12 +48,19 @@ public interface TargetStateAndStatusMsg extends SILMsg, NACpMsg {
     boolean hasSelectedHeading();
 
     /**
-     * The selected heading according to ED-102B §2.2.3.2.7.1.3.7
+     * The selected heading according to ED-102B §2.2.3.2.7.1.3.7.
      * <p>
-     * Look at {@link SurfaceOperationalStatusMsg#isHeadingReferencedToMagneticNorth()} resp.
-     * {@link AirborneOperationalStatusV1V2Msg#isHeadingReferencedToMagneticNorth()} to determine whether this heading
-     * is referring to true north or magnetic north.
-     * If not available, assume magnetic north as the de-facto standard.
+     * The message does not indicate whether it refers to true or magnetic north: "Users of the Selected Heading
+     * data should be aware that there is no method defined in this version of these MOPS to indicate its
+     * reference orientation" (ED-102A and ED-102B §2.2.3.2.7.1.3.7 NOTE 2). Transmitters are encouraged to use
+     * magnetic north, the de facto standard, but encode the value active in the flight deck, in either
+     * orientation.
+     * <p>
+     * ED-129C §3.4.4.6.40 nevertheless reports it with the reference of the aircraft's own heading: for versions
+     * 1 and 2 the HRD of the airborne operational status message
+     * ({@link AirborneOperationalStatusV1V2Msg#isHeadingReferencedToMagneticNorth()}, [REQ 317]), for version 3
+     * the heading type of the Wx AIREP alternate weather state message
+     * ({@link de.serosystems.lib1090.msgs.adsb.WxAIREPAlternateWeatherStateMsg#getHeadingType()}, [REQ 643]).
      *
      * @return the selected heading in decimal degrees ([0, 360)) clockwise, or {@code null} if unavailable
      */
