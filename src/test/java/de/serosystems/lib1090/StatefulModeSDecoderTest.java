@@ -47,13 +47,13 @@ public class StatefulModeSDecoderTest {
     }
 
     @Test
-    public void tssV0Me11Set_shouldNotDecode() throws UnspecifiedFormatError, BadFormatException {
-        // decoder assumes ADS-B v0 and should not decode TSS
+    public void tssBeforeVersionKnownMe11Set_decodesAsV3() throws UnspecifiedFormatError, BadFormatException {
+        // the version is not known yet: subtype 1 is decoded as version 3 (ED-102B §N.1.2), and ME bit 11, part of
+        // the selected altitude, does not keep it from being decoded
         final ModeSDownlinkMsg reply = decoder.decode(TargetStateAndStatusV2MsgTest.TSS_WITH_ME11_BIT_SET, Instant.EPOCH);
 
-        assertEquals(TypeCodedExtendedSquitter.class, reply.getClass());
-        assertFalse(reply instanceof TargetStateAndStatusV1Msg);
-        assertFalse(reply instanceof TargetStateAndStatusV2Msg);
+        assertInstanceOf(TargetStateAndStatusV3Msg.class, reply);
+        assertEquals((907 - 1) * 32, ((TargetStateAndStatusV3Msg) reply).getSelectedAltitude().intValue());
     }
 
     @Test
@@ -390,6 +390,90 @@ public class StatefulModeSDecoderTest {
                 .build();
         assertEquals(ExtendedSquitter.class, strict.decode(modeATrack, Instant.EPOCH).getClass());
         assertInstanceOf(FineAirbornePositionMsg.class, strict.decode(icao, Instant.EPOCH));
+    }
+
+    // ------------------------------------------------------------------ decoding before the version is known
+
+    /**
+     * A message that version 0 does not define and the class it is expected to decode to: before the version is
+     * known (no or a version 0 operational status) with {@code decodeBeforeVersionKnown} off and on, and once the
+     * operational status says version 1, 2 or 3. {@code null} stands for an undecoded
+     * {@link TypeCodedExtendedSquitter}.
+     */
+    private static final class VersionCase {
+        final String name;
+        final byte[] message;
+        final Class<?>[] expected;
+
+        VersionCase(String name, byte[] message, Class<?> off, Class<?> on, Class<?> v1, Class<?> v2, Class<?> v3) {
+            this.name = name;
+            this.message = message;
+            this.expected = new Class<?>[]{off, on, v1, v2, v3};
+        }
+    }
+
+    /**
+     * An ADS-B message with the given first ME byte and ME bit 11 set as given.
+     */
+    private static byte[] me(int firstByte, boolean me11) {
+        byte[] me = new byte[7];
+        me[0] = (byte) firstByte;
+        me[1] = (byte) (me11 ? 0x20 : 0x00);
+        return frame(DF17, me);
+    }
+
+    private static final VersionCase[] VERSION_CASES = {
+            new VersionCase("Mode A code", me(23 << 3 | 7, false),
+                    null, ModeACodeV1Msg.class, ModeACodeV1Msg.class, null, null),
+            new VersionCase("TSS subtype 0", me(29 << 3, false),
+                    null, TargetStateAndStatusV1Msg.class, TargetStateAndStatusV1Msg.class, null, null),
+            new VersionCase("TSS subtype 0, ME bit 11 set", me(29 << 3, true),
+                    null, null, TargetStateAndStatusV1Msg.class, null, null),
+            new VersionCase("TSS subtype 1, ME bit 11 set", me(29 << 3 | 1 << 1, true),
+                    null, TargetStateAndStatusV3Msg.class, null, TargetStateAndStatusV2Msg.class,
+                    TargetStateAndStatusV3Msg.class),
+            new VersionCase("TCAS RA", me(28 << 3 | 2, false),
+                    null, TCASResolutionAdvisoryMsg.class, null, TCASResolutionAdvisoryMsg.class,
+                    TCASResolutionAdvisoryMsg.class),
+            new VersionCase("HVA position", me(25 << 3, false),
+                    null, HVAPositionMsg.class, null, null, HVAPositionMsg.class),
+            new VersionCase("HVA velocity", me(25 << 3 | 1 << 1, false),
+                    null, HVAVelocityMsg.class, null, null, HVAVelocityMsg.class),
+            new VersionCase("Wx AIREP aircraft state", me(26 << 3, false),
+                    null, WxAIREPAircraftStateMsg.class, null, null, WxAIREPAircraftStateMsg.class),
+            new VersionCase("Wx AIREP weather state", me(26 << 3 | 1 << 1, false),
+                    null, WxAIREPWeatherStateMsg.class, null, null, WxAIREPWeatherStateMsg.class),
+            new VersionCase("Wx AIREP alternate weather state", me(26 << 3 | 2 << 1, false),
+                    null, WxAIREPAlternateWeatherStateMsg.class, null, null, WxAIREPAlternateWeatherStateMsg.class),
+            new VersionCase("CAS operational coordination", me(28 << 3 | 3, false),
+                    null, CASOperationalCoordinationMsg.class, null, null, CASOperationalCoordinationMsg.class),
+            new VersionCase("UAS/RPAS contingency", me(28 << 3 | 4, false),
+                    null, UASRPASContingencyMsg.class, null, null, UASRPASContingencyMsg.class),
+    };
+
+    @Test
+    public void messagesNotDefinedInVersion0_dependOnVersionAndOption()
+            throws UnspecifiedFormatError, BadFormatException {
+        // null: no operational status; 0: a version 0 operational status, which does not confirm version 0
+        final Integer[] versions = {null, 0, 1, 2, 3};
+        for (VersionCase c : VERSION_CASES) {
+            for (boolean option : new boolean[]{false, true}) {
+                for (Integer version : versions) {
+                    StatefulModeSDecoder d = StatefulModeSDecoder.builder()
+                            .decodeBeforeVersionKnown(option)
+                            .checkParity(false)
+                            .build();
+                    if (version != null) d.decode(opStatus(DF17, version, false), Instant.EPOCH);
+
+                    Class<?> expected = version == null || version == 0 ?
+                            c.expected[option ? 1 : 0] : c.expected[version + 1];
+                    if (expected == null) expected = TypeCodedExtendedSquitter.class;
+
+                    assertEquals(expected, d.decode(c.message, Instant.EPOCH).getClass(),
+                            c.name + ", decodeBeforeVersionKnown " + option + ", version " + version);
+                }
+            }
+        }
     }
 
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {

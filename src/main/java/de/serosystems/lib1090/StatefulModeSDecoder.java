@@ -59,6 +59,7 @@ public class StatefulModeSDecoder {
     private final boolean decodeDf19Adsb;
     private final boolean tisbV2CompatibilityMode;
     private final boolean checkParity;
+    private final boolean decodeBeforeVersionKnown;
     // keyed by the qualified address including its source, so that ADS-B, ADS-R and TIS-B receptions
     // for the same address never share version, NIC supplements or CPR state (see QualifiedAddress)
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
@@ -78,6 +79,7 @@ public class StatefulModeSDecoder {
         this.decodeDf19Adsb = builder.decodeDf19Adsb;
         this.tisbV2CompatibilityMode = builder.tisbV2CompatibilityMode;
         this.checkParity = builder.checkParity;
+        this.decodeBeforeVersionKnown = builder.decodeBeforeVersionKnown;
     }
 
     /**
@@ -430,6 +432,10 @@ public class StatefulModeSDecoder {
         // if matching version info in operational status has been found.
         DecoderData dd = getDecoderData(modes.getAddress(), timestamp);
 
+        // whether messages that version 0 does not define are decoded although the target's version is not
+        // known, in the format of the version that defines them, see Builder#decodeBeforeVersionKnown
+        boolean versionUnknown = decodeBeforeVersionKnown && dd.adsbVersion == 0;
+
         // what kind of extended squitter?
         byte ftc = es1090.getFormatTypeCode();
 
@@ -536,17 +542,21 @@ public class StatefulModeSDecoder {
 
         if (ftc == 23) { // Test Message, check subtype
             int subtype = es1090.getMessage()[0] & 0x7;
-            if (subtype == 7 && dd.adsbVersion == 1) // Mode A code
+            if (subtype == 7 && (dd.adsbVersion == 1 || versionUnknown)) // Mode A code
                 return new ModeACodeV1Msg(es1090);
         }
 
         if (ftc == 24) {
             int subtype = es1090.getMessage()[0] & 0x7;
+            // not gated on the version: surface system status is not transmitted by ADS-B equipment, but by the
+            // surface surveillance system that generated it (ED-102B §2.2.3.2.7.4.3), so the sender's ADS-B
+            // version does not apply
             if (subtype == 1)
                 return new SurfaceSystemStatusMsg(es1090);
         }
 
-        if (ftc == 25 && dd.adsbVersion >= 3) { // High Velocity and/or Altitude (HVA) message, check subtype
+        // High Velocity and/or Altitude (HVA) message, check subtype
+        if (ftc == 25 && (dd.adsbVersion >= 3 || versionUnknown)) {
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
             if (subtype == 0)
                 return new HVAPositionMsg(es1090);
@@ -554,7 +564,7 @@ public class StatefulModeSDecoder {
                 return new HVAVelocityMsg(es1090);
         }
 
-        if (ftc == 26 && dd.adsbVersion >= 3) { // Wx AIREP message, check subtype
+        if (ftc == 26 && (dd.adsbVersion >= 3 || versionUnknown)) { // Wx AIREP message, check subtype
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
             if (subtype == 0)
                 return new WxAIREPAircraftStateMsg(es1090);
@@ -578,21 +588,25 @@ public class StatefulModeSDecoder {
                     return new EmergencyOrPriorityStatusV1Msg(es1090);
                 else
                     return new EmergencyOrPriorityStatusV0Msg(es1090);
-            } else if (subtype == 2 && dd.adsbVersion > 1)
+            } else if (subtype == 2 && (dd.adsbVersion > 1 || versionUnknown))
                 return new TCASResolutionAdvisoryMsg(es1090);
-            else if (subtype == 3 && dd.adsbVersion >= 3)
+            else if (subtype == 3 && (dd.adsbVersion >= 3 || versionUnknown))
                 return new CASOperationalCoordinationMsg(es1090);
-            else if (subtype == 4 && dd.adsbVersion >= 3)
+            else if (subtype == 4 && (dd.adsbVersion >= 3 || versionUnknown))
                 return new UASRPASContingencyMsg(es1090);
         }
 
         if (ftc == 29) {
             int subtype = (es1090.getMessage()[0] >>> 1) & 0x3;
-            if (subtype == 0 && dd.adsbVersion == 1) {
+            // DO-260A reserved ME bit 11 of TYPE 29 as ZERO; set to ONE, it marks a version 0 TCP/TCP+1
+            // message, which is to be discarded, ED-102B §N.2.5 NOTE 1. In subtype 1, ME bit 11 is part
+            // of the selected altitude.
+            boolean hasMe11Bit = (es1090.getMessage()[1] & 0x20) != 0;
+            if (subtype == 0 && (dd.adsbVersion == 1 || versionUnknown && !hasMe11Bit)) {
                 return new TargetStateAndStatusV1Msg(es1090);
             } else if (subtype == 1 && dd.adsbVersion == 2) {
                 return new TargetStateAndStatusV2Msg(es1090);
-            } else if (subtype == 1 && dd.adsbVersion >= 3) {
+            } else if (subtype == 1 && (dd.adsbVersion >= 3 || versionUnknown)) {
                 return new TargetStateAndStatusV3Msg(es1090);
             }
         }
@@ -808,6 +822,7 @@ public class StatefulModeSDecoder {
         private boolean decodeDf19Adsb = false;
         private boolean tisbV2CompatibilityMode = true;
         private boolean checkParity = true;
+        private boolean decodeBeforeVersionKnown = true;
 
         private Builder() {
         }
@@ -888,6 +903,45 @@ public class StatefulModeSDecoder {
          */
         public Builder checkParity(boolean checkParity) {
             this.checkParity = checkParity;
+            return this;
+        }
+
+        /**
+         * Enables decoding of ADS-B messages that version 0 does not define before the target's version is known.
+         * <p>
+         * The decoder learns a target's ADS-B version only from its Aircraft Operational Status message and assumes
+         * version 0 until then; version 0 itself cannot be confirmed, since it has no version field (ED-102A
+         * §N.2.3.1). With this option enabled, the default, the decoder follows ED-102B §N.1.2: "Prior to receiving
+         * the Version Number, exceptions to assuming Version 0 include messages that were not defined in Version 0."
+         * Until the version is known, each message that ED-102B TABLE N-1 does not define for version 0 is decoded
+         * in the format of the version that defines it:
+         * <ul>
+         *     <li>TYPE Code 23 subtype 7, the Mode A code, as version 1, whose layout DO-260 Change 1 also allows
+         *     version 0 transmitters</li>
+         *     <li>TYPE Code 29 subtype 0, target state and status, as version 1, unless ME bit 11 is set, which marks
+         *     a version 0 TCP/TCP+1 message (ED-102B §N.2.5 NOTE 1)</li>
+         *     <li>TYPE Code 29 subtype 1, target state and status, as version 3, as §N.1.2 prescribes; a version 2
+         *     message read this way loses only NIC<sub>BARO</sub>, ME bit 44, which version 3 reserves</li>
+         *     <li>TYPE Code 28 subtype 2, the TCAS resolution advisory, which version 2 introduced</li>
+         *     <li>the message types and subtypes version 3 introduced: TYPE Code 25 (HVA), TYPE Code 26 (Wx AIREP)
+         *     and TYPE Code 28 subtypes 3 and 4</li>
+         * </ul>
+         * Once the version is known, this option has no effect. ADS-R is not affected: it is not defined for version
+         * 0, so an ADS-R message is decoded only once the version is known.
+         * <p>
+         * Disabled, a message that version 0 does not define is decoded only once the version is known, as ED-102A
+         * §N.1.2 prescribes, and as ED-102A and ED-102B §N.2.5 NOTE 2 require for TYPE Code 29, contrary to ED-102B
+         * §N.1.2: "Prior to generation of a Target Status Report, the 1090 MHz ADS-B Receiving Subsystem must
+         * positively confirm that any received message with a TYPE Code of 29 has originated from a target aircraft
+         * with an ADS-B Version Number other than Zero (0)."
+         * Defaults to true.
+         *
+         * @param decodeBeforeVersionKnown whether to decode messages that version 0 does not define before the
+         *                                 target's version is known
+         * @return this builder
+         */
+        public Builder decodeBeforeVersionKnown(boolean decodeBeforeVersionKnown) {
+            this.decodeBeforeVersionKnown = decodeBeforeVersionKnown;
             return this;
         }
 
