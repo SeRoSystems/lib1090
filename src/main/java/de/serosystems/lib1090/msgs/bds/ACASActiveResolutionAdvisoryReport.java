@@ -20,7 +20,6 @@ package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
-import de.serosystems.lib1090.exceptions.BadFormatException;
 
 /**
  * Decoder for the ACAS active resolution advisory report (BDS 3,0), as defined in ICAO Doc 9871
@@ -49,9 +48,8 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister {
 
     /**
      * @param msg the 7-byte comm-b message (BDS register) as byte array
-     * @throws BadFormatException if message has wrong format
      */
-    public ACASActiveResolutionAdvisoryReport(byte[] msg) throws BadFormatException {
+    public ACASActiveResolutionAdvisoryReport(byte[] msg) {
         super(msg);
 
         BitReader reader = BitReader.forBigEndian(msg);

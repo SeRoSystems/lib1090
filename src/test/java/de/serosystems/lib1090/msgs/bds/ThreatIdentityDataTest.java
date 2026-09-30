@@ -45,6 +45,31 @@ class ThreatIdentityDataTest {
     }
 
     /**
+     * ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3: the bearing codes 61 to 63 are not assigned; they decode as no
+     * bearing estimate, and the code stays available.
+     */
+    @Test
+    void unassignedBearing_isNoEstimate() {
+        for (short code = 61; code <= 63; code++) {
+            ThreatIdentityData tid = new ThreatIdentityData((short) 0, (short) 5, code);
+            assertNull(tid.getBearing());
+            assertEquals(code, tid.getEncodedBearing());
+            assertEquals(0.35f, tid.getRange(), 1e-6f);
+        }
+    }
+
+    /**
+     * Values that do not fit the 7-bit range or 6-bit bearing field are a caller error.
+     */
+    @Test
+    void valuesOutsideTheirFields_areRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new ThreatIdentityData((short) 0, (short) 128, (short) 0));
+        assertThrows(IllegalArgumentException.class, () -> new ThreatIdentityData((short) 0, (short) -1, (short) 0));
+        assertThrows(IllegalArgumentException.class, () -> new ThreatIdentityData((short) 0, (short) 0, (short) 64));
+        assertThrows(IllegalArgumentException.class, () -> new ThreatIdentityData((short) 0, (short) 0, (short) -1));
+    }
+
+    /**
      * A threat identified by its address carries no altitude, range or bearing, and reports none.
      */
     @Test

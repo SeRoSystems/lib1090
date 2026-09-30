@@ -19,7 +19,6 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.Altitude;
-import de.serosystems.lib1090.exceptions.BadFormatException;
 
 import java.io.Serializable;
 
@@ -62,18 +61,22 @@ public class ThreatIdentityData implements Serializable {
      * @param range        the threat identity data range, i.e. the most recent threat range estimated
      *                     by TCAS
      * @param bearing      the threat identity data bearing, i.e. the most recent estimated bearing of
-     *                     the threat aircraft, relative to the TCAS aircraft heading.
-     * @throws BadFormatException if range outside the interval [0, 127] or bearing &gt; 60
+     *                     the threat aircraft, relative to the TCAS aircraft heading; the codes 61 to 63 are not
+     *                     assigned and decode as no bearing estimate, see {@link #getBearing()}
+     * @throws IllegalArgumentException if range is outside [0, 127] or bearing outside [0, 63], the values of
+     *                                  their 7-bit and 6-bit fields
      */
-    public ThreatIdentityData(Short altitudeCode, Short range, Short bearing) throws BadFormatException {
+    public ThreatIdentityData(Short altitudeCode, Short range, Short bearing) {
+        if (range < 0 || range > 127)
+            throw new IllegalArgumentException("Threat identity data range must be between 0 and 127: " + range);
+        if (bearing < 0 || bearing > 63)
+            throw new IllegalArgumentException("Threat identity data bearing must be between 0 and 63: " + bearing);
+
         this.altitudeCode = altitudeCode;
         this.range = range;
         this.bearing = bearing;
 
         hasTransponderAddress = false;
-
-        if (range > 127 || bearing > 60)
-            throw new BadFormatException("Threat identity data range must be between 0 and 127");
     }
 
     /**
@@ -165,14 +168,16 @@ public class ThreatIdentityData implements Serializable {
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
      * <p>
-     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3
+     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3: the codes 61 to 63 are not assigned, and an unassigned
+     * code requires no action (§3.1.2.3.2.3), so they decode like code 0, no bearing estimate available. The code
+     * itself is available as {@link #getEncodedBearing()}.
      *
-     * @return null if the target is identified by its 24 bit address or the bearing estimate is not available;
-     * an array with two elements defining the estimated lower and upper bound for the bearing estimate in
-     * degrees
+     * @return null if the target is identified by its 24 bit address, the bearing estimate is not available or its
+     * code is not assigned; an array with two elements defining the estimated lower and upper bound for the bearing
+     * estimate in degrees
      */
     public Float[] getBearing() {
-        if (hasTransponderAddress || bearing == 0) return null;
+        if (hasTransponderAddress || bearing == 0 || bearing > 60) return null;
 
         return new Float[]{6F * (bearing - 1), 6F * bearing};
     }

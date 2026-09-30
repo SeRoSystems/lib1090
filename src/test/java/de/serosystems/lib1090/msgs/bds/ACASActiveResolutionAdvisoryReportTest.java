@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.TCASResolutionAdvisory;
 import de.serosystems.lib1090.exceptions.BadFormatException;
@@ -143,4 +144,22 @@ public class ACASActiveResolutionAdvisoryReportTest {
         assertEquals(0b10101011110011011110111100, acasReport.getThreatIdentity().intValue());
         assertEquals(0xabcdef, acasReport.getThreatIdentityData().getIcao24().intValue());
     }
+
+    /**
+     * An unassigned threat bearing (code 61) no longer discards the report: every other field is decoded, and the
+     * bearing reads as not available.
+     */
+    @Test
+    public void unassignedBearing_keepsTheReport() {
+        ACASActiveResolutionAdvisoryReport report =
+                new ACASActiveResolutionAdvisoryReport(Tools.hexStringToByteArray("3080000800017d"));
+
+        assertEquals(0x2000, report.getActiveRA());
+        assertEquals((byte) 2, report.getThreatType());
+        ThreatIdentityData tid = report.getThreatIdentityData();
+        assertNull(tid.getBearing());
+        assertEquals((short) 61, tid.getEncodedBearing());
+        assertEquals(0.35f, tid.getRange(), 1e-6f);
+    }
+
 }
