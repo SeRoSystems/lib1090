@@ -72,10 +72,9 @@ public class WxAIREPAlternateWeatherStateMsg extends TypeCodedExtendedSquitter i
 
     /**
      * @param squitter extended squitter which contains this Wx AIREP alternate weather state message
-     * @throws BadFormatException     if message has wrong format
-     * @throws UnspecifiedFormatError if message format is not further specified
+     * @throws BadFormatException if message has wrong format
      */
-    public WxAIREPAlternateWeatherStateMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException, UnspecifiedFormatError {
+    public WxAIREPAlternateWeatherStateMsg(TypeCodedExtendedSquitter squitter) throws BadFormatException {
         super(squitter);
         ADSRMsg.checkADSR(this);
 

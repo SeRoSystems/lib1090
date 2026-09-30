@@ -90,11 +90,10 @@ public class StatefulModeSDecoder {
      * @param modes     the incompletely decoded Mode S message
      * @param timestamp time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
-     * @throws UnspecifiedFormatError declared for signature consistency with the other decode() overloads; the format of {@code modes} has already been validated by its own ModeSDownlinkMsg constructor by the time it reaches this method
-     * @throws BadFormatException     if format contains error, or if the parity check is enabled (see
-     *                                {@link Builder#checkParity(boolean)}) and an extended squitter fails it
+     * @throws BadFormatException if format contains error, or if the parity check is enabled (see
+     *                            {@link Builder#checkParity(boolean)}) and an extended squitter fails it
      */
-    public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg decode(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
         Objects.requireNonNull(timestamp, "timestamp");
 
         // reject corrupted extended squitters before they reach the per-target state, see ED-102B §2.2.4.5 a; the
@@ -167,10 +166,9 @@ public class StatefulModeSDecoder {
     }
 
     // dispatches on FTC per the same message-type table ADS-B rebroadcast uses, ED-102B
-    // §2.2.3.2.2 TABLE 2-9, as required for ADS-R Message Processing, ED-102B §2.2.18.4;
-    // UnspecifiedFormatError is declared for signature consistency, no combination reachable
-    // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
-    private TypeCodedExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+    // §2.2.3.2.2 TABLE 2-9, as required for ADS-R Message Processing, ED-102B §2.2.18.4; a
+    // combination outside TABLE 2-9 falls back to es1090
+    private TypeCodedExtendedSquitter decodeADSR(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
         // interpret ME field as ADS-R
         TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
@@ -416,10 +414,9 @@ public class StatefulModeSDecoder {
         return es1090;
     }
 
-    // dispatches on FTC per ED-102B §2.2.3.2.2 TABLE 2-9 (message-type determination table);
-    // UnspecifiedFormatError is declared for signature consistency, no combination reachable
-    // here currently falls outside TABLE 2-9 without being handled or falling back to es1090
-    private TypeCodedExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+    // dispatches on FTC per ED-102B §2.2.3.2.2 TABLE 2-9 (message-type determination table); a
+    // combination outside TABLE 2-9 falls back to es1090
+    private TypeCodedExtendedSquitter decodeADSB(ModeSDownlinkMsg modes, Instant timestamp) throws BadFormatException {
         // interpret ME field as standard ADS-B
         TypeCodedExtendedSquitter es1090 = new TypeCodedExtendedSquitter(modes);
 
