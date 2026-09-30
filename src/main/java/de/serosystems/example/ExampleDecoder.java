@@ -450,7 +450,7 @@ public class ExampleDecoder {
     private static void printSelectedAltitudeSourceAndPressure(boolean fms, boolean hasPressure, Float pressure) {
         System.out.printf("          Selected altitude is derived from %s\n", fms ? "FMS" : "MCP/FCU");
         if (hasPressure) {
-            System.out.println("          Barometric pressure setting (minus 800 mbar): " + pressure + " mbar");
+            System.out.println("          Barometric pressure setting: " + pressure + " mbar");
         } else {
             System.out.println("          No barometric pressure setting info");
         }
