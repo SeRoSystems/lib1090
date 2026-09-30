@@ -30,8 +30,10 @@ import java.io.Serializable;
  * Decoder for the ADS-B version 1 "Regional Mode A Broadcast", TYPE=23 Subtype=7, as ED-102B Appendix
  * N §N.1.3 TABLE N-1 (Format Type Codes for Version 0 through Version 3 Messages) lists it. Versions 2
  * and 3 define only Subtype 0 of TYPE 23, the test message, so the decoder dispatches this class for
- * version 1 targets only. ED-102B does not give the message's layout; the Mode A (4096) code is read
- * from ME bits 9-21 in the Mode A reply pulse order.
+ * version 1 targets only, and for targets whose version is not known yet unless
+ * {@link de.serosystems.lib1090.StatefulModeSDecoder.Builder#decodeBeforeVersionKnown(boolean)} is disabled.
+ * ED-102B does not give the message's layout; the Mode A (4096) code is read from ME bits 9-21 in the
+ * Mode A reply pulse order.
  * <p>
  * From version 2 onwards the Mode A code is broadcast in the Aircraft Status Message, TYPE=28
  * Subtype=1, ED-102B §2.2.3.2.7.8.1 Figure 2-20.
