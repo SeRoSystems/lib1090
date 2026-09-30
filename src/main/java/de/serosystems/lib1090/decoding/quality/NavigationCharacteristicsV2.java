@@ -50,7 +50,9 @@ package de.serosystems.lib1090.decoding.quality;
  * knowledge's poorest row. Throughout, the answer for partial knowledge is exactly the poorest answer
  * any completion of that knowledge could give — a worst case, never a guess.
  * <p>
- * Taken together these rules are what ED-129C TABLE 15 prescribes.
+ * Taken together these rules are what ED-129C §3.4.4.6.16 TABLE 13 prescribes. Where that table gives PIC 0,
+ * "RC unknown" (surface type code 8 without a set supplement, airborne type codes 18 and 22), this reports the
+ * lower bound ED-102B's own tables give instead.
  *
  * @see NavigationCharacteristicsV1 for version 1, which has a single supplement
  */
