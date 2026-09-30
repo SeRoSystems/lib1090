@@ -102,7 +102,9 @@ public final class Altitude {
      *     <li>a code with the M bit set is invalid: DO-181E §2.2.13.1.2 a.(2)(i) reserves M equals ONE "for
      *     possible future use to indicate that the altitude reporting is in metric units", so there is no
      *     metric coding to decode</li>
-     *     <li>a code without the Q bit set is invalid for certain combinations that are unused</li>
+     *     <li>a code without the Q bit set, coded in 100 ft increments, is invalid if the ICAO Annex 10 Volume IV
+     *     Appendix to Chapter 3 table does not contain it: C1C2C4 = 000, 101 and 111 in every 500 ft band, and 001 and
+     *     011 in the lowest band, which would be -1200 and -1100 ft, below the table's -1000 ft</li>
      * </ul>
      *
      * @param altitudeCode as provided in most Mode S replies (13 bits)
@@ -121,6 +123,9 @@ public final class Altitude {
             boolean C1 = (altitudeCode & 0x1000) != 0;
             boolean C2 = (altitudeCode & 0x0400) != 0;
             boolean C4 = (altitudeCode & 0x0100) != 0;
+            // the table starts at -1000 ft: in the lowest 500 ft band (D2 to B4 all ZERO), C1C2C4 = 001 and 011
+            // would give -1200 and -1100 ft, which the Annex 10 Volume IV Appendix to Chapter 3 does not contain
+            if ((altitudeCode & 0x0AAF) == 0 && !C1 && C4) return false;
             return (!C1 || !C4) && (C1 || C2 || C4);
         }
     }
@@ -182,7 +187,10 @@ public final class Altitude {
      * Check if a given 12 bit altitude code is valid.
      * <ul>
      *     <li>a code of 0 is invalid</li>
-     *     <li>a code without the Q bit set (see {@link #decode12BitQBit(short)}) is invalid for certain combinations that are unused</li>
+     *     <li>a code without the Q bit set (see {@link #decode12BitQBit(short)}), coded in 100 ft increments, is invalid
+     *     if the ICAO Annex 10 Volume IV Appendix to Chapter 3 table does not contain it: C1C2C4 = 000, 101 and 111 in
+     *     every 500 ft band, and 001 and 011 in the lowest band, which would be -1200 and -1100 ft, below the table's
+     *     -1000 ft</li>
      * </ul>
      *
      * @param altitudeCode 12 bit encoded altitude
@@ -198,6 +206,9 @@ public final class Altitude {
             boolean C1 = (altitudeCode & 0x800) != 0;
             boolean C2 = (altitudeCode & 0x200) != 0;
             boolean C4 = (altitudeCode & 0x080) != 0;
+            // the table starts at -1000 ft: in the lowest 500 ft band (D2 to B4 all ZERO), C1C2C4 = 001 and 011
+            // would give -1200 and -1100 ft, which the Annex 10 Volume IV Appendix to Chapter 3 does not contain
+            if ((altitudeCode & 0x56F) == 0 && !C1 && C4) return false;
             return (!C1 || !C4) && (C1 || C2 || C4);
         }
     }
