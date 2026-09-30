@@ -32,8 +32,10 @@ import java.io.Serializable;
  * and 3 define only Subtype 0 of TYPE 23, the test message, so the decoder dispatches this class for
  * version 1 targets only, and for targets whose version is not known yet unless
  * {@link de.serosystems.lib1090.StatefulModeSDecoder.Builder#decodeBeforeVersionKnown(boolean)} is disabled.
- * ED-102B does not give the message's layout; the Mode A (4096) code is read from ME bits 9-21 in the
- * Mode A reply pulse order.
+ * <p>
+ * ED-102B does not give the message's layout. DO-260 Change 1 §2.2.3.2.7.4.2 Figure 2.2.3.2.7.4-2 does,
+ * as the DO-260A message it also allows version 0 transmit-only equipment to broadcast: the Mode A
+ * (4096) code in ME bits 9-21, "C1, A1, C2, A2, C4, A4, ZERO, B1, D1, B2, D2, B4, D4".
  * <p>
  * From version 2 onwards the Mode A code is broadcast in the Aircraft Status Message, TYPE=28
  * Subtype=1, ED-102B §2.2.3.2.7.8.1 Figure 2-20.
