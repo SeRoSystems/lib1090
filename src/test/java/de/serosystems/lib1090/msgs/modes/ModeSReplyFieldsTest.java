@@ -221,6 +221,35 @@ class ModeSReplyFieldsTest {
     }
 
     /**
+     * An all-call reply whose parity leaves the given residual once the CRC is removed: code label and interrogator
+     * code in its last 7 bits.
+     */
+    private static AllCallReply allCall(int residual) throws Exception {
+        byte[] raw = new byte[7];
+        set(raw, 1, 5, 11);
+        set(raw, 9, 32, 0x4840D6);
+        set(raw, 33, 56, ModeSDownlinkMsg.calcParityInt(Arrays.copyOf(raw, 4)) ^ residual);
+        return new AllCallReply(raw);
+    }
+
+    /**
+     * ICAO Annex 10 Volume IV §3.1.2.5.2.1.2.4: "The SI code value of 0 shall not be used". With code label 1, IC = 0
+     * is SI 0; with code labels 2 to 4 it is SI 16, 32 or 48, and with code label 0 it is II 0.
+     */
+    @Test
+    void allCallReply_interrogatorCodeValidity() throws Exception {
+        assertFalse(new AllCallReply("5d4840d6f8741f").hasValidInterrogatorCode()); // CL 1, IC 0
+        assertFalse(allCall(0x10).hasValidInterrogatorCode()); // SI 0
+        assertTrue(allCall(0x11).hasValidInterrogatorCode()); // SI 1
+        assertTrue(allCall(0x00).hasValidInterrogatorCode()); // II 0, e.g. a reply to an all-call without IC
+        assertTrue(allCall(0x20).hasValidInterrogatorCode()); // SI 16
+        assertTrue(allCall(0x30).hasValidInterrogatorCode()); // SI 32
+        assertTrue(allCall(0x40).hasValidInterrogatorCode()); // SI 48
+        assertFalse(allCall(0x50).hasValidInterrogatorCode()); // code label 5 is not defined
+        assertFalse(allCall(0x80).hasValidInterrogatorCode()); // the first 17 bits are not zero
+    }
+
+    /**
      * Every reply's toString() starts with the class and then the downlink message, as in ADS-B.
      */
     @Test
