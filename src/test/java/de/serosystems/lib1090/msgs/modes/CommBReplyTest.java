@@ -18,10 +18,16 @@
 
 package de.serosystems.lib1090.msgs.modes;
 
-import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.Tools;
-import de.serosystems.lib1090.msgs.bds.*;
+import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.bds.BDSCode;
+import de.serosystems.lib1090.msgs.bds.DataLinkCapabilityReport;
+import de.serosystems.lib1090.msgs.bds.DataLinkCapabilityReportV0V5;
+import de.serosystems.lib1090.msgs.bds.DataLinkCapabilityReportV6;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,5 +86,42 @@ class CommBReplyTest {
 
         // the registers without a code decode whatever MB holds
         assertDoesNotThrow(aircraftIdentification::asHeadingAndSpeed);
+    }
+
+    /**
+     * A Comm-B reply whose parity field leaves the given address once the CRC is removed: a reply with data parity
+     * leaves the "Modified AA".
+     */
+    private static CommBReply replyWithAddress(int df, String mb, int address) throws Exception {
+        byte[] raw = Tools.hexStringToByteArray(String.format("%02X", df << 3) + "000000" + mb + "000000");
+        int parity = ModeSDownlinkMsg.calcParityInt(Arrays.copyOf(raw, 11)) ^ address;
+        raw[11] = (byte) (parity >>> 16);
+        raw[12] = (byte) (parity >>> 8);
+        raw[13] = (byte) parity;
+        return df == 20 ? new CommBAltitudeReply(raw) : new CommBIdentifyReply(raw);
+    }
+
+    /**
+     * ICAO Annex 10 Volume IV §3.1.2.3.2.1.5: with data parity, address AAAAAA and register 5,F give the "Modified AA"
+     * F5AAAA, which the reply reports as its address.
+     */
+    @Test
+    void dataParity_annexExample() throws Exception {
+        CommBReply reply = replyWithAddress(20, "00000000000000", 0xF5AAAA);
+
+        assertEquals(0xF5AAAA, reply.getAddress().getAddress());
+        assertEquals(0xAAAAAA, reply.getAddressAssumingDataParity(new BDSCode(5, 0xF)).getAddress());
+        assertEquals(reply.getAddress().getType(),
+                reply.getAddressAssumingDataParity(new BDSCode(5, 0xF)).getType());
+    }
+
+    /**
+     * The register decoded from the reply gives its code: BDS 2,0 turns AAAAAA into 8AAAAA, and back.
+     */
+    @Test
+    void dataParity_withTheDecodedRegister() throws Exception {
+        CommBReply reply = replyWithAddress(21, "20000000000000", 0x8AAAAA);
+
+        assertEquals(0xAAAAAA, reply.getAddressAssumingDataParity(reply.asAircraftIdentification()).getAddress());
     }
 }

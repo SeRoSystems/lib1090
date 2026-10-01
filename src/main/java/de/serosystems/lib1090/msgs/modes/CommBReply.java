@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.exceptions.BadFormatException;
+import de.serosystems.lib1090.msgs.QualifiedAddress;
 import de.serosystems.lib1090.msgs.bds.*;
 
 /**
@@ -31,8 +32,53 @@ import de.serosystems.lib1090.msgs.bds.*;
  * aircraft identification (BDS 2,0) and the ACAS active resolution advisory report (BDS 3,0); their constructors throw
  * a {@link BadFormatException} if MB identifies itself otherwise. The other registers carry no code, so for them the
  * assertion stays the caller's. All methods share MB with this reply, as {@link #getMessage()} does.
+ * <p>
+ * <b>Data parity.</b> The last 24 bits of a Comm-B reply are normally the address/parity field (AP), parity overlaid on
+ * the aircraft address, which {@link #getAddress()} reports. If the interrogation sets the overlay control bit (OVC)
+ * and the transponder supports it, they are the data parity field (DP) instead: parity overlaid on a "Modified AA", the
+ * aircraft address with its most significant 8 bits XORed with BDS1 and BDS2 of the requested register, e.g. F5AAAA
+ * for address AAAAAA and register 5,F (ICAO Annex 10 Volume IV (6th edition) §3.1.2.3.2.1.5). Mode S level 2
+ * transponders certified on or after 1 January 2020 shall have data parity with overlay control (§2.1.5.4.3). The reply
+ * does not tell which of the two it carries, since OVC is in the interrogation; {@link #getAddress()} is then the
+ * Modified AA, and {@link #getAddressAssumingDataParity(BDSCode)} gives the address under that assumption.
  */
 public interface CommBReply {
+
+    /**
+     * The address of the reply, recovered from its AP field. If the reply carries data parity instead, this is the
+     * "Modified AA" rather than the aircraft address; see the interface documentation and
+     * {@link #getAddressAssumingDataParity(BDSCode)}.
+     *
+     * @return the address as recovered from the parity field
+     */
+    QualifiedAddress getAddress();
+
+    /**
+     * The aircraft address, assuming that the reply carries data parity (DP) for the given register: {@link
+     * #getAddress()} with its most significant 8 bits XORed with BDS1 and BDS2 again (ICAO Annex 10 Volume IV
+     * §3.1.2.3.2.1.5). If the reply carries address parity (AP), the result is wrong; whether it does, the reply does
+     * not tell.
+     *
+     * @param code the register the interrogation requested
+     * @return the address under that assumption
+     */
+    default QualifiedAddress getAddressAssumingDataParity(BDSCode code) {
+        QualifiedAddress modified = getAddress();
+        int bds = (code.getBDS1() << 4 | code.getBDS2()) << 16;
+        return new QualifiedAddress(modified.getAddress() ^ bds, modified.getType(), modified.getSource());
+    }
+
+    /**
+     * The aircraft address, assuming that the reply carries data parity (DP) for the given register, e.g. one decoded
+     * from this reply with an {@code as…()} method: {@link #getAddressAssumingDataParity(BDSCode)} with its
+     * {@link BDSRegister#getBDSCode()}.
+     *
+     * @param register the register the interrogation requested
+     * @return the address under that assumption
+     */
+    default QualifiedAddress getAddressAssumingDataParity(BDSRegister register) {
+        return getAddressAssumingDataParity(register.getBDSCode());
+    }
 
     /**
      * The Comm-B message (BDS register; register numbering and content per ICAO Doc 9871 (First Edition, AN/464)
