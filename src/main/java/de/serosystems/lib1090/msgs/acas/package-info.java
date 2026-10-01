@@ -38,7 +38,9 @@
  *     of an RA report; {@link de.serosystems.lib1090.msgs.acas.TCASResolutionAdvisoryReport},
  *     {@link de.serosystems.lib1090.msgs.acas.ACASXResolutionAdvisoryReport}</li>
  * </ul>
- * {@link de.serosystems.lib1090.msgs.acas.ResolutionAdvisories} picks the layout. The package holds no messages:
+ * {@link de.serosystems.lib1090.msgs.acas.ResolutionAdvisories} picks the layout.
+ * {@link de.serosystems.lib1090.msgs.acas.ACASType} is the collision avoidance system the data link capability report
+ * (BDS 1,0) announces. The package holds no messages:
  * the air-air replies themselves, {@link de.serosystems.lib1090.msgs.modes.ShortACAS} and
  * {@link de.serosystems.lib1090.msgs.modes.LongACAS}, are Mode S downlink formats and stay in {@code msgs.modes}.
  */

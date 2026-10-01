@@ -19,22 +19,17 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.msgs.acas.ACASType;
 
 /**
- * Decoder for the data link capability report (BDS 1,0), following the layout of DO-181F Table
- * B-3-16a.
+ * Decoder for the data link capability report (BDS 1,0), following the layout of ICAO Annex 10 Volume IV (6th
+ * edition) §3.1.2.6.10.2.2.1.3 Table 3-6, with the ACAS bits (MB bits 11-14, 16 and 37-40) as §4.3.8.4.2.2.3 defines
+ * them. Bit numbers in this class are MB bit numbers; the Annex's message bit numbers are 32 higher. DO-181E and
+ * DO-181F (Table B-3-16a) define the same layout.
  * <p>
- * ICAO Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-16 defines the register as well, but leaves
- * bits 10-16 and 37-40 to ACAS and uses bits 41-56 as a bit array of supported DTE sub-addresses.
- * The fields this decoder reads there have these sources:
- * <ul>
- *     <li>overlay command capability (15): DO-181E §2.2.19.1.12.6.2</li>
- *     <li>TCAS interface operational (16), hybrid surveillance (37), RA/TA capability (38) and TCAS
- *     version (39-40): DO-181E §2.2.22.1.2.2.4</li>
- *     <li>TCAS operational coordination message (10), TCAS extended version (11-14), and the fields in
- *     bits 42-51: DO-181F only. A transponder following Doc 9871 First Edition reports DTE sub-address
- *     support in bits 41-56 instead, which these accessors then misread.</li>
- * </ul>
+ * ICAO Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-16 used MB bits 41-56 as a bit array of supported DTE
+ * sub-addresses instead, which Table 3-6 has moved to register 11₁₆ (Note to Table 3-6). A transponder following Doc
+ * 9871 First Edition still reports them there, which the accessors of MB bits 42-51 then misread.
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister {
@@ -44,14 +39,14 @@ public class DataLinkCapabilityReport extends BDSRegister {
 
     // Register 1116 Continuation Flag
     private boolean continuationFlag;
-    // TCAS Operational Coordination Message Transmit Capability
-    private boolean tcasOperationalCoordinationMessage;
-    // TCAS Extended Version Number
-    private short tcasExtendedVersionNumber;
+    // Operational Coordination Message (OCM) Transmit Capability
+    private boolean ocmTransmitCapability;
+    // ACAS type
+    private short acasTypeEncoded;
     // Overlay Command Capability
     private boolean overlayCommandCapability;
-    // TCAS Interface Operational
-    private boolean tcasInterfaceOperational;
+    // ACAS operating
+    private boolean acasOperating;
     // Mode S Sub Network Version Number
     private short modeSSubNetworkVersionNumber;
     // Transponder Enhanced Protocol Indicator
@@ -70,12 +65,12 @@ public class DataLinkCapabilityReport extends BDSRegister {
     private boolean surveillanceIdentifierCode;
     // Common Usage GICB
     private boolean commonUsageGicb;
-    // TCAS Hybrid Surveillance Capability
-    private boolean tcasHybridSurveillanceCapability;
-    // TCAS RA/TA Capability
-    private boolean tcasRataCapability;
-    // TCAS Version Number
-    private short tcasVersionNumber;
+    // ACAS Hybrid Surveillance Capability
+    private boolean acasHybridSurveillanceCapability;
+    // ACAS generating TAs and RAs
+    private boolean acasGeneratingRAs;
+    // ACAS Version Number
+    private short acasVersionNumber;
     // Basic Data Flash Capability
     private boolean basicDataFlashCapability;
     // Phase Overlay on Extended Squitter Capability
@@ -104,10 +99,10 @@ public class DataLinkCapabilityReport extends BDSRegister {
         BitReader b = BitReader.forBigEndian(message);
 
         continuationFlag = b.readBoolean(9);
-        tcasOperationalCoordinationMessage = b.readBoolean(10);
-        tcasExtendedVersionNumber = b.readShort(11, 14);
+        ocmTransmitCapability = b.readBoolean(10);
+        acasTypeEncoded = b.readShort(11, 14);
         overlayCommandCapability = b.readBoolean(15);
-        tcasInterfaceOperational = b.readBoolean(16);
+        acasOperating = b.readBoolean(16);
         modeSSubNetworkVersionNumber = b.readShort(17, 23);
         transponderEnhancedProtocolIndicator = b.readBoolean(24);
         modeSSpecificServicesCapability = b.readBoolean(25);
@@ -117,9 +112,9 @@ public class DataLinkCapabilityReport extends BDSRegister {
         squitterCapabilitySubfield = b.readBoolean(34);
         surveillanceIdentifierCode = b.readBoolean(35);
         commonUsageGicb = b.readBoolean(36);
-        tcasHybridSurveillanceCapability = b.readBoolean(37);
-        tcasRataCapability = b.readBoolean(38);
-        tcasVersionNumber = (short) (b.readShort(40, 40) << 1 | b.readShort(39, 39));
+        acasHybridSurveillanceCapability = b.readBoolean(37);
+        acasGeneratingRAs = b.readBoolean(38);
+        acasVersionNumber = (short) (b.readShort(40, 40) << 1 | b.readShort(39, 39));
         basicDataFlashCapability = b.readBoolean(42);
         phaseOverlayExtendedSquitterCapability = b.readBoolean(43);
         phaseOverlayModeSCapability = b.readBoolean(44);
@@ -136,21 +131,31 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * The operational coordination message (OCM) transmit capability, MB bit 10, ICAO Annex 10 Volume IV Table 3-6.
      *
-     * @return whether it's a TCAS operational coordination message
+     * @return whether the installation can transmit the operational coordination message, the 1090ES CAS operational
+     * coordination message (TYPE Code 28, subtype 3,
+     * {@link de.serosystems.lib1090.msgs.adsb.CASOperationalCoordinationMsg})
      */
-    public boolean isTcasOperationalCoordinationMessage() {
-        return tcasOperationalCoordinationMessage;
+    public boolean isOCMTransmitCapability() {
+        return ocmTransmitCapability;
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
-     *
-     * @return the extended TCAS version number
+     * @return the collision avoidance system as transmitted, MB bits 11-14, ICAO Annex 10 Volume IV (6th edition)
+     * §4.3.8.4.2.2.3: 0 TCAS version 7.1 and other systems defined by {@link #getACASVersionNumber()}, 1 ACAS Xa
+     * (RTCA/DO-385 and EUROCAE/ED-256), 2 to 15 reserved for ACAS III
+     * @see #getACASType()
      */
-    public short getTcasExtendedVersionNumber() {
-        return tcasExtendedVersionNumber;
+    public short getACASTypeEncoded() {
+        return acasTypeEncoded;
+    }
+
+    /**
+     * @return the collision avoidance system, MB bits 11-14, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3
+     */
+    public ACASType getACASType() {
+        return ACASType.forEncoded(acasTypeEncoded);
     }
 
     /**
@@ -167,12 +172,13 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181E §2.2.22.1.2.2.4.
+     * MB bit 16, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3; DO-181E §2.2.22.1.2.2.4 sets it while the
+     * transponder's ACAS interface is operational and the transponder is receiving RI 2, 3 or 4 from ACAS.
      *
-     * @return whether the transponder TCAS interface is operational and the transponder is receiving TCAS RI=2, 3 or 4
+     * @return true if ACAS is operating, false if ACAS has failed or is on standby
      */
-    public boolean isTcasInterfaceOperational() {
-        return tcasInterfaceOperational;
+    public boolean isACASOperating() {
+        return acasOperating;
     }
 
     /**
@@ -294,44 +300,43 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Bit 37 shall be set to 1 to indicate the capability of Hybrid Surveillance,
-     * and set to 0 to indicate that there is no Hybrid Surveillance capability. Defined in DO-181E
-     * §2.2.22.1.2.2.4.
+     * MB bit 37, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3. Hybrid surveillance limits the active
+     * interrogations of ACAS (§4.5.1); the ability to decode extended squitters alone does not set this bit.
      *
-     * @return whether TCAS Hybrid Surveillance Capability is set to 0 or 1
+     * @return whether hybrid surveillance is fitted and operational
      */
-    public boolean isTcasHybridSurveillanceCapability() {
-        return tcasHybridSurveillanceCapability;
+    public boolean isACASHybridSurveillanceCapability() {
+        return acasHybridSurveillanceCapability;
     }
 
     /**
-     * Bit 38 shall be set to 1 to indicate that the TCAS is generating both TAs and RAs,
-     * and set to 0 to indicate the generation of TAs only. Defined in DO-181E §2.2.22.1.2.2.4.
+     * MB bit 38, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3.
      *
-     * @return whether TCAS RA/TA capability is set to 0 or 1
+     * @return true if ACAS is generating TAs and RAs, false if it is generating TAs only
      */
-    public boolean isTcasRataCapability() {
-        return tcasRataCapability;
+    public boolean isACASGeneratingRAs() {
+        return acasGeneratingRAs;
     }
 
     /**
-     * Defined in DO-181E §2.2.22.1.2.2.4, whose table lists bit 40 first, i.e. as the most
-     * significant bit.
+     * MB bits 39-40, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3, whose table lists bit 40 (message bit 72)
+     * first, i.e. as the most significant bit.
      *
-     * @return TCAS version number
+     * @return ACAS version number
      * <ul>
-     *     <li>0: DO-185 (6.04A)</li>
-     *     <li>1: DO-185A</li>
-     *     <li>2: DO-185B</li>
-     *     <li>3: reserved for future versions</li>
+     *     <li>0: RTCA/DO-185 (pre-ACAS)</li>
+     *     <li>1: RTCA/DO-185A</li>
+     *     <li>2: RTCA/DO-185B and EUROCAE ED-143</li>
+     *     <li>3: all later systems, which the ACAS unit and software part numbers in registers E5₁₆ and E6₁₆ identify
+     *     (§4.3.8.4.2.8)</li>
      * </ul>
      */
-    public short getTcasVersionNumber() {
-        return tcasVersionNumber;
+    public short getACASVersionNumber() {
+        return acasVersionNumber;
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * MB bit 42, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
      *
      * @return whether the transponder has Basic Dataflash capability
      */
@@ -340,7 +345,7 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * MB bit 43, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
      *
      * @return whether phase overlay in extended squitter is supported
      */
@@ -349,7 +354,7 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * MB bit 44, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
      *
      * @return whether phase overlay for Mode S is supported
      */
@@ -365,7 +370,7 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * MB bits 49-50, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
      *
      * @return the active transponder side indicator
      */
@@ -374,7 +379,8 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * Defined in DO-181F only; see the class documentation.
+     * MB bit 51, the register 11₁₆ data link capability (continuation) change indicator, ICAO Annex 10 Volume IV (6th
+     * edition) Table 3-6; see the class documentation.
      *
      * @return whether change flag is set
      */
@@ -391,10 +397,10 @@ public class DataLinkCapabilityReport extends BDSRegister {
     public String toString() {
         return "DataLinkCapabilityReport{" + super.toString() +
                 ", continuationFlag=" + continuationFlag +
-                ", tcasOperationalCoordinationMessage=" + tcasOperationalCoordinationMessage +
-                ", tcasExtendedVersionNumber=" + tcasExtendedVersionNumber +
+                ", ocmTransmitCapability=" + ocmTransmitCapability +
+                ", acasTypeEncoded=" + acasTypeEncoded +
                 ", overlayCommandCapability=" + overlayCommandCapability +
-                ", tcasInterfaceOperational=" + tcasInterfaceOperational +
+                ", acasOperating=" + acasOperating +
                 ", modeSSubNetworkVersionNumber=" + modeSSubNetworkVersionNumber +
                 ", transponderEnhancedProtocolIndicator=" + transponderEnhancedProtocolIndicator +
                 ", modeSSpecificServicesCapability=" + modeSSpecificServicesCapability +
@@ -404,9 +410,9 @@ public class DataLinkCapabilityReport extends BDSRegister {
                 ", squitterCapabilitySubfield=" + squitterCapabilitySubfield +
                 ", surveillanceIdentifierCode=" + surveillanceIdentifierCode +
                 ", commonUsageGicb=" + commonUsageGicb +
-                ", tcasHybridSurveillanceCapability=" + tcasHybridSurveillanceCapability +
-                ", tcasRataCapability=" + tcasRataCapability +
-                ", tcasVersionNumber=" + tcasVersionNumber +
+                ", acasHybridSurveillanceCapability=" + acasHybridSurveillanceCapability +
+                ", acasGeneratingRAs=" + acasGeneratingRAs +
+                ", acasVersionNumber=" + acasVersionNumber +
                 ", basicDataFlashCapability=" + basicDataFlashCapability +
                 ", phaseOverlayExtendedSquitterCapability=" + phaseOverlayExtendedSquitterCapability +
                 ", phaseOverlayModeSCapability=" + phaseOverlayModeSCapability +

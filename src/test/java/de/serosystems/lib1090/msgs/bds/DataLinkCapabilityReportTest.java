@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.msgs.acas.ACASType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -41,13 +42,29 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void tcasOperationalCoordinationMessage() {
-        assertTrue(new DataLinkCapabilityReport(msg).isTcasOperationalCoordinationMessage());
+    public void ocmTransmitCapability() {
+        assertTrue(new DataLinkCapabilityReport(msg).isOCMTransmitCapability());
     }
 
     @Test
-    public void tcasExtendedVersionNumber() {
-        assertEquals(0, new DataLinkCapabilityReport(msg).getTcasExtendedVersionNumber());
+    public void acasType() {
+        assertEquals(0, new DataLinkCapabilityReport(msg).getACASTypeEncoded());
+        assertEquals(ACASType.TCAS_OR_OTHER, new DataLinkCapabilityReport(msg).getACASType());
+    }
+
+    /**
+     * MB bits 11-14, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.3: 0001 is ACAS Xa, 0010 to 1111 are reserved
+     * for ACAS III.
+     */
+    @Test
+    public void acasType_acasXaAndReserved() {
+        byte[] acasXa = {0x10, 0x04, 0, 0, 0, 0, 0}; // MB bit 14
+        assertEquals(1, new DataLinkCapabilityReport(acasXa).getACASTypeEncoded());
+        assertEquals(ACASType.ACAS_XA, new DataLinkCapabilityReport(acasXa).getACASType());
+
+        byte[] reserved = {0x10, 0x3C, 0, 0, 0, 0, 0}; // MB bits 11-14 = 1111
+        assertEquals(15, new DataLinkCapabilityReport(reserved).getACASTypeEncoded());
+        assertEquals(ACASType.ACAS_III, new DataLinkCapabilityReport(reserved).getACASType());
     }
 
     @Test
@@ -56,8 +73,8 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void tcasInterfaceOperational() {
-        assertFalse(new DataLinkCapabilityReport(msg).isTcasInterfaceOperational());
+    public void acasOperating() {
+        assertFalse(new DataLinkCapabilityReport(msg).isACASOperating());
     }
 
     @Test
@@ -106,18 +123,18 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void tcasHybridSurveillanceCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isTcasHybridSurveillanceCapability());
+    public void acasHybridSurveillanceCapability() {
+        assertTrue(new DataLinkCapabilityReport(msg).isACASHybridSurveillanceCapability());
     }
 
     @Test
-    public void tcasRataCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isTcasRataCapability());
+    public void acasGeneratingRAs() {
+        assertTrue(new DataLinkCapabilityReport(msg).isACASGeneratingRAs());
     }
 
     @Test
-    public void tcasVersionNumber() {
-        assertEquals(2, new DataLinkCapabilityReport(msg).getTcasVersionNumber());
+    public void acasVersionNumber() {
+        assertEquals(2, new DataLinkCapabilityReport(msg).getACASVersionNumber());
     }
 
     @Test
@@ -151,42 +168,42 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    void tcacsVersion0() {
+    void acasVersion0() {
         byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111100,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(0, new DataLinkCapabilityReport(message).getTcasVersionNumber());
+        assertEquals(0, new DataLinkCapabilityReport(message).getACASVersionNumber());
     }
 
     @Test
-    void tcacsVersion1() {
+    void acasVersion1() {
         byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111110,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(1, new DataLinkCapabilityReport(message).getTcasVersionNumber());
+        assertEquals(1, new DataLinkCapabilityReport(message).getACASVersionNumber());
     }
 
     @Test
-    void tcacsVersion2() {
+    void acasVersion2() {
         byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111101,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(2, new DataLinkCapabilityReport(message).getTcasVersionNumber());
+        assertEquals(2, new DataLinkCapabilityReport(message).getACASVersionNumber());
     }
 
     @Test
-    void tcacsVersion3() {
+    void acasVersion3() {
         byte[] message = new byte[]{
                 (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
                 (byte) 0b11111111,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(3, new DataLinkCapabilityReport(message).getTcasVersionNumber());
+        assertEquals(3, new DataLinkCapabilityReport(message).getACASVersionNumber());
     }
 }
