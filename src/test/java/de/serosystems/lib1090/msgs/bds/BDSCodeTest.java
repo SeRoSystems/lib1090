@@ -58,7 +58,7 @@ class BDSCodeTest {
     void testEveryRegisterReportsItsCode() throws Exception {
         byte[] message = new byte[7];
 
-        assertEquals(new BDSCode(1, 0), new DataLinkCapabilityReport(message).getBDSCode());
+        assertEquals(new BDSCode(1, 0), DataLinkCapabilityReport.decode(message).getBDSCode());
         assertEquals(new BDSCode(1, 7), new CommonUsageGICBCapabilityReport(message).getBDSCode());
         assertEquals(new BDSCode(2, 0), new AircraftIdentification(message).getBDSCode());
         assertEquals(new BDSCode(3, 0), new ACASActiveResolutionAdvisoryReport(message).getBDSCode());
