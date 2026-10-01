@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for the Mode S short air-air ACAS reply (DF=0), as defined in
  * ICAO Annex 10 Volume IV §3.1.2.8.2.
  */
-public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
+public class ShortACAS extends ModeSDownlinkMsg implements Serializable, AirAirSurveillanceReply {
 
     private static final long serialVersionUID = -8867923868755627826L;
 
@@ -112,99 +112,9 @@ public class ShortACAS extends ModeSDownlinkMsg implements Serializable {
         return sensitivityLevel;
     }
 
-    /**
-     * This field is used to report the aircraft's maximum cruising
-     * true airspeed capability and TCAS capabilities. Capabilities are, as ICAO Annex 10 Volume IV
-     * §4.3.8.4.1.2 defines them:<br>
-     * <ul>
-     *     <li>code 2: On-board TCAS with resolution capability inhibited</li>
-     *     <li>code 3: On-board TCAS with vertical-only resolution capability</li>
-     *     <li>code 4: On-board TCAS with vertical and horizontal resolution capability</li>
-     * </ul>
-     *
-     * @return the air-to-air reply information according to ICAO Annex 10 Volume IV §3.1.2.8.2.2
-     * @see #getMaximumAirspeed()
-     * @see #hasOperatingACAS()
-     * @see #hasHorizontalResolutionCapability()
-     * @see #hasVerticalResolutionCapability()
-     */
+    @Override
     public byte getReplyInformationEncoded() {
         return replyInformationEncoded;
-    }
-
-    /**
-     * @return whether a/c has operating ACAS (derived from reply information)
-     * @see #getReplyInformationEncoded()
-     */
-    public boolean hasOperatingACAS() {
-        return getReplyInformationEncoded() != 0;
-    }
-
-    /**
-     * @return the maximum airspeed in kn as specified in ICAO Annex 10 Volume IV §3.1.2.8.2.2<br>
-     * null if unknown<br>Integer.MAX_VALUE if unbound
-     */
-    public Integer getMaximumAirspeed() {
-        return decodeMaximumAirspeed(getReplyInformationEncoded());
-    }
-
-    static Integer decodeMaximumAirspeed(byte replyInformationEncoded) {
-        switch (replyInformationEncoded) {
-            case 9:
-                return 75;
-            case 10:
-                return 150;
-            case 11:
-                return 300;
-            case 12:
-                return 600;
-            case 13:
-                return 1200;
-            case 14:
-                return Integer.MAX_VALUE;
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Derived from the reply information codes 0–7, ICAO Annex 10 Volume IV §4.3.8.4.1.2.
-     *
-     * @return true if vertical resolution capability announced; false if explicitly not available; null if information
-     * not provided in this reply
-     */
-    public Boolean hasVerticalResolutionCapability() {
-        switch (replyInformationEncoded) {
-            case 0:
-            case 1:
-            case 2:
-                return false;
-            case 3:
-            case 4:
-                return true;
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Derived from the reply information codes 0–7, ICAO Annex 10 Volume IV §4.3.8.4.1.2.
-     *
-     * @return true if horizontal resolution capability announced; false if explicitly not available; null if
-     * information not provided in this reply
-     */
-    public Boolean hasHorizontalResolutionCapability() {
-        switch (replyInformationEncoded) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                return false;
-            case 4:
-                return true;
-            default:
-                return null;
-        }
     }
 
     /**
