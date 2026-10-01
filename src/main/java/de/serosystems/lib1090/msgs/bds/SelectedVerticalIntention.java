@@ -216,6 +216,23 @@ public class SelectedVerticalIntention extends BDSRegister {
         return targetAltSourceEncoded;
     }
 
+    /**
+     * Whether the register obeys the format rules of ICAO Doc 9871 §A.2 Table A-2-64: the reserved MB bits 40-47 and
+     * 52-53 are ZERO, and so is every field whose status bit is ZERO (§A.2.1.1): MCP/FCU selected altitude (status 1,
+     * bits 2-13), FMS selected altitude (14, 15-26), barometric pressure setting (27, 28-39), the MCP/FCU mode bits
+     * (48, 49-51) and the target altitude source (54, 55-56).
+     * <p>
+     * The register carries no identifier, so these rules are what tells it from another register; a register that
+     * breaks them is not this one or is malformed. Whether the values are plausible is not checked.
+     *
+     * @return whether the register is consistent with its format
+     */
+    public boolean isConsistent() {
+        return isZero(40, 47) && isZero(52, 53)
+                && isZeroUnlessValid(1, 13) && isZeroUnlessValid(14, 26) && isZeroUnlessValid(27, 39)
+                && isZeroUnlessValid(48, 51) && isZeroUnlessValid(54, 56);
+    }
+
     @Override
     public BDSCode getBDSCode() {
         return BDS_CODE;

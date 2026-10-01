@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs.bds;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.decoding.Interval;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.acas.*;
 import org.junit.jupiter.api.Test;
 
@@ -28,11 +29,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ACASActiveResolutionAdvisoryReportTest {
 
-    private static ResolutionAdvisory ra(byte[] mb) {
+    private static ResolutionAdvisory ra(byte[] mb) throws BadFormatException {
         return new ACASActiveResolutionAdvisoryReport(mb).getResolutionAdvisory();
     }
 
-    private static ResolutionAdvisory ra(String mb) {
+    private static ResolutionAdvisory ra(String mb) throws BadFormatException {
         return ra(Tools.hexStringToByteArray(mb));
     }
 
@@ -42,7 +43,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * No ARA, every RAC, RAT and MTE set, and the unassigned TTI 3.
      */
     @Test
-    public void tcas_racRatMteAndUnassignedThreatType() {
+    public void tcas_racRatMteAndUnassignedThreatType() throws BadFormatException {
         ResolutionAdvisory ra = ra(new byte[]{
                 (byte) 0b00110000, (byte) 0b00000000, (byte) 0b00000011, (byte) 0b11111100, 0, 0, 0});
 
@@ -63,7 +64,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
     }
 
     @Test
-    public void tcas_threatAddress() {
+    public void tcas_threatAddress() throws BadFormatException {
         // icao24 set here is 0xabcdef = 0b 10101011 11001101 11101111
         TCASResolutionAdvisoryReport tcas = (TCASResolutionAdvisoryReport) ra(new byte[]{
                 0b00110000, 0b01000000, 0b01000000, 0b01110110, (byte) 0b10101111, 0b00110111, (byte) 0b10111100});
@@ -86,7 +87,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * bearing reads as not available.
      */
     @Test
-    public void tcas_unassignedBearing_keepsTheReport() {
+    public void tcas_unassignedBearing_keepsTheReport() throws BadFormatException {
         TCASResolutionAdvisoryReport tcas = (TCASResolutionAdvisoryReport) ra("3080000800017d");
 
         assertEquals(0x2000, tcas.getActiveRAEncoded());
@@ -103,7 +104,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * §2.2.3.9.3.2.3.1.2: 14 dedicated ARA bits and RAC, nothing after.
      */
     @Test
-    public void tcas6() {
+    public void tcas6() throws BadFormatException {
         ResolutionAdvisory ra = ra("30020040000000"); // ARA bit 47 (don't climb), RAC bit 58 (don't turn right)
 
         assertInstanceOf(TCAS6ResolutionAdvisory.class, ra);
@@ -120,7 +121,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * steps; TIDR and TIDB follow at bits 74-80 and 81-86.
      */
     @Test
-    public void acasX_altitudeRangeBearing() {
+    public void acasX_altitudeRangeBearing() throws BadFormatException {
         ResolutionAdvisory ra = ra("30800408371528");
 
         assertInstanceOf(ACASXResolutionAdvisoryReport.class, ra);
@@ -154,7 +155,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * RMF = 1 with TTI = 1: TID holds the 24-bit address in bits 63-86.
      */
     @Test
-    public void acasX_address() {
+    public void acasX_address() throws BadFormatException {
         ACASXResolutionAdvisoryReport x = (ACASXResolutionAdvisoryReport) ra("3080040d210358");
 
         assertEquals(ThreatIdentityType.ADDRESS, x.getThreatIdentityType());
@@ -167,7 +168,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * layout made this an unassigned code.
      */
     @Test
-    public void acasX_designationAndSuppression() {
+    public void acasX_designationAndSuppression() throws BadFormatException {
         ACASXResolutionAdvisoryReport x = (ACASXResolutionAdvisoryReport) ra("3080040837153f");
 
         assertTrue(x.isThreatDesignated());
@@ -179,7 +180,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
      * RMF = 2 (reserved for ACAS III) has no defined layout: no content, but the format and the raw bits.
      */
     @Test
-    public void reservedFormat_hasNoContent() {
+    public void reservedFormat_hasNoContent() throws BadFormatException {
         ACASActiveResolutionAdvisoryReport report =
                 new ACASActiveResolutionAdvisoryReport(Tools.hexStringToByteArray("30800808371528"));
 

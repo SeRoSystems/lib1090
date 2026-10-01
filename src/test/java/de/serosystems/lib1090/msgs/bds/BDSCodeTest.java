@@ -58,12 +58,21 @@ class BDSCodeTest {
     void testEveryRegisterReportsItsCode() throws Exception {
         byte[] message = new byte[7];
 
-        assertEquals(new BDSCode(1, 0), DataLinkCapabilityReport.decode(message).getBDSCode());
+        assertEquals(new BDSCode(1, 0), DataLinkCapabilityReport.decode(withCode(0x10)).getBDSCode());
         assertEquals(new BDSCode(1, 7), new CommonUsageGICBCapabilityReport(message).getBDSCode());
-        assertEquals(new BDSCode(2, 0), new AircraftIdentification(message).getBDSCode());
-        assertEquals(new BDSCode(3, 0), new ACASActiveResolutionAdvisoryReport(message).getBDSCode());
+        assertEquals(new BDSCode(2, 0), new AircraftIdentification(withCode(0x20)).getBDSCode());
+        assertEquals(new BDSCode(3, 0), new ACASActiveResolutionAdvisoryReport(withCode(0x30)).getBDSCode());
         assertEquals(new BDSCode(4, 0), new SelectedVerticalIntention(message).getBDSCode());
         assertEquals(new BDSCode(5, 0), new TrackAndTurn(message).getBDSCode());
         assertEquals(new BDSCode(6, 0), new HeadingAndSpeed(message).getBDSCode());
+    }
+
+    /**
+     * A message of a register that identifies itself in MB bits 1-8.
+     */
+    private static byte[] withCode(int mb1to8) {
+        byte[] message = new byte[7];
+        message[0] = (byte) mb1to8;
+        return message;
     }
 }

@@ -235,6 +235,21 @@ public class HeadingAndSpeed extends BDSRegister {
         return twosComplement(inertialVerticalRateSign, inertialVerticalRateEncoded, 9) * 32;
     }
 
+    /**
+     * Whether the register obeys the format rules of ICAO Doc 9871 §A.2 Table A-2-96: every field whose status bit is
+     * ZERO is ZERO as well (§A.2.1.1): magnetic heading (status 1, bits 2-12), indicated airspeed (13, 14-23), Mach
+     * number (24, 25-34), barometric altitude rate (35, 36-45) and inertial vertical velocity (46, 47-56).
+     * <p>
+     * The register carries no identifier, so these rules are what tells it from another register; a register that
+     * breaks them is not this one or is malformed. Whether the values are plausible is not checked.
+     *
+     * @return whether the register is consistent with its format
+     */
+    public boolean isConsistent() {
+        return isZeroUnlessValid(1, 12) && isZeroUnlessValid(13, 23) && isZeroUnlessValid(24, 34)
+                && isZeroUnlessValid(35, 45) && isZeroUnlessValid(46, 56);
+    }
+
     @Override
     public BDSCode getBDSCode() {
         return BDS_CODE;

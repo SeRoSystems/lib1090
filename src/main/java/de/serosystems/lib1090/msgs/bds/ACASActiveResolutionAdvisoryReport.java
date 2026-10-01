@@ -19,6 +19,7 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.acas.RAMessageFormat;
 import de.serosystems.lib1090.msgs.acas.ResolutionAdvisories;
 import de.serosystems.lib1090.msgs.acas.ResolutionAdvisory;
@@ -45,9 +46,12 @@ public class ACASActiveResolutionAdvisoryReport extends BDSRegister {
 
     /**
      * @param msg the 7-byte comm-b message (BDS register) as byte array
+     * @throws BadFormatException if MB bits 1-8 are not 0011 0000, BDS1 = 3 and BDS2 = 0 (ICAO Annex 10 Volume IV
+     *                            §4.3.8.4.2.2.1)
      */
-    public ACASActiveResolutionAdvisoryReport(byte[] msg) {
+    public ACASActiveResolutionAdvisoryReport(byte[] msg) throws BadFormatException {
         super(msg);
+        requireBDSCode();
     }
 
     /**

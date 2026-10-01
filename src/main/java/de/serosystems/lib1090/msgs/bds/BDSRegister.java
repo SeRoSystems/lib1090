@@ -19,6 +19,8 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 
 import java.io.Serializable;
 
@@ -71,6 +73,45 @@ public abstract class BDSRegister implements Serializable {
      */
     public byte[] getMessage() {
         return message;
+    }
+
+    /**
+     * For a register that identifies itself in MB bits 1-8, BDS1 in bits 1-4 and BDS2 in bits 5-8: checks that the
+     * message is this register.
+     *
+     * @throws BadFormatException if MB bits 1-8 hold another BDS code than {@link #getBDSCode()}
+     */
+    protected void requireBDSCode() throws BadFormatException {
+        int bds1 = (message[0] >>> 4) & 0xF;
+        int bds2 = message[0] & 0xF;
+        if (bds1 != getBDSCode().getBDS1() || bds2 != getBDSCode().getBDS2())
+            throw new BadFormatException(String.format("MB identifies itself as BDS %X,%X, not %X,%X",
+                    bds1, bds2, getBDSCode().getBDS1(), getBDSCode().getBDS2()), Tools.toHexString(message));
+    }
+
+    /**
+     * @param first the first MB bit, inclusive
+     * @param last  the last MB bit, inclusive
+     * @return whether these MB bits are all ZERO
+     */
+    protected boolean isZero(int first, int last) {
+        BitReader b = BitReader.forBigEndian(message);
+        for (int bit = first; bit <= last; bit++)
+            if (b.readBoolean(bit)) return false;
+        return true;
+    }
+
+    /**
+     * ICAO Doc 9871 §A.2.1.1: if the data of a field are not available, "the status bit (if specified for that field)
+     * shall indicate that the data in that field are invalid and the field shall be zeroed", where a status bit covers
+     * "the data field(s) which follow, up to the next status bit" (§A.2.2.1).
+     *
+     * @param status the MB bit of the status bit
+     * @param last   the last MB bit the status bit covers
+     * @return whether the status bit is set or the bits it covers are all ZERO
+     */
+    protected boolean isZeroUnlessValid(int status, int last) {
+        return BitReader.forBigEndian(message).readBoolean(status) || isZero(status + 1, last);
     }
 
     /**
