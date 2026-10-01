@@ -33,7 +33,7 @@ import java.util.Arrays;
  * as defined in ICAO Annex 10 Volume IV §3.1.2.6.8.
  */
 @SuppressWarnings("unused")
-public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable {
+public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable, CommBReply {
 
     private static final long serialVersionUID = -1623942073259152603L;
 
@@ -203,17 +203,7 @@ public class CommBIdentifyReply extends ModeSDownlinkMsg implements Serializable
         return identityEncoded;
     }
 
-    /**
-     * The Comm-B message (BDS register; register numbering and content per ICAO Doc 9871 (First Edition,
-     * AN/464) §A.2.1 Register Allocation — individual registers are decoded in package
-     * de.serosystems.lib1090.msgs.bds).
-     * <p>
-     * <b>The array is not a copy and must not be modified:</b> it is this message's own, shared with every
-     * message decoded or copied from it, so a change would alter all of them. It is not copied for
-     * performance.
-     *
-     * @return the 7-byte Comm-B message
-     */
+    @Override
     public byte[] getMessage() {
         return message;
     }
