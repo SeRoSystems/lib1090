@@ -32,6 +32,14 @@ public class StatefulPositionDecoder implements PositionDecoder {
      */
     private static final int MAX_DIST_TO_SENDER = 700000; // 700km
 
+    /**
+     * Maximum age of the last position for it to serve as the reference of a local decode, after which the target
+     * is decoded as a new one: the time after which ED-102B §2.2.10.3.1 g and §2.2.10.3.2 f consider a global decode
+     * invalid, far below the time a target needs to move half a zone, 175 NM airborne or 42 NM on the surface
+     * (ED-102B §A.1.7.4 NOTE)
+     */
+    private static final Duration REFERENCE_TIMEOUT = Duration.ofSeconds(120);
+
     private CPREncodedPosition lastEven;
     private CPREncodedPosition lastOdd;
     private Position lastPosition;
@@ -65,7 +73,8 @@ public class StatefulPositionDecoder implements PositionDecoder {
      *                 null disables checks and surface decoding
      * @return WGS84 coordinates with latitude and longitude in dec degrees, and altitude in feet. altitude might be null
      * if unavailable. On error, the returned position is null. Check the .isReasonable() flag before using
-     * the position.
+     * the position. A position that fails a reasonableness test is not used as the reference for the next local
+     * decode, so that the next position requires a global decode, or, on the surface, the receiver as reference.
      */
     @Override
     public Position decodePosition(CPREncodedPosition cpr, Position receiver) {
@@ -83,6 +92,17 @@ public class StatefulPositionDecoder implements PositionDecoder {
         // and throw otherwise, so this needs to be checked before calling them
         if (lastOther != null && (lastOther.getNBits() != cpr.getNBits() || lastOther.isSurface() != cpr.isSurface()))
             lastOther = null;
+
+        // after a long gap, the target may have moved more than half a zone from the last position, beyond which
+        // local decoding is ambiguous, so it is decoded as a new target; the gap is taken between the earlier and the
+        // later timestamp, so that it is never negative: Duration.abs() of a negative duration goes through BigDecimal
+        // on Java 8
+        if (lastTime != null && (cpr.getTimestamp().isAfter(lastTime)
+                ? Duration.between(lastTime, cpr.getTimestamp())
+                : Duration.between(cpr.getTimestamp(), lastTime)).compareTo(REFERENCE_TIMEOUT) > 0) {
+            lastPosition = null;
+            numReasonable = 0;
+        }
 
         // only use receiver as reference for surface positions (might be too far away for airborne)
         Position refPos = lastPosition != null ? lastPosition : (cpr.isSurface() ? receiver : null);
@@ -102,20 +122,27 @@ public class StatefulPositionDecoder implements PositionDecoder {
                 newPosition.setReasonable(false);
         }
 
+        // apply additional reasonableness test
+        if (receiver != null && receiver.haversine(newPosition) > MAX_DIST_TO_SENDER)
+            newPosition.setReasonable(false);
+
+        // a position that failed a test is no reference: the next local decode would come out near it and pass the
+        // speed test against it (ED-102B §2.2.10.6.3 b 1)); the target is decoded as a new one instead, as either
+        // this position or the last one may be the wrong one
+        if (!newPosition.isReasonable()) {
+            lastPosition = null;
+            lastTime = null;
+            numReasonable = 0;
+            return newPosition;
+        }
+
         // a copy of the coordinates, the reference for the next local decode, so that a caller changing the
         // returned position cannot move it
         lastPosition = new Position(newPosition.getLongitude(), newPosition.getLatitude(), null);
         lastTime = cpr.getTimestamp();
 
-        if (!newPosition.isReasonable()) numReasonable = 0; // reset
-            // at least 2 good messages before we declare reasonable
-        else if (numReasonable++ < 2) newPosition.setReasonable(false);
-
-        // apply additional reasonableness test
-        if (receiver != null && receiver.haversine(newPosition) > MAX_DIST_TO_SENDER) {
-            newPosition.setReasonable(false);
-            numReasonable = 0;
-        }
+        // at least 2 good messages before we declare reasonable
+        if (numReasonable++ < 2) newPosition.setReasonable(false);
 
         return newPosition;
     }
