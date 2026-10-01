@@ -27,26 +27,28 @@ import static org.junit.jupiter.api.Assertions.*;
 class AirAirSurveillanceReplyTest {
 
     /**
-     * Per RI code: operating ACAS, vertical and horizontal resolution capability, and maximum airspeed, ICAO Annex 10
-     * Volume IV (6th edition) §4.3.8.4.1.2 and §3.1.2.8.2.2. null where the code does not tell.
+     * Per RI code: operating ACAS, resolution capability in any dimension, vertical and horizontal resolution
+     * capability, and maximum airspeed, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.1.2 and §3.1.2.8.2.2, code 1 as
+     * ED-73F §3.27.1.5 defines it. null where the code does not tell.
      */
     private static final Object[][] EXPECTED = {
-            /* 0 no operating ACAS */ {false, false, false, null},
-            /* 1 not assigned */ {null, null, null, null},
-            /* 2 resolution capability inhibited */ {true, false, false, null},
-            /* 3 vertical only */ {true, true, false, null},
-            /* 4 vertical and horizontal */ {true, true, true, null},
-            /* 5 reserved for passive ACAS */ {null, null, null, null},
-            /* 6 reserved for passive ACAS */ {null, null, null, null},
-            /* 7 not assigned */ {null, null, null, null},
-            /* 8 no maximum airspeed data */ {null, null, null, null},
-            /* 9 */ {null, null, null, 75},
-            /* 10 */ {null, null, null, 150},
-            /* 11 */ {null, null, null, 300},
-            /* 12 */ {null, null, null, 600},
-            /* 13 */ {null, null, null, 1200},
-            /* 14 more than 1200 kt */ {null, null, null, Integer.MAX_VALUE},
-            /* 15 not assigned */ {null, null, null, null},
+            // operating ACAS, resolution capability, vertical, horizontal, maximum airspeed
+            /* 0 no operating ACAS */ {false, false, false, false, null},
+            /* 1 junior or passive CAS with resolution capability (ED-73F) */ {true, true, null, null, null},
+            /* 2 resolution capability inhibited */ {true, false, false, false, null},
+            /* 3 vertical only */ {true, true, true, false, null},
+            /* 4 vertical and horizontal */ {true, true, true, true, null},
+            /* 5 reserved for passive ACAS */ {null, null, null, null, null},
+            /* 6 reserved for passive ACAS */ {null, null, null, null, null},
+            /* 7 not assigned */ {null, null, null, null, null},
+            /* 8 no maximum airspeed data */ {null, null, null, null, null},
+            /* 9 */ {null, null, null, null, 75},
+            /* 10 */ {null, null, null, null, 150},
+            /* 11 */ {null, null, null, null, 300},
+            /* 12 */ {null, null, null, null, 600},
+            /* 13 */ {null, null, null, null, 1200},
+            /* 14 more than 1200 kt */ {null, null, null, null, Integer.MAX_VALUE},
+            /* 15 not assigned */ {null, null, null, null, null},
     };
 
     /**
@@ -65,9 +67,10 @@ class AirAirSurveillanceReplyTest {
         assertEquals(ri, reply.getReplyInformationEncoded(), code);
         assertEquals(ri >= 8, reply.isAcquisitionReply(), code);
         assertEquals(EXPECTED[ri][0], reply.hasOperatingACAS(), code);
-        assertEquals(EXPECTED[ri][1], reply.hasVerticalResolutionCapability(), code);
-        assertEquals(EXPECTED[ri][2], reply.hasHorizontalResolutionCapability(), code);
-        assertEquals(EXPECTED[ri][3], reply.getMaximumAirspeed(), code);
+        assertEquals(EXPECTED[ri][1], reply.hasResolutionCapability(), code);
+        assertEquals(EXPECTED[ri][2], reply.hasVerticalResolutionCapability(), code);
+        assertEquals(EXPECTED[ri][3], reply.hasHorizontalResolutionCapability(), code);
+        assertEquals(EXPECTED[ri][4], reply.getMaximumAirspeed(), code);
     }
 
     @Test
@@ -88,5 +91,20 @@ class AirAirSurveillanceReplyTest {
         assertEquals(8, acas.getReplyInformationEncoded());
         assertTrue(acas.isAcquisitionReply());
         assertNull(acas.hasOperatingACAS());
+    }
+
+    /**
+     * The repro of #161: RI 1, a junior or passive CAS with resolution capability (ED-73F §3.27.1.5), used to report
+     * no resolution capability.
+     */
+    @Test
+    void ri1_isACASWithResolutionCapability() throws BadFormatException, UnspecifiedFormatError {
+        ShortACAS acas = new ShortACAS("00008c38f85bf6");
+
+        assertEquals(1, acas.getReplyInformationEncoded());
+        assertTrue(acas.hasOperatingACAS());
+        assertTrue(acas.hasResolutionCapability());
+        assertNull(acas.hasVerticalResolutionCapability());
+        assertNull(acas.hasHorizontalResolutionCapability());
     }
 }

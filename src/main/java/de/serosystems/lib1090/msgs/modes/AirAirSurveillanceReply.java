@@ -23,10 +23,15 @@ package de.serosystems.lib1090.msgs.modes;
  * one (DF=16, {@link LongACAS}): a 4-bit field (bits 14-17) whose codes tell the kind of reply and, depending on it,
  * either the ACAS capability or the maximum cruising true airspeed.
  * <p>
- * ICAO Annex 10 Volume IV (6th edition), §4.3.8.4.1.2 (codes 0-7) and §3.1.2.8.2.2 (codes 8-15):
+ * ICAO Annex 10 Volume IV (6th edition), §4.3.8.4.1.2 (codes 0-7) and §3.1.2.8.2.2 (codes 8-15), with code 1 as the
+ * Mode S MOPS define it:
  * <ul>
  *     <li>0: no operating ACAS (a reply to an interrogation with AQ = 0, as are codes 0-7)</li>
- *     <li>1: not assigned</li>
+ *     <li>1: not assigned in the Annex; EUROCAE ED-73F (RTCA DO-181F) §3.27.1.5 defines it as "Active CAS of junior
+ *     status with resolution capability or Passive CAS with resolution capability and a Mode S transponder", and
+ *     ED-102B (RTCA DO-260C) TABLE 2-44 counts it, as code 3, as a CAS that can issue an RA. A junior CAS adapts its RA
+ *     sense to the senior one, a passive CAS coordinates via ADS-B only. Neither says in which dimension it
+ *     resolves.</li>
  *     <li>2: ACAS with resolution capability inhibited, reported also at sensitivity level 2 or with the TA only mode
  *     selected</li>
  *     <li>3: ACAS with vertical-only resolution capability and capability to utilize 1 030/1 090 MHz discrete Mode S
@@ -40,6 +45,11 @@ package de.serosystems.lib1090.msgs.modes;
  * Codes 0-7 are a tracking reply, 8-15 an acquisition reply: bit 14 replicates the AQ bit of the interrogation. The
  * ACAS accessors therefore know nothing about an acquisition reply and return null for it, as for the codes that are
  * not assigned or reserved.
+ * <p>
+ * ED-73F describes codes 1 and 3 alike as "with resolution capability" and assigns no code 4: the MOPS tell whether a
+ * CAS can resolve, the Annex in which dimension. {@link #hasResolutionCapability()} answers the first, independent of
+ * the dimension; {@link #hasVerticalResolutionCapability()} and {@link #hasHorizontalResolutionCapability()} answer
+ * the second where the Annex does, for codes 3 and 4.
  */
 public interface AirAirSurveillanceReply {
 
@@ -57,13 +67,14 @@ public interface AirAirSurveillanceReply {
     }
 
     /**
-     * @return true if the reply reports an operating ACAS (RI 2-4), false if it reports none (RI 0), or null if it does
-     * not tell: an acquisition reply, or a code that is not assigned or reserved (RI 1, 5-7)
+     * @return true if the reply reports an operating ACAS (RI 1-4), false if it reports none (RI 0), or null if it does
+     * not tell: an acquisition reply, or a code that is not assigned or reserved (RI 5-7)
      */
     default Boolean hasOperatingACAS() {
         switch (getReplyInformationEncoded()) {
             case 0:
                 return false;
+            case 1:
             case 2:
             case 3:
             case 4:
@@ -74,9 +85,29 @@ public interface AirAirSurveillanceReply {
     }
 
     /**
+     * @return true if the reply reports resolution capability in some dimension, i.e. that ACAS can issue RAs (RI 1, 3
+     * and 4), false if it reports none (RI 0, no operating ACAS, or 2, resolution capability inhibited), or null if it
+     * does not tell: an acquisition reply, or a code that is not assigned or reserved (RI 5-7)
+     */
+    default Boolean hasResolutionCapability() {
+        switch (getReplyInformationEncoded()) {
+            case 0:
+            case 2:
+                return false;
+            case 1:
+            case 3:
+            case 4:
+                return true;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * @return true if the reply reports vertical resolution capability (RI 3-4), false if it reports none (RI 0, no
-     * operating ACAS, or 2, resolution capability inhibited), or null if it does not tell: an acquisition reply, or a
-     * code that is not assigned or reserved (RI 1, 5-7)
+     * operating ACAS, or 2, resolution capability inhibited), or null if it does not tell: an acquisition reply, RI 1,
+     * which reports resolution capability without a dimension (see {@link #hasResolutionCapability()}), or a code that
+     * is not assigned or reserved (RI 5-7)
      */
     default Boolean hasVerticalResolutionCapability() {
         switch (getReplyInformationEncoded()) {
@@ -93,7 +124,8 @@ public interface AirAirSurveillanceReply {
 
     /**
      * @return true if the reply reports horizontal resolution capability (RI 4), false if it reports none (RI 0, 2 or
-     * 3), or null if it does not tell: an acquisition reply, or a code that is not assigned or reserved (RI 1, 5-7)
+     * 3), or null if it does not tell: an acquisition reply, RI 1, which reports resolution capability without a
+     * dimension (see {@link #hasResolutionCapability()}), or a code that is not assigned or reserved (RI 5-7)
      */
     default Boolean hasHorizontalResolutionCapability() {
         switch (getReplyInformationEncoded()) {
