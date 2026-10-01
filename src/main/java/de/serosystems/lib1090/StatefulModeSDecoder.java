@@ -54,6 +54,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class StatefulModeSDecoder {
     private static final Duration DECODER_TIMEOUT = Duration.ofMillis(3600_000L);
+    private static final int CLEANUP_INTERVAL = 1_000_000;
 
     private final PositionDecoderSupplier positionDecoderSupplier;
     private final boolean decodeDf19Adsb;
@@ -103,7 +104,10 @@ public class StatefulModeSDecoder {
                 !modes.checkParity())
             throw new BadFormatException("Parity check failed", modes.getHexMessage());
 
-        if (++afterLastCleanup > 1000000 && decoderData.size() > 30000) clearDecoders();
+        if (++afterLastCleanup >= CLEANUP_INTERVAL) {
+            afterLastCleanup = 0;
+            clearDecoders();
+        }
 
         latestTimestamp = timestamp;
 
@@ -769,12 +773,13 @@ public class StatefulModeSDecoder {
 
     /**
      * Clean state by removing decoders not used for more than an hour. This happens automatically
-     * every 1 Mio messages if more than 30000 targets are tracked.
+     * every 1 Mio messages.
      */
     public void clearDecoders() {
         // nothing decoded yet, so no time to measure the age of an entry against
         if (latestTimestamp == null) return;
-        decoderData.values().removeIf(dd -> Duration.between(dd.lastUsed, latestTimestamp).compareTo(DECODER_TIMEOUT) > 0);
+        Instant cutoff = latestTimestamp.minus(DECODER_TIMEOUT);
+        decoderData.values().removeIf(dd -> dd.lastUsed.isBefore(cutoff));
     }
 
     private DecoderData getDecoderData(QualifiedAddress address, Instant timestamp) {

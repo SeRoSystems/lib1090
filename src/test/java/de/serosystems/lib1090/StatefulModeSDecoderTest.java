@@ -237,6 +237,28 @@ public class StatefulModeSDecoderTest {
     }
 
     /**
+     * The automatic cleanup runs once every million messages, whatever the number of targets, and removes the
+     * targets not seen for more than an hour. The counter used not to be reset, so that it ran on every message
+     * after the first million, and only with more than 30000 targets.
+     */
+    @Test
+    public void automaticCleanup_runsEveryMillionMessages() throws UnspecifiedFormatError, BadFormatException {
+        Instant t0 = Instant.EPOCH;
+        ModeSDownlinkMsg stale = new ModeSDownlinkMsg(opStatus(DF17, 2, false));
+        QualifiedAddress address = stale.getAddress();
+        ModeSDownlinkMsg other = new ModeSDownlinkMsg("8DABCDEF2004200000000082AA9F");
+
+        for (int round = 1; round <= 2; round++) {
+            Instant later = t0.plusSeconds(round * 7200L);
+            decoder.decode(stale, later.minusSeconds(7200));
+            for (int i = 1; i < 999_999; i++) decoder.decode(other, later);
+            assertEquals(2, decoder.getAdsbVersion(address));
+            decoder.decode(other, later);
+            assertEquals(0, decoder.getAdsbVersion(address));
+        }
+    }
+
+    /**
      * A query before the first decode used to create an entry without a time, on which a later cleanup threw.
      */
     @Test
