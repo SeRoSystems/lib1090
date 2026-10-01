@@ -26,24 +26,51 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ThreatIdentityDataTest {
 
-    /**
-     * ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2: 0 is no estimate, 1 is less than 0.05 NM, and n up to
-     * 127 is (n - 1)/10 NM rounded to the nearest 0.1 NM, whose lower bound is reported.
-     */
-    @Test
-    void testRange() throws Exception {
-        assertNull(new ThreatIdentityData((short) 0, (short) 0, (short) 0).getRange());
-        assertEquals(0.05f, new ThreatIdentityData((short) 0, (short) 1, (short) 0).getRange());
-        // integer division used to make this -0.05
-        assertEquals(0.35f, new ThreatIdentityData((short) 0, (short) 5, (short) 0).getRange(), 1e-6f);
-        assertEquals(12.55f, new ThreatIdentityData((short) 0, (short) 127, (short) 0).getRange(), 1e-6f);
+    private static ThreatIdentityData range(int code) {
+        return new ThreatIdentityData((short) 0, (short) code, (short) 0);
     }
 
+    private static ThreatIdentityData bearing(int code) {
+        return new ThreatIdentityData((short) 0, (short) 0, (short) code);
+    }
+
+    /**
+     * ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2: 0 is no estimate, 1 is less than 0.05 NM, n up to 126 is
+     * (n - 1)/10 NM ±0.05, and 127 is greater than 12.55 NM. getRange() gives the estimate, getRangeInterval() the
+     * range; codes 1 and 127 have no estimate.
+     */
     @Test
-    void testBearing() throws Exception {
-        assertNull(new ThreatIdentityData((short) 0, (short) 0, (short) 0).getBearing());
-        assertArrayEquals(new Float[]{0f, 6f}, new ThreatIdentityData((short) 0, (short) 0, (short) 1).getBearing());
-        assertArrayEquals(new Float[]{354f, 360f}, new ThreatIdentityData((short) 0, (short) 0, (short) 60).getBearing());
+    void testRange() {
+        assertNull(range(0).getRange());
+        assertNull(range(0).getRangeInterval());
+
+        assertNull(range(1).getRange());
+        assertEquals(Interval.of(Bound.AT_LEAST, 0, Bound.BELOW, 0.05), range(1).getRangeInterval());
+
+        assertEquals(0.1f, range(2).getRange(), 1e-6f);
+        assertEquals(Interval.of(Bound.AT_LEAST, 0.05, Bound.AT_MOST, 0.15), range(2).getRangeInterval());
+        // integer division used to make this -0.05, and the lower bound once was returned instead of the estimate
+        assertEquals(0.4f, range(5).getRange(), 1e-6f);
+        assertEquals(12.5f, range(126).getRange(), 1e-6f);
+        assertEquals(Interval.of(Bound.AT_LEAST, 12.45, Bound.AT_MOST, 12.55), range(126).getRangeInterval());
+
+        assertNull(range(127).getRange());
+        assertEquals(Interval.of(Bound.MORE_THAN, 12.55, Bound.NONE, 0), range(127).getRangeInterval());
+    }
+
+    /**
+     * ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3: code n from 1 to 60 is between 6(n - 1) and 6n degrees; getBearing()
+     * gives the middle, getBearingInterval() the range.
+     */
+    @Test
+    void testBearing() {
+        assertNull(bearing(0).getBearing());
+        assertNull(bearing(0).getBearingInterval());
+
+        assertEquals(3f, bearing(1).getBearing());
+        assertEquals(Interval.of(Bound.AT_LEAST, 0, Bound.AT_MOST, 6), bearing(1).getBearingInterval());
+        assertEquals(357f, bearing(60).getBearing());
+        assertEquals(Interval.of(Bound.AT_LEAST, 354, Bound.AT_MOST, 360), bearing(60).getBearingInterval());
     }
 
     /**
@@ -55,8 +82,9 @@ class ThreatIdentityDataTest {
         for (short code = 61; code <= 63; code++) {
             ThreatIdentityData tid = new ThreatIdentityData((short) 0, (short) 5, code);
             assertNull(tid.getBearing());
+            assertNull(tid.getBearingInterval());
             assertEquals(code, tid.getEncodedBearing());
-            assertEquals(0.35f, tid.getRange(), 1e-6f);
+            assertEquals(0.4f, tid.getRange(), 1e-6f);
         }
     }
 
