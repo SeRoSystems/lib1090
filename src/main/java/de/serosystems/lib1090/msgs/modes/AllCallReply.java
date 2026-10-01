@@ -156,18 +156,17 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
      * has been received correctly without knowing the interrogator in advance.
      *
      * @return true if the interrogator ID is conformant with ICAO Annex 10 Volume IV
-     * §3.1.2.3.3.2 and §3.1.2.5.2.1.3
+     * §3.1.2.3.3.2, §3.1.2.5.2.1.2.4 and §3.1.2.5.2.1.3
      */
     public boolean hasValidInterrogatorCode() {
         // ICAO Annex 10 Volume IV §3.1.2.3.3.2
         // the first 17 bits have to be zero
         if (parityInterrogator > 127) return false;
 
-        // Note: seems to be used by ACAS
-        //int ii = interrogator[2] & 0xF;
-        // ICAO Annex 10 Volume IV §3.1.2.5.2.1.2.4
-        // surveillance identifier of 0 shall never be used
-        //if (cl > 0 && ii == 0) return false;
+        // ICAO Annex 10 Volume IV §3.1.2.5.2.1.2.4: "The SI code value of 0 shall not be used". With code label 1
+        // the IC field holds SI codes 1 to 15, so IC = 0 would be SI 0; with code labels 2 to 4, IC = 0 is SI 16, 32
+        // or 48 and valid, and with code label 0 it is II 0
+        if (codeLabelEncoded == 1 && (parityInterrogator & 0xF) == 0) return false;
 
         // ICAO Annex 10 Volume IV §3.1.2.5.2.1.3
         // code label is only defined for 0-4
