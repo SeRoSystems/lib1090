@@ -42,6 +42,10 @@ public class QualifiedAddress implements Serializable {
      * table keys on for DF=18, is coded per §2.2.3.2.1.3 TABLE 2-7). Reserved values (DF=19
      * with AF&gt;0) are military-use codings not specified by ED-102B; see ICAO Annex 10
      * Volume IV §3.1.2.8.8.2.
+     * <p>
+     * The address of a reply without an AA field, recovered from its parity field, is typed {@code ICAO24}, although
+     * it is not verified; for a Comm-B reply with data parity, it is not even the aircraft address. See
+     * {@link de.serosystems.lib1090.msgs.ModeSDownlinkMsg#getAddress()}.
      */
     public enum Type {
         // ICAO 24-bit address

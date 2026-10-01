@@ -407,6 +407,14 @@ public class ModeSDownlinkMsg implements Serializable {
     }
 
     /**
+     * The address of the reply. DF 11, 17, 18 and 19 carry it in the clear, in their AA field. The other formats
+     * (DF 0, 4, 5, 16, 20, 21 and 24) carry it only overlaid on the CRC in their parity field (AP field), and the
+     * address is recovered from there by removing the CRC: it cannot be checked against the reply itself, and a reply
+     * with an undetected bit error yields another address. Callers usually check such addresses against the targets
+     * known from replies with an address in the clear. A Comm-B reply (DF 20, 21) may also carry data parity instead,
+     * and then yields a "Modified AA" rather than the aircraft address; see
+     * {@link de.serosystems.lib1090.msgs.modes.CommBReply}.
+     *
      * @return fully qualified address (with type)
      */
     public QualifiedAddress getAddress() {
