@@ -242,7 +242,7 @@ public class ModeSDownlinkMsg implements Serializable {
             case 20: // Long Comm-B, altitude reply
             case 21: // Long Comm-B, identity reply
             case 24: // Long Comm-D (ELM)
-                addr = noCRC ? parity : calcParityInt() ^ parity;
+                addr = getOverlay();
                 break;
 
             case 11: // all call replies
@@ -439,6 +439,17 @@ public class ModeSDownlinkMsg implements Serializable {
      */
     public int getParity() {
         return parity;
+    }
+
+    /**
+     * The address or interrogator code that the CRC in the parity field is overlaid on (ICAO Annex 10 Volume IV
+     * §3.1.2.3.3.2), i.e. what the field holds once the CRC is removed; 0 for an intact extended squitter. If the CRC
+     * has already been removed (see {@code noCRC} of the constructors), that is the parity field itself.
+     *
+     * @return the address or interrogator code overlaid on the CRC
+     */
+    protected int getOverlay() {
+        return noCRC ? parity : calcParityInt() ^ parity;
     }
 
     /**

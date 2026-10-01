@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.modes;
 
+import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.acas.ACASXResolutionAdvisory;
 import de.serosystems.lib1090.msgs.acas.RAMessageFormat;
@@ -195,6 +196,28 @@ class ModeSReplyFieldsTest {
         assertTrue(reply.isSurveillanceID());
         assertEquals(23, reply.getInterrogatorCode());
         assertTrue(reply.hasValidInterrogatorCode());
+    }
+
+    /**
+     * With noCRC, the parity field already holds the interrogator code, here code label 1 and interrogator code 3, and
+     * the CRC is not applied again; the same reply with the CRC applied gives the same code.
+     */
+    @Test
+    void testAllCallReplyWithoutCRC() throws Exception {
+        AllCallReply withoutCRC = new AllCallReply(new ModeSDownlinkMsg("5D4840D6000013", true));
+        assertEquals(1, withoutCRC.getCodeLabelEncoded());
+        assertEquals(3, withoutCRC.getInterrogatorCode());
+        assertTrue(withoutCRC.hasValidInterrogatorCode());
+
+        byte[] raw = Tools.hexStringToByteArray("5D4840D6000000");
+        int parity = ModeSDownlinkMsg.calcParityInt(Arrays.copyOf(raw, 4)) ^ 0x13;
+        raw[4] = (byte) (parity >>> 16);
+        raw[5] = (byte) (parity >>> 8);
+        raw[6] = (byte) parity;
+        AllCallReply withCRC = new AllCallReply(raw);
+        assertEquals(withoutCRC.getCodeLabelEncoded(), withCRC.getCodeLabelEncoded());
+        assertEquals(withoutCRC.getInterrogatorCode(), withCRC.getInterrogatorCode());
+        assertEquals(withoutCRC.getAddress(), withCRC.getAddress());
     }
 
     /**

@@ -75,8 +75,8 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
         capabilitiesEncoded = getBitReader().readByte(6, 8);
 
-        // extract interrogator ID
-        parityInterrogator = calcParityInt() ^ getParity();
+        // extract interrogator ID, which the parity field is overlaid on; with noCRC, the CRC is already removed
+        parityInterrogator = getOverlay();
 
         codeLabelEncoded = (byte) ((parityInterrogator >> 4) & 0x7);
     }
@@ -103,9 +103,9 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Some receivers already subtract the crc checksum
-     * from the parity field right after reception.
-     * In that case, use {@link #getParity()} to get the interrogator ID.<br><br>
+     * The code is read from the parity field with the CRC removed. For a receiver that already removes the CRC, build
+     * the reply with {@code noCRC} (see {@link ModeSDownlinkMsg#ModeSDownlinkMsg(String, boolean)}), or decode it with
+     * {@link de.serosystems.lib1090.StatefulModeSDecoder#decode(String, boolean, java.time.Instant)}.<br><br>
      * Note: Use {@link #hasValidInterrogatorCode()} to check the validity of this field.
      *
      * @return the interrogator code which can either be the interrogator id or the surveillance id.
