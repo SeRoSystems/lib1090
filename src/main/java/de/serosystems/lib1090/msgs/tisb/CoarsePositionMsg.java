@@ -22,6 +22,8 @@ import de.serosystems.lib1090.Position;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
 import de.serosystems.lib1090.decoding.Altitude;
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
@@ -153,25 +155,23 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
     }
 
     /**
-     * See also {@link #getGroundSpeedUpperBound()}.
-     *
-     * @return ground speed in knots (lower bound of possible 32 knots window)
+     * @return the ground speed as transmitted, ME bits 26-31, ED-102A §2.2.17.3.5.7 Table 2-111
      */
-    public Integer getGroundSpeedLowerBound() {
-        if (groundSpeed == 0) return null;
-        else if (groundSpeed == 1) return 0;
-        else return 16 + (groundSpeed - 2) * 32;
+    public byte getGroundSpeedEncoded() {
+        return groundSpeed;
     }
 
     /**
-     * See also {@link #getGroundSpeedLowerBound()}.
+     * The ground speed in knots, ED-102A §2.2.17.3.5.7 Table 2-111: code 1 is below 16 kt, code n from 2 to 62 at least
+     * 16 + (n - 2) * 32 kt and below 16 + (n - 1) * 32 kt, and code 63 at least 1968 kt, with no upper end.
      *
-     * @return ground speed in knots (upper bound of possible 32 knots window)
+     * @return the ground speed in knots, or null if no ground speed information is available (code 0)
      */
-    public Integer getGroundSpeedUpperBound() {
+    public Interval getGroundSpeed() {
         if (groundSpeed == 0) return null;
-        else if (groundSpeed == 1) return 16;
-        else return 16 + (groundSpeed - 1) * 32;
+        if (groundSpeed == 1) return Interval.of(Bound.AT_LEAST, 0, Bound.BELOW, 16);
+        if (groundSpeed == 63) return Interval.of(Bound.AT_LEAST, 1968, Bound.NONE, 0);
+        return Interval.of(Bound.AT_LEAST, 16 + (groundSpeed - 2) * 32, Bound.BELOW, 16 + (groundSpeed - 1) * 32);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class CoarsePositionMsg extends ExtendedSquitter implements Serializable,
                 ", altitudeEncoded=" + altitudeEncoded +
                 ", groundTrackStatus=" + groundTrackStatus +
                 ", groundTrackAngle=" + getGroundTrackAngle() +
-                ", groundSpeed=" + getGroundSpeedLowerBound() + "-" + getGroundSpeedUpperBound() +
+                ", groundSpeed=" + getGroundSpeed() +
                 ", position=" + position +
                 '}';
     }
