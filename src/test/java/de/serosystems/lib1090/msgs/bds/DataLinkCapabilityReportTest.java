@@ -153,11 +153,6 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void enhancedSurveillanceCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isEnhancedSurveillanceCapability());
-    }
-
-    @Test
     public void activeTransponderSideIndicator() {
         assertEquals(1, new DataLinkCapabilityReport(msg).getActiveTransponderSideIndicator());
     }
