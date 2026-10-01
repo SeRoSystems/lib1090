@@ -19,6 +19,9 @@
 package de.serosystems.lib1090.msgs.modes;
 
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.acas.ACASXResolutionAdvisory;
+import de.serosystems.lib1090.msgs.acas.RAMessageFormat;
+import de.serosystems.lib1090.msgs.acas.TCASResolutionAdvisory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -128,7 +131,7 @@ class ModeSReplyFieldsTest {
         set(raw, 14, 17, 4);
         set(raw, 20, 32, 0x0A5B);
         set(raw, 33, 40, 0x30);
-        set(raw, 41, 54, 0x2A55);
+        set(raw, 41, 54, 0x2A54); // bits 53-54 = 0: TCAS layout
         set(raw, 55, 58, 0b1001);
         set(raw, 59, 59, 1);
 
@@ -138,16 +141,39 @@ class ModeSReplyFieldsTest {
         assertEquals(4, acas.getReplyInformationEncoded());
         assertEquals(0x0A5B, acas.getAltitudeEncoded());
         assertTrue(acas.hasValidRAC());
-        assertEquals(0x2A55, acas.getActiveResolutionAdvisories());
-        assertEquals(0b1001, acas.getResolutionAdvisoryComplementEncoded());
-        assertTrue(acas.noPassBelow());
-        assertFalse(acas.noPassAbove());
-        assertTrue(acas.noTurnRight());
-        assertTrue(acas.hasTerminated());
-        assertFalse(acas.hasMultipleThreats());
+        assertEquals(RAMessageFormat.TCAS_II, acas.getRAMessageFormat());
+        assertInstanceOf(TCASResolutionAdvisory.class, acas.getResolutionAdvisory());
+        TCASResolutionAdvisory tcas = (TCASResolutionAdvisory) acas.getResolutionAdvisory();
+        assertEquals(0x2A54, tcas.getActiveRAEncoded());
+        assertEquals(0b1001, tcas.getRACRecordEncoded());
+        assertTrue(tcas.isDoNotPassBelowActive());
+        assertFalse(tcas.isDoNotPassAboveActive());
+        assertTrue(tcas.isDoNotTurnRightActive());
+        assertTrue(tcas.isTerminated());
+        assertFalse(tcas.isMultipleThreatEncounter());
+
+        byte[] reserved = raw.clone();
+
+        // bits 53-54 = 1: ACAS X layout, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.4.2.2, with a 10-bit ARA
+        // (41-50) and LDI (51-52); RAC, RAT and MTE stay where they are
+        set(raw, 41, 54, 0x2A55);
+        LongACAS acasX = new LongACAS(raw);
+        assertEquals(RAMessageFormat.ACAS_X, acasX.getRAMessageFormat());
+        assertInstanceOf(ACASXResolutionAdvisory.class, acasX.getResolutionAdvisory());
+        ACASXResolutionAdvisory x = (ACASXResolutionAdvisory) acasX.getResolutionAdvisory();
+        assertEquals(0x2A5, x.getActiveRAEncoded());
+        assertEquals(1, x.getLowLevelDescendInhibitEncoded());
+        assertEquals(0b1001, x.getRACRecordEncoded());
+        assertTrue(x.isTerminated());
+
+        // bits 53-54 = 2, reserved for ACAS III: no defined layout
+        set(reserved, 53, 53, 1);
+        assertEquals(RAMessageFormat.ACAS_III, new LongACAS(reserved).getRAMessageFormat());
+        assertNull(new LongACAS(reserved).getResolutionAdvisory());
 
         set(raw, 33, 40, 0x31);
         assertFalse(new LongACAS(raw).hasValidRAC());
+        assertNull(new LongACAS(raw).getResolutionAdvisory());
     }
 
     /**

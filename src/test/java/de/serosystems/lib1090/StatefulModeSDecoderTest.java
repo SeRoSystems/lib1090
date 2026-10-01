@@ -24,6 +24,8 @@ import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
 import de.serosystems.lib1090.msgs.QualifiedAddress;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisory;
+import de.serosystems.lib1090.msgs.acas.TCASResolutionAdvisoryReport;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.ExtendedSquitter;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
@@ -433,8 +435,8 @@ public class StatefulModeSDecoderTest {
                     null, TargetStateAndStatusV3Msg.class, null, TargetStateAndStatusV2Msg.class,
                     TargetStateAndStatusV3Msg.class),
             new VersionCase("TCAS RA", me(28 << 3 | 2, false),
-                    null, TCASResolutionAdvisoryMsg.class, null, TCASResolutionAdvisoryMsg.class,
-                    TCASResolutionAdvisoryMsg.class),
+                    null, ACASResolutionAdvisoryMsg.class, null, ACASResolutionAdvisoryMsg.class,
+                    ACASResolutionAdvisoryMsg.class),
             new VersionCase("HVA position", me(25 << 3, false),
                     null, HVAPositionMsg.class, null, null, HVAPositionMsg.class),
             new VersionCase("HVA velocity", me(25 << 3 | 1 << 1, false),
@@ -487,8 +489,10 @@ public class StatefulModeSDecoderTest {
 
         ModeSDownlinkMsg msg = d.decode("8D4840D6E28000094282BDD2CD09", Instant.EPOCH);
 
-        assertInstanceOf(TCASResolutionAdvisoryMsg.class, msg);
-        assertNull(((TCASResolutionAdvisoryMsg) msg).getThreatIdentityData().getBearing());
+        assertInstanceOf(ACASResolutionAdvisoryMsg.class, msg);
+        ResolutionAdvisory ra = ((ACASResolutionAdvisoryMsg) msg).getResolutionAdvisory();
+        assertInstanceOf(TCASResolutionAdvisoryReport.class, ra);
+        assertNull(((TCASResolutionAdvisoryReport) ra).getThreatIdentityData().getBearing());
     }
 
     private Position extractPosition(String raw, Instant timestamp) throws UnspecifiedFormatError, BadFormatException {

@@ -16,8 +16,10 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.bds;
+package de.serosystems.lib1090.msgs.acas;
 
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,4 +84,41 @@ class ThreatIdentityDataTest {
         assertNull(tid.getRange());
         assertNull(tid.getBearing());
     }
+
+    /**
+     * ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.2.9.1: the ACAS X altitude is binary, 0 no data, 1 below
+     * -950 ft, and n from 2 on at least 100 n - 1150 ft and below 100 n - 1050 ft.
+     */
+    @Test
+    void binaryAltitude() {
+        ThreatIdentityData none = ThreatIdentityData.withBinaryAltitude((short) 0, (short) 0, (short) 0);
+        assertTrue(none.isAltitudeBinary());
+        assertNull(none.getAltitude());
+        assertNull(none.getAltitudeInterval());
+
+        ThreatIdentityData below = ThreatIdentityData.withBinaryAltitude((short) 1, (short) 0, (short) 0);
+        assertNull(below.getAltitude());
+        assertEquals(Interval.of(Bound.NONE, 0, Bound.BELOW, -950), below.getAltitudeInterval());
+
+        ThreatIdentityData lowest = ThreatIdentityData.withBinaryAltitude((short) 2, (short) 0, (short) 0);
+        assertEquals(-900, (int) lowest.getAltitude());
+        assertEquals(Interval.of(Bound.AT_LEAST, -950, Bound.BELOW, -850), lowest.getAltitudeInterval());
+
+        assertEquals(203_600, (int) ThreatIdentityData.withBinaryAltitude((short) 2047, (short) 0, (short) 0)
+                .getAltitude());
+        assertThrows(IllegalArgumentException.class,
+                () -> ThreatIdentityData.withBinaryAltitude((short) 2048, (short) 0, (short) 0));
+    }
+
+    /**
+     * A Mode C altitude (TCAS layout) decodes through the Gillham code and has no interval.
+     */
+    @Test
+    void modeCAltitude_hasNoInterval() {
+        ThreatIdentityData tid = new ThreatIdentityData((short) 0x0400, (short) 0, (short) 0); // -1000 ft
+        assertFalse(tid.isAltitudeBinary());
+        assertEquals(-1000, (int) tid.getAltitude());
+        assertNull(tid.getAltitudeInterval());
+    }
+
 }

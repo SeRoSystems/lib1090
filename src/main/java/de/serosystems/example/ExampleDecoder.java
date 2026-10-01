@@ -26,6 +26,10 @@ import de.serosystems.lib1090.decoding.quality.SystemDesignAssurance;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisory;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisoryReport;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisoryState;
+import de.serosystems.lib1090.msgs.acas.ThreatIdentityData;
 import de.serosystems.lib1090.msgs.adsb.*;
 import de.serosystems.lib1090.msgs.modes.*;
 import de.serosystems.lib1090.msgs.squitter.*;
@@ -287,12 +291,20 @@ public class ExampleDecoder {
                 System.out.println("          Mode S reply rate limiting: "
                         + ((OperationalModeCodeV3) om).isModeSReplyRateLimitingActive());
             }
-        } else if (msg instanceof TCASResolutionAdvisoryMsg) {
-            TCASResolutionAdvisoryMsg tcas = (TCASResolutionAdvisoryMsg) msg;
-            System.out.println("[" + icao24 + "]: TCAS Resolution Advisory completed: " + tcas.hasRATerminated());
-            System.out.println("          Threat type is " + tcas.getThreatType());
-            if (tcas.getThreatType() == 1) // it's a icao24 address
-                System.out.println("          Threat identity is 0x" + String.format("%06x", tcas.getThreatIdentity()));
+        } else if (msg instanceof ACASResolutionAdvisoryMsg) {
+            ResolutionAdvisory ra = ((ACASResolutionAdvisoryMsg) msg).getResolutionAdvisory();
+            System.out.println("[" + icao24 + "]: ACAS resolution advisory: " + ra);
+            if (ra instanceof ResolutionAdvisoryReport) {
+                ResolutionAdvisoryReport report = (ResolutionAdvisoryReport) ra;
+                System.out.println("          Terminated: " + report.isTerminated()
+                        + ", threat identity type is " + report.getThreatIdentityType());
+                ThreatIdentityData tid = report.getThreatIdentityData();
+                if (tid != null && tid.hasTransponderAddress())
+                    System.out.println("          Threat identity is 0x" + String.format("%06x", tid.getIcao24()));
+                else if (tid != null)
+                    System.out.println("          Threat altitude " + tid.getAltitude() + " ft, range "
+                            + tid.getRange() + " NM");
+            }
         } else if (msg instanceof CASOperationalCoordinationMsg) {
             CASOperationalCoordinationMsg cas = (CASOperationalCoordinationMsg) msg;
             System.out.println("[" + icao24 + "]: CAS Operational Coordination, multiple threat: " + cas.isMultipleThreatBit());
@@ -424,8 +436,12 @@ public class ExampleDecoder {
                     (long_acas.hasOperatingACAS() ? "operating." : "not operating."));
             System.out.println("          A/C is " + (long_acas.isAirborne() ? "airborne" : "on the ground") +
                     " and sensitivity level is " + long_acas.getSensitivityLevel());
-            System.out.println("          RAC is " + (long_acas.hasValidRAC() ? "valid" : "not valid") +
-                    " and is " + long_acas.getResolutionAdvisoryComplementEncoded() + " (MTE=" + long_acas.hasMultipleThreats() + ")");
+            ResolutionAdvisoryState ra = long_acas.getResolutionAdvisory();
+            if (ra != null)
+                System.out.println("          RAC is " + ra.getRACRecordEncoded() + " (" + ra.getRAMessageFormat()
+                        + ", MTE=" + ra.isMultipleThreatEncounter() + ")");
+            else
+                System.out.println("          No coordination reply");
             System.out.println("          Maximum airspeed is " + long_acas.getMaximumAirspeed() + "kn.");
         } else if (msg instanceof MilitaryExtendedSquitter) {
             MilitaryExtendedSquitter mil = (MilitaryExtendedSquitter) msg;

@@ -586,7 +586,7 @@ public class StatefulModeSDecoder {
                 else
                     return new EmergencyOrPriorityStatusV0Msg(es1090);
             } else if (subtype == 2 && (dd.adsbVersion > 1 || versionUnknown))
-                return new TCASResolutionAdvisoryMsg(es1090);
+                return new ACASResolutionAdvisoryMsg(es1090);
             else if (subtype == 3 && (dd.adsbVersion >= 3 || versionUnknown))
                 return new CASOperationalCoordinationMsg(es1090);
             else if (subtype == 4 && (dd.adsbVersion >= 3 || versionUnknown))
