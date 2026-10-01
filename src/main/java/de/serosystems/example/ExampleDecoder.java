@@ -417,7 +417,7 @@ public class ExampleDecoder {
         } else if (msg instanceof ShortACAS) {
             ShortACAS acas = (ShortACAS) msg;
             System.out.println("[" + icao24 + "]: Altitude is " + acas.getAltitude() + "ft and ACAS is " +
-                    (acas.hasOperatingACAS() ? "operating." : "not operating."));
+                    acasStatus(acas));
             System.out.println("          A/C is " + (acas.isAirborne() ? "airborne" : "on the ground") +
                     " and sensitivity level is " + acas.getSensitivityLevel());
         } else if (msg instanceof AltitudeReply) {
@@ -433,7 +433,7 @@ public class ExampleDecoder {
         } else if (msg instanceof LongACAS) {
             LongACAS long_acas = (LongACAS) msg;
             System.out.println("[" + icao24 + "]: Altitude is " + long_acas.getAltitude() + "ft and ACAS is " +
-                    (long_acas.hasOperatingACAS() ? "operating." : "not operating."));
+                    acasStatus(long_acas));
             System.out.println("          A/C is " + (long_acas.isAirborne() ? "airborne" : "on the ground") +
                     " and sensitivity level is " + long_acas.getSensitivityLevel());
             ResolutionAdvisoryState ra = long_acas.getResolutionAdvisory();
@@ -461,6 +461,13 @@ public class ExampleDecoder {
         } else if (msg.getClass() == ModeSDownlinkMsg.class) {
             System.out.println("[" + icao24 + "]: Unknown message with DF " + msg.getDownlinkFormat());
         }
+    }
+
+    private static String acasStatus(AirAirSurveillanceReply reply) {
+        if (reply.isAcquisitionReply())
+            return "not reported (acquisition reply, maximum airspeed " + reply.getMaximumAirspeed() + " kt).";
+        Boolean operating = reply.hasOperatingACAS();
+        return operating == null ? "not reported." : operating ? "operating." : "not operating.";
     }
 
     private static void printSelectedAltitudeSourceAndPressure(boolean fms, boolean hasPressure, Float pressure) {

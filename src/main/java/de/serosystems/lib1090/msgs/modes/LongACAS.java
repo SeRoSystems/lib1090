@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Decoder for the Mode S long air-air ACAS reply (DF=16), as defined in
  * ICAO Annex 10 Volume IV §3.1.2.8.3.
  */
-public class LongACAS extends ModeSDownlinkMsg implements Serializable {
+public class LongACAS extends ModeSDownlinkMsg implements Serializable, AirAirSurveillanceReply {
 
     private static final long serialVersionUID = 1052613416840618986L;
 
@@ -142,32 +142,9 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
         return sensitivityLevel;
     }
 
-    /**
-     * This field is used to report the aircraft's maximum cruising
-     * true airspeed capability and type of reply to interrogating aircraft
-     *
-     * @return the air-to-air reply information according to ICAO Annex 10 Volume IV §3.1.2.8.2.2
-     * @see #getMaximumAirspeed()
-     * @see #hasOperatingACAS()
-     */
+    @Override
     public byte getReplyInformationEncoded() {
         return replyInformationEncoded;
-    }
-
-    /**
-     * @return whether a/c has operating ACAS (derived from reply information)
-     * @see #getReplyInformationEncoded()
-     */
-    public boolean hasOperatingACAS() {
-        return getReplyInformationEncoded() != 0;
-    }
-
-    /**
-     * @return the maximum airspeed in kt as specified in ICAO Annex 10 Volume IV §3.1.2.8.2.2<br>
-     * null if unknown<br>Integer.MAX_VALUE if unbound
-     */
-    public Integer getMaximumAirspeed() {
-        return ShortACAS.decodeMaximumAirspeed(getReplyInformationEncoded());
     }
 
     /**
