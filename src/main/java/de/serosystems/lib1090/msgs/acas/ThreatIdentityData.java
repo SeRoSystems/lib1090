@@ -202,43 +202,59 @@ public class ThreatIdentityData implements Serializable {
     }
 
     /**
-     * Get the decoded lower bound for the range in NM
-     * <p>
-     * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
-     * {@link #hasTransponderAddress()} is true
-     * <p>
-     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2
+     * The estimated range of the threat in NM, ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2 (and §4.3.8.4.2.2.2.9.2 for
+     * ACAS X): code n from 2 to 126 stands for (n - 1)/10 NM ±0.05, and this returns (n - 1)/10. Codes 1 (less than
+     * 0.05 NM) and 127 (greater than 12.55 NM) state a bound only, which {@link #getRangeInterval()} gives.
      *
-     * @return null if the target is identified by its 24 bit address or the range estimate is not available;
-     * 0.05 if the estimate is less than 0.05NM, or the actual estimated range (shortest estimate) in NM
+     * @return the estimated range in NM, or null if the threat is identified by its address, no range estimate is
+     * available (code 0), or the code states a bound only (codes 1 and 127)
      */
     public Float getRange() {
-        if (hasTransponderAddress || range == 0)
-            return null;
-
-        if (range == 1)
-            return 0.05F;
-        return (range - 1) / 10F - 0.05F;
+        if (hasTransponderAddress || range < 2 || range > 126) return null;
+        return (range - 1) / 10F;
     }
 
     /**
-     * Get the decoded lower bound for the bearing in degrees
-     * <p>
-     * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
-     * {@link #hasTransponderAddress()} is true
-     * <p>
-     * See ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.3: the codes 61 to 63 are not assigned, and an unassigned
-     * code requires no action (§3.1.2.3.2.3), so they decode like code 0, no bearing estimate available. The code
-     * itself is available as {@link #getEncodedBearing()}.
+     * The range of the threat's estimated range in NM, ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.6.2: code 1 is less than
+     * 0.05 NM, code n from 2 to 126 is (n - 1)/10 NM ±0.05, both ends included as the Annex states them, and code 127
+     * is greater than 12.55 NM.
      *
-     * @return null if the target is identified by its 24 bit address, the bearing estimate is not available or its
-     * code is not assigned; an array with two elements defining the estimated lower and upper bound for the bearing
-     * estimate in degrees
+     * @return the range in NM, or null if the threat is identified by its address or no range estimate is available
+     * (code 0)
      */
-    public Float[] getBearing() {
-        if (hasTransponderAddress || bearing == 0 || bearing > 60) return null;
+    public Interval getRangeInterval() {
+        if (hasTransponderAddress || range == 0) return null;
+        if (range == 1) return Interval.of(Bound.AT_LEAST, 0, Bound.BELOW, 0.05);
+        if (range == 127) return Interval.of(Bound.MORE_THAN, 12.55, Bound.NONE, 0);
+        return Interval.of(Bound.AT_LEAST, (range - 1.5) / 10, Bound.AT_MOST, (range - 0.5) / 10);
+    }
 
-        return new Float[]{6F * (bearing - 1), 6F * bearing};
+    /**
+     * The estimated bearing of the threat in degrees relative to the ACAS aircraft heading, ICAO Annex 10 Volume IV
+     * §4.3.8.4.2.2.1.6.3 (and §4.3.8.4.2.2.2.9.3 for ACAS X): code n from 1 to 60 stands for a bearing between 6(n - 1)
+     * and 6n degrees, and this returns the middle, 6n - 3; {@link #getBearingInterval()} gives the range. The codes 61
+     * to 63 are not assigned, and an unassigned code requires no action (§3.1.2.3.2.3), so they decode like code 0, no
+     * bearing estimate available. The code itself is available as {@link #getEncodedBearing()}.
+     *
+     * @return the estimated bearing in degrees, or null if the threat is identified by its address, no bearing
+     * estimate is available, or its code is not assigned
+     */
+    public Float getBearing() {
+        if (hasTransponderAddress || bearing == 0 || bearing > 60) return null;
+        return 6F * bearing - 3;
+    }
+
+    /**
+     * The range of the threat's estimated bearing in degrees relative to the ACAS aircraft heading, ICAO Annex 10
+     * Volume IV §4.3.8.4.2.2.1.6.3: code n from 1 to 60 is between 6(n - 1) and 6n degrees, both ends included as the
+     * Annex states them.
+     *
+     * @return the range in degrees, or null if the threat is identified by its address, no bearing estimate is
+     * available, or its code is not assigned (61 to 63)
+     */
+    public Interval getBearingInterval() {
+        if (hasTransponderAddress || bearing == 0 || bearing > 60) return null;
+        return Interval.of(Bound.AT_LEAST, 6 * (bearing - 1), Bound.AT_MOST, 6 * bearing);
     }
 
 }

@@ -95,7 +95,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
         assertFalse(tid.isAltitudeBinary());
         assertNull(tid.getBearing());
         assertEquals((short) 61, tid.getEncodedBearing());
-        assertEquals(0.35f, tid.getRange(), 1e-6f);
+        assertEquals(0.4f, tid.getRange(), 1e-6f);
     }
 
     /**
@@ -145,7 +145,9 @@ public class ACASActiveResolutionAdvisoryReportTest {
         assertEquals(9900, (int) tid.getAltitude());
         assertEquals(Interval.of(Bound.AT_LEAST, 9850, Bound.BELOW, 9950), tid.getAltitudeInterval());
         assertEquals(21, (short) tid.getEncodedRange()); // 2.0 NM
-        assertArrayEquals(new Float[]{54f, 60f}, tid.getBearing());
+        assertEquals(2.0f, tid.getRange(), 1e-6f);
+        assertEquals(57f, tid.getBearing());
+        assertEquals(Interval.of(Bound.AT_LEAST, 54, Bound.AT_MOST, 60), tid.getBearingInterval());
     }
 
     /**
@@ -170,7 +172,7 @@ public class ACASActiveResolutionAdvisoryReportTest {
 
         assertTrue(x.isThreatDesignated());
         assertTrue(x.getSuppressionIndicator());
-        assertArrayEquals(new Float[]{84f, 90f}, x.getThreatIdentityData().getBearing());
+        assertEquals(87f, x.getThreatIdentityData().getBearing());
     }
 
     /**
