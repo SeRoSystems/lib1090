@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs;
 import de.serosystems.lib1090.StatefulModeSDecoder;
 import de.serosystems.lib1090.Tools;
 import de.serosystems.lib1090.cpr.CPREncodedPosition;
+import de.serosystems.lib1090.msgs.acas.AbstractResolutionAdvisory;
 import de.serosystems.lib1090.msgs.bds.*;
 import de.serosystems.lib1090.msgs.squitter.PositionMsg;
 import org.junit.jupiter.api.Test;
@@ -98,9 +99,8 @@ public class SerializationTest {
 
         ACASActiveResolutionAdvisoryReport ra = (ACASActiveResolutionAdvisoryReport) registers[0];
         ACASActiveResolutionAdvisoryReport raBack = roundTrip(ra);
-        assertArrayEquals(ra.getActiveResolutionAdvisories(), raBack.getActiveResolutionAdvisories());
-        assertArrayEquals(ra.getResolutionAdvisoriesComplementsRecord(),
-                raBack.getResolutionAdvisoriesComplementsRecord());
+        assertEquals(ra.getResolutionAdvisory(), raBack.getResolutionAdvisory());
+        assertEquals(ra.getResolutionAdvisory(), roundTrip((AbstractResolutionAdvisory) ra.getResolutionAdvisory()));
     }
 
     @SuppressWarnings("unchecked")

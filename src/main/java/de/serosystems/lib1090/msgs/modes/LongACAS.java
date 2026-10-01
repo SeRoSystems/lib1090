@@ -23,6 +23,9 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
+import de.serosystems.lib1090.msgs.acas.RAMessageFormat;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisories;
+import de.serosystems.lib1090.msgs.acas.ResolutionAdvisoryState;
 
 import java.io.Serializable;
 
@@ -38,11 +41,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
     private byte sensitivityLevel;
     private byte replyInformationEncoded;
     private short altitudeEncoded;
-    private byte vds; // V-definition subfield of MV, 0x30 for a resolution advisory report
-    private short activeResolutionAdvisories;
-    private byte racRecordEncoded; // RAC = resolution advisory complement
-    private boolean raTerminated;
-    private boolean multipleThreatEncounter;
+    private byte vds; // V-definition subfield of MV, 0x30 for a coordination reply
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -89,70 +88,44 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
 
         // MV/air-air coordination info; see ICAO Annex 10 Volume IV §4.3.8.4.2.4
         vds = b.readByte(33, 40);
-        activeResolutionAdvisories = b.readShort(41, 54);
-        racRecordEncoded = b.readByte(55, 58);
-        raTerminated = b.readBoolean(59);
-        multipleThreatEncounter = b.readBoolean(60);
     }
 
     /**
-     * Important note: check this before using any of
-     * {@link #getActiveResolutionAdvisories()},
-     * {@link #noPassBelow()}, {@link #noPassAbove()},
-     * {@link #noTurnLeft()}, {@link #noTurnRight()},
-     * {@link #hasTerminated()}, {@link #hasMultipleThreats()}
-     *
-     * @return true if resolution advisory complement is valid
+     * @return true if MV carries a coordination reply (VDS = 0x30), ICAO Annex 10 Volume IV §4.3.8.4.2.4.2; check this
+     * before using {@link #getResolutionAdvisory()}
      */
     public boolean hasValidRAC() {
         return vds == 0x30;
     }
 
     /**
-     * @return the binary encoded information about active
-     * resolution advisories, see ICAO Annex 10 Volume IV §4.3.8.4.2.2.1.1
+     * @return message bits 41-88 of MV as transmitted, right-aligned
      */
-    public short getActiveResolutionAdvisories() {
-        return activeResolutionAdvisories;
+    public long getResolutionAdvisoryEncoded() {
+        return getBitReader().readLong(41, 88);
     }
 
     /**
-     * @return the binary encoded resolution advisory complement
-     * @see #noPassBelow()
-     * @see #noPassAbove()
-     * @see #noTurnLeft()
-     * @see #noTurnRight()
+     * @return the collision avoidance system that generated the coordination reply, and so its layout, bits 53-54;
+     * only meaningful if {@link #hasValidRAC()}
      */
-    public byte getResolutionAdvisoryComplementEncoded() {
-        return racRecordEncoded;
+    public RAMessageFormat getRAMessageFormat() {
+        return ResolutionAdvisories.messageFormat(getResolutionAdvisoryEncoded());
     }
 
     /**
-     * @return true iff do not pass below advisory is active
+     * The coordination reply, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.4.2: ARA, RAC, RAT and MTE, in the
+     * TCAS layout, §4.3.8.4.2.4.2.1, or in the ACAS X layout, which adds the low-level descend inhibit,
+     * §4.3.8.4.2.4.2.2.
+     *
+     * @return a {@link de.serosystems.lib1090.msgs.acas.TCASResolutionAdvisory} or an
+     * {@link de.serosystems.lib1090.msgs.acas.ACASXResolutionAdvisory}, or null if MV carries no coordination reply
+     * (see {@link #hasValidRAC()}) or its RA message format has no defined layout
+     * @see ResolutionAdvisories#coordinationReply(long)
      */
-    public boolean noPassBelow() {
-        return (racRecordEncoded & 8) == 8;
-    }
-
-    /**
-     * @return true iff do not pass above advisory is active
-     */
-    public boolean noPassAbove() {
-        return (racRecordEncoded & 4) == 4;
-    }
-
-    /**
-     * @return true iff do not turn left advisory is active
-     */
-    public boolean noTurnLeft() {
-        return (racRecordEncoded & 2) == 2;
-    }
-
-    /**
-     * @return true iff do not turn right advisory is active
-     */
-    public boolean noTurnRight() {
-        return (racRecordEncoded & 1) == 1;
+    public ResolutionAdvisoryState getResolutionAdvisory() {
+        if (!hasValidRAC()) return null;
+        return ResolutionAdvisories.coordinationReply(getResolutionAdvisoryEncoded());
     }
 
     /**
@@ -160,20 +133,6 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
      */
     public boolean isAirborne() {
         return !verticalStatus;
-    }
-
-    /**
-     * @return true iff the RA from {@link #getActiveResolutionAdvisories()} has been terminated
-     */
-    public boolean hasTerminated() {
-        return raTerminated;
-    }
-
-    /**
-     * @return true iff two or more threats are being processed
-     */
-    public boolean hasMultipleThreats() {
-        return multipleThreatEncounter;
     }
 
     /**
@@ -242,10 +201,7 @@ public class LongACAS extends ModeSDownlinkMsg implements Serializable {
                 ", replyInformationEncoded=" + replyInformationEncoded +
                 ", altitudeEncoded=" + altitudeEncoded +
                 ", vds=" + vds +
-                ", activeResolutionAdvisories=" + activeResolutionAdvisories +
-                ", racRecordEncoded=" + racRecordEncoded +
-                ", raTerminated=" + raTerminated +
-                ", multipleThreatEncounter=" + multipleThreatEncounter +
+                ", resolutionAdvisory=" + getResolutionAdvisory() +
                 '}';
     }
 

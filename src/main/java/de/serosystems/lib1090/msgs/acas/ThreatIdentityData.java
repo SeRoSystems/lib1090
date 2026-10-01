@@ -16,9 +16,11 @@
  *  along with de.serosystems.lib1090.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.serosystems.lib1090.msgs.bds;
+package de.serosystems.lib1090.msgs.acas;
 
 import de.serosystems.lib1090.decoding.Altitude;
+import de.serosystems.lib1090.decoding.Bound;
+import de.serosystems.lib1090.decoding.Interval;
 
 import java.io.Serializable;
 
@@ -27,6 +29,10 @@ import java.io.Serializable;
  * §4.3.8.4.2.2.1.6; the THREAT IDENTITY DATA subfield's register layout is also given in ICAO
  * Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-48 — BDS code 3,0, ACAS
  * active resolution advisory.
+ * <p>
+ * The ACAS X layout, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.2.9, codes the threat altitude in binary
+ * rather than as a Mode C code, see {@link #withBinaryAltitude(Short, Short, Short)}; range and bearing are coded the
+ * same way in both layouts.
  */
 @SuppressWarnings("unused")
 public class ThreatIdentityData implements Serializable {
@@ -37,6 +43,7 @@ public class ThreatIdentityData implements Serializable {
     private Short range;
     private Short bearing;
     private boolean hasTransponderAddress;
+    private boolean binaryAltitude;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -80,6 +87,28 @@ public class ThreatIdentityData implements Serializable {
     }
 
     /**
+     * Create a new instance of the ACAS X layout, where the target is identified by altitude, range and bearing and
+     * the altitude is coded in binary, ICAO Annex 10 Volume IV (6th edition) §4.3.8.4.2.2.2.9.1.
+     *
+     * @param altitudeCode the 11-bit TIDA: 0 no data, 1 below -950 ft, n from 2 on at least 100 n - 1150 ft and
+     *                     below 100 n - 1050 ft
+     * @param range        the threat identity data range, coded as in {@link #ThreatIdentityData(Short, Short, Short)}
+     * @param bearing      the threat identity data bearing, coded as in
+     *                     {@link #ThreatIdentityData(Short, Short, Short)}
+     * @return the threat identity data
+     * @throws IllegalArgumentException if altitudeCode is outside [0, 2047], range outside [0, 127] or bearing
+     *                                  outside [0, 63], the values of their 11-bit, 7-bit and 6-bit fields
+     */
+    public static ThreatIdentityData withBinaryAltitude(Short altitudeCode, Short range, Short bearing) {
+        if (altitudeCode < 0 || altitudeCode > 2047)
+            throw new IllegalArgumentException("Binary threat altitude must be between 0 and 2047: " + altitudeCode);
+
+        ThreatIdentityData tid = new ThreatIdentityData(altitudeCode, range, bearing);
+        tid.binaryAltitude = true;
+        return tid;
+    }
+
+    /**
      * Check whether the underlying target is identified by its ICAO 24 bit address, or a triple of
      * (range, altitude, bearing).
      *
@@ -100,7 +129,8 @@ public class ThreatIdentityData implements Serializable {
     }
 
     /**
-     * Get the altitude code. See {@link #getAltitude()} for the value in feet.
+     * Get the altitude code: a Mode C code in the TCAS layout, the binary TIDA in the ACAS X layout, see
+     * {@link #isAltitudeBinary()}. See {@link #getAltitude()} for the value in feet.
      * <p>
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
@@ -132,14 +162,43 @@ public class ThreatIdentityData implements Serializable {
     }
 
     /**
+     * @return true if the altitude is coded in binary, as in the ACAS X layout, ICAO Annex 10 Volume IV (6th edition)
+     * §4.3.8.4.2.2.2.9.1; false if it is a Mode C code, as in the TCAS layout, §4.3.8.4.2.2.1.6.1, or the threat is
+     * identified by its address
+     */
+    public boolean isAltitudeBinary() {
+        return binaryAltitude;
+    }
+
+    /**
      * The method returns "null" when the target is identified by its ICAO 24 bit address, i.e., when
      * {@link #hasTransponderAddress()} is true
+     * <p>
+     * A Mode C code decodes as the altitude it reports. A binary altitude (ACAS X) is a 100 ft range, and this
+     * returns its center, 100 n - 1100 ft; code 1, below -950 ft, has none. {@link #getAltitudeInterval()} gives the
+     * range itself.
      *
-     * @return the decoded barometric altitude in feet if applicable
+     * @return the decoded barometric altitude in feet if applicable, or null if the altitude is not available or its
+     * code is invalid
      */
     public Integer getAltitude() {
         if (hasTransponderAddress) return null;
+        if (binaryAltitude) return altitudeCode < 2 ? null : 100 * altitudeCode - 1100;
         return Altitude.decode13BitAltitude(altitudeCode);
+    }
+
+    /**
+     * The altitude range in feet a binary altitude (ACAS X) stands for, ICAO Annex 10 Volume IV (6th edition)
+     * §4.3.8.4.2.2.2.9.1: code 1 is below -950 ft, and code n from 2 on is at least 100 n - 1150 ft and below
+     * 100 n - 1050 ft.
+     *
+     * @return the altitude range in feet, or null if the threat is identified by its address, no altitude is
+     * available (code 0), or the altitude is a Mode C code, which {@link #getAltitude()} decodes
+     */
+    public Interval getAltitudeInterval() {
+        if (hasTransponderAddress || !binaryAltitude || altitudeCode == 0) return null;
+        if (altitudeCode == 1) return Interval.of(Bound.NONE, 0, Bound.BELOW, -950);
+        return Interval.of(Bound.AT_LEAST, 100 * altitudeCode - 1150, Bound.BELOW, 100 * altitudeCode - 1050);
     }
 
     /**
