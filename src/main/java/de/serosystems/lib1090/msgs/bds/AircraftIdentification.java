@@ -21,6 +21,7 @@ package de.serosystems.lib1090.msgs.bds;
 import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.decoding.Identification;
 import de.serosystems.lib1090.decoding.InternationalAlphabet5;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 
 /**
  * Decoder for aircraft identification (BDS 2,0), as defined in ICAO Doc 9871 (First Edition,
@@ -44,9 +45,12 @@ public class AircraftIdentification extends BDSRegister {
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
+     * @throws BadFormatException if MB bits 1-8 are not 0010 0000, BDS1 = 2 and BDS2 = 0 (ICAO Doc 9871 §A.2 Table
+     *                            A-2-32)
      */
-    public AircraftIdentification(byte[] message) {
+    public AircraftIdentification(byte[] message) throws BadFormatException {
         super(message);
+        requireBDSCode();
 
         aircraftIdentificationEncoded = BitReader.forBigEndian(message).readLong(9, 56);
     }

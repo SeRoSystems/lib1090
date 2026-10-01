@@ -95,8 +95,8 @@ public abstract class DataLinkCapabilityReport extends BDSRegister {
      * @param message the 7-byte comm-b message (BDS register) as byte array
      * @return a {@link DataLinkCapabilityReportV6} from subnetwork version 6 on, a {@link DataLinkCapabilityReportV0V5}
      * below it
-     * @throws BadFormatException declared by the constructors of the two layouts; it does not occur, since the
-     *                            version selects the layout
+     * @throws BadFormatException if MB bits 1-8 are not 0001 0000, BDS1 = 1 and BDS2 = 0 (ICAO Annex 10 Volume IV
+     *                            §3.1.2.6.10.2.2.2, ICAO Doc 9871 §A.2 Table A-2-16)
      */
     public static DataLinkCapabilityReport decode(byte[] message) throws BadFormatException {
         return subNetworkVersionNumber(message) >= 6
@@ -114,9 +114,12 @@ public abstract class DataLinkCapabilityReport extends BDSRegister {
 
     /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
+     * @throws BadFormatException if MB bits 1-8 are not 0001 0000, BDS1 = 1 and BDS2 = 0 (ICAO Annex 10 Volume IV
+     *                            §3.1.2.6.10.2.2.2, ICAO Doc 9871 §A.2 Table A-2-16)
      */
-    protected DataLinkCapabilityReport(byte[] message) {
+    protected DataLinkCapabilityReport(byte[] message) throws BadFormatException {
         super(message);
+        requireBDSCode();
 
         BitReader b = BitReader.forBigEndian(message);
 

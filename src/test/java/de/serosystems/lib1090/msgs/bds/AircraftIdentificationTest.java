@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +31,7 @@ public class AircraftIdentificationTest {
     };
 
     @Test
-    public void aircraftIdentification() {
+    public void aircraftIdentification() throws BadFormatException {
         AircraftIdentification id = new AircraftIdentification(MSG);
 
         assertEquals(0x2CC371C31DE0L, id.getAircraftIdentificationEncoded());
@@ -43,7 +44,7 @@ public class AircraftIdentificationTest {
      * a Comm-B reply is unlikely to carry BDS 2,0: here the trailing space (code 32) replaced by code 63.
      */
     @Test
-    public void undefinedCharacterInvalidatesIdentification() {
+    public void undefinedCharacterInvalidatesIdentification() throws BadFormatException {
         assertTrue(new AircraftIdentification(MSG).hasValidAircraftIdentification());
 
         byte[] corrupted = MSG.clone();
@@ -57,7 +58,7 @@ public class AircraftIdentificationTest {
      * Every register reports its raw message through the base class, as the ADS-B messages do.
      */
     @Test
-    public void toStringIncludesTheMessage() {
+    public void toStringIncludesTheMessage() throws BadFormatException {
         assertTrue(new AircraftIdentification(MSG).toString()
                 .startsWith("AircraftIdentification{BDSRegister{bdsCode=2,0, message=202cc371c31de0}"));
     }

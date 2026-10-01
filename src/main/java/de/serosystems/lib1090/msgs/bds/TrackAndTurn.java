@@ -236,6 +236,21 @@ public class TrackAndTurn extends BDSRegister {
         return trueAirspeedEncoded * 2;
     }
 
+    /**
+     * Whether the register obeys the format rules of ICAO Doc 9871 §A.2 Table A-2-80: every field whose status bit is
+     * ZERO is ZERO as well, Note 3 and §A.2.1.1: roll angle (status 1, bits 2-11), true track angle (12, 13-23), ground
+     * speed (24, 25-34), track angle rate (35, 36-45) and true airspeed (46, 47-56).
+     * <p>
+     * The register carries no identifier, so these rules are what tells it from another register; a register that
+     * breaks them is not this one or is malformed. Whether the values are plausible is not checked.
+     *
+     * @return whether the register is consistent with its format
+     */
+    public boolean isConsistent() {
+        return isZeroUnlessValid(1, 11) && isZeroUnlessValid(12, 23) && isZeroUnlessValid(24, 34)
+                && isZeroUnlessValid(35, 45) && isZeroUnlessValid(46, 56);
+    }
+
     @Override
     public BDSCode getBDSCode() {
         return BDS_CODE;
