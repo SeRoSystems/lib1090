@@ -30,6 +30,10 @@ import de.serosystems.lib1090.msgs.acas.ACASType;
  * ICAO Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-16 used MB bits 41-56 as a bit array of supported DTE
  * sub-addresses instead, which Table 3-6 has moved to register 11₁₆ (Note to Table 3-6). A transponder following Doc
  * 9871 First Edition still reports them there, which the accessors of MB bits 42-51 then misread.
+ * <p>
+ * Whether the transponder supports the enhanced surveillance registers 4,0, 5,0 and 6,0 is not reported here, but in
+ * the common usage GICB capability report (BDS 1,7), see {@link CommonUsageGICBCapabilityReport}; MB bit 36,
+ * {@link #isCommonUsageGicb()}, toggles each time that report changes.
  */
 @SuppressWarnings("unused")
 public class DataLinkCapabilityReport extends BDSRegister {
@@ -77,8 +81,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
     private boolean phaseOverlayExtendedSquitterCapability;
     // Phase Overlay on Mode S Capability
     private boolean phaseOverlayModeSCapability;
-    // Enhanced Surveillance (EHS) Capability
-    private boolean enhancedSurveillanceCapability;
     // Active Transponder Side Indicator
     private short activeTransponderSideIndicator;
     // Register 1116 Change Flag / Data Link Capability (continuation) Change Indicator
@@ -118,7 +120,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
         basicDataFlashCapability = b.readBoolean(42);
         phaseOverlayExtendedSquitterCapability = b.readBoolean(43);
         phaseOverlayModeSCapability = b.readBoolean(44);
-        enhancedSurveillanceCapability = b.readBoolean(47);
         activeTransponderSideIndicator = b.readShort(49, 50);
         changeFlag = b.readBoolean(51);
     }
@@ -363,13 +364,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
-     * @return whether the transponder has Enhanced Surveillance capability
-     */
-    public boolean isEnhancedSurveillanceCapability() {
-        return enhancedSurveillanceCapability;
-    }
-
-    /**
      * MB bits 49-50, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
      *
      * @return the active transponder side indicator
@@ -416,7 +410,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
                 ", basicDataFlashCapability=" + basicDataFlashCapability +
                 ", phaseOverlayExtendedSquitterCapability=" + phaseOverlayExtendedSquitterCapability +
                 ", phaseOverlayModeSCapability=" + phaseOverlayModeSCapability +
-                ", enhancedSurveillanceCapability=" + enhancedSurveillanceCapability +
                 ", activeTransponderSideIndicator=" + activeTransponderSideIndicator +
                 ", changeFlag=" + changeFlag +
                 '}';
