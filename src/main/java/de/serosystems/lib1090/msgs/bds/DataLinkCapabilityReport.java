@@ -19,24 +19,31 @@
 package de.serosystems.lib1090.msgs.bds;
 
 import de.serosystems.lib1090.decoding.BitReader;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.acas.ACASType;
 
 /**
  * Decoder for the data link capability report (BDS 1,0), following the layout of ICAO Annex 10 Volume IV (6th
  * edition) §3.1.2.6.10.2.2.1.3 Table 3-6, with the ACAS bits (MB bits 11-14, 16 and 37-40) as §4.3.8.4.2.2.3 defines
- * them. Bit numbers in this class are MB bit numbers; the Annex's message bit numbers are 32 higher. DO-181E and
- * DO-181F (Table B-3-16a) define the same layout.
+ * them. Bit numbers in this class are MB bit numbers; the Annex's message bit numbers are 32 higher. DO-181F and
+ * ED-73F (Table B-3-16a) define the same layout.
  * <p>
- * ICAO Doc 9871 (First Edition, AN/464) §A.2 TABLE A-2-16 used MB bits 41-56 as a bit array of supported DTE
- * sub-addresses instead, which Table 3-6 has moved to register 11₁₆ (Note to Table 3-6). A transponder following Doc
- * 9871 First Edition still reports them there, which the accessors of MB bits 42-51 then misread.
+ * MB bits 41-56 have two layouts, which the Mode S subnetwork version number selects, so this class holds MB bits 9-40
+ * and {@link #decode(byte[])} picks the subclass for the rest:
+ * <ul>
+ *     <li>{@link DataLinkCapabilityReportV6}, from version 6 on, the version of DO-181F and ED-73F: the basic
+ *     dataflash and phase overlay capabilities, the active transponder side and the change indicator</li>
+ *     <li>{@link DataLinkCapabilityReportV0V5}, below version 6, ICAO Doc 9871 First and Second Edition §A.2 Table
+ *     A-2-16: the support status of DTE sub-addresses 0 to 15, which Table 3-6 has moved to register 11₁₆ (Note to
+ *     Table 3-6)</li>
+ * </ul>
  * <p>
  * Whether the transponder supports the enhanced surveillance registers 4,0, 5,0 and 6,0 is not reported here, but in
  * the common usage GICB capability report (BDS 1,7), see {@link CommonUsageGICBCapabilityReport}; MB bit 36,
  * {@link #isCommonUsageGicb()}, toggles each time that report changes.
  */
 @SuppressWarnings("unused")
-public class DataLinkCapabilityReport extends BDSRegister {
+public abstract class DataLinkCapabilityReport extends BDSRegister {
     private static final long serialVersionUID = 2607206512004324831L;
 
     private static final BDSCode BDS_CODE = new BDSCode(1, 0);
@@ -75,16 +82,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
     private boolean acasGeneratingRAs;
     // ACAS Version Number
     private short acasVersionNumber;
-    // Basic Data Flash Capability
-    private boolean basicDataFlashCapability;
-    // Phase Overlay on Extended Squitter Capability
-    private boolean phaseOverlayExtendedSquitterCapability;
-    // Phase Overlay on Mode S Capability
-    private boolean phaseOverlayModeSCapability;
-    // Active Transponder Side Indicator
-    private short activeTransponderSideIndicator;
-    // Register 1116 Change Flag / Data Link Capability (continuation) Change Indicator
-    private boolean changeFlag;
 
     /**
      * protected no-arg constructor e.g. for serialization with Kryo
@@ -93,9 +90,32 @@ public class DataLinkCapabilityReport extends BDSRegister {
     }
 
     /**
+     * Decodes a data link capability report in the layout its Mode S subnetwork version number selects.
+     *
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     * @return a {@link DataLinkCapabilityReportV6} from subnetwork version 6 on, a {@link DataLinkCapabilityReportV0V5}
+     * below it
+     * @throws BadFormatException declared by the constructors of the two layouts; it does not occur, since the
+     *                            version selects the layout
+     */
+    public static DataLinkCapabilityReport decode(byte[] message) throws BadFormatException {
+        return subNetworkVersionNumber(message) >= 6
+                ? new DataLinkCapabilityReportV6(message)
+                : new DataLinkCapabilityReportV0V5(message);
+    }
+
+    /**
+     * @param message the 7-byte comm-b message (BDS register) as byte array
+     * @return the Mode S subnetwork version number, MB bits 17-23
+     */
+    static short subNetworkVersionNumber(byte[] message) {
+        return BitReader.forBigEndian(message).readShort(17, 23);
+    }
+
+    /**
      * @param message the 7-byte comm-b message (BDS register) as byte array
      */
-    public DataLinkCapabilityReport(byte[] message) {
+    protected DataLinkCapabilityReport(byte[] message) {
         super(message);
 
         BitReader b = BitReader.forBigEndian(message);
@@ -117,11 +137,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
         acasHybridSurveillanceCapability = b.readBoolean(37);
         acasGeneratingRAs = b.readBoolean(38);
         acasVersionNumber = (short) (b.readShort(40, 40) << 1 | b.readShort(39, 39));
-        basicDataFlashCapability = b.readBoolean(42);
-        phaseOverlayExtendedSquitterCapability = b.readBoolean(43);
-        phaseOverlayModeSCapability = b.readBoolean(44);
-        activeTransponderSideIndicator = b.readShort(49, 50);
-        changeFlag = b.readBoolean(51);
     }
 
     /**
@@ -189,10 +204,13 @@ public class DataLinkCapabilityReport extends BDSRegister {
      *     <li>1: ICAO Doc 9688 (1996)</li>
      *     <li>2: ICAO Doc 9688 (1998)</li>
      *     <li>3: ICAO Annex 10, Volume III, Amendment 77</li>
-     *     <li>4: ICAO Doc 9871, Edition 1</li>
-     *     <li>5: ICAO Doc 9871, Edition 2</li>
-     *     <li>6-127: Reserved</li>
+     *     <li>4: ICAO Doc 9871, Edition 1 (RTCA DO-181D, EUROCAE ED-73C)</li>
+     *     <li>5: ICAO Doc 9871, Edition 2 (RTCA DO-181E, EUROCAE ED-73E)</li>
+     *     <li>6: RTCA DO-181F and EUROCAE ED-73F, which assign it to an "ICAO Doc 9871, Edition 3"; Doc 9871 Edition 2
+     *     still lists 6 as reserved</li>
+     *     <li>7-127: Reserved</li>
      * </ul>
+     * The version selects the layout of MB bits 41-56, see {@link #decode(byte[])}.
      */
     public short getModeSSubNetworkVersionNumber() {
         return modeSSubNetworkVersionNumber;
@@ -336,52 +354,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
         return acasVersionNumber;
     }
 
-    /**
-     * MB bit 42, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
-     *
-     * @return whether the transponder has Basic Dataflash capability
-     */
-    public boolean isBasicDataFlashCapability() {
-        return basicDataFlashCapability;
-    }
-
-    /**
-     * MB bit 43, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
-     *
-     * @return whether phase overlay in extended squitter is supported
-     */
-    public boolean isPhaseOverlayExtendedSquitterCapability() {
-        return phaseOverlayExtendedSquitterCapability;
-    }
-
-    /**
-     * MB bit 44, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
-     *
-     * @return whether phase overlay for Mode S is supported
-     */
-    public boolean isPhaseOverlayModeSCapability() {
-        return phaseOverlayModeSCapability;
-    }
-
-    /**
-     * MB bits 49-50, ICAO Annex 10 Volume IV (6th edition) Table 3-6; see the class documentation.
-     *
-     * @return the active transponder side indicator
-     */
-    public short getActiveTransponderSideIndicator() {
-        return activeTransponderSideIndicator;
-    }
-
-    /**
-     * MB bit 51, the register 11₁₆ data link capability (continuation) change indicator, ICAO Annex 10 Volume IV (6th
-     * edition) Table 3-6; see the class documentation.
-     *
-     * @return whether change flag is set
-     */
-    public boolean isChangeFlag() {
-        return changeFlag;
-    }
-
     @Override
     public BDSCode getBDSCode() {
         return BDS_CODE;
@@ -407,11 +379,6 @@ public class DataLinkCapabilityReport extends BDSRegister {
                 ", acasHybridSurveillanceCapability=" + acasHybridSurveillanceCapability +
                 ", acasGeneratingRAs=" + acasGeneratingRAs +
                 ", acasVersionNumber=" + acasVersionNumber +
-                ", basicDataFlashCapability=" + basicDataFlashCapability +
-                ", phaseOverlayExtendedSquitterCapability=" + phaseOverlayExtendedSquitterCapability +
-                ", phaseOverlayModeSCapability=" + phaseOverlayModeSCapability +
-                ", activeTransponderSideIndicator=" + activeTransponderSideIndicator +
-                ", changeFlag=" + changeFlag +
                 '}';
     }
 }

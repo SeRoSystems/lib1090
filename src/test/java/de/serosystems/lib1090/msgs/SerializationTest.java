@@ -83,7 +83,7 @@ public class SerializationTest {
                 new ACASActiveResolutionAdvisoryReport(Tools.hexStringToByteArray("300003FC000000")),
                 new AircraftIdentification(Tools.hexStringToByteArray("202CC371C31DE0")),
                 new CommonUsageGICBCapabilityReport(Tools.hexStringToByteArray("FA81C100000000")),
-                new DataLinkCapabilityReport(Tools.hexStringToByteArray("10C003B3FD7260")),
+                DataLinkCapabilityReport.decode(Tools.hexStringToByteArray("10C003B3FD7260")),
                 new HeadingAndSpeed(Tools.hexStringToByteArray("A74A072BFDEFC1")),
                 new SelectedVerticalIntention(Tools.hexStringToByteArray("85E42F31300000")),
                 new TrackAndTurn(Tools.hexStringToByteArray("81951536E024D4")),

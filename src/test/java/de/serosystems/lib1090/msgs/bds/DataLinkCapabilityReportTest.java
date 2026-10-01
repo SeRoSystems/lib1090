@@ -18,6 +18,8 @@
 
 package de.serosystems.lib1090.msgs.bds;
 
+import de.serosystems.lib1090.Tools;
+import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.msgs.acas.ACASType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,19 +39,19 @@ public class DataLinkCapabilityReportTest {
     }
 
     @Test
-    public void continuationFlag() {
-        assertTrue(new DataLinkCapabilityReport(msg).isContinuationFlag());
+    public void continuationFlag() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isContinuationFlag());
     }
 
     @Test
-    public void ocmTransmitCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isOCMTransmitCapability());
+    public void ocmTransmitCapability() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isOCMTransmitCapability());
     }
 
     @Test
-    public void acasType() {
-        assertEquals(0, new DataLinkCapabilityReport(msg).getACASTypeEncoded());
-        assertEquals(ACASType.TCAS_OR_OTHER, new DataLinkCapabilityReport(msg).getACASType());
+    public void acasType() throws BadFormatException {
+        assertEquals(0, DataLinkCapabilityReport.decode(msg).getACASTypeEncoded());
+        assertEquals(ACASType.TCAS_OR_OTHER, DataLinkCapabilityReport.decode(msg).getACASType());
     }
 
     /**
@@ -57,148 +59,194 @@ public class DataLinkCapabilityReportTest {
      * for ACAS III.
      */
     @Test
-    public void acasType_acasXaAndReserved() {
+    public void acasType_acasXaAndReserved() throws BadFormatException {
         byte[] acasXa = {0x10, 0x04, 0, 0, 0, 0, 0}; // MB bit 14
-        assertEquals(1, new DataLinkCapabilityReport(acasXa).getACASTypeEncoded());
-        assertEquals(ACASType.ACAS_XA, new DataLinkCapabilityReport(acasXa).getACASType());
+        assertEquals(1, DataLinkCapabilityReport.decode(acasXa).getACASTypeEncoded());
+        assertEquals(ACASType.ACAS_XA, DataLinkCapabilityReport.decode(acasXa).getACASType());
 
         byte[] reserved = {0x10, 0x3C, 0, 0, 0, 0, 0}; // MB bits 11-14 = 1111
-        assertEquals(15, new DataLinkCapabilityReport(reserved).getACASTypeEncoded());
-        assertEquals(ACASType.ACAS_III, new DataLinkCapabilityReport(reserved).getACASType());
+        assertEquals(15, DataLinkCapabilityReport.decode(reserved).getACASTypeEncoded());
+        assertEquals(ACASType.ACAS_III, DataLinkCapabilityReport.decode(reserved).getACASType());
     }
 
     @Test
-    public void overlayCommandCapability() {
-        assertFalse(new DataLinkCapabilityReport(msg).isOverlayCommandCapability());
+    public void overlayCommandCapability() throws BadFormatException {
+        assertFalse(DataLinkCapabilityReport.decode(msg).isOverlayCommandCapability());
     }
 
     @Test
-    public void acasOperating() {
-        assertFalse(new DataLinkCapabilityReport(msg).isACASOperating());
+    public void acasOperating() throws BadFormatException {
+        assertFalse(DataLinkCapabilityReport.decode(msg).isACASOperating());
     }
 
     @Test
-    public void modeSSubNetworkVersionNumber() {
-        assertEquals(1, new DataLinkCapabilityReport(msg).getModeSSubNetworkVersionNumber());
+    public void modeSSubNetworkVersionNumber() throws BadFormatException {
+        assertEquals(1, DataLinkCapabilityReport.decode(msg).getModeSSubNetworkVersionNumber());
     }
 
     @Test
-    public void transponderEnhancedProtocolIndicator() {
-        assertTrue(new DataLinkCapabilityReport(msg).isTransponderEnhancedProtocolIndicator());
+    public void transponderEnhancedProtocolIndicator() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isTransponderEnhancedProtocolIndicator());
     }
 
     @Test
-    public void modeSSpecificServicesCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isModeSSpecificServicesCapability());
+    public void modeSSpecificServicesCapability() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isModeSSpecificServicesCapability());
     }
 
     @Test
-    public void uelmAverageThroughputCapability() {
-        assertEquals(3, new DataLinkCapabilityReport(msg).getUelmAverageThroughputCapability());
+    public void uelmAverageThroughputCapability() throws BadFormatException {
+        assertEquals(3, DataLinkCapabilityReport.decode(msg).getUelmAverageThroughputCapability());
     }
 
     @Test
-    public void delmThroughputCapability() {
-        assertEquals(3, new DataLinkCapabilityReport(msg).getDelmThroughputCapability());
+    public void delmThroughputCapability() throws BadFormatException {
+        assertEquals(3, DataLinkCapabilityReport.decode(msg).getDelmThroughputCapability());
     }
 
     @Test
-    public void aircraftIdentificationCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isAircraftIdentificationCapability());
+    public void aircraftIdentificationCapability() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isAircraftIdentificationCapability());
     }
 
     @Test
-    public void squitterCapabilitySubfield() {
-        assertTrue(new DataLinkCapabilityReport(msg).isSquitterCapabilitySubfield());
+    public void squitterCapabilitySubfield() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isSquitterCapabilitySubfield());
     }
 
     @Test
-    public void surveillanceIdentifierCode() {
-        assertTrue(new DataLinkCapabilityReport(msg).isSurveillanceIdentifierCode());
+    public void surveillanceIdentifierCode() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isSurveillanceIdentifierCode());
     }
 
     @Test
-    public void commonUsageGICB() {
-        assertTrue(new DataLinkCapabilityReport(msg).isCommonUsageGicb());
+    public void commonUsageGICB() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isCommonUsageGicb());
     }
 
     @Test
-    public void acasHybridSurveillanceCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isACASHybridSurveillanceCapability());
+    public void acasHybridSurveillanceCapability() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isACASHybridSurveillanceCapability());
     }
 
     @Test
-    public void acasGeneratingRAs() {
-        assertTrue(new DataLinkCapabilityReport(msg).isACASGeneratingRAs());
+    public void acasGeneratingRAs() throws BadFormatException {
+        assertTrue(DataLinkCapabilityReport.decode(msg).isACASGeneratingRAs());
     }
 
     @Test
-    public void acasVersionNumber() {
-        assertEquals(2, new DataLinkCapabilityReport(msg).getACASVersionNumber());
+    public void acasVersionNumber() throws BadFormatException {
+        assertEquals(2, DataLinkCapabilityReport.decode(msg).getACASVersionNumber());
+    }
+
+    /**
+     * The test register with subnetwork version 6, the version of DO-181F and ED-73F, so that MB bits 41-56 have the
+     * ED-73F layout.
+     */
+    private static DataLinkCapabilityReportV6 version6() throws BadFormatException {
+        byte[] v6 = msg.clone();
+        v6[2] = 0b00001101; // MB bits 17-23 = 6, bit 24 as before
+        return (DataLinkCapabilityReportV6) DataLinkCapabilityReport.decode(v6);
     }
 
     @Test
-    public void basicDataFlashCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isBasicDataFlashCapability());
+    public void basicDataFlashCapability() throws BadFormatException {
+        assertTrue(version6().isBasicDataFlashCapability());
     }
 
     @Test
-    public void phaseOverlayExtendedSquitterCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isPhaseOverlayExtendedSquitterCapability());
+    public void phaseOverlayExtendedSquitterCapability() throws BadFormatException {
+        assertTrue(version6().isPhaseOverlayExtendedSquitterCapability());
     }
 
     @Test
-    public void phaseOverlayModeSCapability() {
-        assertTrue(new DataLinkCapabilityReport(msg).isPhaseOverlayModeSCapability());
+    public void phaseOverlayModeSCapability() throws BadFormatException {
+        assertTrue(version6().isPhaseOverlayModeSCapability());
     }
 
     @Test
-    public void activeTransponderSideIndicator() {
-        assertEquals(1, new DataLinkCapabilityReport(msg).getActiveTransponderSideIndicator());
+    public void activeTransponderSideIndicator() throws BadFormatException {
+        assertEquals(1, version6().getActiveTransponderSideIndicator());
     }
 
     @Test
-    public void changeFlag() {
-        assertTrue(new DataLinkCapabilityReport(msg).isChangeFlag());
+    public void changeFlag() throws BadFormatException {
+        assertTrue(version6().isChangeFlag());
+    }
+
+    /**
+     * decode() picks the layout by the subnetwork version number: version 6 and up DO-181F/ED-73F, below it the DTE
+     * sub-address array of ICAO Doc 9871 First and Second Edition. The constructors reject the other layout with a
+     * BadFormatException.
+     */
+    @Test
+    public void decode_picksTheLayoutByVersion() throws BadFormatException {
+        assertInstanceOf(DataLinkCapabilityReportV6.class, version6());
+        assertEquals(6, version6().getModeSSubNetworkVersionNumber());
+        assertInstanceOf(DataLinkCapabilityReportV0V5.class, DataLinkCapabilityReport.decode(msg)); // version 1
+
+        assertThrows(BadFormatException.class, () -> new DataLinkCapabilityReportV6(msg));
+        byte[] v6 = msg.clone();
+        v6[2] = 0b00001101;
+        assertThrows(BadFormatException.class, () -> new DataLinkCapabilityReportV0V5(v6));
+    }
+
+    /**
+     * Below subnetwork version 6, MB bits 41-56 are the DTE sub-address array, MSB first.
+     */
+    @Test
+    public void belowVersion6_isTheDTESubAddressArray() throws BadFormatException {
+        DataLinkCapabilityReportV0V5 report = (DataLinkCapabilityReportV0V5) DataLinkCapabilityReport.decode(msg);
+
+        // MB bits 41-56 = 0111 0010 0110 0000: sub-addresses 1, 2, 3, 6, 9 and 10
+        assertEquals(0x7260, report.getDTESubAddressSupportEncoded());
+        assertArrayEquals(new boolean[]{false, true, true, true, false, false, true, false, false, true, true, false,
+                false, false, false, false}, report.getDTESubAddressSupport());
+
+        // the repro of #187: DTE sub-addresses 1 and 5 used to read as basic dataflash capability
+        DataLinkCapabilityReport repro = DataLinkCapabilityReport.decode(Tools.hexStringToByteArray("10000000004400"));
+        assertInstanceOf(DataLinkCapabilityReportV0V5.class, repro);
+        assertTrue(((DataLinkCapabilityReportV0V5) repro).getDTESubAddressSupport()[1]);
+        assertTrue(((DataLinkCapabilityReportV0V5) repro).getDTESubAddressSupport()[5]);
     }
 
     @Test
-    void acasVersion0() {
+    void acasVersion0() throws BadFormatException {
         byte[] message = new byte[]{
-                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0x10, (byte) 0xff, (byte) 0xff, (byte) 0xff, // BDS 1,0
                 (byte) 0b11111100,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(0, new DataLinkCapabilityReport(message).getACASVersionNumber());
+        assertEquals(0, DataLinkCapabilityReport.decode(message).getACASVersionNumber());
     }
 
     @Test
-    void acasVersion1() {
+    void acasVersion1() throws BadFormatException {
         byte[] message = new byte[]{
-                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0x10, (byte) 0xff, (byte) 0xff, (byte) 0xff, // BDS 1,0
                 (byte) 0b11111110,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(1, new DataLinkCapabilityReport(message).getACASVersionNumber());
+        assertEquals(1, DataLinkCapabilityReport.decode(message).getACASVersionNumber());
     }
 
     @Test
-    void acasVersion2() {
+    void acasVersion2() throws BadFormatException {
         byte[] message = new byte[]{
-                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0x10, (byte) 0xff, (byte) 0xff, (byte) 0xff, // BDS 1,0
                 (byte) 0b11111101,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(2, new DataLinkCapabilityReport(message).getACASVersionNumber());
+        assertEquals(2, DataLinkCapabilityReport.decode(message).getACASVersionNumber());
     }
 
     @Test
-    void acasVersion3() {
+    void acasVersion3() throws BadFormatException {
         byte[] message = new byte[]{
-                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0x10, (byte) 0xff, (byte) 0xff, (byte) 0xff, // BDS 1,0
                 (byte) 0b11111111,
                 (byte) 0xff, (byte) 0xff
         };
-        assertEquals(3, new DataLinkCapabilityReport(message).getACASVersionNumber());
+        assertEquals(3, DataLinkCapabilityReport.decode(message).getACASVersionNumber());
     }
 }
