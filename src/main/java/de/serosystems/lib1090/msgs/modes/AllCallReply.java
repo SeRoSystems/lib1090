@@ -75,8 +75,8 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
         capabilitiesEncoded = getBitReader().readByte(6, 8);
 
-        // extract interrogator ID
-        parityInterrogator = calcParityInt() ^ getParity();
+        // extract interrogator ID, which the parity field is overlaid on; with noCRC, the CRC is already removed
+        parityInterrogator = getParityResidual();
 
         codeLabelEncoded = (byte) ((parityInterrogator >> 4) & 0x7);
     }
