@@ -32,6 +32,14 @@ public class StatefulPositionDecoder implements PositionDecoder {
      */
     private static final int MAX_DIST_TO_SENDER = 700000; // 700km
 
+    /**
+     * Maximum age of the last position for it to serve as the reference of a local decode, after which the target
+     * is decoded as a new one: the time after which ED-102B §2.2.10.3.1 g and §2.2.10.3.2 f consider a global decode
+     * invalid, far below the time a target needs to move half a zone, 175 NM airborne or 42 NM on the surface
+     * (ED-102B §A.1.7.4 NOTE)
+     */
+    private static final Duration REFERENCE_TIMEOUT = Duration.ofSeconds(120);
+
     private CPREncodedPosition lastEven;
     private CPREncodedPosition lastOdd;
     private Position lastPosition;
@@ -83,6 +91,17 @@ public class StatefulPositionDecoder implements PositionDecoder {
         // and throw otherwise, so this needs to be checked before calling them
         if (lastOther != null && (lastOther.getNBits() != cpr.getNBits() || lastOther.isSurface() != cpr.isSurface()))
             lastOther = null;
+
+        // after a long gap, the target may have moved more than half a zone from the last position, beyond which
+        // local decoding is ambiguous, so it is decoded as a new target; the gap is taken between the earlier and the
+        // later timestamp, so that it is never negative: Duration.abs() of a negative duration goes through BigDecimal
+        // on Java 8
+        if (lastTime != null && (cpr.getTimestamp().isAfter(lastTime)
+                ? Duration.between(lastTime, cpr.getTimestamp())
+                : Duration.between(cpr.getTimestamp(), lastTime)).compareTo(REFERENCE_TIMEOUT) > 0) {
+            lastPosition = null;
+            numReasonable = 0;
+        }
 
         // only use receiver as reference for surface positions (might be too far away for airborne)
         Position refPos = lastPosition != null ? lastPosition : (cpr.isSurface() ? receiver : null);

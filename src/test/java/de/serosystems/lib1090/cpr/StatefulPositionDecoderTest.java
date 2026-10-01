@@ -62,4 +62,69 @@ class StatefulPositionDecoderTest {
         assertEquals(52.2658, actual.getLatitude(), 1e-4);
     }
 
+    /**
+     * Airborne CPR encoding with 17 bits, ED-102B §A.1.7.3.
+     */
+    private static CPREncodedPosition encode(double lat, double lon, boolean odd, Instant timestamp) {
+        int i = odd ? 1 : 0;
+        double dLat = 360.0 / (60 - i);
+        int yz = (int) Math.floor((1 << 17) * mod(lat, dLat) / dLat + 0.5);
+        double rLat = dLat * (yz / (double) (1 << 17) + Math.floor(lat / dLat));
+        double dLon = 360.0 / Math.max(nl(rLat) - i, 1);
+        int xz = (int) Math.floor((1 << 17) * mod(lon, dLon) / dLon + 0.5);
+        return CPREncodedPosition.ofAirborne(17, odd, yz % (1 << 17), xz % (1 << 17), timestamp);
+    }
+
+    private static double mod(double x, double y) {
+        return x - y * Math.floor(x / y);
+    }
+
+    private static int nl(double lat) {
+        if (lat == 0) return 59;
+        if (Math.abs(lat) == 87) return 2;
+        if (Math.abs(lat) > 87) return 1;
+        double a = 1 - Math.cos(Math.PI / 30);
+        double b = Math.pow(Math.cos(Math.toRadians(lat)), 2);
+        return (int) Math.floor(2 * Math.PI / Math.acos(1 - a / b));
+    }
+
+    /**
+     * A track at 40N 10E, whose last position, at T0 + 3 s, is reasonable.
+     */
+    private static StatefulPositionDecoder track() {
+        StatefulPositionDecoder decoder = new StatefulPositionDecoder();
+        for (int s = 0; s < 4; s++) decoder.decodePosition(encode(40, 10, s % 2 == 1, T0.plusSeconds(s)), null);
+        return decoder;
+    }
+
+    /**
+     * After two hours, the target is 4° further north, more than half an even zone of 6°. Decoded locally against
+     * the old position, it came out at 38N, flagged reasonable. Now it is decoded as a new target: no position
+     * without a pair, and one not yet reasonable with it.
+     */
+    @Test
+    void anOldPositionIsNoReference() throws Exception {
+        StatefulPositionDecoder decoder = track();
+        assertTrue(decoder.decodePosition(encode(40, 10, false, T0.plusSeconds(4)), null).isReasonable());
+
+        StatefulPositionDecoder returned = track();
+        assertNull(returned.decodePosition(encode(44, 10, false, T0.plusSeconds(7200)), null));
+        Position global = returned.decodePosition(encode(44, 10, true, T0.plusSeconds(7201)), null);
+        assertEquals(44, global.getLatitude(), 1e-3);
+        assertEquals(10, global.getLongitude(), 1e-3);
+        assertFalse(global.isReasonable());
+    }
+
+    /**
+     * The last position stays the reference for 120 s.
+     */
+    @Test
+    void theReferenceExpiresAfter120Seconds() throws Exception {
+        Position local = track().decodePosition(encode(40.1, 10, false, T0.plusSeconds(3 + 120)), null);
+        assertEquals(40.1, local.getLatitude(), 1e-3);
+        assertTrue(local.isReasonable());
+
+        assertNull(track().decodePosition(encode(40.1, 10, false, T0.plusSeconds(3 + 121)), null));
+    }
+
 }
