@@ -63,6 +63,7 @@ public class StatefulModeSDecoder {
     private final boolean tisbV2CompatibilityMode;
     private final boolean checkParity;
     private final boolean decodeBeforeVersionKnown;
+    private final boolean decodeTypeCodeZero;
     // keyed by the qualified address including its source, so that ADS-B, ADS-R and TIS-B receptions
     // for the same address never share version, NIC supplements or CPR state (see QualifiedAddress)
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
@@ -83,6 +84,7 @@ public class StatefulModeSDecoder {
         this.tisbV2CompatibilityMode = builder.tisbV2CompatibilityMode;
         this.checkParity = builder.checkParity;
         this.decodeBeforeVersionKnown = builder.decodeBeforeVersionKnown;
+        this.decodeTypeCodeZero = builder.decodeTypeCodeZero;
     }
 
     /**
@@ -473,7 +475,13 @@ public class StatefulModeSDecoder {
             }
         }
 
-        if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22)) {
+        // TYPE Code 0, no position, is an airborne position message without horizontal position if it carries a
+        // barometric altitude, ME bits 9-20 (ED-102B §2.2.3.2.3.1.3.1); without one, it is all zeros and to be
+        // discarded (§2.2.7.1.1 a), and might as well be a surface position message (§2.2.3.2.4.1.3.1)
+        boolean altitudeOnly = ftc == 0 && decodeTypeCodeZero &&
+                (es1090.getMessage()[1] != 0 || (es1090.getMessage()[2] & 0xf0) != 0);
+
+        if ((ftc >= 9 && ftc <= 18) || (ftc >= 20 && ftc <= 22) || altitudeOnly) {
             // airborne position message
             switch (dd.adsbVersion) {
                 case 0:
@@ -845,6 +853,7 @@ public class StatefulModeSDecoder {
         private boolean tisbV2CompatibilityMode = true;
         private boolean checkParity = true;
         private boolean decodeBeforeVersionKnown = true;
+        private boolean decodeTypeCodeZero = true;
 
         private Builder() {
         }
@@ -964,6 +973,27 @@ public class StatefulModeSDecoder {
          */
         public Builder decodeBeforeVersionKnown(boolean decodeBeforeVersionKnown) {
             this.decodeBeforeVersionKnown = decodeBeforeVersionKnown;
+            return this;
+        }
+
+        /**
+         * Whether to decode ADS-B messages of TYPE Code 0, "No Position Information", that carry a barometric altitude
+         * as airborne position messages of the target's version. A transmitter sends them when it has lost its
+         * horizontal position, with the altitude in ME bits 9-20 (ED-102B §2.2.3.2.3.1.3.1), which a receiver may use
+         * to update the altitude of a target it tracks (ED-102B §2.2.7.1.1 b). The message then reports no valid
+         * position ({@link PositionMsg#hasValidPosition()}), so {@link StatefulModeSDecoder#extractPosition} gives null for it.
+         * <p>
+         * A TYPE Code 0 message without altitude has all ME bits zero and is not decoded further either way: ED-102B
+         * §2.2.7.1.1 a requires discarding it, and it may as well stand for a surface position message
+         * (§2.2.3.2.4.1.3.1). Disabled, TYPE Code 0 messages are not decoded further at all. ADS-R and TIS-B are not
+         * affected. Defaults to true.
+         *
+         * @param decodeTypeCodeZero whether to decode TYPE Code 0 messages that carry a barometric altitude as airborne
+         *                           position messages
+         * @return this builder
+         */
+        public Builder decodeTypeCodeZero(boolean decodeTypeCodeZero) {
+            this.decodeTypeCodeZero = decodeTypeCodeZero;
             return this;
         }
 

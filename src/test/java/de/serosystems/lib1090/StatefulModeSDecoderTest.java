@@ -209,6 +209,42 @@ public class StatefulModeSDecoderTest {
         assertFalse(decoder.getDiffBaroAlt(velocity).hasDifference());
     }
 
+    /**
+     * TYPE Code 0 with the given altitude code in ME bits 9-20 and zeros elsewhere.
+     */
+    private static byte[] typeCodeZero(int altitudeEncoded) {
+        byte[] me = new byte[7];
+        me[1] = (byte) (altitudeEncoded >> 4);
+        me[2] = (byte) (altitudeEncoded << 4);
+        return frame(DF17, me);
+    }
+
+    /**
+     * ED-102B §2.2.7.1.1: a TYPE Code 0 message with altitude is an airborne position without horizontal position,
+     * one without altitude is discarded.
+     */
+    @Test
+    public void typeCodeZero_withAltitudeIsAnAirbornePosition() throws UnspecifiedFormatError, BadFormatException {
+        ModeSDownlinkMsg v0 = decoder.decode(typeCodeZero(0xC38), Instant.EPOCH);
+        assertInstanceOf(AirbornePositionV0Msg.class, v0);
+        AirbornePositionV0Msg position = (AirbornePositionV0Msg) v0;
+        assertEquals(38000, position.getAltitude());
+        assertFalse(position.hasValidPosition());
+        assertNull(decoder.extractPosition(v0.getAddress(), position, null));
+
+        decoder.decode(opStatus(DF17, 2, false), Instant.EPOCH);
+        assertInstanceOf(AirbornePositionV2Msg.class, decoder.decode(typeCodeZero(0xC38), Instant.EPOCH));
+
+        assertEquals(TypeCodedExtendedSquitter.class, decoder.decode(typeCodeZero(0), Instant.EPOCH).getClass());
+    }
+
+    @Test
+    public void typeCodeZero_isNotDecodedIfDisabled() throws UnspecifiedFormatError, BadFormatException {
+        StatefulModeSDecoder disabled = StatefulModeSDecoder.builder().checkParity(false).decodeTypeCodeZero(false)
+                .build();
+        assertEquals(TypeCodedExtendedSquitter.class, disabled.decode(typeCodeZero(0xC38), Instant.EPOCH).getClass());
+    }
+
     @Test
     public void addressSource_isDerivedFromDownlinkFormatAndCF() throws UnspecifiedFormatError, BadFormatException {
         assertEquals(QualifiedAddress.Source.TRANSPONDER, decoder.decode(position(DF17), Instant.EPOCH).getAddress().getSource());
