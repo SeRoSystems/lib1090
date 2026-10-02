@@ -1,13 +1,16 @@
 lib1090 [![Maven Central](https://img.shields.io/maven-central/v/de.sero-systems/lib1090.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22de.sero-systems%22%20AND%20a:%22lib1090%22)
 =========
 
-This is a Mode S, ADS-B, TIS-B and ADS-R decoding library for Java. It was forked from the OpenSky Network's (http://www.opensky-network.org) java-adsb library and refactored entirely to accommodate TIS-B and ADS-R.
+This is a Mode S, ADS-B, TIS-B and ADS-R decoding library for Java. It was forked from the OpenSky Network's
+(http://www.opensky-network.org) java-adsb library and refactored entirely to accommodate TIS-B and ADS-R.
 
 It is based on these two references:
+
 * ICAO Aeronautical Telecommunications Annex 10 Volume IV (Surveillance Radar and Collision Avoidance Systems)
 * RTCA DO-260C / Eurocae ED-102B "Minimum Operational Performance Standards (MOPS) for 1090ES"
 
 It supports the following Mode S downlink formats:
+
 * DF 0: Short air-air ACAS
 * DF 4: Short altitude reply
 * DF 5: Short identify reply
@@ -20,6 +23,7 @@ It supports the following Mode S downlink formats:
 * DF >24: Comm-D Extended Length Message
 
 The following ADS-B formats are supported:
+
 * BDS 0,5: Airborne position messages (including global and local CPR)
 * BDS 0,6: Surface position messages (including global and local CPR)
 * BDS 0,8: Identification messages
@@ -39,6 +43,7 @@ The formats are implemented according to RTCA DO-260B (ADS-B Version 2) and DO-2
 The decoder properly takes care of older versions and defaults to v3 for unspecified/newer versions.
 
 Basic support for the following Comm-B registers is implemented:
+
 * BDS 1,0: Data link capability
 * BDS 1,7: Common usage GICB capability
 * BDS 2,0: Identification
@@ -53,7 +58,6 @@ instantiate the correct decoder class. This has not yet been implemented in the 
 If required, users of this library need to explicitly call the correct Comm-B message decoder.
 
 The Comm-D data link and military ES are not parsed.
-
 
 ### Decoding on several threads
 
@@ -71,13 +75,13 @@ permits in ADS-R define no IMF field at all — format type code 25 is the clear
 cannot be determined. We consider this a defect in the specification rather than something a decoder can work around.
 
 `lib1090` reports `QualifiedAddress.Type.UNKNOWN` for these. Since the decoder keys its per-target state on the
-qualified address *including its type and source*, such a message neither contributes to nor reads that state. For ADS-R, whose
+qualified address *including its type and source*, such a message neither contributes to nor reads that state. For
+ADS-R, whose
 decoding needs the version established by an earlier operational status message, this means the message is not decoded
 further and is returned as a plain `TypeCodedExtendedSquitter`.
 
 Affected format type codes are 0, 23, 24, 25, 27 and 30. Apart from 25 these are either reserved or not decoded by this
 library in any case, so 25 is the only one where the limitation costs anything today.
-
 
 ### Packaging
 
