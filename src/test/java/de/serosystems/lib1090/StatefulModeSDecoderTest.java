@@ -20,6 +20,7 @@ package de.serosystems.lib1090;
 
 import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.decoding.Interval;
+import de.serosystems.lib1090.decoding.diffbaroalt.DiffBaroAlt;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.ModeSDownlinkMsg;
@@ -143,6 +144,51 @@ public class StatefulModeSDecoderTest {
         me[0] = (byte) 0x99;
         me[5] = (byte) (nicSupplementA ? 0x02 : 0x00);
         return frame(DF18_TISB, me);
+    }
+
+    /**
+     * Airborne velocity over ground with the given Difference from Barometric Altitude, ME bits 49-56, and ME bit 36
+     * set, which TIS-B requires for the difference.
+     */
+    private static byte[] velocity(int firstByte, int diffBaroAltEncoded) {
+        byte[] me = new byte[7];
+        me[0] = (byte) 0x99;
+        me[4] = 0x10;
+        me[6] = (byte) diffBaroAltEncoded;
+        return frame(firstByte, me);
+    }
+
+    /**
+     * A report without a difference replaces the last one: the transmitter sends all zeros once it has lost
+     * geometric or barometric altitude (ED-102B §2.2.3.2.6.1.15), and the stored difference used to outlive that.
+     */
+    @Test
+    public void diffBaroAlt_isReplacedByAReportWithoutDifference() throws UnspecifiedFormatError, BadFormatException {
+        decoder.decode("8D3C6586F8000000004000069135", Instant.EPOCH);
+        ModeSDownlinkMsg v2 = decoder.decode("8D3C65869900650CA0040A020B82", Instant.EPOCH);
+        assertEquals(212.5, decoder.getDiffBaroAlt(v2).getDifference().getLower());
+        decoder.decode("8D3C65869900650CA004000267F5", Instant.EPOCH);
+        assertEquals(DiffBaroAlt.Status.UNKNOWN, decoder.getDiffBaroAlt(v2).getStatus());
+        assertNull(decoder.getDiffBaroAlt(v2).getDifference());
+
+        decoder.decode("8D3C6587F8000000006000460F1E", Instant.EPOCH);
+        ModeSDownlinkMsg v3 = decoder.decode("8D3C65879900650CA0048A7BD760", Instant.EPOCH);
+        assertTrue(decoder.getDiffBaroAlt(v3).hasDifference());
+        for (String unavailable : new String[]{"8D3C65879900650CA004007CBDD7", "8D3C65879980650CA00400ED7AA8",
+                "8D3C65879900650CA0051072508F"}) {
+            decoder.decode("8D3C65879900650CA0048A7BD760", Instant.EPOCH);
+            decoder.decode(unavailable, Instant.EPOCH);
+            assertFalse(decoder.getDiffBaroAlt(v3).hasDifference(), unavailable);
+        }
+
+        // ADS-R velocity is decoded once the version is known
+        decoder.decode(opStatus(DF18_ADSR, 2, false), Instant.EPOCH);
+        for (int firstByte : new int[]{DF18_ADSR, DF18_TISB}) {
+            ModeSDownlinkMsg reply = decoder.decode(velocity(firstByte, 10), Instant.EPOCH);
+            assertTrue(decoder.getDiffBaroAlt(reply).hasDifference());
+            decoder.decode(velocity(firstByte, 0), Instant.EPOCH);
+            assertEquals(DiffBaroAlt.Status.UNKNOWN, decoder.getDiffBaroAlt(reply).getStatus());
+        }
     }
 
     @Test

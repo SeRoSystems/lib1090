@@ -321,19 +321,19 @@ public class StatefulModeSDecoder {
                         velocity = velocityV3;
                         break;
                 }
-                if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
+                dd.geoMinusBaro = velocity.getDiffBaroAlt();
                 return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 1:
                         de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV1Msg a1 =
                                 new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV1Msg(es1090);
-                        if (a1.hasDiffBaroAlt()) dd.geoMinusBaro = a1.getDiffBaroAlt();
+                        dd.geoMinusBaro = a1.getDiffBaroAlt();
                         return a1;
                     case 2:
                         de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg a2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg(es1090);
-                        if (a2.hasDiffBaroAlt()) dd.geoMinusBaro = a2.getDiffBaroAlt();
+                        dd.geoMinusBaro = a2.getDiffBaroAlt();
                         return a2;
                     case 3:
                     default:
@@ -399,8 +399,7 @@ public class StatefulModeSDecoder {
             if (subtype == 1 || subtype == 2) {
                 de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
                         new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
-                if (vog.hasDiffBaroAlt())
-                    dd.geoMinusBaro = vog.getDiffBaroAlt();
+                dd.geoMinusBaro = vog.getDiffBaroAlt();
                 dd.nicSupplements = dd.nicSupplements.withA(vog.getNICSupplementA());
                 return vog;
             } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
@@ -408,8 +407,7 @@ public class StatefulModeSDecoder {
                 // as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                 de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
-                if (ash.hasDiffBaroAlt())
-                    dd.geoMinusBaro = ash.getDiffBaroAlt();
+                dd.geoMinusBaro = ash.getDiffBaroAlt();
                 dd.nicSupplements = dd.nicSupplements.withA(ash.getNICSupplementA());
                 return ash;
             }
@@ -520,21 +518,21 @@ public class StatefulModeSDecoder {
                         velocity = velocityV3;
                         break;
                 }
-                if (velocity.hasDiffBaroAlt()) dd.geoMinusBaro = velocity.getDiffBaroAlt();
+                dd.geoMinusBaro = velocity.getDiffBaroAlt();
                 return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 0:
                         AirspeedHeadingV0Msg a0 = new AirspeedHeadingV0Msg(es1090);
-                        if (a0.hasDiffBaroAlt()) dd.geoMinusBaro = a0.getDiffBaroAlt();
+                        dd.geoMinusBaro = a0.getDiffBaroAlt();
                         return a0;
                     case 1:
                         AirspeedHeadingV1Msg a1 = new AirspeedHeadingV1Msg(es1090);
-                        if (a1.hasDiffBaroAlt()) dd.geoMinusBaro = a1.getDiffBaroAlt();
+                        dd.geoMinusBaro = a1.getDiffBaroAlt();
                         return a1;
                     case 2:
                         AirspeedHeadingV2Msg a2 = new AirspeedHeadingV2Msg(es1090);
-                        if (a2.hasDiffBaroAlt()) dd.geoMinusBaro = a2.getDiffBaroAlt();
+                        dd.geoMinusBaro = a2.getDiffBaroAlt();
                         return a2;
                     case 3:
                     default:
@@ -762,10 +760,12 @@ public class StatefulModeSDecoder {
     /**
      * Get the difference between geometric and barometric altitude as tracked by the decoder. The value is derived
      * from ADS-B {@link AirspeedHeadingMsg} and {@link VelocityOverGroundMsg}. The method returns the most recent
-     * value.
+     * report, also if it reports no difference, which the transmitter signals when it has lost geometric or
+     * barometric altitude: check {@link DiffBaroAlt#hasDifference()}.
      *
      * @param reply a Mode S message
-     * @return the difference between geometric and barometric altitude, or null if none has been reported
+     * @return the most recently reported difference between geometric and barometric altitude, or null if none has
+     * been received
      */
     public DiffBaroAlt getDiffBaroAlt(ModeSDownlinkMsg reply) {
         if (reply == null) return null;
