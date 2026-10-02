@@ -280,6 +280,19 @@ public final class CPREncodedPosition implements Serializable {
      * @throws IllegalArgumentException if any sanity check fails
      */
     public Position decodeGlobal(CPREncodedPosition other, Position reference, boolean timeCheck) {
+        Position[] pair = decodeGlobalPair(other, reference, timeCheck);
+        return pair == null ? null : pair[0];
+    }
+
+    /**
+     * Global decoding as {@link #decodeGlobal(CPREncodedPosition, Position, boolean)}, of both messages of the pair:
+     * the zone indices and latitudes it computes are those of both.
+     *
+     * @return the position of this message and of the other one, or null as for
+     * {@link #decodeGlobal(CPREncodedPosition, Position, boolean)}
+     * @throws IllegalArgumentException as {@link #decodeGlobal(CPREncodedPosition, Position, boolean)}
+     */
+    private Position[] decodeGlobalPair(CPREncodedPosition other, Position reference, boolean timeCheck) {
         /* early sanity checks */
         Objects.requireNonNull(other, "other must not be null");
         if (other.nBits != nBits) throw new IllegalArgumentException("Number of bits must match");
@@ -318,14 +331,30 @@ public final class CPREncodedPosition implements Serializable {
         if (nLon != RlatOdd.NL()) // straddling position, cannot decode this pair
             return null;
 
-        // reconstruct latitude
-        final double Rlat = isOdd ? RlatOdd.toDegrees() : RlatEven.toDegrees();
+        // longitude index
+        final int m = nLon != 1 ? zoneIndex(nLon, even.xz, odd.xz) : 0;
 
-        // reconstruct longitude
+        // reconstruct latitude and longitude of both
+        return new Position[]{
+                new Position(reconstructGlobalLongitude(angle, nLon, m, reference),
+                        (isOdd ? RlatOdd : RlatEven).toDegrees(), 0.),
+                new Position(other.reconstructGlobalLongitude(angle, nLon, m, reference),
+                        (isOdd ? RlatEven : RlatOdd).toDegrees(), 0.)
+        };
+    }
+
+    /**
+     * Reconstruct the longitude of this message in a global decode.
+     *
+     * @param angle     full range angle
+     * @param nLon      number of longitude zones of the pair
+     * @param m         longitude index, ignored if there is only one longitude zone
+     * @param reference reference position, which determines the quadrant of a surface position
+     * @return the longitude [°] in [-180, 180)
+     */
+    private double reconstructGlobalLongitude(double angle, int nLon, int m, Position reference) {
         double Rlon;
         if (nLon != 1) {
-            // longitude index
-            int m = zoneIndex(nLon, even.xz, odd.xz);
             // global longitude
             int ni = nLon - (isOdd ? 1 : 0);
             Rlon = reconstructGlobal(angle, ni, m, xz);
@@ -336,12 +365,10 @@ public final class CPREncodedPosition implements Serializable {
         if (isSurface) {
             double delta = normalize(reference.getLongitude() - Rlon);
             int k = (int) Math.round(delta / 90.);
-            Rlon = normalize(Rlon + k * 90);
+            return normalize(Rlon + k * 90);
         } else {
-            Rlon = normalize(Rlon);
+            return normalize(Rlon);
         }
-
-        return new Position(Rlon, Rlat, 0.);
     }
 
     /**
@@ -432,7 +459,9 @@ public final class CPREncodedPosition implements Serializable {
      */
     public Position decodePosition(CPREncodedPosition other, Position reference) {
         // apply global decoding; a surface position is ambiguous by a 90° quadrant without a reference
-        Position globalPos = other == null || (isSurface && reference == null) ? null : decodeGlobal(other, reference);
+        Position[] pair = other == null || (isSurface && reference == null) ? null :
+                decodeGlobalPair(other, reference, true);
+        Position globalPos = pair == null ? null : pair[0];
 
         // apply local decoding
         Position localPos = reference != null ? decodeLocal(reference) : null;
@@ -447,25 +476,9 @@ public final class CPREncodedPosition implements Serializable {
         if (globalPos != null && localPos != null && globalPos.haversine(localPos) > mu)
             reasonable = false;
 
-        // use local CPR to verify even and odd position
-        if (globalPos != null) {
-            Position localThis = decodeLocal(globalPos);
-
-            // check local/global distance of new message
-            if (globalPos.haversine(localThis) > mu)
-                reasonable = false;
-
-            // check if distance to other is within limits
-            Position globalOther = other.decodeGlobal(this, reference);
-            Position localOther = other.decodeLocal(globalPos);
-
-            // should be within 3 NM (= 555.6 m/s * 10 seconds)
-            if (globalOther != null && !isSurface && globalOther.haversine(globalPos) > 5556)
-                reasonable = false;
-
-            if (localOther != null && !isSurface && localOther.haversine(globalPos) > 5556)
-                reasonable = false;
-        }
+        // check that the even and odd position belong together: within 3 NM (= 555.6 m/s * 10 seconds)
+        if (pair != null && !isSurface && pair[1].haversine(globalPos) > 5556)
+            reasonable = false;
 
         // prefer global over local position
         Position ret = globalPos != null ? globalPos : localPos;
