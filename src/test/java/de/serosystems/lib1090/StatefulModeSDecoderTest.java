@@ -191,6 +191,24 @@ public class StatefulModeSDecoderTest {
         }
     }
 
+    /**
+     * The difference comes with the time of the message that reported it, also of a report without a difference.
+     */
+    @Test
+    public void diffBaroAltTimestamp_isThatOfTheLastReport() throws UnspecifiedFormatError, BadFormatException {
+        Instant t0 = Instant.ofEpochSecond(1_600_000_000L);
+        ModeSDownlinkMsg opStatus = decoder.decode("8D3C6586F8000000004000069135", t0);
+        assertNull(decoder.getDiffBaroAltTimestamp(opStatus));
+
+        ModeSDownlinkMsg velocity = decoder.decode("8D3C65869900650CA0040A020B82", t0.plusSeconds(1));
+        assertEquals(t0.plusSeconds(1), decoder.getDiffBaroAltTimestamp(velocity));
+        decoder.decode("8D3C6586F8000000004000069135", t0.plusSeconds(2));
+        assertEquals(t0.plusSeconds(1), decoder.getDiffBaroAltTimestamp(velocity));
+        decoder.decode("8D3C65869900650CA004000267F5", t0.plusSeconds(3));
+        assertEquals(t0.plusSeconds(3), decoder.getDiffBaroAltTimestamp(velocity));
+        assertFalse(decoder.getDiffBaroAlt(velocity).hasDifference());
+    }
+
     @Test
     public void addressSource_isDerivedFromDownlinkFormatAndCF() throws UnspecifiedFormatError, BadFormatException {
         assertEquals(QualifiedAddress.Source.TRANSPONDER, decoder.decode(position(DF17), Instant.EPOCH).getAddress().getSource());

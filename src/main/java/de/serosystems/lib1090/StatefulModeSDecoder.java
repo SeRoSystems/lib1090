@@ -321,19 +321,19 @@ public class StatefulModeSDecoder {
                         velocity = velocityV3;
                         break;
                 }
-                dd.geoMinusBaro = velocity.getDiffBaroAlt();
+                dd.setDiffBaroAlt(velocity.getDiffBaroAlt(), timestamp);
                 return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 1:
                         de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV1Msg a1 =
                                 new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV1Msg(es1090);
-                        dd.geoMinusBaro = a1.getDiffBaroAlt();
+                        dd.setDiffBaroAlt(a1.getDiffBaroAlt(), timestamp);
                         return a1;
                     case 2:
                         de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg a2 =
                                 new de.serosystems.lib1090.msgs.adsr.AirspeedHeadingV2Msg(es1090);
-                        dd.geoMinusBaro = a2.getDiffBaroAlt();
+                        dd.setDiffBaroAlt(a2.getDiffBaroAlt(), timestamp);
                         return a2;
                     case 3:
                     default:
@@ -399,7 +399,7 @@ public class StatefulModeSDecoder {
             if (subtype == 1 || subtype == 2) {
                 de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg vog =
                         new de.serosystems.lib1090.msgs.tisb.VelocityOverGroundMsg(es1090);
-                dd.geoMinusBaro = vog.getDiffBaroAlt();
+                dd.setDiffBaroAlt(vog.getDiffBaroAlt(), timestamp);
                 dd.nicSupplements = dd.nicSupplements.withA(vog.getNICSupplementA());
                 return vog;
             } else if ((subtype == 3 || subtype == 4) && tisbV2CompatibilityMode) {
@@ -407,7 +407,7 @@ public class StatefulModeSDecoder {
                 // as such in TIS-B v2 compatibility mode (see Builder#tisbV2CompatibilityMode)
                 de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg ash =
                         new de.serosystems.lib1090.msgs.tisb.AirspeedHeadingMsg(es1090);
-                dd.geoMinusBaro = ash.getDiffBaroAlt();
+                dd.setDiffBaroAlt(ash.getDiffBaroAlt(), timestamp);
                 dd.nicSupplements = dd.nicSupplements.withA(ash.getNICSupplementA());
                 return ash;
             }
@@ -518,21 +518,21 @@ public class StatefulModeSDecoder {
                         velocity = velocityV3;
                         break;
                 }
-                dd.geoMinusBaro = velocity.getDiffBaroAlt();
+                dd.setDiffBaroAlt(velocity.getDiffBaroAlt(), timestamp);
                 return (TypeCodedExtendedSquitter) velocity;
             } else if (subtype == 3 || subtype == 4) {  // airspeed & heading
                 switch (dd.adsbVersion) {
                     case 0:
                         AirspeedHeadingV0Msg a0 = new AirspeedHeadingV0Msg(es1090);
-                        dd.geoMinusBaro = a0.getDiffBaroAlt();
+                        dd.setDiffBaroAlt(a0.getDiffBaroAlt(), timestamp);
                         return a0;
                     case 1:
                         AirspeedHeadingV1Msg a1 = new AirspeedHeadingV1Msg(es1090);
-                        dd.geoMinusBaro = a1.getDiffBaroAlt();
+                        dd.setDiffBaroAlt(a1.getDiffBaroAlt(), timestamp);
                         return a1;
                     case 2:
                         AirspeedHeadingV2Msg a2 = new AirspeedHeadingV2Msg(es1090);
-                        dd.geoMinusBaro = a2.getDiffBaroAlt();
+                        dd.setDiffBaroAlt(a2.getDiffBaroAlt(), timestamp);
                         return a2;
                     case 3:
                     default:
@@ -774,6 +774,21 @@ public class StatefulModeSDecoder {
     }
 
     /**
+     * Get the time of the report {@link #getDiffBaroAlt(ModeSDownlinkMsg)} returns: the timestamp the message that
+     * carried it was decoded with. The decoder does not age the difference, so this is what tells whether it is out
+     * of date, as the timestamp of a State Vector Report does (ED-102B §2.2.8).
+     *
+     * @param reply a Mode S message
+     * @return the time of the most recently reported difference between geometric and barometric altitude, or null if
+     * none has been received
+     */
+    public Instant getDiffBaroAltTimestamp(ModeSDownlinkMsg reply) {
+        if (reply == null) return null;
+        DecoderData dd = decoderData.get(reply.getAddress());
+        return dd == null ? null : dd.geoMinusBaroTimestamp;
+    }
+
+    /**
      * Clean state by removing decoders not used for more than an hour. This happens automatically
      * every 1 Mio messages.
      */
@@ -806,12 +821,18 @@ public class StatefulModeSDecoder {
         byte adsbVersion;
         NICSupplements nicSupplements = NICSupplements.none();
         DiffBaroAlt geoMinusBaro;
+        Instant geoMinusBaroTimestamp;
         Instant lastUsed;
         PositionDecoder posDec;
 
         DecoderData(PositionDecoder posDec) {
             adsbVersion = 0;
             this.posDec = posDec;
+        }
+
+        void setDiffBaroAlt(DiffBaroAlt diffBaroAlt, Instant timestamp) {
+            geoMinusBaro = diffBaroAlt;
+            geoMinusBaroTimestamp = timestamp;
         }
     }
 
