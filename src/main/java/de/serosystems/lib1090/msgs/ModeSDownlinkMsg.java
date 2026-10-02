@@ -104,21 +104,30 @@ public class ModeSDownlinkMsg implements Serializable {
      */
     public static int calcParityInt(byte[] msg) {
         int remainder = 0;
-        assert CRC_TABLE.length == 1 << 8;
-        for (byte b : msg) {
-            /* multiply remainder by X^8, creating a polynomial that has potentially a degree higher than 24.
-               We split the remainder into a polynomial of those leading monomials (called dividend) and the rest (will be the new remainder).
-               Furthermore, we add another 8 coefficients (corresponds to one byte) from the message.
-               As we multiply those 8 coefficients by X^24, they will add to the dividend.
-               Note: we have precomputed the outcome of this division in the lookup table.
-             */
-            int dividend = remainder >>> (24 - 8); // extract leading coefficients that will have higher degree than 24 after multiplication
-            dividend = (dividend ^ b) & 0xff; // add new 8 coefficients (and remove some bits that are not 0 due to overflows and sign extension)
-            remainder <<= 8; // multiply by X^8
-            remainder ^= CRC_TABLE[dividend]; // compute remainder (i.e. look it up), then subtract it.
-        }
+        for (byte b : msg) remainder = crcUpdate(remainder, b);
         // return remainder and omit overflowing bits
         return remainder & 0xffffff;
+    }
+
+    /**
+     * One step of {@link #calcParityInt(byte[])}: the remainder after another byte of the message.
+     *
+     * @param remainder the remainder so far, possibly with overflowing bits above the 24th
+     * @param b         the next byte of the message
+     * @return the new remainder, possibly with overflowing bits above the 24th
+     */
+    private static int crcUpdate(int remainder, byte b) {
+        assert CRC_TABLE.length == 1 << 8;
+        /* multiply remainder by X^8, creating a polynomial that has potentially a degree higher than 24.
+           We split the remainder into a polynomial of those leading monomials (called dividend) and the rest (will be the new remainder).
+           Furthermore, we add another 8 coefficients (corresponds to one byte) from the message.
+           As we multiply those 8 coefficients by X^24, they will add to the dividend.
+           Note: we have precomputed the outcome of this division in the lookup table.
+         */
+        int dividend = remainder >>> (24 - 8); // extract leading coefficients that will have higher degree than 24 after multiplication
+        dividend = (dividend ^ b) & 0xff; // add new 8 coefficients (and remove some bits that are not 0 due to overflows and sign extension)
+        remainder <<= 8; // multiply by X^8
+        return remainder ^ CRC_TABLE[dividend]; // compute remainder (i.e. look it up), then subtract it.
     }
 
     /**
@@ -229,7 +238,8 @@ public class ModeSDownlinkMsg implements Serializable {
         payload = Arrays.copyOfRange(reply, 1, reply.length - 3);
 
         // extract parity field
-        parity = rawAPToInt(Arrays.copyOfRange(reply, reply.length - 3, reply.length));
+        parity = (reply[reply.length - 3] & 0xff) << 16 | (reply[reply.length - 2] & 0xff) << 8 |
+                (reply[reply.length - 1] & 0xff);
 
         // extract ICAO24 address
         QualifiedAddress.Type type = null;
@@ -249,9 +259,7 @@ public class ModeSDownlinkMsg implements Serializable {
             case 17:
             case 18:
             case 19: // Extended squitter
-                byte[] rawAddress = new byte[3];
-                System.arraycopy(payload, 0, rawAddress, 0, 3);
-                addr = rawAPToInt(rawAddress);
+                addr = (payload[0] & 0xff) << 16 | (payload[1] & 0xff) << 8 | (payload[2] & 0xff);
 
                 if (downlinkFormat == 18 && firstField == 7)
                     throw new UnspecifiedFormatError("Got invalid (reserved) format");
@@ -448,7 +456,10 @@ public class ModeSDownlinkMsg implements Serializable {
      * @return calculates Mode S parity as 24 bit integer
      */
     public int calcParityInt() {
-        return calcParityInt(withoutParity());
+        // as calcParityInt(withoutParity()), without building the array
+        int remainder = crcUpdate(0, (byte) (downlinkFormat << 3 | firstField));
+        for (byte b : payload) remainder = crcUpdate(remainder, b);
+        return remainder & 0xffffff;
     }
 
     /**
@@ -472,17 +483,6 @@ public class ModeSDownlinkMsg implements Serializable {
      */
     protected BitReader getBitReader() {
         return BitReader.forBigEndian(withoutParity());
-    }
-
-    /**
-     * @param raw the three bytes AP field
-     * @return the three bytes converted to an integer
-     */
-    private static int rawAPToInt(byte[] raw) {
-        if (raw.length != 3)
-            throw new RuntimeException("AP can only have 3 bytes");
-
-        return (raw[0] & 0xff) << 16 | (raw[1] & 0xff) << 8 | (raw[2] & 0xff);
     }
 
     /**

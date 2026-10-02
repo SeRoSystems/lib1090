@@ -40,6 +40,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Generic stateful decoder for Mode S Messages.
@@ -56,7 +57,8 @@ public class StatefulModeSDecoder {
     private static final Duration DECODER_TIMEOUT = Duration.ofMillis(3600_000L);
     private static final int CLEANUP_INTERVAL = 1_000_000;
 
-    private final PositionDecoderSupplier positionDecoderSupplier;
+    // the state of a new target, built once rather than as a capturing lambda on every lookup
+    private final Function<QualifiedAddress, DecoderData> newDecoderData;
     private final boolean decodeDf19Adsb;
     private final boolean tisbV2CompatibilityMode;
     private final boolean checkParity;
@@ -76,7 +78,7 @@ public class StatefulModeSDecoder {
     }
 
     private StatefulModeSDecoder(Builder builder) {
-        this.positionDecoderSupplier = builder.positionDecoderSupplier;
+        this.newDecoderData = builder.positionDecoderSupplier.andThen(DecoderData::new);
         this.decodeDf19Adsb = builder.decodeDf19Adsb;
         this.tisbV2CompatibilityMode = builder.tisbV2CompatibilityMode;
         this.checkParity = builder.checkParity;
@@ -783,10 +785,7 @@ public class StatefulModeSDecoder {
     }
 
     private DecoderData getDecoderData(QualifiedAddress address, Instant timestamp) {
-        DecoderData dd = decoderData.computeIfAbsent(
-                address,
-                a -> positionDecoderSupplier.andThen(DecoderData::new).apply(a)
-        );
+        DecoderData dd = decoderData.computeIfAbsent(address, newDecoderData);
         dd.lastUsed = timestamp;
         return dd;
     }

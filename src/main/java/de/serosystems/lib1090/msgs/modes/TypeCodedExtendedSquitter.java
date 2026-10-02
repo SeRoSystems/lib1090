@@ -75,7 +75,8 @@ public class TypeCodedExtendedSquitter extends ExtendedSquitter implements Seria
                 (getDownlinkFormat() == 19 && getFirstField() > 0))
             throw new BadFormatException("Message is not an extended squitter with a format type code");
 
-        formatTypeCode = getBitReader().readByte(33, 37);
+        // ME bits 1-5, the top of the first ME byte
+        formatTypeCode = (byte) ((getMessage()[0] & 0xff) >>> 3);
     }
 
     /**
