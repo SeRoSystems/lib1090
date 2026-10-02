@@ -59,6 +59,26 @@ If required, users of this library need to explicitly call the correct Comm-B me
 
 The Comm-D data link and military ES are not parsed.
 
+### Decoder options
+
+`new StatefulModeSDecoder()` uses the defaults below. To change any of them, use the builder:
+
+```java
+StatefulModeSDecoder decoder = StatefulModeSDecoder.builder()
+        .checkParity(false)
+        .decodeBeforeVersionKnown(false)
+        .build();
+```
+
+| Option                     | Default                   | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|----------------------------|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checkParity`              | `true`                    | Checks the parity of every extended squitter (DF=17, DF=18, and DF=19 if decoded as ADS-B) and throws a `BadFormatException` if it does not match, before the message can change the target's state. Disable it only if the input has already been checked, e.g. by the receiver: otherwise a corrupted message can change a target's ADS-B version, NIC supplements and CPR frames.                                                                                                                |
+| `decodeBeforeVersionKnown` | `true`                    | The decoder learns a target's ADS-B version from its operational status message and assumes version 0 until then. Enabled, messages that version 0 does not define are decoded before the version is known, in the format of the version that defines them, as ED-102B §N.1.2 allows (e.g. target state and status, the TCAS RA broadcast, the Mode A code). Disabled, they are decoded only once the version is known, as ED-102A §N.1.2 and ED-102B §N.2.5 NOTE 2 require. ADS-R is not affected. |
+| `decodeTypeCodeZero`       | `true`                    | Decodes ADS-B messages of TYPE Code 0 ("No Position Information") that carry a barometric altitude as airborne position messages without a valid position, so that the altitude of a target that has lost its horizontal position is not lost (ED-102B §2.2.7.1.1). A TYPE Code 0 message without altitude is never decoded further.                                                                                                                                                                |
+| `tisbV2CompatibilityMode`  | `true`                    | Decodes TIS-B formats that version 2 used and ED-102B reserves: the coarse airborne position (CF=3), targets addressed by Mode A code and track file number (CF=2 with IMF=1), and the airspeed and heading velocity subtypes 3 and 4.                                                                                                                                                                                                                                                              |
+| `decodeDf19Adsb`           | `false`                   | Decodes DF=19 with AF=0 as ADS-B. ED-102B no longer allows it, since such a message is not guaranteed to be in the ADS-B format; enable it only for legacy data that relies on it.                                                                                                                                                                                                                                                                                                                  |
+| `positionDecoderSupplier`  | stateful, with speed test | The position decoder for each target. The default decodes CPR globally and locally with its own reasonableness tests, including a speed test. `positionDecoderSupplierDefault(true)` keeps it but disables the speed test, which helps with networks of receivers whose timestamps fluctuate; `positionDecoderSupplier(...)` sets custom logic.                                                                                                                                                     |
+
 ### Decoding on several threads
 
 `StatefulModeSDecoder` is not thread-safe. It keeps state per target — the ADS-B version, NIC supplements and the CPR
