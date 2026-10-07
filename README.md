@@ -17,7 +17,7 @@ It supports the following Mode S downlink formats:
 * DF 19: Military Extended Squitter
 * DF 20: Comm-B altitude reply
 * DF 21: Comm-B identify reply
-* DF >24: Comm-D Extended Length Message
+* DF 24: Comm-D Extended Length Message
 
 The following ADS-B formats are supported:
 * BDS 0,5: Airborne position messages (including global and local CPR)
@@ -35,7 +35,7 @@ The following ADS-B formats are supported:
 
 Note: BDS 6,B through BDS 6,D (ADS-B PIREP) messages are not implemented yet.
 
-The formats are implemented according to RTCA DO-260B (ADS-B Version 2) and DO-260C (ADS-B Version 3).
+The formats are implemented according to EUROCAE ED-102A (ADS-B Version 2) and ED-102B (ADS-B Version 3).
 The decoder properly takes care of older versions and defaults to v3 for unspecified/newer versions.
 
 Basic support for the following Comm-B registers is implemented:
@@ -48,9 +48,12 @@ Basic support for the following Comm-B registers is implemented:
 * BDS 6,0: Heading and speed report
 
 The type of the Comm-B register cannot be inferred from the message itself. As a passive observer, who does not know
-the interrogation, some rule-based (or more sophisticated) approach needs to be applied to derive the type and
-instantiate the correct decoder class. This has not yet been implemented in the `StatefulModeSDecoder`.
-If required, users of this library need to explicitly call the correct Comm-B message decoder.
+the interrogation, some rule-based (or more sophisticated) approach needs to be applied to derive the type, and the
+`StatefulModeSDecoder` does not do this. Once the register is chosen, the Comm-B replies (DF 20 and 21) decode it via
+their `CommBReply` interface, e.g. `reply.asTrackAndTurn()`. Two aids help with the choice: the registers that carry
+their code in MB bits 1-8 (BDS 1,0, 2,0 and 3,0) throw a `BadFormatException` for a reply with another code, and BDS
+4,0, 5,0 and 6,0 offer `isConsistent()`, which checks their reserved bits and status bits. For a reply with data
+parity, `getAddressAssumingDataParity()` recovers the address it modifies.
 
 The Comm-D data link and military ES are not parsed.
 
