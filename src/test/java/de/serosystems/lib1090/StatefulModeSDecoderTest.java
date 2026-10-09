@@ -210,6 +210,46 @@ public class StatefulModeSDecoderTest {
     }
 
     /**
+     * ED-102B §2.2.10.1.3 b: after more than 250 seconds without messages, a target starts over, with version 0 and
+     * no altitude difference; the difference used to be reported for up to an hour.
+     */
+    @Test
+    public void silentTarget_startsOverAfter250Seconds() throws UnspecifiedFormatError, BadFormatException {
+        Instant t0 = Instant.ofEpochSecond(1_600_000_000L);
+        for (int gap : new int[]{250, 251}) {
+            decoder = newDecoder();
+            decoder.decode(opStatus(DF17, 2, false), t0);
+            ModeSDownlinkMsg reply = decoder.decode(velocity(DF17, 10), t0.plusSeconds(1));
+            assertTrue(decoder.getDiffBaroAlt(reply).hasDifference());
+
+            decoder.decode(position(DF17), t0.plusSeconds(1 + gap));
+            boolean kept = gap == 250;
+            assertEquals(kept ? 2 : 0, decoder.getAdsbVersion(reply), "gap " + gap);
+            assertEquals(kept, decoder.getDiffBaroAlt(reply) != null, "gap " + gap);
+            assertEquals(kept ? t0.plusSeconds(1) : null, decoder.getDiffBaroAltTimestamp(reply), "gap " + gap);
+        }
+    }
+
+    /**
+     * Disabled, a target keeps its state however long it was silent, until the cleanup removes it; a message with an
+     * earlier timestamp never resets it.
+     */
+    @Test
+    public void silentTarget_keepsItsStateIfDisabledOrBackInTime() throws UnspecifiedFormatError, BadFormatException {
+        Instant t0 = Instant.ofEpochSecond(1_600_000_000L);
+        StatefulModeSDecoder keeping = StatefulModeSDecoder.builder().checkParity(false).resetSilentTargets(false)
+                .build();
+        for (StatefulModeSDecoder d : new StatefulModeSDecoder[]{keeping, decoder}) {
+            d.decode(opStatus(DF17, 2, false), t0);
+            ModeSDownlinkMsg reply = d.decode(velocity(DF17, 10), t0.plusSeconds(1));
+            Instant next = d == keeping ? t0.plusSeconds(3000) : t0.minusSeconds(3000);
+            d.decode(position(DF17), next);
+            assertEquals(2, d.getAdsbVersion(reply));
+            assertTrue(d.getDiffBaroAlt(reply).hasDifference());
+        }
+    }
+
+    /**
      * TYPE Code 0 with the given altitude code in ME bits 9-20 and zeros elsewhere.
      */
     private static byte[] typeCodeZero(int altitudeEncoded) {

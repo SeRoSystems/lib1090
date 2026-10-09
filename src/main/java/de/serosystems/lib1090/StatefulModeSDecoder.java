@@ -55,6 +55,8 @@ import java.util.function.Function;
 @SuppressWarnings("unused")
 public class StatefulModeSDecoder {
     private static final Duration DECODER_TIMEOUT = Duration.ofMillis(3600_000L);
+    // the time without messages after which ED-102B §2.2.10.1.3 b deletes all records of a participant
+    private static final Duration SILENCE_TIMEOUT = Duration.ofSeconds(250);
     private static final int CLEANUP_INTERVAL = 1_000_000;
 
     // the state of a new target, built once rather than as a capturing lambda on every lookup
@@ -64,6 +66,7 @@ public class StatefulModeSDecoder {
     private final boolean checkParity;
     private final boolean decodeBeforeVersionKnown;
     private final boolean decodeTypeCodeZero;
+    private final boolean resetSilentTargets;
     // keyed by the qualified address including its source, so that ADS-B, ADS-R and TIS-B receptions
     // for the same address never share version, NIC supplements or CPR state (see QualifiedAddress)
     private final Map<QualifiedAddress, DecoderData> decoderData = new HashMap<>();
@@ -85,6 +88,7 @@ public class StatefulModeSDecoder {
         this.checkParity = builder.checkParity;
         this.decodeBeforeVersionKnown = builder.decodeBeforeVersionKnown;
         this.decodeTypeCodeZero = builder.decodeTypeCodeZero;
+        this.resetSilentTargets = builder.resetSilentTargets;
     }
 
     /**
@@ -783,8 +787,10 @@ public class StatefulModeSDecoder {
 
     /**
      * Get the time of the report {@link #getDiffBaroAlt(ModeSDownlinkMsg)} returns: the timestamp the message that
-     * carried it was decoded with. The decoder does not age the difference, so this is what tells whether it is out
-     * of date, as the timestamp of a State Vector Report does (ED-102B §2.2.8).
+     * carried it was decoded with. The decoder does not age the difference while the target sends other messages,
+     * and drops it only with the rest of the target's state after a silence (see
+     * {@link Builder#resetSilentTargets(boolean)}), so this is what tells whether it is out of date, as the timestamp
+     * of a State Vector Report does (ED-102B §2.2.8).
      *
      * @param reply a Mode S message
      * @return the time of the most recently reported difference between geometric and barometric altitude, or null if
@@ -809,6 +815,14 @@ public class StatefulModeSDecoder {
 
     private DecoderData getDecoderData(QualifiedAddress address, Instant timestamp) {
         DecoderData dd = decoderData.computeIfAbsent(address, newDecoderData);
+
+        // after a long silence, the target starts over (ED-102B §2.2.10.1.3 b); only a gap forward in time counts
+        if (resetSilentTargets && dd.lastUsed != null &&
+                Duration.between(dd.lastUsed, timestamp).compareTo(SILENCE_TIMEOUT) > 0) {
+            dd = newDecoderData.apply(address);
+            decoderData.put(address, dd);
+        }
+
         dd.lastUsed = timestamp;
         return dd;
     }
@@ -854,6 +868,7 @@ public class StatefulModeSDecoder {
         private boolean checkParity = true;
         private boolean decodeBeforeVersionKnown = true;
         private boolean decodeTypeCodeZero = true;
+        private boolean resetSilentTargets = true;
 
         private Builder() {
         }
@@ -994,6 +1009,27 @@ public class StatefulModeSDecoder {
          */
         public Builder decodeTypeCodeZero(boolean decodeTypeCodeZero) {
             this.decodeTypeCodeZero = decodeTypeCodeZero;
+            return this;
+        }
+
+        /**
+         * Whether a target starts over after more than 250 seconds without messages, as ED-102B §2.2.10.1.3 b
+         * requires: "If no new messages have been received from a given Participant for 250 seconds, then all
+         * records ... shall be deleted". The next ADS-B, ADS-R or TIS-B message of the target then finds no
+         * state: its ADS-B version, NIC supplements, CPR frames and position reference, and its difference between
+         * geometric and barometric altitude are gone, so that it is decoded as version 0 until its next Operational
+         * Status message (see {@link #decodeBeforeVersionKnown(boolean)}). The time is taken per qualified address,
+         * i.e. separately for ADS-B, ADS-R and TIS-B, from the timestamps the messages are decoded with; only a gap
+         * forward in time counts.
+         * <p>
+         * Disabled, a target keeps its state until {@link StatefulModeSDecoder#clearDecoders()} removes it, after an
+         * hour without messages. Defaults to true.
+         *
+         * @param resetSilentTargets whether a target starts over after more than 250 seconds without messages
+         * @return this builder
+         */
+        public Builder resetSilentTargets(boolean resetSilentTargets) {
+            this.resetSilentTargets = resetSilentTargets;
             return this;
         }
 
