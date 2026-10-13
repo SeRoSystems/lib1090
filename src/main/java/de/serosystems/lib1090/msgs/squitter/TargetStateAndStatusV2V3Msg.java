@@ -46,7 +46,7 @@ public interface TargetStateAndStatusV2V3Msg extends TargetStateAndStatusMsg {
      *
      * @return the encoded barometric pressure setting
      */
-    int getBarometricPressureSettingEncoded();
+    short getBarometricPressureSettingEncoded();
 
     /**
      * The barometric pressure setting in millibars, according to ED-102B §2.2.3.2.7.1.3.4, in the range

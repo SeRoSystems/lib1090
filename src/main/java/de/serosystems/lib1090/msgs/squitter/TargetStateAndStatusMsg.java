@@ -40,7 +40,7 @@ public interface TargetStateAndStatusMsg extends SILMsg, NACpMsg {
      *
      * @return the encoded selected altitude field value, ED-102B §2.2.3.2.7.1.3.3
      */
-    int getSelectedAltitudeEncoded();
+    short getSelectedAltitudeEncoded();
 
     /**
      * @return whether selected heading is available, ED-102B §2.2.3.2.7.1.3.5
@@ -72,7 +72,7 @@ public interface TargetStateAndStatusMsg extends SILMsg, NACpMsg {
      * @return the encoded selected heading (named target heading track in V1) field value
      * including sign bit, ED-102B §2.2.3.2.7.1.3.6 (sign) and §2.2.3.2.7.1.3.7 (magnitude)
      */
-    int getSelectedHeadingEncoded();
+    short getSelectedHeadingEncoded();
 
     /**
      * @return the raw encoded navigation accuracy category for position, ED-102B §2.2.3.2.7.1.3.8

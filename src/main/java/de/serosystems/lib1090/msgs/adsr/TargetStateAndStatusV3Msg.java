@@ -37,11 +37,11 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
 
     private boolean silSupplement;
     private boolean selectedAltitudeType;
-    private int selectedAltitude;
-    private int barometricPressureSetting;
+    private short selectedAltitude;
+    private short barometricPressureSetting;
     private boolean selectedHeadingStatus;
     private boolean selectedHeadingSign;
-    private int selectedHeading;
+    private short selectedHeading;
     private byte nacP;
     private byte sil;
     private boolean mcpFcuStatus;
@@ -157,7 +157,7 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
     }
 
     @Override
-    public int getSelectedAltitudeEncoded() {
+    public short getSelectedAltitudeEncoded() {
         return selectedAltitude;
     }
 
@@ -190,7 +190,7 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
      * @return the encoded barometric pressure setting
      */
     @Override
-    public int getBarometricPressureSettingEncoded() {
+    public short getBarometricPressureSettingEncoded() {
         return barometricPressureSetting;
     }
 
@@ -220,8 +220,8 @@ public class TargetStateAndStatusV3Msg extends TypeCodedExtendedSquitter impleme
     }
 
     @Override
-    public int getSelectedHeadingEncoded() {
-        return ((selectedHeadingSign ? 1 : 0) << 8) | selectedHeading;
+    public short getSelectedHeadingEncoded() {
+        return (short) (((selectedHeadingSign ? 1 : 0) << 8) | selectedHeading);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
     private boolean targetAltitudeType;
     private byte targetAltitudeCapability;
     private byte verticalModeIndicator;
-    private int targetAltitude;
+    private short targetAltitude;
     private byte horizontalDataAvailableAndSourceIndicator;
     private short targetHeadingTrackAngle;
     private boolean targetHeadingTrackIndicator;
@@ -101,7 +101,7 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
         targetAltitudeType = b.readBoolean(10);
         targetAltitudeCapability = b.readByte(12, 13);
         verticalModeIndicator = b.readByte(14, 15);
-        targetAltitude = b.readInt(16, 25);
+        targetAltitude = b.readShort(16, 25);
         horizontalDataAvailableAndSourceIndicator = b.readByte(26, 27);
         targetHeadingTrackAngle = b.readShort(28, 36);
         targetHeadingTrackIndicator = b.readBoolean(37);
@@ -132,7 +132,7 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
     }
 
     @Override
-    public int getSelectedAltitudeEncoded() {
+    public short getSelectedAltitudeEncoded() {
         return targetAltitude;
     }
 
@@ -152,7 +152,7 @@ public class TargetStateAndStatusV1Msg extends TypeCodedExtendedSquitter impleme
     }
 
     @Override
-    public int getSelectedHeadingEncoded() {
+    public short getSelectedHeadingEncoded() {
         return targetHeadingTrackAngle;
     }
 
