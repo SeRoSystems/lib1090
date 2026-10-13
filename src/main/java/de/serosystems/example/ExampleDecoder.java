@@ -50,11 +50,11 @@ import java.util.Scanner;
  * 2,8d4ca513587153a8184a2fb5adeb
  * 3,8d3413c399014e23c80f947ce87c
  * 4,5d4ca88c079afe
- * 5,a0001838ca3e51f0a8000047a36a
+ * 5,a0001838ca3e51f0a80000ef614d
  * 6,8d47a36a58c38668ffb55f000000
- * 7,5d506c28000000
- * 8,a8000102fe81c1000000004401e3
- * 9,a0001839000000000000004401e3
+ * 7,5d506c28387c97
+ * 8,a8000102fe81c100000000085acf
+ * 9,a0001839000000000000007988fd
  * <p>
  * Line 6 is an extended squitter from a receiver that removes the CRC, leaving 0 in the parity field.
  */
