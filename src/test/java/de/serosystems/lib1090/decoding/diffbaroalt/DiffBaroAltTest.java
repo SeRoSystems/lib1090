@@ -146,6 +146,26 @@ class DiffBaroAltTest {
         assertDifference(above(3137.5), 3137.5, DiffBaroAltV0V2.of(false, 127));
     }
 
+    /**
+     * Only the highest code of each coding is saturated, whatever its sign; a code reporting nothing is not.
+     */
+    @Test
+    void testOnlyHighestCodeIsSaturated() {
+        for (boolean negative : new boolean[]{false, true}) {
+            assertTrue(DiffBaroAltV3.of(negative, 0x7FF).isSaturated());
+            assertFalse(DiffBaroAltV3.of(negative, 0x7FE).isSaturated());
+            assertFalse(DiffBaroAltV3.of(negative, 0).isSaturated());
+
+            assertTrue(ADSRDiffBaroAltV3.of(negative, 0x3FF).isSaturated());
+            assertFalse(ADSRDiffBaroAltV3.of(negative, 0x37F).isSaturated());
+            assertFalse(ADSRDiffBaroAltV3.of(negative, 0).isSaturated());
+
+            assertTrue(DiffBaroAltV0V2.of(negative, 0x7F).isSaturated());
+            assertFalse(DiffBaroAltV0V2.of(negative, 0x7E).isSaturated());
+            assertFalse(DiffBaroAltV0V2.of(negative, 0).isSaturated());
+        }
+    }
+
     private static boolean contains(Interval outer, Interval inner) {
         return outer.getGuaranteedLowerBound() <= inner.getGuaranteedLowerBound()
                 && inner.getGuaranteedUpperBound() <= outer.getGuaranteedUpperBound();

@@ -18,6 +18,7 @@
 
 package de.serosystems.lib1090.decoding.diffbaroalt;
 
+import de.serosystems.lib1090.decoding.Bound;
 import de.serosystems.lib1090.decoding.Interval;
 
 /**
@@ -45,9 +46,16 @@ abstract class AbstractDiffBaroAlt implements DiffBaroAlt {
      * inclusive, the midpoint otherwise.
      */
     private static double valueOf(Interval magnitude) {
-        if (Double.isInfinite(magnitude.getGuaranteedUpperBound())) return magnitude.getLower();
+        if (isUnbounded(magnitude)) return magnitude.getLower();
         if (magnitude.getLower() == 0 && magnitude.getLowerBound().isInclusive()) return 0;
         return (magnitude.getLower() + magnitude.getUpper()) / 2;
+    }
+
+    /**
+     * Whether a magnitude interval has no upper end, which only that of the highest code lacks.
+     */
+    private static boolean isUnbounded(Interval magnitude) {
+        return magnitude.getUpperBound() == Bound.NONE;
     }
 
     @Override
@@ -75,6 +83,11 @@ abstract class AbstractDiffBaroAlt implements DiffBaroAlt {
     public Double getValue() {
         if (magnitudeValue == null) return null;
         return negative ? 0 - magnitudeValue : magnitudeValue;
+    }
+
+    @Override
+    public boolean isSaturated() {
+        return magnitude != null && isUnbounded(magnitude);
     }
 
     /**

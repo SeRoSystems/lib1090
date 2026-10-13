@@ -82,4 +82,11 @@ public interface DiffBaroAlt {
      * @return the value of the code, or null if none is reported
      */
     Double getValue();
+
+    /**
+     * @return true if the code is the highest of its coding, which only bounds the magnitude: the
+     * difference then has no upper end on the positive side and no lower end on the negative one, and
+     * {@link #getValue()} is that bound. False if no difference is reported.
+     */
+    boolean isSaturated();
 }
