@@ -104,8 +104,8 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
     /**
      * The code is read from the parity field with the CRC removed. For a receiver that already removes the CRC, build
-     * the reply with {@code noCRC} (see {@link ModeSDownlinkMsg#ModeSDownlinkMsg(String, boolean)}), or decode it with
-     * {@link de.serosystems.lib1090.StatefulModeSDecoder#decode(String, boolean, java.time.Instant)}.<br><br>
+     * the reply with {@code crcRemoved} (see {@link ModeSDownlinkMsg#ModeSDownlinkMsg(String, boolean)}), or decode it
+     * with {@link de.serosystems.lib1090.StatefulModeSDecoder#decode(String, boolean, java.time.Instant)}.<br><br>
      * Note: Use {@link #hasValidInterrogatorCode()} to check the validity of this field.
      *
      * @return the interrogator code which can either be the interrogator id or the surveillance id.

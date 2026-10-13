@@ -75,7 +75,7 @@ public class ExampleDecoder {
             // some receivers deliver the parity field with the CRC already removed, which leaves 0 in an intact
             // extended squitter; a message whose CRC comes out as 0 by chance is unlikely (2^-24); for the other
             // formats, whose parity field carries the address or the interrogator code, this cannot be told from the
-            // message, so a stream of such a receiver should rather be decoded with noCRC throughout:
+            // message, so a stream of such a receiver should rather be decoded with crcRemoved throughout:
             // decoder.decode(raw, true, timestamp)
             boolean extendedSquitter = reply.getDownlinkFormat() == 17 || reply.getDownlinkFormat() == 18;
             if (extendedSquitter && reply.getParity() == 0)

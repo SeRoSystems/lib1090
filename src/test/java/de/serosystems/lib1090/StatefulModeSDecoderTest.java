@@ -453,7 +453,7 @@ public class StatefulModeSDecoderTest {
      * If the CRC has already been removed from the parity field, an intact message has a parity field of 0.
      */
     @Test
-    public void parityCheck_respectsNoCRC() throws UnspecifiedFormatError, BadFormatException {
+    public void parityCheck_respectsCRCRemoved() throws UnspecifiedFormatError, BadFormatException {
         StatefulModeSDecoder checking = new StatefulModeSDecoder();
         assertInstanceOf(AirborneOperationalStatusV2Msg.class,
                 checking.decode("8DABCDEFF8000000004930000000", true, Instant.EPOCH));

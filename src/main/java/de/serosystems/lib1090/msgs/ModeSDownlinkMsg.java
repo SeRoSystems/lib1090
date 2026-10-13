@@ -37,7 +37,7 @@ public class ModeSDownlinkMsg implements Serializable {
     private byte firstField; // the 3 bits after downlink format, the 5 bits after DF and spare for DF 24
     private byte[] payload; // 3 or 10 bytes
     private int parity; // 3 bytes
-    private boolean noCRC;
+    private boolean crcRemoved;
 
     private QualifiedAddress address;
 
@@ -201,14 +201,14 @@ public class ModeSDownlinkMsg implements Serializable {
     /**
      *
      * @param reply the bytes of the reply
-     * @param noCRC whether the CRC has already been removed from the parity field, leaving only the address or
-     *              interrogator code overlaid on it
+     * @param crcRemoved whether the CRC has already been removed from the parity field, leaving only the address
+     *                   or interrogator code overlaid on it
      * @throws BadFormatException     if message has invalid length or downlink format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public ModeSDownlinkMsg(byte[] reply, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
+    public ModeSDownlinkMsg(byte[] reply, boolean crcRemoved) throws BadFormatException, UnspecifiedFormatError {
         // check format invariants
-        this.noCRC = noCRC;
+        this.crcRemoved = crcRemoved;
 
         if (reply.length != 7 && reply.length != 14) // initial test
             throw new BadFormatException("Raw message has an invalid length of " + reply.length);
@@ -362,14 +362,14 @@ public class ModeSDownlinkMsg implements Serializable {
      * | DF (5) | FF (3) | Payload (24/80) | PI/AP (24) |
      *
      * @param rawMessage Mode S message in hex representation
-     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     * @param crcRemoved whether the CRC has already been removed from the parity field, leaving only the address or
      *                   interrogator code overlaid on it
      * @throws BadFormatException     if message is no hex string of even length, has invalid length or payload does
      *                                not match specification or parity has invalid length
      * @throws UnspecifiedFormatError if message format is not further specified
      */
-    public ModeSDownlinkMsg(String rawMessage, boolean noCRC) throws BadFormatException, UnspecifiedFormatError {
-        this(parseHex(rawMessage), noCRC);
+    public ModeSDownlinkMsg(String rawMessage, boolean crcRemoved) throws BadFormatException, UnspecifiedFormatError {
+        this(parseHex(rawMessage), crcRemoved);
     }
 
     private static byte[] parseHex(String rawMessage) throws BadFormatException {
@@ -390,7 +390,7 @@ public class ModeSDownlinkMsg implements Serializable {
         firstField = reply.firstField;
         payload = reply.payload;
         parity = reply.parity;
-        noCRC = reply.noCRC;
+        crcRemoved = reply.crcRemoved;
         address = reply.address;
     }
 
@@ -446,7 +446,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
     /**
      * The parity field as received: the CRC overlaid with the address or interrogator code, or only the address or
-     * interrogator code if the CRC has already been removed (see {@code noCRC} of the constructors).
+     * interrogator code if the CRC has already been removed (see {@code crcRemoved} of the constructors).
      *
      * @return the parity field
      */
@@ -457,12 +457,12 @@ public class ModeSDownlinkMsg implements Serializable {
     /**
      * The address or interrogator code that the CRC in the parity field is overlaid on (ICAO Annex 10 Volume IV
      * §3.1.2.3.3.2), i.e. what the field holds once the CRC is removed; 0 for an intact extended squitter. If the CRC
-     * has already been removed (see {@code noCRC} of the constructors), that is the parity field itself.
+     * has already been removed (see {@code crcRemoved} of the constructors), that is the parity field itself.
      *
      * @return the address or interrogator code overlaid on the CRC
      */
     protected int getOverlay() {
-        return noCRC ? parity : calcParityInt() ^ parity;
+        return crcRemoved ? parity : calcParityInt() ^ parity;
     }
 
     /**
@@ -500,7 +500,7 @@ public class ModeSDownlinkMsg implements Serializable {
 
     /**
      * Re-builds the message from the fields and returns it as a hex string, with the CRC overlaid in the parity field
-     * as transmitted, also if it had been removed (see {@code noCRC} of the constructors).
+     * as transmitted, also if it had been removed (see {@code crcRemoved} of the constructors).
      *
      * @return the reply as a hex string
      */
@@ -508,7 +508,7 @@ public class ModeSDownlinkMsg implements Serializable {
         byte[] msg = new byte[4 + payload.length];
         msg[0] = (byte) (downlinkFormat << 3 | firstField);
         System.arraycopy(payload, 0, msg, 1, payload.length);
-        int crc = noCRC ? getParity() ^ calcParityInt() : getParity();
+        int crc = crcRemoved ? getParity() ^ calcParityInt() : getParity();
         msg[1 + payload.length] = (byte) ((crc >> 16) & 0xff);
         msg[1 + payload.length + 1] = (byte) ((crc >> 8) & 0xff);
         msg[1 + payload.length + 2] = (byte) (crc & 0xff);
@@ -519,18 +519,18 @@ public class ModeSDownlinkMsg implements Serializable {
      * Important note: use this method for extended squitter/ADS-B messages (DF 17, 18) only! Other messages overlay
      * the CRC with an address or an interrogator code other than 0, which this check cannot know.
      * <p>
-     * If the CRC has already been removed from the parity field (see {@code noCRC} of the constructors), the field of
-     * an intact message is 0.
+     * If the CRC has already been removed from the parity field (see {@code crcRemoved} of the constructors), the field
+     * of an intact message is 0.
      *
      * @return true if parity in message matched calculated parity
      */
     public boolean checkParity() {
-        return noCRC ? getParity() == 0 : calcParityInt() == getParity();
+        return crcRemoved ? getParity() == 0 : calcParityInt() == getParity();
     }
 
     /**
      * Two replies are equal if they have the same downlink format and content, and the same parity field once the CRC
-     * is removed. Whether the CRC still has to be removed or already has been is taken from {@code noCRC} of the
+     * is removed. Whether the CRC still has to be removed or already has been is taken from {@code crcRemoved} of the
      * constructors.
      */
     @Override
@@ -570,7 +570,7 @@ public class ModeSDownlinkMsg implements Serializable {
                 "downlinkFormat=" + downlinkFormat +
                 ", firstField=" + firstField +
                 ", payload=" + Tools.toHexString(payload) +
-                ", noCRC=" + noCRC +
+                ", crcRemoved=" + crcRemoved +
                 ", class=" + getClass().getSimpleName() +
                 ", address=" + address.toString() +
                 '}';
@@ -579,7 +579,7 @@ public class ModeSDownlinkMsg implements Serializable {
     @Override
     public int hashCode() {
         // the address stands in for the parity field once the CRC is removed, which it is for the formats that overlay
-        // the address on the CRC; the parity field as received cannot take part, as it depends on noCRC
+        // the address on the CRC; the parity field as received cannot take part, as it depends on crcRemoved
         int result = downlinkFormat;
         result = 31 * result + (int) firstField;
         result = 31 * result + Arrays.hashCode(payload);

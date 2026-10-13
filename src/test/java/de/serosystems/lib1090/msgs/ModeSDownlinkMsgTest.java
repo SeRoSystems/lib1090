@@ -36,7 +36,7 @@ class ModeSDownlinkMsgTest {
         assertNotEquals(valid, addressAsParity);
         assertNotEquals(addressAsParity, valid);
 
-        // the same message with the CRC removed is, if built with noCRC
+        // the same message with the CRC removed is, if built with crcRemoved
         ModeSDownlinkMsg crcRemoved = new ModeSDownlinkMsg("8D4840D6202CC371C32CE0000000", true);
         ModeSDownlinkMsg crcRemovedUnflagged = new ModeSDownlinkMsg("8D4840D6202CC371C32CE0000000");
         assertEquals(valid, crcRemoved);
@@ -80,7 +80,7 @@ class ModeSDownlinkMsgTest {
     /**
      * Equal messages hash equally, also where the parity is overlaid with the address and one receiver reports it
      * with the CRC removed: here a DF=20 reply as received, and with its address as the parity field, which is the
-     * same reply only if built with noCRC.
+     * same reply only if built with crcRemoved.
      */
     @Test
     void addressParityWithAndWithoutCRC_hashesEqually() throws Exception {
@@ -97,7 +97,7 @@ class ModeSDownlinkMsgTest {
 
     /**
      * Two raw replies with the same content from addresses whose XOR is the CRC of that content are different
-     * replies: the parity is compared once the CRC is removed, as noCRC says, not in either form.
+     * replies: the parity is compared once the CRC is removed, as crcRemoved says, not in either form.
      */
     @Test
     void repliesFromAddressesDifferingByTheCRC_areNotEqual() throws Exception {

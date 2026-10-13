@@ -687,15 +687,15 @@ public class StatefulModeSDecoder {
 
     /**
      * @param rawMessage the Mode S message as byte array
-     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     * @param crcRemoved whether the CRC has already been removed from the parity field, leaving only the address or
      *                   interrogator code overlaid on it
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(byte[] rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        return decode(new ModeSDownlinkMsg(rawMessage, noCRC), timestamp);
+    public ModeSDownlinkMsg decode(byte[] rawMessage, boolean crcRemoved, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        return decode(new ModeSDownlinkMsg(rawMessage, crcRemoved), timestamp);
     }
 
     /**
@@ -711,15 +711,15 @@ public class StatefulModeSDecoder {
 
     /**
      * @param rawMessage the Mode S message in hex representation
-     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     * @param crcRemoved whether the CRC has already been removed from the parity field, leaving only the address or
      *                   interrogator code overlaid on it
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
      * @throws BadFormatException     if format contains error
      */
-    public ModeSDownlinkMsg decode(String rawMessage, boolean noCRC, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
-        return decode(new ModeSDownlinkMsg(rawMessage, noCRC), timestamp);
+    public ModeSDownlinkMsg decode(String rawMessage, boolean crcRemoved, Instant timestamp) throws BadFormatException, UnspecifiedFormatError {
+        return decode(new ModeSDownlinkMsg(rawMessage, crcRemoved), timestamp);
     }
 
     /**

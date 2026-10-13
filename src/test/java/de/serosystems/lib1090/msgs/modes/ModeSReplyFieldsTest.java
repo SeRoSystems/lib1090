@@ -199,8 +199,8 @@ class ModeSReplyFieldsTest {
     }
 
     /**
-     * With noCRC, the parity field already holds the interrogator code, here code label 1 and interrogator code 3, and
-     * the CRC is not applied again; the same reply with the CRC applied gives the same code.
+     * With crcRemoved, the parity field already holds the interrogator code, here code label 1 and interrogator code 3,
+     * and the CRC is not applied again; the same reply with the CRC applied gives the same code.
      */
     @Test
     void testAllCallReplyWithoutCRC() throws Exception {
