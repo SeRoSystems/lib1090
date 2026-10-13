@@ -55,6 +55,8 @@ import java.util.Scanner;
  * 7,5d506c28000000
  * 8,a8000102fe81c1000000004401e3
  * 9,a0001839000000000000004401e3
+ * <p>
+ * Line 6 is an extended squitter from a receiver that removes the CRC, leaving 0 in the parity field.
  */
 public class ExampleDecoder {
     // The ModeSDecoder does all the magic for us
@@ -69,7 +71,16 @@ public class ExampleDecoder {
     public void decodeMsg(Instant timestamp, String raw, Position receiver) {
         ModeSDownlinkMsg msg;
         try {
-            msg = decoder.decode(raw, timestamp);
+            ModeSDownlinkMsg reply = new ModeSDownlinkMsg(raw);
+            // some receivers deliver the parity field with the CRC already removed, which leaves 0 in an intact
+            // extended squitter; a message whose CRC comes out as 0 by chance is unlikely (2^-24); for the other
+            // formats, whose parity field carries the address or the interrogator code, this cannot be told from the
+            // message, so a stream of such a receiver should rather be decoded with noCRC throughout:
+            // decoder.decode(raw, true, timestamp)
+            boolean extendedSquitter = reply.getDownlinkFormat() == 17 || reply.getDownlinkFormat() == 18;
+            if (extendedSquitter && reply.getParity() == 0)
+                reply = new ModeSDownlinkMsg(raw, true);
+            msg = decoder.decode(reply, timestamp);
         } catch (BadFormatException e) {
             System.out.println("Malformed message! Skipping it. Message: " + e.getMessage());
             return;

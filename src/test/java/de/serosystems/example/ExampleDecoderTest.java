@@ -58,6 +58,17 @@ class ExampleDecoderTest {
         assertFalse(out.contains("Unknown extended squitter"), out);
     }
 
+    /**
+     * An extended squitter whose parity field is 0, as delivered by a receiver that removes the CRC, is decoded, not
+     * rejected for a failed parity check.
+     */
+    @Test
+    void extendedSquitterWithCRCRemoved_isDecoded() {
+        String out = decode("8DABCDEFF8000000004930000000"); // operational status, parity 000000
+
+        assertFalse(out.contains("Malformed message"), out);
+    }
+
     private static String decode(String... messages) {
         ExampleDecoder decoder = new ExampleDecoder();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
