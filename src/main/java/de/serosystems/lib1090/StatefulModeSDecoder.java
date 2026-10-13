@@ -687,7 +687,8 @@ public class StatefulModeSDecoder {
 
     /**
      * @param rawMessage the Mode S message as byte array
-     * @param noCRC      indicates whether the CRC has been subtracted from the parity field
+     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     *                   interrogator code overlaid on it
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor
@@ -710,7 +711,8 @@ public class StatefulModeSDecoder {
 
     /**
      * @param rawMessage the Mode S message in hex representation
-     * @param noCRC      indicates whether the CRC has been subtracted from the parity field
+     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     *                   interrogator code overlaid on it
      * @param timestamp  time of applicability (or reception) of the message
      * @return an instance of the most specialized ModeSReply possible
      * @throws UnspecifiedFormatError propagated from the ModeSDownlinkMsg constructor

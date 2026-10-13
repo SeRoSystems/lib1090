@@ -450,7 +450,7 @@ public class StatefulModeSDecoderTest {
     }
 
     /**
-     * If the CRC has already been subtracted from the parity field, an intact message has a parity field of 0.
+     * If the CRC has already been removed from the parity field, an intact message has a parity field of 0.
      */
     @Test
     public void parityCheck_respectsNoCRC() throws UnspecifiedFormatError, BadFormatException {

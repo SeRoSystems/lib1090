@@ -201,7 +201,8 @@ public class ModeSDownlinkMsg implements Serializable {
     /**
      *
      * @param reply the bytes of the reply
-     * @param noCRC indicates whether the CRC has been subtracted from the parity field
+     * @param noCRC whether the CRC has already been removed from the parity field, leaving only the address or
+     *              interrogator code overlaid on it
      * @throws BadFormatException     if message has invalid length or downlink format
      * @throws UnspecifiedFormatError if message format is not further specified
      */
@@ -361,7 +362,8 @@ public class ModeSDownlinkMsg implements Serializable {
      * | DF (5) | FF (3) | Payload (24/80) | PI/AP (24) |
      *
      * @param rawMessage Mode S message in hex representation
-     * @param noCRC      indicates whether the CRC has been subtracted from the parity field
+     * @param noCRC      whether the CRC has already been removed from the parity field, leaving only the address or
+     *                   interrogator code overlaid on it
      * @throws BadFormatException     if message is no hex string of even length, has invalid length or payload does
      *                                not match specification or parity has invalid length
      * @throws UnspecifiedFormatError if message format is not further specified
@@ -443,7 +445,10 @@ public class ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * @return parity field from message
+     * The parity field as received: the CRC overlaid with the address or interrogator code, or only the address or
+     * interrogator code if the CRC has already been removed (see {@code noCRC} of the constructors).
+     *
+     * @return the parity field
      */
     public int getParity() {
         return parity;
@@ -494,7 +499,8 @@ public class ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Re-builds the message from the fields and returns it as a hex string
+     * Re-builds the message from the fields and returns it as a hex string, with the CRC overlaid in the parity field
+     * as transmitted, also if it had been removed (see {@code noCRC} of the constructors).
      *
      * @return the reply as a hex string
      */
@@ -510,13 +516,11 @@ public class ModeSDownlinkMsg implements Serializable {
     }
 
     /**
-     * Important note: use this method for extended
-     * squitter/ADS-B messages (DF 17, 18) only! Other messages may have
-     * their parity field XORed with an ICAO24 transponder address
-     * or an interrogator ID.
+     * Important note: use this method for extended squitter/ADS-B messages (DF 17, 18) only! Other messages overlay
+     * the CRC with an address or an interrogator code other than 0, which this check cannot know.
      * <p>
-     * If the CRC has already been subtracted from the parity field (see {@code noCRC} of the constructors), the
-     * field of an intact message is 0.
+     * If the CRC has already been removed from the parity field (see {@code noCRC} of the constructors), the field of
+     * an intact message is 0.
      *
      * @return true if parity in message matched calculated parity
      */

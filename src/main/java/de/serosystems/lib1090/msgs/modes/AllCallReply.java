@@ -33,7 +33,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
     private static final long serialVersionUID = 2459589933570219472L;
 
     private byte capabilitiesEncoded;
-    private int parityInterrogator; // the parity field with the CRC removed: code label and interrogator code
+    private int parityInterrogator; // the parity field once the CRC is removed: code label and interrogator code
     private byte codeLabelEncoded;
 
     /**
@@ -75,7 +75,7 @@ public class AllCallReply extends ModeSDownlinkMsg implements Serializable {
 
         capabilitiesEncoded = getBitReader().readByte(6, 8);
 
-        // extract interrogator ID, which the parity field is overlaid on; with noCRC, the CRC is already removed
+        // the code label and interrogator code, overlaid on the CRC in the parity field
         parityInterrogator = getOverlay();
 
         codeLabelEncoded = (byte) ((parityInterrogator >> 4) & 0x7);

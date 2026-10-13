@@ -221,14 +221,14 @@ class ModeSReplyFieldsTest {
     }
 
     /**
-     * An all-call reply whose parity leaves the given residual once the CRC is removed: code label and interrogator
+     * An all-call reply whose parity field holds the given overlay once the CRC is removed: code label and interrogator
      * code in its last 7 bits.
      */
-    private static AllCallReply allCall(int residual) throws Exception {
+    private static AllCallReply allCall(int overlay) throws Exception {
         byte[] raw = new byte[7];
         set(raw, 1, 5, 11);
         set(raw, 9, 32, 0x4840D6);
-        set(raw, 33, 56, ModeSDownlinkMsg.calcParityInt(Arrays.copyOf(raw, 4)) ^ residual);
+        set(raw, 33, 56, ModeSDownlinkMsg.calcParityInt(Arrays.copyOf(raw, 4)) ^ overlay);
         return new AllCallReply(raw);
     }
 
