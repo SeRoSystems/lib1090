@@ -22,7 +22,7 @@ import de.serosystems.lib1090.decoding.BitReader;
 import de.serosystems.lib1090.exceptions.BadFormatException;
 import de.serosystems.lib1090.exceptions.UnspecifiedFormatError;
 import de.serosystems.lib1090.msgs.modes.TypeCodedExtendedSquitter;
-import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusMsg;
+import de.serosystems.lib1090.msgs.squitter.TargetStateAndStatusV2V3Msg;
 
 import java.io.Serializable;
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Decoder for the ADS-B version 2 target state and status message, as defined in ED-102B
  * Appendix N §N.5.3 Figure N-23 (legacy format retained for backward compatibility).
  */
-public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter implements Serializable, TargetStateAndStatusMsg, ADSBMsg {
+public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter implements Serializable, TargetStateAndStatusV2V3Msg, ADSBMsg {
 
     private static final long serialVersionUID = 8402350306532746670L;
 
@@ -150,6 +150,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      * @return true is the value of {@link #getSelectedAltitude()} is derived from the Flight Management System (FMS),
      * false if it is derived from the Control Panel/Flight Control Unit (MCP/FCU)
      */
+    @Override
     public boolean isFMSSelectedAltitude() {
         return selectedAltitudeType;
     }
@@ -160,6 +161,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      * @return whether the Barometric Pressure Setting is available, i.e. {@link #getBarometricPressureSetting()}
      * returns a non-null value
      */
+    @Override
     public boolean hasBarometricPressureSetting() {
         return barometricPressureSetting != 0;
     }
@@ -170,6 +172,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return the encoded barometric pressure setting
      */
+    @Override
     public int getBarometricPressureSettingEncoded() {
         return barometricPressureSetting;
     }
@@ -182,6 +185,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return the barometric pressure setting in millibars, or null if not available
      */
+    @Override
     public Float getBarometricPressureSetting() {
         return barometricPressureSetting != 0 ? (float) (800 + (barometricPressureSetting - 1) * 0.8) : null;
     }
@@ -226,6 +230,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if Mode is deliberately being provided, false otherwise
      */
+    @Override
     public boolean hasMode() {
         return mcpFcuStatus;
     }
@@ -237,6 +242,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if the autopilot system is engaged, false if not engaged or status unknown, null if not available.
      */
+    @Override
     public Boolean hasAutopilotEngaged() {
         if (!mcpFcuStatus) return null;
         return autopilotEngaged;
@@ -249,6 +255,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if vertical navigation mode is active, false otherwise or if status unknown, null if not available
      */
+    @Override
     public Boolean hasVNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
         return vnavModeEngaged;
@@ -261,6 +268,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if altitude hold mode is active, false if inactive or status unknown, null if not available
      */
+    @Override
     public Boolean hasActiveAltitudeHoldMode() {
         if (!mcpFcuStatus) return null;
         return altitudeHoldMode;
@@ -273,6 +281,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if approach mode is active, false if inactive or status unknown, null if not available
      */
+    @Override
     public Boolean hasActiveApproachMode() {
         if (!mcpFcuStatus) return null;
         return approachMode;
@@ -290,6 +299,7 @@ public class TargetStateAndStatusV2Msg extends TypeCodedExtendedSquitter impleme
      *
      * @return true if the lateral navigation mode is active, false otherwise or if status unknown, null if not available
      */
+    @Override
     public Boolean hasLNAVModeEngaged() {
         if (!mcpFcuStatus) return null;
         return lnavModeEngaged;

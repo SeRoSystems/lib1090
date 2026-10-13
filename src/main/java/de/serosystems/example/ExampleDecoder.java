@@ -361,20 +361,14 @@ public class ExampleDecoder {
                 System.out.println("          No selected heading info");
             }
 
-            // versions 2 and 3 add the source of the selected altitude, the barometric pressure setting and
-            // the autopilot and navigation modes
-            if (msg instanceof TargetStateAndStatusV2Msg) {
-                TargetStateAndStatusV2Msg v2 = (TargetStateAndStatusV2Msg) msg;
-                printSelectedAltitudeSourceAndPressure(v2.isFMSSelectedAltitude(), v2.hasBarometricPressureSetting(),
-                        v2.getBarometricPressureSetting());
-                printModes(v2.hasMode(), v2.hasAutopilotEngaged(), v2.hasVNAVModeEngaged(),
-                        v2.hasActiveAltitudeHoldMode(), v2.hasActiveApproachMode(), v2.hasLNAVModeEngaged());
-            } else if (msg instanceof TargetStateAndStatusV3Msg) {
-                TargetStateAndStatusV3Msg v3 = (TargetStateAndStatusV3Msg) msg;
-                printSelectedAltitudeSourceAndPressure(v3.isFMSSelectedAltitude(), v3.hasBarometricPressureSetting(),
-                        v3.getBarometricPressureSetting());
-                printModes(v3.hasMode(), v3.hasAutopilotEngaged(), v3.hasVNAVModeEngaged(),
-                        v3.hasActiveAltitudeHoldMode(), v3.hasActiveApproachMode(), v3.hasLNAVModeEngaged());
+            // versions 2 and 3, ADS-B and ADS-R, add the source of the selected altitude, the barometric pressure
+            // setting and the autopilot and navigation modes
+            if (msg instanceof TargetStateAndStatusV2V3Msg) {
+                TargetStateAndStatusV2V3Msg v2v3 = (TargetStateAndStatusV2V3Msg) msg;
+                printSelectedAltitudeSourceAndPressure(v2v3.isFMSSelectedAltitude(),
+                        v2v3.hasBarometricPressureSetting(), v2v3.getBarometricPressureSetting());
+                printModes(v2v3.hasMode(), v2v3.hasAutopilotEngaged(), v2v3.hasVNAVModeEngaged(),
+                        v2v3.hasActiveAltitudeHoldMode(), v2v3.hasActiveApproachMode(), v2v3.hasLNAVModeEngaged());
             }
         } else if (msg instanceof HVAPositionMsg) {
             HVAPositionMsg hvaPos = (HVAPositionMsg) msg;

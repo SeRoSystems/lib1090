@@ -59,6 +59,21 @@ class ExampleDecoderTest {
     }
 
     /**
+     * The fields that versions 2 and 3 add to a target state and status message are printed for ADS-R too, not only
+     * for ADS-B.
+     */
+    @Test
+    void adsrVersion2TargetState_printsItsAdditions() {
+        String out = decode(
+                "96ABC180F80000000040005ACD7E", // ADS-R operational status, version 2
+                "96ABC180EA065008000000359E2E"); // ADS-R target state and status, pressure setting 800 mb
+
+        assertTrue(out.contains("Selected altitude is derived from MCP/FCU"), out);
+        assertTrue(out.contains("Barometric pressure setting: 800.0 mbar"), out);
+        assertTrue(out.contains("No MCP/FCU mode info"), out);
+    }
+
+    /**
      * An extended squitter whose parity field is 0, as delivered by a receiver that removes the CRC, is decoded, not
      * rejected for a failed parity check.
      */
